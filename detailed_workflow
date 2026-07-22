@@ -1,0 +1,29 @@
+digraph {
+	A [label="1. Design Data Model
+(Create Tables and Relationships)"]
+	B [label="2. Generate Unique Course Identifier
+(Ensure each course has a unique ID)"]
+	C [label="3. Add Helper Functions
+(Password Check, Course Enrollment)"]
+	D [label="4. Manage User Registration
+(Create User, Assign Roles)"]
+	E [label="5. Handle Assignments and Submissions
+(Students submit assignments)"]
+	F [label="6. Manage Exams and Quizzes
+(Add Questions, Assign Grades)"]
+	G [label="7. Build User Interface
+(Design Student, Teacher, Admin Views)"]
+	H [label="8. Test System and Fix Bugs
+(Ensure everything works smoothly)"]
+	I [label="9. Integrate with External Services
+(Email, Notifications, Third-Party APIs)"]
+	A -> B [label="Design Tables with Proper Relationships"]
+	B -> C [label="Generate Unique Course ID for Each Course"]
+	C -> D [label="Implement Helper Functions like Password Validation"]
+	D -> E [label="Handle User Registration and Assign Roles (Student, Teacher)"]
+	E -> F [label="Manage Assignment Submissions and Grading"]
+	F -> G [label="Create and Manage Exams/Quizzes"]
+	G -> H [label="Design User Interfaces for All Roles"]
+	H -> I [label="Test the System, Identify Bugs, and Integrate Services"]
+	I -> A [label="Reiterate and Improve"]
+}

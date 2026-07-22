@@ -1,0 +1,12 @@
+Learnova LMS v13 - Quiz and Exam Builder Fix
+
+- Add Quiz now opens a dedicated Quiz Builder instead of Add Assignment.
+- Add Assignment only creates Homework or Project items.
+- Quiz Builder supports Multiple Choice, True/False, Short Answer, and Essay.
+- Exam Builder supports the same four question types.
+- Dynamic questions can be added, removed, and reordered before saving.
+- Multiple-choice choices and correct answers are validated.
+- True/False answers are normalized.
+- Exam total score is synchronized with question points.
+- Existing quizzes have a dedicated question-management page.
+- Quiz assignments no longer appear twice in the Assignments and Quizzes sections.

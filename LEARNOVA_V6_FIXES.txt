@@ -1,0 +1,26 @@
+LEARNOVA LMS V6 - UI AND FUNCTIONAL FIXES
+
+Implemented:
+- Professional admin Students and Instructors pages using the unified sidebar/header.
+- Professional Add Student, Add Instructor, and Add Course forms.
+- Redesigned Courses management page.
+- Redesigned academic Reports page.
+- Redesigned course Discussion Forum.
+- Working Admin Notifications page and header notification icon.
+- Working Admin Messages page and header messages icon.
+- Working Settings page.
+- Working Help Center with searchable topics.
+- Working profile dropdown and page search.
+- Search inside students, instructors, and courses tables.
+- Redesigned instructor internal course workspace with Units, Assignments, Quizzes, Exams, Students, Discussions, Edit and Delete controls.
+- Redesigned student internal course workspace with progress, units, assignments, quizzes, exams, grades, discussions, and certificate controls.
+- Existing database and project features preserved.
+
+RUN:
+1. Open projectPy27/ecms in VS Code.
+2. Double-click start_windows.bat OR run:
+   python -m venv venv
+   venv\Scripts\activate
+   python -m pip install -r requirements.txt
+   python run.py
+3. Open http://127.0.0.1:5000/

@@ -1,0 +1,15 @@
+Learnova LMS - Certificate Fix
+
+Implemented:
+- Certificates are automatically issued for enrolled students with a final grade of 60% or higher.
+- Certificate service always returns a valid tuple and no longer fails with NoneType unpacking errors.
+- My Certificates buttons now use real links to the certificate route.
+- Certificate route verifies enrollment, creates the certificate when eligible, and opens the certificate page.
+- Redesigned premium certificate with correct spacing, grade/date/instructor sections, signatures, seal, and A4 landscape printing.
+
+Run from projectPy27/ecms:
+venv\Scripts\activate
+python run.py
+
+Open:
+http://127.0.0.1:5000/

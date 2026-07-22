@@ -1,0 +1,80 @@
+{% extends 'student/base.html' %}
+
+{% block title %}My Certificates | Learnova LMS{% endblock %}
+
+{% block content %}
+<div class="page-title-row">
+    <div>
+        <span class="eyebrow">ACHIEVEMENTS</span>
+        <h1>My Certificates</h1>
+        <p>View, print, and save the certificates you have earned.</p>
+    </div>
+    <div class="date-chip">
+        <i class="fa-solid fa-award"></i>
+        {{ certificates|length }} Issued
+    </div>
+</div>
+
+{% if certificates %}
+<div class="certificate-grid">
+    {% for certificate in certificates %}
+    <article class="certificate-list-card">
+        <div class="certificate-ribbon">
+            <i class="fa-solid fa-award"></i>
+        </div>
+
+        <div class="certificate-card-content">
+            <span class="course-chip">{{ certificate.course.code }}</span>
+            <h2>{{ certificate.course.name }}</h2>
+            <p>
+                Successfully completed with a final grade of
+                <strong>{{ '%.2f'|format(certificate.final_grade or 0) }}%</strong>.
+            </p>
+
+            <div class="certificate-meta">
+                <span>
+                    <i class="fa-regular fa-calendar"></i>
+                    {{ certificate.issued_at.strftime('%d %B %Y') }}
+                </span>
+                <span>
+                    <i class="fa-solid fa-fingerprint"></i>
+                    {{ certificate.certificate_code }}
+                </span>
+            </div>
+
+            <div class="certificate-card-actions">
+                <a
+                    class="primary-btn"
+                    href="{{ url_for('students.certificate', course_id=certificate.course_id) }}"
+                >
+                    <i class="fa-solid fa-eye"></i>
+                    View Certificate
+                </a>
+
+                <a
+                    class="secondary-btn"
+                    href="{{ url_for('students.certificate', course_id=certificate.course_id) }}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    <i class="fa-solid fa-print"></i>
+                    Print / PDF
+                </a>
+            </div>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state-card">
+    <div class="empty-state-icon">
+        <i class="fa-solid fa-award"></i>
+    </div>
+    <h2>No certificates yet</h2>
+    <p>Earn a final grade of at least 60% in a course to unlock its certificate.</p>
+    <a class="primary-btn" href="{{ url_for('students.courses') }}">
+        View My Courses
+    </a>
+</div>
+{% endif %}
+{% endblock %}

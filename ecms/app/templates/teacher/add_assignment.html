@@ -1,0 +1,223 @@
+{% extends 'teacher/base.html' %}
+
+{% block title %}
+Add Assignment | Learnova LMS
+{% endblock %}
+
+{% block content %}
+
+<div class="page-title-row">
+    <div>
+        <span class="eyebrow">ASSIGNMENT BUILDER</span>
+
+        <h1>Add New Assignment</h1>
+
+        <p>
+            Create homework or a project for
+            <strong>{{ course.name }}</strong>.
+        </p>
+    </div>
+
+    <a
+        class="secondary-btn"
+        href="{{ url_for(
+            'teachers.view_course',
+            teacher_id=teacher.id,
+            course_id=course.id
+        ) }}"
+    >
+        <i class="fa-solid fa-arrow-left"></i>
+        Back to Course
+    </a>
+</div>
+
+<section class="data-card form-card-narrow">
+
+    <div class="form-intro">
+        <div class="form-intro-icon">
+            <i class="fa-solid fa-list-check"></i>
+        </div>
+
+        <div>
+            <h2>Assignment Details</h2>
+
+            <p>
+                Set the title, instructions, type,
+                submission period, and assignment file.
+            </p>
+        </div>
+    </div>
+
+    <form
+        method="post"
+        enctype="multipart/form-data"
+        class="form-grid modern-editor-form"
+    >
+
+        <label class="full-span">
+            Assignment Title
+
+            <input
+                type="text"
+                name="title"
+                required
+                placeholder="Enter a clear assignment title"
+                value="{{ request.form.get('title', '') }}"
+            >
+        </label>
+
+        <label>
+            Assignment Type
+
+            <select name="assignment_type" required>
+                <option
+                    value="homework"
+                    {% if request.form.get('assignment_type') == 'homework' %}
+                        selected
+                    {% endif %}
+                >
+                    Homework
+                </option>
+
+                <option
+                    value="project"
+                    {% if request.form.get('assignment_type') == 'project' %}
+                        selected
+                    {% endif %}
+                >
+                    Project
+                </option>
+            </select>
+        </label>
+
+        <label>
+            Start Date & Time
+
+            <input
+                type="datetime-local"
+                name="start_date"
+                required
+                value="{{ request.form.get('start_date', '') }}"
+            >
+        </label>
+
+        <label>
+            Due Date & Time
+
+            <input
+                type="datetime-local"
+                name="due_date"
+                required
+                value="{{ request.form.get('due_date', '') }}"
+            >
+        </label>
+
+        <label class="full-span">
+            Instructions
+
+            <textarea
+                name="description"
+                rows="7"
+                placeholder="Add instructions, requirements, and submission notes..."
+            >{{ request.form.get('description', '') }}</textarea>
+        </label>
+
+        <div class="full-span assignment-upload-section">
+
+            <label for="assignment_file" class="upload-section-title">
+                <i class="fa-solid fa-paperclip"></i>
+                Assignment File
+            </label>
+
+            <label class="assignment-upload-box" for="assignment_file">
+
+                <input
+                    type="file"
+                    id="assignment_file"
+                    name="assignment_file"
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.zip,.jpg,.jpeg,.png"
+                    hidden
+                >
+
+                <div class="assignment-upload-icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+
+                <div class="assignment-upload-text">
+                    <strong>Choose an assignment file</strong>
+
+                    <span>
+                        PDF, Word, PowerPoint, Excel, ZIP, image, or text file
+                    </span>
+
+                    <small id="selectedAssignmentFile">
+                        No file selected
+                    </small>
+                </div>
+
+            </label>
+
+        </div>
+
+        <div class="builder-note full-span">
+            <i class="fa-solid fa-circle-info"></i>
+
+            <div>
+                <strong>Need to create a quiz?</strong>
+
+                <span>
+                    Use the dedicated Quiz Builder from the Quizzes section
+                    so you can add question types and correct answers.
+                </span>
+            </div>
+        </div>
+
+        <div class="form-actions full-span">
+
+            <button type="submit" class="primary-btn">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Create Assignment
+            </button>
+
+            <a
+                class="secondary-btn"
+                href="{{ url_for(
+                    'teachers.view_course',
+                    teacher_id=teacher.id,
+                    course_id=course.id
+                ) }}"
+            >
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+    const assignmentFileInput =
+        document.getElementById("assignment_file");
+
+    const selectedAssignmentFile =
+        document.getElementById("selectedAssignmentFile");
+
+    if (assignmentFileInput && selectedAssignmentFile) {
+        assignmentFileInput.addEventListener("change", function () {
+            if (this.files && this.files.length > 0) {
+                selectedAssignmentFile.textContent =
+                    this.files[0].name;
+            } else {
+                selectedAssignmentFile.textContent =
+                    "No file selected";
+            }
+        });
+    }
+</script>
+
+{% endblock %}

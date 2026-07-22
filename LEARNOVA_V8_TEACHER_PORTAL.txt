@@ -1,0 +1,16 @@
+Learnova LMS v8 - Teacher Portal Upgrade
+
+Updated teacher pages:
+- Instructor dashboard
+- My Courses
+- Assignments
+- Submissions and grading
+- Students
+- Evaluations and grades
+- Reports
+- Notifications
+- Profile editing
+- Course workspace and discussion links
+
+All teacher navigation links now point to real Flask routes.
+Open projectPy27/ecms and run start_windows.bat or python run.py.

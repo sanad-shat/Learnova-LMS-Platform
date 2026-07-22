@@ -1,0 +1,28 @@
+EDUSPHERE LMS — TEST CHECKLIST
+
+1. Admin
+- Add/edit/delete a student
+- Add/edit/delete an instructor
+- Add/edit/delete a course
+- Enroll a student in a course
+- Open reports and certificates
+
+2. Instructor
+- Log in
+- Add a unit and upload a material file
+- Add an assignment, quiz, and exam
+- Open Submissions and grade student work
+- Open Discussions and create/reply to a topic
+
+3. Student
+- Log in and open an enrolled course
+- Download a unit file and mark the unit complete
+- Submit an assignment before its deadline
+- Complete a quiz (only one attempt)
+- Review notifications, grades, and discussion replies
+- Complete every activity and reach 60% or higher
+- Generate and print/save the certificate as PDF
+
+4. Persistence
+- Add a record, stop the terminal, start again, and confirm it remains.
+- Keep instance\ecms.db and uploads\ when moving the project.

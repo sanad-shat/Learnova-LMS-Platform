@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Learnova LMS Admin{% endblock %}</title>
+<link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}">{% block head %}{% endblock %}</head>
+<body><div class="mobile-overlay"></div><div class="app-layout">
+<aside class="sidebar"><a class="sidebar-brand" href="{{ url_for('admin.dashboard') }}"><img src="{{ url_for('static',filename='brand/learnova-icon.svg') }}"><span class="brand-copy"><strong>Learnova <b>LMS</b></strong><small>LEARN. GROW. SUCCEED.</small></span></a>
+<div class="nav-section">Main Menu</div><nav class="side-nav">
+<a href="{{ url_for('admin.dashboard') }}" class="{% if request.endpoint=='admin.dashboard' %}active{% endif %}"><i class="fa-solid fa-house"></i>Dashboard</a>
+<a href="{{ url_for('admin.manage_students') }}" class="{% if 'student' in request.endpoint %}active{% endif %}"><i class="fa-solid fa-user-graduate"></i>Students</a>
+<a href="{{ url_for('admin.manage_teachers') }}" class="{% if 'teacher' in request.endpoint and request.endpoint!='admin.reports_teachers' %}active{% endif %}"><i class="fa-solid fa-chalkboard-user"></i>Instructors</a>
+<a href="{{ url_for('admin.manage_courses') }}" class="{% if 'course' in request.endpoint %}active{% endif %}"><i class="fa-solid fa-book-open"></i>Courses</a>
+<a href="{{ url_for('admin.certificates') }}" class="{% if 'certificate' in request.endpoint %}active{% endif %}"><i class="fa-solid fa-award"></i>Certificates</a>
+<a href="{{ url_for('forum.index') }}"><i class="fa-solid fa-comments"></i>Discussions</a>
+<a href="{{ url_for('admin.reports_teachers') }}" class="{% if request.endpoint=='admin.reports_teachers' %}active{% endif %}"><i class="fa-solid fa-chart-column"></i>Reports</a></nav>
+<div class="nav-section">System</div><nav class="side-nav">
+<a href="{{ url_for('admin.notifications') }}" class="{% if request.endpoint=='admin.notifications' %}active{% endif %}"><i class="fa-solid fa-bell"></i>Notifications <span class="nav-badge">{{ admin_unread_count|default(0) }}</span></a>
+<a href="{{ url_for('admin.settings') }}" class="{% if request.endpoint=='admin.settings' %}active{% endif %}"><i class="fa-solid fa-gear"></i>Settings</a></nav>
+<div class="sidebar-footer"><a class="help-link" href="{{ url_for('admin.help_center') }}"><i class="fa-regular fa-circle-question"></i>Help Center</a></div></aside>
+<section class="app-main"><header class="top-header"><div class="header-left"><button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="globalSearch" placeholder="Search this page..."></div></div><div class="header-right">
+<a class="header-icon" href="{{ url_for('admin.notifications') }}" title="Notifications"><i class="fa-regular fa-bell"></i><span>{{ admin_unread_count|default(0) }}</span></a>
+<a class="header-icon" href="{{ url_for('admin.messages') }}" title="Messages"><i class="fa-regular fa-comment-dots"></i><span>{{ admin_message_count|default(0) }}</span></a>
+<div class="profile-menu"><button class="profile-chip" type="button" data-profile-toggle><div class="profile-avatar">A</div><div class="profile-copy"><strong>Admin User</strong><small>Administrator</small></div><i class="fa-solid fa-chevron-down"></i></button><div class="profile-dropdown"><a href="{{ url_for('admin.settings') }}"><i class="fa-solid fa-gear"></i> Settings</a><a href="{{ url_for('admin.help_center') }}"><i class="fa-regular fa-circle-question"></i> Help</a><a href="/"><i class="fa-solid fa-arrow-right-from-bracket"></i> Exit Admin</a></div></div>
+</div></header><main class="content">{% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}{% block content %}{% endblock %}</main></section></div>
+<script src="{{ url_for('static',filename='js/app.js') }}"></script>{% block scripts %}{% endblock %}</body></html>

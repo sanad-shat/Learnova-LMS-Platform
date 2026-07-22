@@ -1,0 +1,106 @@
+{% extends 'student/base.html' %}
+
+{% block title %}
+{{ exam.title }}
+{% endblock %}
+
+{% block content %}
+
+<h2>{{ exam.title }}</h2>
+
+<p>{{ exam.description }}</p>
+
+<form method="post">
+
+{% for question in exam.questions %}
+
+<div class="quiz-question-card">
+
+<h3>
+Question {{ loop.index }}
+({{ question.score }} pts)
+</h3>
+
+<p>{{ question.question_text }}</p>
+
+{% if question.question_type == 'mcq' %}
+
+{% for option in question.options.split(',') %}
+
+<label>
+
+<input
+type="radio"
+name="answer_{{ question.id }}"
+value="{{ option.strip() }}"
+required>
+
+{{ option.strip() }}
+
+</label>
+
+<br>
+
+{% endfor %}
+
+{% elif question.question_type == 'true_false' %}
+
+<label>
+
+<input
+type="radio"
+name="answer_{{ question.id }}"
+value="True"
+required>
+
+True
+
+</label>
+
+<br>
+
+<label>
+
+<input
+type="radio"
+name="answer_{{ question.id }}"
+value="False">
+
+False
+
+</label>
+
+{% elif question.question_type == 'short_answer' %}
+
+<input
+class="form-control"
+type="text"
+name="answer_{{ question.id }}"
+required>
+
+{% elif question.question_type == 'essay' %}
+
+<textarea
+class="form-control"
+rows="5"
+name="answer_{{ question.id }}"></textarea>
+
+{% endif %}
+
+</div>
+
+<br>
+
+{% endfor %}
+
+<button
+class="primary-btn"
+type="submit">
+
+Submit Exam
+
+</button>
+
+</form>
+
+{% endblock %}

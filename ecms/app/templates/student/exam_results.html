@@ -1,0 +1,39 @@
+{% extends 'student/base.html' %}
+
+{% block title %}
+Exam Result
+{% endblock %}
+
+{% block content %}
+
+<div class="page-title-row">
+    <div>
+        <span class="eyebrow">EXAM RESULT</span>
+        <h1>{{ exam.title }}</h1>
+        <p>Your exam has been submitted successfully.</p>
+    </div>
+</div>
+
+<div class="dashboard-card">
+
+    <h2>Your Score</h2>
+
+    <h1 style="font-size:48px;margin:20px 0;">
+        {{ grade.score }} / {{ exam.total_score }}
+    </h1>
+
+    <p>
+        Questions:
+        {{ exam.questions|length }}
+    </p>
+
+    <br>
+
+    <a href="{{ url_for('students.view_course', course_id=exam.course_id) }}"
+       class="primary-btn">
+        Back to Course
+    </a>
+
+</div>
+
+{% endblock %}

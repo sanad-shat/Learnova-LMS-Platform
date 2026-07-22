@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Instructor Portal | Learnova LMS{% endblock %}</title>
+  <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=10">
+</head>
+<body>
+<div class="mobile-overlay"></div>
+<div class="app-layout">
+  <aside class="sidebar">
+    <a class="sidebar-brand" href="{{ url_for('teachers.dashboard',teacher_id=teacher.id) }}">
+      <img src="{{ url_for('static',filename='brand/learnova-icon.svg') }}" alt="Learnova">
+      <span class="brand-copy"><strong>Learnova <b>LMS</b></strong><small>INSTRUCTOR PORTAL</small></span>
+    </a>
+    <div class="nav-section">Teaching</div>
+    <nav class="side-nav">
+      <a class="{{ 'active' if active_page=='dashboard' else '' }}" href="{{ url_for('teachers.dashboard',teacher_id=teacher.id) }}"><i class="fa-solid fa-house"></i>Dashboard</a>
+      <a class="{{ 'active' if active_page=='courses' else '' }}" href="{{ url_for('teachers.courses',teacher_id=teacher.id) }}"><i class="fa-solid fa-book-open"></i>My Courses</a>
+      <a class="{{ 'active' if active_page=='assignments' else '' }}" href="{{ url_for('teachers.assignments',teacher_id=teacher.id) }}"><i class="fa-solid fa-list-check"></i>Assignments</a>
+      <a class="{{ 'active' if active_page=='submissions' else '' }}" href="{{ url_for('teachers.submissions',teacher_id=teacher.id) }}"><i class="fa-solid fa-inbox"></i>Submissions{% if nav_ungraded %}<span class="nav-badge">{{ nav_ungraded }}</span>{% endif %}</a>
+      <a class="{{ 'active' if active_page=='students' else '' }}" href="{{ url_for('teachers.students',teacher_id=teacher.id) }}"><i class="fa-solid fa-user-graduate"></i>Students</a>
+      <a class="{{ 'active' if active_page=='evaluations' else '' }}" href="{{ url_for('teachers.evaluations',teacher_id=teacher.id) }}"><i class="fa-solid fa-star-half-stroke"></i>Evaluations</a>
+      <a class="{{ 'active' if active_page=='certificates' else '' }}" href="{{ url_for('teachers.certificates',teacher_id=teacher.id) }}"><i class="fa-solid fa-award"></i>Certificates</a>
+      <a href="{{ url_for('forum.index') }}"><i class="fa-solid fa-comments"></i>Discussions</a>
+    </nav>
+    <div class="nav-section">Account</div>
+    <nav class="side-nav">
+      <a class="{{ 'active' if active_page=='reports' else '' }}" href="{{ url_for('teachers.reports',teacher_id=teacher.id) }}"><i class="fa-solid fa-chart-column"></i>Reports</a>
+      <a class="{{ 'active' if active_page=='notifications' else '' }}" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-solid fa-bell"></i>Notifications{% if nav_notifications %}<span class="nav-badge">{{ nav_notifications }}</span>{% endif %}</a>
+      <a class="{{ 'active' if active_page=='profile' else '' }}" href="{{ url_for('teachers.profile',teacher_id=teacher.id) }}"><i class="fa-solid fa-user-gear"></i>Profile</a>
+      <a href="{{ url_for('teachers.logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
+    </nav>
+    <div class="sidebar-footer"><a class="help-link" href="mailto:support@learnova.local"><i class="fa-regular fa-circle-question"></i>Help Center</a></div>
+  </aside>
+  <section class="app-main">
+    <header class="top-header">
+      <div class="header-left"><button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="teacherGlobalSearch" placeholder="Search this page..."></div></div>
+      <div class="header-right">
+        <a class="header-icon" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-regular fa-bell"></i>{% if nav_notifications %}<span class="icon-badge">{{ nav_notifications }}</span>{% endif %}</a>
+        <div class="profile-chip"><div class="profile-avatar">{{ (teacher.name_person or teacher.username)[0]|upper }}</div><div class="profile-copy"><strong>{{ teacher.name_person or teacher.username }}</strong><small>Instructor</small></div></div>
+      </div>
+    </header>
+    <main class="content">
+      {% with messages=get_flashed_messages(with_categories=true) %}{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endwith %}
+      {% block content %}{% endblock %}
+    </main>
+  </section>
+</div>
+<script src="{{ url_for('static',filename='js/app.js') }}"></script>
+<script>
+const gs=document.getElementById('teacherGlobalSearch'); if(gs){gs.addEventListener('input',()=>{const q=gs.value.toLowerCase();document.querySelectorAll('[data-searchable]').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q)?'':'none')})}
+</script>
+{% block scripts %}{% endblock %}
+</body></html>

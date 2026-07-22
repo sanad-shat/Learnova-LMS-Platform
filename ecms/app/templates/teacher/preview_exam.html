@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preview Exam - {{ exam.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+        header { background: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        nav { background: #34495e; padding: 15px; display: flex; flex-wrap: wrap; justify-content: center; }
+        nav a { color: white; margin: 5px 10px; text-decoration: none; font-weight: 600; padding: 8px 12px; border-radius: 6px; transition: background 0.3s; }
+        nav a:hover { background: #1abc9c; }
+        main { padding: 20px; max-width: 1000px; margin: 20px auto; }
+        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        .card h2 { color: #34495e; margin-bottom: 15px; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
+        .exam-info p { margin: 8px 0; font-size: 1.05em; }
+        .question-block { border-left: 5px solid #3498db; background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; transition: transform 0.2s; }
+        .question-block:hover { transform: translateY(-2px); }
+        .question-block h3 { margin: 0 0 10px 0; color: #2980b9; }
+        .question-type, .question-score { font-size: 0.9em; color: #7f8c8d; margin-bottom: 5px; }
+        .options { margin-top: 8px; padding-left: 20px; }
+        .options li { margin-bottom: 5px; }
+        .back-btn { display: inline-block; background: #7f8c8d; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px; transition: background 0.3s; }
+        .back-btn:hover { background: #636e72; }
+        @media (max-width: 768px) { main { padding: 10px; } nav { flex-direction: column; align-items: center; } nav a { margin: 5px 0; } }
+    </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body>
+<header>
+    <h1>Preview Exam: {{ exam.title }}</h1>
+</header>
+<nav>
+    <a href="{{ url_for('teachers.dashboard', teacher_id=teacher.id) }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+    <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}"><i class="fas fa-book"></i> My Courses</a>
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}"><i class="fas fa-arrow-left"></i> Back to Course</a>
+    <a href="{{ url_for('teachers.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+</nav>
+<main>
+  
+<!-- Exam Info Stylish Block -->
+<div class="exam-info-blocks" style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+
+    <div style="flex:1 1 200px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fas fa-calendar-alt"></i>
+        <strong>Start Date:</strong>
+        <div>{{ exam.start_date.strftime('%Y-%m-%d %H:%M') }}</div>
+    </div>
+
+    <div style="flex:1 1 200px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fas fa-calendar-check"></i>
+        <strong>End Date:</strong>
+        <div>{{ exam.end_date.strftime('%Y-%m-%d %H:%M') }}</div>
+    </div>
+
+    <div style="flex:1 1 150px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fas fa-star"></i>
+        <strong>Total Score:</strong>
+        <div>{{ exam.total_score }}</div>
+    </div>
+
+    <div style="flex:1 1 300px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+        <i class="fas fa-file-alt"></i>
+        <strong>Description:</strong>
+        <div>{{ exam.description }}</div>
+    </div>
+
+</div>
+
+
+    <!-- Questions -->
+    <div class="card">
+        <h2>Questions</h2>
+        {% if exam.questions %}
+            {% for question in exam.questions %}
+            <div class="question-block">
+                <h3>Question {{ loop.index }}: {{ question.question_text }}</h3>
+                <p class="question-type"><i class="fas fa-tag"></i> Type: {{ question.question_type.replace('_', ' ').title() }}</p>
+                <p class="question-score"><i class="fas fa-star-half-alt"></i> Score: {{ question.score }}</p>
+
+                {% if question.question_type in ['multiple_choice', 'mcq'] and question.options %}
+                <ul class="options">
+                    {% for option in question.options.split(',') %}
+                    <li>{{ option }}</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Answer:</strong> {{ question.answer }}</p>
+                {% elif question.question_type in ['open_ended', 'short_answer', 'essay'] %}
+                <p><strong>Expected Answer:</strong> {{ question.answer }}</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No questions added yet.</p>
+        {% endif %}
+    </div>
+
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-btn">
+        <i class="fas fa-arrow-left"></i> Back to Course
+    </a>
+</main>
+</body>
+</html>

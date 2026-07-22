@@ -1,0 +1,31 @@
+LEARNOVA LMS — Final Upgrade
+
+Branding:
+- New name: Learnova LMS
+- Unified SVG logo and favicon
+- Branded student and instructor login pages
+- Unified professional responsive styling
+
+Discussion forum:
+- Student, instructor, and admin access based on course permissions
+- Questions, discussions, and instructor/admin announcements
+- Attachments, likes, search and course/type filters
+- Instructor/admin pin, lock, moderate, and delete controls
+- Notifications for new topics and replies
+
+Instructor controls:
+- Delete units and attached material
+- Delete assignments and linked submissions/quizzes
+- Delete quizzes and linked questions/results
+- Delete exams and linked questions/grades
+- Remove student activity scores
+
+Admin credentials:
+- New/reset student and instructor passwords can be shown/hidden in admin pages
+- Existing securely hashed passwords display as Encrypted until reset
+
+Run from projectPy27\ecms:
+python -m venv venv
+venv\Scripts\activate
+python -m pip install -r requirements.txt
+python run.py

@@ -1,0 +1,99 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Help Center | Learnova LMS{% endblock %}
+
+{% block content %}
+<div class="help-hero">
+    <span class="eyebrow">LEARNOVA SUPPORT</span>
+    <h1>How can we help?</h1>
+    <p>Use these guides and shortcuts to manage the LMS confidently.</p>
+    <div class="help-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="helpSearch" placeholder="Search help topics..." autocomplete="off">
+    </div>
+</div>
+
+<div class="help-grid" id="helpGrid">
+    <a href="{{ url_for('admin.manage_students') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+        <h3>Student Management</h3>
+        <p>Create student accounts, edit profiles, reset passwords, enroll students in courses and manage academic information.</p>
+        <div class="help-card-footer"><span>Open Students</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.manage_teachers') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+        <h3>Instructor Management</h3>
+        <p>Create instructor accounts, manage departments, academic ranks, assigned courses and account passwords.</p>
+        <div class="help-card-footer"><span>Open Instructors</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.manage_courses') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-book-open"></i></div>
+        <h3>Course Management</h3>
+        <p>Create courses, assign instructors, organize learning materials and manage student enrollment.</p>
+        <div class="help-card-footer"><span>Open Courses</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.reports_teachers') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-chart-column"></i></div>
+        <h3>Reports &amp; Assessments</h3>
+        <p>Review assignments, quizzes, exams, grades, analytics and instructor performance reports.</p>
+        <div class="help-card-footer"><span>Open Reports</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('forum.index') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-comments"></i></div>
+        <h3>Discussion Forum</h3>
+        <p>Manage course discussions, review questions, moderate replies and organize discussion topics.</p>
+        <div class="help-card-footer"><span>Open Discussions</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.certificates') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-award"></i></div>
+        <h3>Certificates</h3>
+        <p>View issued certificates, student completion information and academic achievement records.</p>
+        <div class="help-card-footer"><span>Open Certificates</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.notifications') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-bell"></i></div>
+        <h3>Notifications</h3>
+        <p>Review system alerts, account updates, course activities and important LMS notifications.</p>
+        <div class="help-card-footer"><span>Open Notifications</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('admin.settings') }}" class="help-card-link" data-help-item>
+        <div class="help-card-icon"><i class="fa-solid fa-gears"></i></div>
+        <h3>System Settings</h3>
+        <p>Review database information, system preferences, application settings and storage details.</p>
+        <div class="help-card-footer"><span>Open Settings</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+</div>
+
+<div class="help-empty-state" id="helpEmptyState">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <h3>No help topics found</h3>
+    <p>Try searching with another word.</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const helpSearch = document.getElementById('helpSearch');
+const helpItems = document.querySelectorAll('[data-help-item]');
+const helpEmptyState = document.getElementById('helpEmptyState');
+if (helpSearch) {
+  helpSearch.addEventListener('input', function () {
+    const value = this.value.toLowerCase().trim();
+    let visibleCount = 0;
+    helpItems.forEach(function (item) {
+      const isVisible = item.textContent.toLowerCase().includes(value);
+      item.style.display = isVisible ? 'block' : 'none';
+      if (isVisible) visibleCount++;
+    });
+    helpEmptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}

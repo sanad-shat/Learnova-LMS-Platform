@@ -1,0 +1,8 @@
+Learnova LMS v14 - Student Progress Page Fix
+
+- Replaced the teacher student-details JSON response with a full HTML progress page.
+- Added instructor access and course ownership checks.
+- Added student enrollment validation.
+- Added assignment, quiz, exam, activity, progress, grade, and certificate summaries.
+- Added a responsive Learnova-styled student progress template.
+- Added responsive CSS for the new page.

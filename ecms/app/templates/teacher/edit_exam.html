@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Edit Exam - {{ exam.title }}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body { font-family: Arial, sans-serif; background: #f5f5f5; margin:0; padding:0; }
+header { background:#2c3e50; color:white; padding:20px; text-align:center; font-size:1.4em; }
+nav { background:#34495e; padding:15px; }
+nav a { color:white; margin:0 10px; text-decoration:none; font-weight:bold; }
+main { padding:20px; max-width:1000px; margin:0 auto; }
+.card { background:white; padding:20px; border-radius:12px; box-shadow:0 3px 8px rgba(0,0,0,0.12); margin-bottom:20px; }
+.exam-info-blocks { display:flex; flex-wrap:wrap; gap:15px; margin-bottom:20px; }
+.exam-info-blocks div { flex:1 1 220px; background:#f0f4f8; padding:15px; border-radius:12px; box-shadow:0 2px 6px rgba(0,0,0,0.08); text-align:center; }
+.exam-info-blocks div i { font-size:1.2em; margin-bottom:5px; color:#2980b9; display:block; }
+label { font-weight:bold; margin-top:10px; display:block; }
+input[type="text"], input[type="number"], textarea, select { width:100%; padding:8px 10px; margin-top:5px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box; }
+textarea { resize: vertical; }
+button { padding:10px 15px; border:none; border-radius:6px; cursor:pointer; font-weight:bold; margin-top:15px; }
+button[type="submit"] { background:#3498db; color:white; }
+button[type="submit"]:hover { background:#2980b9; }
+button[type="button"] { background:#2ecc71; color:white; }
+button[type="button"]:hover { background:#27ae60; }
+.question-block { border-left:5px solid #3498db; padding:15px 20px; border-radius:10px; margin-bottom:15px; background:#ffffff; box-shadow:0 2px 6px rgba(0,0,0,0.08); position:relative; transition:all 0.2s ease; }
+.question-block:hover { box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+.question-block h3 { margin-top:0; margin-bottom:10px; color:#2c3e50; font-size:1.1em; }
+.remove-btn { position:absolute; top:10px; right:10px; cursor:pointer; color:#e74c3c; font-size:1.2em; }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body>
+
+<header>
+    Edit Exam: {{ exam.title }}
+</header>
+
+<nav>
+    <a href="{{ url_for('teachers.dashboard', teacher_id=teacher.id) }}">Dashboard</a>
+    <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}">My Courses</a>
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}">Back to Course</a>
+    <a href="{{ url_for('teachers.logout') }}">Logout</a>
+</nav>
+
+<main>
+
+<!-- Exam Info Blocks -->
+<div class="card exam-info-blocks">
+    <div><i class="fas fa-calendar-alt"></i><strong>Start Date</strong><div>{{ exam.start_date.strftime('%Y-%m-%d %H:%M') }}</div></div>
+    <div><i class="fas fa-calendar-check"></i><strong>End Date</strong><div>{{ exam.end_date.strftime('%Y-%m-%d %H:%M') }}</div></div>
+    <div><i class="fas fa-star"></i><strong>Total Score</strong><div>{{ exam.total_score }}</div></div>
+    <div><i class="fas fa-file-alt"></i><strong>Description</strong><div>{{ exam.description }}</div></div>
+</div>
+
+<form action="{{ url_for('teachers.edit_exam_page', teacher_id=teacher.id, course_id=course.id, exam_id=exam.id) }}" method="POST">
+
+<div class="card">
+    <label>Exam Title:</label>
+    <input type="text" name="title" value="{{ exam.title }}" required>
+
+    <label>Total Score:</label>
+    <input type="number" name="total_score" value="{{ exam.total_score }}" min="1" required>
+
+    <label>Description:</label>
+    <textarea name="description">{{ exam.description }}</textarea>
+
+    <label>Start Date:</label>
+    <input type="datetime-local" name="start_date" value="{{ exam.start_date.strftime('%Y-%m-%dT%H:%M') }}" required>
+
+    <label>End Date:</label>
+    <input type="datetime-local" name="end_date" value="{{ exam.end_date.strftime('%Y-%m-%dT%H:%M') }}" required>
+</div>
+
+<h2>Questions</h2>
+<div id="questions_container">
+    {% for question in exam.questions %}
+    <div class="question-block" data-id="{{ question.id }}">
+        <i class="fas fa-times remove-btn" onclick="this.parentElement.remove()"></i>
+        <label>Question {{ loop.index }}:</label>
+        <input type="text" name="question_{{ question.id }}" value="{{ question.question_text }}" required>
+
+        <label>Type:</label>
+        <select name="type_{{ question.id }}">
+            <option value="multiple_choice" {% if question.question_type=='multiple_choice' %}selected{% endif %}>Multiple Choice</option>
+            <option value="single_answer" {% if question.question_type=='single_answer' %}selected{% endif %}>Single Answer</option>
+            <option value="open_ended" {% if question.question_type=='open_ended' %}selected{% endif %}>Open Ended</option>
+        </select>
+
+        <label>Options (comma separated):</label>
+        <input type="text" name="options_{{ question.id }}" value="{{ question.options }}">
+
+        <label>Answer:</label>
+        <input type="text" name="answer_{{ question.id }}" value="{{ question.answer }}">
+
+        <label>Score:</label>
+        <input type="number" name="score_{{ question.id }}" value="{{ question.score }}" min="1" required>
+    </div>
+    {% endfor %}
+</div>
+
+<button type="button" onclick="addQuestion()">+ Add Question</button>
+<button type="submit">Save Changes</button>
+</form>
+
+<script>
+let questionCount = {{ exam.questions|length }};
+function addQuestion() {
+    questionCount++;
+    const container = document.getElementById('questions_container');
+    const block = document.createElement('div');
+    block.className='question-block';
+    block.dataset.idx=questionCount;
+    block.innerHTML=`
+        <i class="fas fa-times remove-btn" onclick="this.parentElement.remove()"></i>
+        <label>Question ${questionCount}:</label>
+        <input type="text" name="new_question_${questionCount}" placeholder="Enter question text" required>
+        <label>Type:</label>
+        <select name="new_type_${questionCount}">
+            <option value="multiple_choice">Multiple Choice</option>
+            <option value="single_answer">Single Answer</option>
+            <option value="open_ended">Open Ended</option>
+        </select>
+        <label>Options:</label>
+        <input type="text" name="new_options_${questionCount}" placeholder="Option1,Option2,...">
+        <label>Answer:</label>
+        <input type="text" name="new_answer_${questionCount}" placeholder="Correct answer">
+        <label>Score:</label>
+        <input type="number" name="new_score_${questionCount}" min="1" value="1" required>
+    `;
+    container.appendChild(block);
+}
+</script>
+
+</main>
+</body>
+</html>

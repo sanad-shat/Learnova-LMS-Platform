@@ -1,0 +1,33 @@
+EDUSPHERE LMS — FINAL UPGRADED VERSION
+
+FASTEST START ON WINDOWS
+1. Open: projectPy27\ecms
+2. Double-click: start_windows.bat
+3. Open: http://127.0.0.1:5000/
+
+MANUAL START IN VS CODE
+1. Open the folder projectPy27\ecms (not projectPy27 only).
+2. Open Terminal and run:
+   python -m venv venv
+   venv\Scripts\activate
+   python -m pip install -r requirements.txt
+   python run.py
+3. Open http://127.0.0.1:5000/
+
+IMPORTANT FILES
+- Application entry: ecms\run.py
+- Dependencies: ecms\requirements.txt
+- SQLite database: ecms\instance\ecms.db
+- SQL export: ecms\database.sql
+- Uploaded materials: ecms\uploads\
+
+MAIN FEATURES
+- Admin, instructor, and student portals
+- Course, user, enrollment, assignment, quiz, exam, and grade management
+- Student progress tracking, unit completion, and upcoming work
+- Instructor submission grading and feedback
+- Notifications for new content and published grades
+- Full course discussion forums with search, replies, editing, deletion, and pinning
+- Certificates issued after 100% completion and a final grade of at least 60%
+- Print / Save as PDF certificate support
+- Improved responsive design across the main pages

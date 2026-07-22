@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <title>{{ course.name }} | Learnova</title>
+
+    <link rel="icon"
+          href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='professional.css') }}">
+</head>
+
+<body>
+
+<div class="course-workspace">
+
+    <aside class="workspace-side">
+
+        <a class="sidebar-brand"
+           href="{{ url_for('students.dashboard') }}">
+
+            <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+
+            <span class="brand-copy">
+                <strong>Learnova <b>LMS</b></strong>
+                <small>STUDENT PORTAL</small>
+            </span>
+        </a>
+
+        <div class="nav-section">Course Menu</div>
+
+        <nav class="side-nav">
+
+            <a href="{{ url_for('students.dashboard') }}">
+                <i class="fa-solid fa-house"></i>
+                Dashboard
+            </a>
+
+            <a class="active" href="#overview">
+                <i class="fa-solid fa-book-open"></i>
+                Overview
+            </a>
+
+            <a href="#units">
+                <i class="fa-solid fa-layer-group"></i>
+                Units
+            </a>
+
+            <a href="#assignments">
+                <i class="fa-solid fa-list-check"></i>
+                Assignments
+            </a>
+
+            <a href="#quizzes">
+                <i class="fa-solid fa-circle-question"></i>
+                Quizzes
+            </a>
+
+            <a href="#exams">
+                <i class="fa-solid fa-file-circle-check"></i>
+                Exams & Grades
+            </a>
+
+            <a href="{{ url_for('forum.index', course_id=course.id) }}">
+                <i class="fa-solid fa-comments"></i>
+                Discussions
+            </a>
+
+            <a href="{{ url_for('students.logout') }}">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Logout
+            </a>
+
+        </nav>
+
+    </aside>
+
+    <main class="workspace-main">
+
+        <div class="workspace-content">
+
+            <section class="workspace-hero" id="overview">
+
+                <div>
+                    <span class="course-chip">{{ course.code }}</span>
+
+                    <h1>{{ course.name }}</h1>
+
+                    <p>
+                        {{ course.description or 'Course learning space' }}
+                    </p>
+
+                    <small>
+                        Instructor:
+                        {{ teacher.name_person or teacher.username }}
+                    </small>
+                </div>
+
+                <div class="grade-ring">
+                    <strong>{{ progress.percent }}%</strong>
+                    <span>Progress</span>
+                </div>
+
+            </section>
+
+            <section class="stats-grid">
+
+                <article class="metric-card">
+
+                    <div class="metric-icon purple">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+
+                    <div>
+                        <small>Units</small>
+                        <strong>
+                            {{ progress.unit_done }}/{{ progress.unit_total }}
+                        </strong>
+                        <em>Completed</em>
+                    </div>
+
+                </article>
+
+                <article class="metric-card">
+
+                    <div class="metric-icon blue">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+
+                    <div>
+                        <small>Assignments</small>
+                        <strong>
+                            {{ progress.assignment_done }}/{{ progress.assignment_total }}
+                        </strong>
+                        <em>Submitted</em>
+                    </div>
+
+                </article>
+
+                <article class="metric-card">
+
+                    <div class="metric-icon green">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </div>
+
+                    <div>
+                        <small>Quizzes</small>
+                        <strong>
+                            {{ progress.quiz_done }}/{{ progress.quiz_total }}
+                        </strong>
+                        <em>Attempted</em>
+                    </div>
+
+                </article>
+
+                <article class="metric-card">
+
+                    <div class="metric-icon amber">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+
+                    <div>
+                        <small>Final Grade</small>
+                        <strong>{{ final_grade }}%</strong>
+                        <em>Current result</em>
+                    </div>
+
+                </article>
+
+            </section>
+
+            <section class="workspace-section" id="units">
+
+                <div class="workspace-section-head">
+                    <h2>Learning Units</h2>
+                </div>
+
+                {% for unit in course.units %}
+
+                <article class="resource-card">
+
+                    <div>
+
+                        <h3>{{ unit.title }}</h3>
+
+                        <p>
+                            {{ unit.content or 'Learning material for this unit.' }}
+                        </p>
+
+                        {% if unit.file_path %}
+
+                        <a class="secondary-btn"
+                           href="{{ url_for('teachers.uploaded_file', filename=unit.file_path) }}">
+
+                            <i class="fa-solid fa-download"></i>
+                            Download Material
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                    <form method="post"
+                          action="{{ url_for('students.toggle_unit', unit_id=unit.id) }}">
+
+                        <button class="{% if unit.id in completed_unit_ids %}secondary-btn{% else %}primary-btn{% endif %}">
+
+                            {{ '✓ Completed' if unit.id in completed_unit_ids else 'Mark Complete' }}
+
+                        </button>
+
+                    </form>
+
+                </article>
+
+                {% else %}
+
+                <div class="empty-state compact">
+                    No units yet.
+                </div>
+
+                {% endfor %}
+
+            </section>
+
+            <section class="workspace-section" id="assignments">
+
+                <div class="workspace-section-head">
+                    <h2>Assignments</h2>
+                </div>
+
+                {% for item in assignments %}
+
+                <article class="resource-card">
+
+                    <div>
+
+                        <h3>{{ item.assignment.title }}</h3>
+
+                        <p>{{ item.assignment.description }}</p>
+
+                        <small>
+                            Due
+                            {{ item.assignment.due_date.strftime('%d %b %Y, %H:%M') }}
+                        </small>
+
+                        {% if item.submitted %}
+
+                        <p>
+                            <span class="badge badge-success">
+                                Submitted
+                            </span>
+
+                            Grade:
+                            {{ item.grade if item.grade is not none else 'Pending' }}
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div>
+
+                        {% if item.submitted %}
+
+                        <a class="secondary-btn"
+                           href="{{ url_for('students.edit_submission', submission_id=item.submission_id) }}">
+
+                            Edit Submission
+
+                        </a>
+
+                        {% else %}
+
+                        <a class="primary-btn"
+                           href="{{ url_for('students.submit_assignment', assignment_id=item.assignment.id) }}">
+
+                            Submit Assignment
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+                {% else %}
+
+                <div class="empty-state compact">
+                    No assignments yet.
+                </div>
+
+                {% endfor %}
+
+            </section>
+
+            <section class="workspace-section" id="quizzes">
+
+                <div class="workspace-section-head">
+                    <h2>Quizzes</h2>
+                </div>
+
+                {% for item in quizzes %}
+
+                <article class="resource-card">
+
+                    <div>
+
+                        <h3>{{ item.quiz.title }}</h3>
+
+                        <p>{{ item.quiz.description }}</p>
+
+                        <small>
+                            Available until
+                            {{ item.quiz.end_date.strftime('%d %b %Y, %H:%M') }}
+                        </small>
+
+                    </div>
+
+                    {% if item.attempted %}
+
+                    <a class="secondary-btn"
+                       href="{{ url_for('students.quiz_results', quiz_id=item.quiz.id) }}">
+
+                        Results:
+                        {{ item.score }}/{{ item.total }}
+
+                    </a>
+
+                    {% else %}
+
+                    <a class="primary-btn"
+                       href="{{ url_for('students.take_quiz', quiz_id=item.quiz.id) }}">
+
+                        Take Quiz
+
+                    </a>
+
+                    {% endif %}
+
+                </article>
+
+                {% else %}
+
+                <div class="empty-state compact">
+                    No quizzes yet.
+                </div>
+
+                {% endfor %}
+
+            </section>
+
+            <section class="workspace-section" id="exams">
+
+                <div class="workspace-section-head">
+
+                    <div>
+                        <span class="eyebrow">ASSESSMENTS</span>
+                        <h2>Exams & Grades</h2>
+                    </div>
+
+                </div>
+
+                {% for item in exams %}
+
+                <article class="resource-card">
+
+                    <div>
+
+                        <h3>{{ item.exam.title }}</h3>
+
+                        <p>
+                            {{ item.exam.description or 'Course examination' }}
+                        </p>
+
+                        <small>
+
+                            {{ item.exam.start_date.strftime('%d %b %Y, %H:%M') }}
+
+                            —
+
+                            {{ item.exam.end_date.strftime('%d %b %Y, %H:%M') }}
+
+                        </small>
+
+                        <p class="muted">
+
+                            Total score:
+                            {{ item.exam.total_score }}
+
+                            &nbsp;•&nbsp;
+
+                            Questions:
+                            {{ item.exam.questions|length }}
+
+                        </p>
+
+                    </div>
+
+                    <div>
+
+                        {% if item.taken %}
+
+                        <a class="secondary-btn"
+                           href="{{ url_for('students.exam_results', exam_id=item.exam.id) }}">
+
+                            <i class="fa-solid fa-chart-column"></i>
+
+                            View Result:
+                            {{ item.score }}/{{ item.exam.total_score }}
+
+                        </a>
+
+                        {% else %}
+
+                        <a class="primary-btn"
+                           href="{{ url_for('students.take_exam', exam_id=item.exam.id) }}">
+
+                            <i class="fa-solid fa-pen-to-square"></i>
+                            Take Exam
+
+                        </a>
+
+                        {% endif %}
+
+                    </div>
+
+                </article>
+
+                {% else %}
+
+                <div class="empty-state compact">
+                    No exams yet.
+                </div>
+
+                {% endfor %}
+
+            </section>
+
+            <section class="workspace-section">
+
+                <div class="workspace-section-head">
+
+                    <div>
+
+                        <span class="eyebrow">
+                            COURSE ACHIEVEMENT
+                        </span>
+
+                        <h2>
+                            Certificate of Completion
+                        </h2>
+
+                    </div>
+
+                    {% if certificate %}
+
+                    <a class="primary-btn"
+                       href="{{ url_for('students.certificate', course_id=course.id) }}">
+
+                        View Certificate
+
+                    </a>
+
+                    {% else %}
+
+                    <a class="primary-btn {% if progress.percent < 100 or final_grade < 60 %}disabled{% endif %}"
+                       href="{{ url_for('students.generate_certificate', course_id=course.id) }}">
+
+                        Generate Certificate
+
+                    </a>
+
+                    {% endif %}
+
+                </div>
+
+                <p class="muted">
+                    Complete all course activities and achieve at least 60%.
+                </p>
+
+            </section>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<h2>Students in {{ course.name }}</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Email</th>
+            <th>Total Grade</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for data in student_data %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ data.student.username }}</td>
+            <td>{{ data.student.email }}</td>
+            <td>{{ data.total_grade }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('admin.manage_courses') }}">Back to Courses</a>
+{% endblock %}

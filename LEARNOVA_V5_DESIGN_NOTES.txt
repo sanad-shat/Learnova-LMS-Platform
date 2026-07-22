@@ -1,0 +1,26 @@
+LEARNOVA LMS — PROFESSIONAL UI V5
+
+Implemented:
+- Complete Python + Flask interface redesign inspired by the approved reference.
+- Unified navy sidebar, sticky top bar, search field, notification badges and user profile.
+- New responsive Admin, Instructor and Student dashboards.
+- Redesigned Student and Instructor login pages.
+- New Learnova shield/book logo and favicon used across the application.
+- Modern cards, metrics, charts, tables, forms, buttons, course cards and certificate styling.
+- Existing database, routes and LMS functions were preserved.
+- Responsive mobile sidebar and reusable JavaScript interactions.
+
+Tested routes:
+- /
+- /admin/
+- /student/login and student dashboard
+- /teacher/login and instructor dashboard
+
+Run from projectPy27/ecms:
+  python -m venv venv
+  venv\Scripts\activate
+  python -m pip install -r requirements.txt
+  python run.py
+
+Open:
+  http://127.0.0.1:5000/

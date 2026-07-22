@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate of Completion</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .certificate-container {
+            width: 800px;
+            max-width: 90%;
+            height: auto;
+            background: white;
+            border: 2px solid #27ae60; /* Green frame */
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Logo — Diagonal, inside frame */
+        .bg-logo {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 180px;
+            color: #27ae60;
+            opacity: 0.05;
+            font-weight: 800;
+            letter-spacing: -4px;
+            z-index: 1;
+            pointer-events: none;
+            user-select: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Logo (Front) */
+        .logo {
+            font-size: 36px;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+            font-family: 'Inter', sans-serif;
+            z-index: 2;
+            position: relative;
+        }
+
+        .logo span {
+            color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        /* Title */
+        .title {
+            font-size: 28px;
+            color: #444;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .course-title {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 20px 0;
+            color: #000;
+            position: relative;
+            z-index: 2;
+        }
+
+        .instructors {
+            font-size: 16px;
+            color: #555;
+            margin: 15px 0;
+            font-weight: 500;
+            position: relative;
+            z-index: 2;
+        }
+
+        .student-name {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 60px 0 20px;
+            color: #000;
+            position: relative;
+            z-index: 2;
+        }
+
+        .details {
+            font-size: 16px;
+            color: #555;
+            margin-top: 30px;
+            line-height: 1.6;
+            position: relative;
+            z-index: 2;
+        }
+
+        .detail-row {
+            margin-bottom: 5px;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        /* Certificate Info (Top Right) */
+        .cert-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+            text-align: right;
+            z-index: 2;
+        }
+
+        /* Save Button */
+        .save-pdf-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+        }
+
+        .save-pdf-btn:hover {
+            background: #c0392b;
+        }
+
+        @media print {
+            .save-pdf-btn {
+                display: none !important;
+            }
+        }
+    </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body>
+    <button class="save-pdf-btn" id="downloadPdfBtn">
+        <i class="fas fa-file-pdf"></i> Save as PDF
+    </button>
+
+    <div class="certificate-container" id="certificate">
+        <!-- Background Logo — Diagonal, inside frame -->
+        <div class="bg-logo">Ecms</div>
+
+        <!-- Top Right Info (Will be filled by JS) -->
+        <div class="cert-info" id="certInfo">
+            Certificate no: EC-<br>
+            Certificate url: <br>
+            Reference Number:
+        </div>
+
+        <!-- Logo -->
+        <div class="logo">
+            <span>E</span>cms
+        </div>
+
+        <!-- Title -->
+        <div class="title">Certificate of Completion</div>
+
+        <!-- Course Title -->
+        <div class="course-title">{{ course.name }}</div>
+
+        <!-- Instructors -->
+        <div class="instructors">Instructors {{ teacher.name_person }}</div>
+
+        <!-- Student Name -->
+        <div class="student-name">{{ student.name_person }}</div>
+
+        <!-- Details -->
+        <div class="details">
+            <div class="detail-row">
+                <span class="detail-label">Date</span> {{ today.strftime('%B %d, %Y') }}
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Total Score</span> {{ total_score }}/{{ total_possible }}
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Grade</span> {{ percentage }}%
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate Certificate Info
+        function generateRandomId(length = 5) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+
+        function getTodayDate() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function generateCertificateData() {
+            const certId = generateRandomId(5);
+            const today = getTodayDate();
+            const refSuffix = Math.floor(100 + Math.random() * 900);
+
+            const certNo = `EC-${certId}`;
+            const certUrl = `https://ecms.edu/cert/${certId}`;
+            const refNo = `REF-${today}-${refSuffix}`;
+
+            return { certNo, certUrl, refNo };
+        }
+
+        // Fill Certificate Info
+        document.addEventListener('DOMContentLoaded', () => {
+            const { certNo, certUrl, refNo } = generateCertificateData();
+            const certInfoDiv = document.getElementById('certInfo');
+            certInfoDiv.innerHTML = `
+                Certificate no: ${certNo}<br>
+                Certificate url: ${certUrl}<br>
+                Reference Number: ${refNo}
+            `;
+        });
+
+        // Export to PDF using html2pdf.js
+        document.getElementById('downloadPdfBtn').addEventListener('click', () => {
+            const element = document.getElementById('certificate');
+
+            const opt = {
+                margin:       10,        // margin in mm
+                filename:     'certificate.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+
+            // Generate PDF
+            html2pdf().set(opt).from(element).save();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+{% extends "teacher/base.html" %}
+
+{% block title %}Student Progress | Learnova LMS{% endblock %}
+
+{% block content %}
+<div class="page-title-row">
+  <div>
+    <span class="eyebrow">STUDENT TRACKING</span>
+    <h1>{{ student.name_person or student.username }}</h1>
+    <p>Review progress, grades, assessments, and certificate status in {{ course.name }}.</p>
+  </div>
+  <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn secondary-btn">
+    <i class="fa-solid fa-arrow-left"></i> Back to Course
+  </a>
+</div>
+
+<div class="stats-grid">
+  <article class="metric-card">
+    <div class="metric-icon blue"><i class="fa-solid fa-chart-line"></i></div>
+    <div><small>Course Progress</small><strong>{{ progress.percent }}%</strong><em>{{ progress.completed }}/{{ progress.total }} completed</em></div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-icon purple"><i class="fa-solid fa-star"></i></div>
+    <div><small>Final Grade</small><strong>{{ "%.2f"|format(final_grade or 0) }}%</strong><em>{{ 'Passing' if (final_grade or 0) >= 60 else 'Needs improvement' }}</em></div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-icon green"><i class="fa-solid fa-list-check"></i></div>
+    <div><small>Completed Activities</small><strong>{{ progress.completed }}</strong><em>Out of {{ progress.total }}</em></div>
+  </article>
+  <article class="metric-card">
+    <div class="metric-icon amber"><i class="fa-solid fa-award"></i></div>
+    <div><small>Certificate</small><strong>{{ 'Issued' if certificate else 'Pending' }}</strong><em>{{ 'Available to student' if certificate else 'Not issued yet' }}</em></div>
+  </article>
+</div>
+
+<section class="data-card student-progress-card">
+  <div class="student-progress-head">
+    <div>
+      <span class="course-chip">{{ course.code }}</span>
+      <h2>Student Information</h2>
+      <p>Academic and contact details for this enrollment.</p>
+    </div>
+    <div class="student-progress-avatar">{{ (student.name_person or student.username)[0]|upper }}</div>
+  </div>
+
+  <div class="student-info-grid">
+    <div><span>Full Name</span><strong>{{ student.name_person or student.username }}</strong></div>
+    <div><span>University ID</span><strong>{{ student.university_id or '—' }}</strong></div>
+    <div><span>Email</span><strong>{{ student.email }}</strong></div>
+    <div><span>Department</span><strong>{{ student.department or '—' }}</strong></div>
+    <div><span>Academic Level</span><strong>{{ student.level or '—' }}</strong></div>
+    <div><span>Activity Score</span><strong>{{ activity_score }}</strong></div>
+  </div>
+
+  <div class="progress-overview">
+    <div class="progress-overview-label"><span>Overall course completion</span><strong>{{ progress.percent }}%</strong></div>
+    <div class="student-progress-bar"><span style="width: {{ progress.percent }}%"></span></div>
+  </div>
+</section>
+
+<section class="data-card student-progress-card">
+  <div class="student-section-title"><i class="fa-solid fa-list-check"></i><div><h2>Assignments</h2><p>Submission and grading status.</p></div></div>
+  <div class="responsive-table">
+    <table class="modern-table">
+      <thead><tr><th>Assignment</th><th>Due Date</th><th>Status</th><th>Score</th><th>Feedback</th></tr></thead>
+      <tbody>
+      {% for item in assignments %}
+        <tr data-searchable>
+          <td><strong>{{ item.title }}</strong></td>
+          <td>{{ item.due_date.strftime('%d %b %Y, %H:%M') if item.due_date else 'No deadline' }}</td>
+          <td>{% if item.submitted %}<span class="progress-status success">Submitted</span>{% else %}<span class="progress-status warning">Pending</span>{% endif %}</td>
+          <td>{{ item.score if item.score is not none else 'Not graded' }}</td>
+          <td>{{ item.feedback or '—' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="empty-table-message">No assignments are available for this course.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="data-card student-progress-card">
+  <div class="student-section-title"><i class="fa-solid fa-circle-question"></i><div><h2>Quizzes</h2><p>Attempt status and achieved scores.</p></div></div>
+  <div class="responsive-table">
+    <table class="modern-table">
+      <thead><tr><th>Quiz</th><th>Status</th><th>Score</th><th>Percentage</th></tr></thead>
+      <tbody>
+      {% for item in quizzes %}
+        <tr data-searchable>
+          <td><strong>{{ item.title }}</strong></td>
+          <td>{% if item.completed %}<span class="progress-status success">Completed</span>{% else %}<span class="progress-status warning">Not Attempted</span>{% endif %}</td>
+          <td>{% if item.score is not none %}{{ item.score }} / {{ item.total }}{% else %}—{% endif %}</td>
+          <td>{% if item.score is not none %}{{ "%.2f"|format(item.score * 100 / item.total) }}%{% else %}—{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty-table-message">No quizzes are available for this course.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="data-card student-progress-card">
+  <div class="student-section-title"><i class="fa-solid fa-file-pen"></i><div><h2>Exams</h2><p>Exam completion and grading details.</p></div></div>
+  <div class="responsive-table">
+    <table class="modern-table">
+      <thead><tr><th>Exam</th><th>Status</th><th>Score</th><th>Percentage</th></tr></thead>
+      <tbody>
+      {% for item in exams %}
+        <tr data-searchable>
+          <td><strong>{{ item.title }}</strong></td>
+          <td>{% if item.completed %}<span class="progress-status success">Completed</span>{% else %}<span class="progress-status warning">Not Taken</span>{% endif %}</td>
+          <td>{% if item.score is not none %}{{ item.score }} / {{ item.total }}{% else %}—{% endif %}</td>
+          <td>{% if item.score is not none %}{{ "%.2f"|format(item.score * 100 / item.total) }}%{% else %}—{% endif %}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="empty-table-message">No exams are available for this course.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

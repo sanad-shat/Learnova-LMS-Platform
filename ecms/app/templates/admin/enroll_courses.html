@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Enroll Courses</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+.card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
+h2 { text-align: center; color: #2c3e50; margin-bottom: 20px; }
+label { display: block; margin: 12px 0 6px; font-weight: bold; }
+select, input[type=number], button { padding: 10px; width: 100%; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 15px; }
+button { background: #2c3e50; color: white; border: none; cursor: pointer; font-weight: bold; }
+button:hover { background: #34495e; }
+.course-select { margin-bottom: 10px; }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body>
+<div class="card">
+<h2>Enroll Courses for {{ student.username }}</h2>
+
+<form method="POST" id="enrollForm">
+    <label>Number of Courses to Enroll:</label>
+    <input type="number" id="courseCount" min="1" max="{{ courses|length }}" placeholder="Enter number of courses">
+
+    <div id="courseContainer"></div>
+
+    <button type="submit">Enroll</button>
+</form>
+
+<a href="{{ url_for('admin.manage_students') }}">Back to Students</a>
+
+<script>
+// جافاسكربت لإنشاء الحقول بناءً على العدد
+const courseCountInput = document.getElementById('courseCount');
+const courseContainer = document.getElementById('courseContainer');
+const courses = [
+    {% for course in courses %}
+        {id: {{ course.id }}, name: "{{ course.name }}"},
+    {% endfor %}
+];
+
+courseCountInput.addEventListener('input', function() {
+    courseContainer.innerHTML = ''; // امسح أي حقول موجودة
+    const count = parseInt(this.value);
+    if (!count || count <= 0) return;
+
+    for (let i = 0; i < count; i++) {
+        const label = document.createElement('label');
+        label.textContent = `Select Course ${i+1}:`;
+        const select = document.createElement('select');
+        select.name = 'course_ids';
+        select.classList.add('course-select');
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select Course --';
+        select.appendChild(defaultOption);
+
+        courses.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.name;
+            select.appendChild(option);
+        });
+
+        courseContainer.appendChild(label);
+        courseContainer.appendChild(select);
+    }
+});
+</script>
+</div>
+</body>
+</html>

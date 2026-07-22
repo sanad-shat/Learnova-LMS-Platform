@@ -1,0 +1,32 @@
+EduSphere LMS Version 4.0
+
+Added student profile fields:
+- University ID
+- Phone
+- Department
+- Academic level
+- Gender
+- Account status
+
+Added instructor profile fields:
+- Employee ID
+- Phone
+- Department
+- Academic rank
+- Office number
+- Gender
+- Account status
+
+Updated:
+- Add/Edit Student pages
+- Add/Edit Instructor pages
+- Manage Students table
+- Manage Instructors table
+- Unified responsive professional styling across the project
+- Automatic SQLite schema upgrade without deleting existing data
+
+Run from projectPy27\ecms:
+python -m venv venv
+venv\Scripts\activate
+python -m pip install -r requirements.txt
+python run.py

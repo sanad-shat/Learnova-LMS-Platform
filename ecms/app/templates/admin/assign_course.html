@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assign Teacher</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #ece9e6, #ffffff); 
+            margin: 0; 
+            padding: 0; 
+        }
+        main { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .card { 
+            background: #fff; 
+            padding: 30px 25px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 500px; 
+            box-sizing: border-box; 
+        }
+        h2 { 
+            text-align: center; 
+            margin-bottom: 25px; 
+            color: #2c3e50;
+            font-size: 28px;
+        }
+        .course-info { 
+            display: block;
+            background: #f5f5f5; 
+            padding: 15px 20px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            font-size: 16px; 
+            color: #2c3e50; 
+            font-weight: bold;
+            text-align: center;
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600; 
+            color: #34495e;
+        }
+        select { 
+            width: 100%; 
+            padding: 12px 15px; 
+            border: none; 
+            border-radius: 12px; 
+            background: #f5f5f5; 
+            font-size: 15px; 
+            outline: none; 
+            box-sizing: border-box; 
+            cursor: pointer; 
+            transition: background 0.3s, box-shadow 0.3s; 
+        }
+        select:focus { 
+            background: #e8f0fe; 
+            box-shadow: 0 0 0 2px #2c3e50; 
+        }
+        button { 
+            background: #2c3e50; 
+            color: white; 
+            border: none; 
+            border-radius: 12px; 
+            padding: 14px; 
+            width: 100%; 
+            font-size: 16px; 
+            font-weight: bold; 
+            margin-top: 15px; 
+            transition: background 0.3s, transform 0.2s; 
+        }
+        button:hover { 
+            background: #34495e; 
+            cursor: pointer; 
+            transform: translateY(-2px); 
+        }
+    </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body>
+<main>
+    <div class="card">
+        <h2>Assign Teacher</h2>
+
+        <div class="course-info" style="display: inline-block; background: #2c3e50; color: white; padding: 10px 15px; border-radius: 8px; font-size: 1em; text-align: center; margin-bottom: 20px;">
+            {{ course.name }}
+        </div>
+        
+
+        <form method="POST">
+            <label>Select Teacher:</label>
+            <select name="teacher_id" required>
+                <option value="">-- Choose Teacher --</option>
+                {% for teacher in teachers %}
+                    <option value="{{ teacher.id }}" {% if course.teacher and teacher.id == course.teacher.id %}selected{% endif %}>
+                        {{ teacher.username }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Assign Teacher</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>
