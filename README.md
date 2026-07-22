@@ -24,8 +24,36 @@ Learnova LMS is a web-based Learning Management System developed using Python an
 
 ```bash
 pip install -r requirements.txt
+```
+
+## How to Run
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/sanad-shat/Learnova-LMS.git
+```
+
+2. Navigate to the project folder:
+
+```bash
+cd Learnova-LMS
+```
+
+3. Install the required packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Run the application:
+
+```bash
 python vv.py
 ```
 
 ## Author
-Sanad Shat
+
+**Sanad Shat**
+
+Software Engineering & Artificial Intelligence Student
