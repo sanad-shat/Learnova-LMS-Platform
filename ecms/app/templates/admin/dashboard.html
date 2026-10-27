@@ -8,17 +8,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-  /* Override parent legacy CSS */
-  .admin-main, .admin-content, main {
+  .admin-main, .admin-content, main.content {
     background-color: #f8fafc !important;
+    padding: 32px 36px 48px !important;
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
   }
 
+  /* Header Section */
   .page-title-row {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 28px !important;
   }
 
   .page-title-row h1 {
@@ -41,43 +42,47 @@
     gap: 8px !important;
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
-    padding: 8px 16px !important;
+    padding: 9px 18px !important;
     border-radius: 99px !important;
     font-size: 12.5px !important;
     font-weight: 700 !important;
     color: #334155 !important;
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.03) !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03) !important;
   }
 
-  /* Metric Cards Overhaul */
+  .date-chip i {
+    color: #4f46e5 !important;
+  }
+
+  /* KPI Grid */
   .stats-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
-    gap: 18px !important;
-    margin-bottom: 24px !important;
+    gap: 20px !important;
+    margin-bottom: 28px !important;
   }
 
   .metric-card {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 18px !important;
-    padding: 20px !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
+    padding: 22px 20px !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02) !important;
     display: flex !important;
     align-items: center !important;
     gap: 16px !important;
-    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+    transition: all 0.25s ease !important;
   }
 
   .metric-card:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 10px 22px rgba(79, 70, 229, 0.08) !important;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.08) !important;
     border-color: #cbd5e1 !important;
   }
 
   .metric-icon {
-    width: 48px !important;
-    height: 48px !important;
+    width: 50px !important;
+    height: 50px !important;
     border-radius: 14px !important;
     display: flex !important;
     align-items: center !important;
@@ -101,7 +106,7 @@
 
   .metric-card strong {
     display: block !important;
-    font-size: 24px !important;
+    font-size: 26px !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     line-height: 1.1 !important;
@@ -110,37 +115,37 @@
   .metric-card em {
     display: block !important;
     font-style: normal !important;
-    font-size: 11px !important;
+    font-size: 11.5px !important;
     color: #94a3b8 !important;
     margin-top: 4px !important;
     font-weight: 500 !important;
   }
 
-  /* Panels */
+  /* Panels Layout */
   .dashboard-grid {
     display: grid !important;
     grid-template-columns: 1.8fr 1.2fr !important;
-    gap: 20px !important;
-    margin-bottom: 24px !important;
+    gap: 22px !important;
+    margin-bottom: 28px !important;
   }
 
   .panel {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 20px !important;
-    padding: 24px !important;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03) !important;
+    padding: 24px 26px !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02) !important;
   }
 
   .panel-head {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin-bottom: 20px !important;
+    margin-bottom: 22px !important;
   }
 
   .panel-head h2 {
-    font-size: 16px !important;
+    font-size: 16.5px !important;
     font-weight: 800 !important;
     color: #0f172a !important;
     margin: 0 !important;
@@ -149,7 +154,7 @@
   .panel-head button, .panel-head a {
     background: #f8fafc !important;
     border: 1px solid #e2e8f0 !important;
-    padding: 6px 14px !important;
+    padding: 7px 14px !important;
     border-radius: 10px !important;
     font-size: 12px !important;
     font-weight: 700 !important;
@@ -158,11 +163,19 @@
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .panel-head button:hover, .panel-head a:hover {
+    color: #4f46e5 !important;
+    border-color: #cbd5e1 !important;
+    background: #ffffff !important;
   }
 
   .chart-wrap {
-    height: 270px !important;
+    height: 280px !important;
     position: relative !important;
+    width: 100% !important;
   }
 
   /* Activities */
@@ -177,9 +190,16 @@
     align-items: center !important;
     gap: 14px !important;
     padding: 10px 14px !important;
-    border-radius: 12px !important;
+    border-radius: 14px !important;
     background: #f8fafc !important;
     border: 1px solid #f1f5f9 !important;
+    transition: all 0.2s ease !important;
+  }
+
+  .activity-item:hover {
+    background: #ffffff !important;
+    border-color: #cbd5e1 !important;
+    transform: translateX(3px) !important;
   }
 
   .activity-dot {
@@ -208,17 +228,18 @@
     color: #64748b !important;
   }
 
-  /* Bottom 3 Columns */
+  /* Bottom Three Grids */
   .three-grid {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 20px !important;
+    gap: 22px !important;
   }
 
   .mini-list {
     display: flex !important;
     flex-direction: column !important;
     gap: 14px !important;
+    margin-top: 4px !important;
   }
 
   .mini-row {
@@ -257,10 +278,12 @@
     color: #0f172a !important;
   }
 
+  /* Quick Actions (Uniform 2x2 Grid) */
   .course-actions {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
-    gap: 10px !important;
+    gap: 12px !important;
+    margin-top: 6px !important;
   }
 
   .course-actions a {
@@ -268,23 +291,25 @@
     align-items: center !important;
     justify-content: center !important;
     gap: 8px !important;
-    padding: 12px !important;
+    height: 48px !important;
+    padding: 0 14px !important;
     border-radius: 12px !important;
-    font-size: 12.5px !important;
+    font-size: 13px !important;
     font-weight: 700 !important;
     text-decoration: none !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.25s ease !important;
   }
 
   .course-actions .primary-btn {
     background: #4f46e5 !important;
     color: #ffffff !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2) !important;
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.22) !important;
   }
 
   .course-actions .primary-btn:hover {
     background: #4338ca !important;
     transform: translateY(-2px) !important;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.32) !important;
   }
 
   .course-actions .secondary-btn {
@@ -297,19 +322,22 @@
     background: #ffffff !important;
     color: #4f46e5 !important;
     border-color: #cbd5e1 !important;
+    transform: translateY(-2px) !important;
   }
 
+  /* System Status Rows */
   .status-row {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 9px 0 !important;
+    padding: 10px 0 !important;
     border-bottom: 1px solid #f1f5f9 !important;
     font-size: 13px !important;
   }
 
   .status-row:last-child {
     border-bottom: none !important;
+    padding-bottom: 0 !important;
   }
 
   .status-row span {
@@ -332,6 +360,18 @@
     background: #10b981 !important;
     box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
     display: inline-block !important;
+  }
+
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    .three-grid { grid-template-columns: 1fr !important; }
+    .dashboard-grid { grid-template-columns: 1fr !important; }
+  }
+
+  @media (max-width: 640px) {
+    .stats-grid { grid-template-columns: 1fr !important; }
+    .page-title-row { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
+    .course-actions { grid-template-columns: 1fr !important; }
   }
 </style>
 {% endblock %}
@@ -442,6 +482,7 @@
 </section>
 
 <section class="three-grid">
+  <!-- Modules -->
   <article class="panel">
     <div class="panel-head">
       <h2>Platform Modules</h2>
@@ -470,6 +511,7 @@
     </div>
   </article>
 
+  <!-- Quick Actions 2x2 -->
   <article class="panel">
     <div class="panel-head">
       <h2>Quick Actions</h2>
@@ -490,6 +532,7 @@
     </div>
   </article>
 
+  <!-- System Health -->
   <article class="panel">
     <div class="panel-head">
       <h2>System Status</h2>
@@ -518,9 +561,11 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const ctx = document.getElementById('overviewChart').getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
-    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.28)');
-    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.01)');
+    
+    // Smooth modern gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.22)');
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.00)');
 
     new Chart(ctx, {
       type: 'line',
@@ -536,32 +581,47 @@
             {{ stats.certificates }}
           ],
           borderColor: '#4f46e5',
-          borderWidth: 2.5,
+          borderWidth: 2,
           backgroundColor: gradient,
           fill: true,
           tension: 0.42,
           pointBackgroundColor: '#ffffff',
           pointBorderColor: '#4f46e5',
-          pointBorderWidth: 2.5,
-          pointRadius: 4.5,
-          pointHoverRadius: 6.5
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#0f172a',
+            padding: 10,
+            cornerRadius: 10,
+            displayColors: false,
+            titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12, weight: 'bold' },
+            bodyFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 }
+          }
         },
         scales: {
           x: {
             grid: { display: false },
-            ticks: { color: '#64748b', font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' } }
+            ticks: {
+              color: '#64748b',
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }
+            }
           },
           y: {
             beginAtZero: true,
             grid: { color: 'rgba(226, 232, 240, 0.6)' },
-            ticks: { color: '#94a3b8', font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, precision: 0 }
+            ticks: {
+              color: '#94a3b8',
+              font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 },
+              precision: 0
+            }
           }
         }
       }
