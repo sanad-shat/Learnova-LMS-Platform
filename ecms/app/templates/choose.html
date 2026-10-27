@@ -219,26 +219,26 @@
       transform: translateY(-2px);
     }
 
-    /* Illustration Wrapper & Card */
+    /* Modern Course Preview Mockup */
     .illustration-wrapper {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 20px;
+      padding: 10px;
     }
 
     .illustration-bg-glow {
       position: absolute;
       width: 320px;
       height: 320px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(124, 58, 237, 0.08) 50%, transparent 70%);
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(124, 58, 237, 0.08) 50%, transparent 70%);
       border-radius: 50%;
       filter: blur(40px);
       z-index: 1;
     }
 
-    .edu-card-interactive {
+    .edu-course-preview-card {
       position: relative;
       z-index: 2;
       width: 100%;
@@ -246,8 +246,8 @@
       background: #ffffff;
       border: 1px solid rgba(226, 232, 240, 0.9);
       border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.12), 0 1px 3px rgba(0,0,0,0.05);
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(79, 70, 229, 0.16), 0 2px 6px rgba(0,0,0,0.04);
       animation: gentleFloat 5s ease-in-out infinite alternate;
     }
 
@@ -256,79 +256,166 @@
       100% { transform: translateY(-8px); }
     }
 
-    .edu-card-header {
+    .course-cover-art {
+      height: 180px;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+      position: relative;
       display: flex;
       align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #f1f5f9;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    .edu-avatar {
-      width: 44px;
-      height: 44px;
-      background: #eef2ff;
+    .course-cover-art::before {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.5) 0%, transparent 70%);
+      top: -40px;
+      right: -30px;
+    }
+
+    .course-play-btn {
+      width: 56px;
+      height: 56px;
+      background: rgba(255, 255, 255, 0.95);
       color: #4f46e5;
-      border-radius: 12px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 20px;
+      padding-left: 4px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s ease;
+      cursor: pointer;
+      position: relative;
+      z-index: 2;
     }
 
-    .edu-student-name {
+    .course-play-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .course-tag-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      font-size: 11px;
       font-weight: 700;
-      font-size: 15px;
-      color: #0f172a;
+      padding: 5px 12px;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      z-index: 2;
     }
 
-    .edu-student-sub {
-      font-size: 12px;
-      color: #64748b;
+    .course-duration-pill {
+      position: absolute;
+      bottom: 14px;
+      right: 16px;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(6px);
+      color: #f1f5f9;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 8px;
+      z-index: 2;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
-    .text-success {
-      color: #10b981;
-      font-size: 8px;
+    .course-preview-body {
+      padding: 22px 24px 24px;
     }
 
-    .edu-vector-art {
-      padding: 10px 0;
+    .course-meta-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
     }
 
-    /* Welcome Footnote Box */
-    .edu-welcome-box {
-      background: #f8fafc;
-      padding: 14px 18px;
-      border-radius: 16px;
-      border: 1px solid #edf2f7;
+    .course-category {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #4f46e5;
+    }
+
+    .course-rating {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f59e0b;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .course-main-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.35;
+      margin: 0 0 16px;
+    }
+
+    .course-instructor-row {
       display: flex;
       align-items: center;
       gap: 12px;
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
     }
 
-    .edu-welcome-box i {
-      font-size: 20px;
+    .instructor-avatar-mini {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #eef2ff;
       color: #4f46e5;
-      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
     }
 
-    .edu-welcome-box div strong {
+    .instructor-info-mini strong {
       display: block;
       font-size: 13px;
-      color: #0f172a;
-      font-weight: 700;
+      color: #1e293b;
     }
 
-    .edu-welcome-box div span {
+    .instructor-info-mini small {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
       color: #64748b;
-      margin-top: 2px;
+    }
+
+    .course-perks-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    .course-perks-row span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .course-perks-row i {
+      color: #4f46e5;
     }
 
     /* Portals Selection Grid */
@@ -518,7 +605,7 @@
       .hero-description { margin-left: auto; margin-right: auto; }
       .quick-actions { justify-content: center; }
       .illustration-wrapper { order: -1; }
-      .edu-card-interactive { max-width: 360px; }
+      .edu-course-preview-card { max-width: 380px; }
       .portals-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
     }
@@ -577,55 +664,43 @@
         </div>
       </div>
 
-      <!-- Modern Educational Visual Showcase -->
+      <!-- Modern Course Preview Mockup Component -->
       <div class="illustration-wrapper">
         <div class="illustration-bg-glow"></div>
-        <div class="edu-card-interactive">
-          <div class="edu-card-header">
-            <div class="edu-avatar">
-              <i class="fa-solid fa-graduation-cap"></i>
+        <div class="edu-course-preview-card">
+          <!-- Course Media Cover -->
+          <div class="course-cover-art">
+            <div class="course-play-btn">
+              <i class="fa-solid fa-play"></i>
             </div>
-            <div>
-              <div class="edu-student-name">Active Learning Space</div>
-              <div class="edu-student-sub"><i class="fa-solid fa-circle text-success"></i> Connected Platform</div>
-            </div>
+            <span class="course-tag-badge">Featured Course</span>
+            <span class="course-duration-pill"><i class="fa-regular fa-clock"></i> 8 Weeks</span>
           </div>
 
-          <div class="edu-vector-art">
-            <svg viewBox="0 0 400 240" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto;">
-              <!-- Desk & Computer Scene -->
-              <rect x="40" y="195" width="320" height="8" rx="4" fill="#E2E8F0"/>
-              <path d="M120 70C120 62 126 56 134 56H266C274 56 280 62 280 70V170H120V70Z" fill="#1E293B"/>
-              <rect x="128" y="64" width="144" height="96" rx="4" fill="#3B82F6" fill-opacity="0.15"/>
-              <!-- Screen UI Elements -->
-              <rect x="140" y="74" width="70" height="8" rx="3" fill="#6366F1"/>
-              <rect x="140" y="88" width="120" height="4" rx="2" fill="#94A3B8"/>
-              <rect x="140" y="96" width="95" height="4" rx="2" fill="#94A3B8"/>
-              <!-- Mini Chart on Screen -->
-              <rect x="140" y="112" width="16" height="34" rx="2" fill="#818CF8"/>
-              <rect x="162" y="122" width="16" height="24" rx="2" fill="#6366F1"/>
-              <rect x="184" y="104" width="16" height="42" rx="2" fill="#4F46E5"/>
-              <rect x="206" y="116" width="16" height="30" rx="2" fill="#38BDF8"/>
-              <!-- Stand -->
-              <rect x="194" y="170" width="12" height="25" fill="#64748B"/>
-              <path d="M175 195H225" stroke="#64748B" stroke-width="4" stroke-linecap="round"/>
-              <!-- Books Stack -->
-              <rect x="60" y="180" width="45" height="15" rx="3" fill="#818CF8"/>
-              <rect x="64" y="167" width="38" height="13" rx="2" fill="#F59E0B"/>
-              <rect x="67" y="156" width="32" height="11" rx="2" fill="#10B981"/>
-              <!-- Coffee Cup / Pen Holder -->
-              <rect x="295" y="165" width="22" height="30" rx="3" fill="#EF4444"/>
-              <line x1="300" y1="156" x2="304" y2="165" stroke="#F87171" stroke-width="3" stroke-linecap="round"/>
-              <line x1="310" y1="152" x2="313" y2="165" stroke="#F87171" stroke-width="3" stroke-linecap="round"/>
-            </svg>
-          </div>
+          <!-- Course Body -->
+          <div class="course-preview-body">
+            <div class="course-meta-top">
+              <span class="course-category">Computer Science</span>
+              <span class="course-rating"><i class="fa-solid fa-star"></i> 4.9 (1.2k)</span>
+            </div>
 
-          <!-- Replaced with clean informative banner -->
-          <div class="edu-welcome-box">
-            <i class="fa-solid fa-lightbulb"></i>
-            <div>
-              <strong>Self-Paced Learning</strong>
-              <span>Anytime, anywhere educational access.</span>
+            <h3 class="course-main-title">Full-Stack Modern Web Engineering</h3>
+            
+            <div class="course-instructor-row">
+              <div class="instructor-avatar-mini">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <div class="instructor-info-mini">
+                <strong>Dr. Alexander Vance</strong>
+                <small>Lead Course Instructor</small>
+              </div>
+            </div>
+
+            <!-- Features Chips -->
+            <div class="course-perks-row">
+              <span><i class="fa-solid fa-layer-group"></i> 24 Lessons</span>
+              <span><i class="fa-solid fa-file-lines"></i> 8 Quizzes</span>
+              <span><i class="fa-solid fa-certificate"></i> Verified Certificate</span>
             </div>
           </div>
         </div>
