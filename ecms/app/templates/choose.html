@@ -224,28 +224,42 @@
       transform: translateY(-2px);
     }
 
-    /* Modern Hero Visual Card */
-    .hero-showcase-card {
-      background: linear-gradient(145deg, #0e1e38 0%, #172a4d 100%);
-      border-radius: 24px;
-      padding: 36px 32px;
-      color: #ffffff;
-      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+    /* Showcase Card & Floating Badges */
+    .showcase-wrapper {
       position: relative;
-      overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .hero-showcase-card::before {
-      content: '';
+    .hero-showcase-card {
+      position: relative;
+      background: linear-gradient(145deg, #0b1528 0%, #172544 100%);
+      border-radius: 28px;
+      padding: 38px 32px;
+      color: #ffffff;
+      box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      width: 100%;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-showcase-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 35px 70px -12px rgba(79, 70, 229, 0.25);
+    }
+
+    .card-glow {
       position: absolute;
-      width: 250px;
-      height: 250px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
-      top: -60px;
-      right: -60px;
-      z-index: 1;
+      top: -80px;
+      right: -80px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(56, 189, 248, 0.05) 60%, transparent 80%);
       border-radius: 50%;
+      filter: blur(20px);
+      pointer-events: none;
     }
 
     .card-content {
@@ -253,15 +267,49 @@
       z-index: 2;
     }
 
+    .card-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+
     .brand-large-icon {
-      width: 76px;
-      height: 76px;
-      margin-bottom: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      padding: 14px;
+      width: 68px;
+      height: 68px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 12px;
       border-radius: 18px;
       border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      margin-bottom: 0 !important;
+    }
+
+    .live-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      padding: 5px 12px;
+      border-radius: 99px;
+    }
+
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #4ade80;
+      animation: pulseAnim 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.75); }
     }
 
     .card-title {
@@ -276,7 +324,6 @@
       margin: 0 0 24px;
     }
 
-    /* Interactive UI Preview items inside Hero Card */
     .showcase-stat-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -337,10 +384,74 @@
     }
 
     .completion-progress {
-      width: 88%;
+      width: 92%;
       height: 100%;
       background: linear-gradient(90deg, #6366f1, #38bdf8);
       border-radius: 99px;
+      animation: growProgress 1.5s ease-out;
+    }
+
+    @keyframes growProgress {
+      0% { width: 0%; }
+      100% { width: 92%; }
+    }
+
+    /* Floating Badges */
+    .floating-badge {
+      position: absolute;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      padding: 10px 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04);
+      animation: floatBadge 4s ease-in-out infinite alternate;
+    }
+
+    .badge-top {
+      top: -24px;
+      left: -28px;
+    }
+
+    .badge-bottom {
+      bottom: -22px;
+      right: -24px;
+      animation-delay: 2s;
+    }
+
+    @keyframes floatBadge {
+      0% { transform: translateY(0px); }
+      100% { transform: translateY(-8px); }
+    }
+
+    .badge-icon-wrap {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .bg-green-subtle { background: #dcfce7; color: #16a34a; }
+    .bg-amber-subtle { background: #fef3c7; color: #d97706; }
+
+    .badge-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .badge-sub {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 500;
     }
 
     /* Portals Selection Grid */
@@ -446,7 +557,7 @@
       transition: transform 0.2s ease;
     }
 
-    /* Metrics & Features Grid */
+    /* Features Grid */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -532,6 +643,7 @@
       .quick-actions { justify-content: center; }
       .portals-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .badge-top, .badge-bottom { display: none; }
     }
 
     @media (max-width: 576px) {
@@ -588,37 +700,66 @@
         </div>
       </div>
 
-      <!-- Right Visual Component (Live LMS Preview Mockup) -->
-      <div class="hero-showcase-card">
-        <div class="card-content">
-          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-large-icon">
-          <h2 class="card-title">Learnova LMS Suite</h2>
-          <p class="card-tagline">Continuous learning powered by reliable cloud data.</p>
-
-          <div class="showcase-stat-row">
-            <div class="stat-mini-pill">
-              <i class="fa-solid fa-users"></i>
-              <div>
-                <span>Community</span>
-                <strong>Active & Sync</strong>
-              </div>
-            </div>
-            <div class="stat-mini-pill">
-              <i class="fa-solid fa-circle-check"></i>
-              <div>
-                <span>Success Rate</span>
-                <strong>98.4%</strong>
-              </div>
-            </div>
+      <!-- Right Visual Component with Floating Badges -->
+      <div class="showcase-wrapper">
+        <!-- Floating Badge Top Left -->
+        <div class="floating-badge badge-top">
+          <div class="badge-icon-wrap bg-green-subtle">
+            <i class="fa-solid fa-shield-check"></i>
           </div>
+          <div>
+            <div class="badge-title">Database Synced</div>
+            <div class="badge-sub">Neon Cloud Active</div>
+          </div>
+        </div>
 
-          <div class="completion-bar-wrap">
-            <div class="completion-header">
-              <span>Overall Course Completion</span>
-              <span>88%</span>
+        <!-- Floating Badge Bottom Right -->
+        <div class="floating-badge badge-bottom">
+          <div class="badge-icon-wrap bg-amber-subtle">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div>
+            <div class="badge-title">Certificates</div>
+            <div class="badge-sub">Auto-Issued & Verified</div>
+          </div>
+        </div>
+
+        <div class="hero-showcase-card">
+          <div class="card-glow"></div>
+          <div class="card-content">
+            <div class="card-top-bar">
+              <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-large-icon">
+              <span class="live-status-pill"><span class="pulse-dot"></span> Live Hub</span>
             </div>
-            <div class="completion-bar">
-              <div class="completion-progress"></div>
+            
+            <h2 class="card-title">Learnova LMS Suite</h2>
+            <p class="card-tagline">Centralized academic performance & real-time analytics.</p>
+
+            <div class="showcase-stat-row">
+              <div class="stat-mini-pill">
+                <i class="fa-solid fa-bolt"></i>
+                <div>
+                  <span>Cloud Engine</span>
+                  <strong>Fast & Resilient</strong>
+                </div>
+              </div>
+              <div class="stat-mini-pill">
+                <i class="fa-solid fa-chart-line-up"></i>
+                <div>
+                  <span>Success Rate</span>
+                  <strong>98.4%</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="completion-bar-wrap">
+              <div class="completion-header">
+                <span><i class="fa-solid fa-graduation-cap" style="margin-right:6px"></i> System Progression</span>
+                <span>92%</span>
+              </div>
+              <div class="completion-bar">
+                <div class="completion-progress"></div>
+              </div>
             </div>
           </div>
         </div>
