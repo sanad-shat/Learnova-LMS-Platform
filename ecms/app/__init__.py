@@ -47,7 +47,7 @@ def _ensure_forum_columns():
         else:
             target_table = 'discussion_topic'
             cols = {table: columns}
-        
+
         try:
             existing = {row[1] for row in db.session.execute(sql_text(f"PRAGMA table_info({target_table})")).fetchall()}
             for name, sql_type in cols.items():
@@ -74,12 +74,9 @@ def create_app():
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecms.db'
 
-  app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
-    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-        'pool_pre_ping': True,
-        'pool_recycle': 300,
-    }
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_pre_ping': True, 'pool_recycle': 300}
 
     db.init_app(app)
     login_manager.init_app(app)
