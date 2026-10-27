@@ -14,10 +14,11 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.35);
       --navy: #0f172a;
       --slate: #64748b;
-      --border: #e2e8f0;
-      --bg: #f8fafc;
+      --border-glass: rgba(226, 232, 240, 0.8);
+      --bg-page: #f8fafc;
     }
 
     * {
@@ -29,7 +30,7 @@
 
     body {
       min-height: 100vh;
-      background: var(--bg);
+      background: var(--bg-page);
       color: var(--navy);
       display: flex;
       flex-direction: column;
@@ -37,109 +38,179 @@
       justify-content: center;
       position: relative;
       overflow-x: hidden;
-      padding: 30px 16px;
+      padding: 40px 16px;
     }
 
-    /* Modern Background System */
-    .bg-dots {
+    /* Interactive Living Background */
+    .bg-grid {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: radial-gradient(rgba(79, 70, 229, 0.14) 1.2px, transparent 1.2px);
-      background-size: 26px 26px;
-      mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 50%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 50%, transparent 100%);
+      inset: 0;
+      background-image: 
+        radial-gradient(rgba(79, 70, 229, 0.16) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(226, 232, 240, 0.3) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.3) 1px, transparent 1px);
+      background-size: 32px 32px, 96px 96px, 96px 96px;
+      mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
       pointer-events: none;
       z-index: 0;
     }
 
-    .bg-ambient-glow {
+    /* Ambient Dynamic Blobs */
+    .orb-1 {
       position: absolute;
-      width: 650px;
-      height: 450px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
+      width: 520px;
+      height: 520px;
       border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(168, 85, 247, 0.12) 45%, transparent 70%);
+      top: 10%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      filter: blur(65px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 10s ease-in-out infinite alternate;
+    }
+
+    .orb-2 {
+      position: absolute;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+      bottom: 5%;
+      right: 25%;
       filter: blur(60px);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Glass Modern Container */
-    .login-wrapper {
+    @keyframes floatOrb {
+      0% { transform: translate(-50%, -15%) scale(1); }
+      100% { transform: translate(-48%, -25%) scale(1.08); }
+    }
+
+    /* Top Navigation Floating Link */
+    .nav-float {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 24px;
+    }
+
+    .back-btn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate);
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      padding: 9px 18px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      transition: all 0.25s ease;
+    }
+
+    .back-btn-pill:hover {
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+      border-color: #c7d2fe;
+    }
+
+    /* Ultra Modern Glass Card */
+    .auth-box-wrapper {
       position: relative;
       z-index: 2;
       width: 100%;
       max-width: 440px;
     }
 
-    .login-card {
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      border-radius: 26px;
-      padding: 42px 36px 36px;
+    .glass-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 28px;
+      padding: 40px 36px 34px;
       box-shadow: 
-        0 20px 40px -15px rgba(15, 23, 42, 0.08),
-        0 0 0 1px rgba(79, 70, 229, 0.06),
-        0 2px 4px rgba(0, 0, 0, 0.02);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+        0 24px 48px -12px rgba(15, 23, 42, 0.09),
+        0 4px 16px -2px rgba(79, 70, 229, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9);
     }
 
-    .login-card:hover {
-      box-shadow: 
-        0 25px 50px -12px rgba(79, 70, 229, 0.12),
-        0 0 0 1px rgba(79, 70, 229, 0.12),
-        0 4px 6px rgba(0, 0, 0, 0.02);
-    }
-
-    /* Brand Section */
-    .brand-section {
+    /* Glowing Badge on Top of Card */
+    .card-top-header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
-    .brand-icon-wrapper {
-      width: 64px;
-      height: 64px;
+    .brand-icon-halo {
+      position: relative;
+      width: 68px;
+      height: 68px;
       margin: 0 auto 16px;
-      background: linear-gradient(145deg, #ffffff, #f1f5f9);
-      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .brand-icon-halo::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(124, 58, 237, 0.1));
+      filter: blur(8px);
+      z-index: 1;
+    }
+
+    .brand-icon-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
       border: 1px solid rgba(226, 232, 240, 0.9);
-      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
     }
 
-    .brand-icon-wrapper img {
-      width: 36px;
-      height: 36px;
+    .brand-icon-inner img {
+      width: 38px;
+      height: 38px;
+      filter: drop-shadow(0 2px 4px rgba(79, 70, 229, 0.2));
     }
 
-    .brand-section h1 {
+    .card-top-header h1 {
       font-size: 26px;
       font-weight: 800;
-      color: var(--navy);
       letter-spacing: -0.8px;
+      color: var(--navy);
       margin-bottom: 6px;
     }
 
-    .brand-section p {
-      font-size: 14px;
+    .card-top-header p {
+      font-size: 13.5px;
       color: var(--slate);
       font-weight: 500;
     }
 
-    /* Flash Message */
+    /* Flash Messages */
     .flash {
       padding: 12px 16px;
-      border-radius: 12px;
+      border-radius: 14px;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -155,48 +226,48 @@
       border: 1px solid #dcfce7;
     }
 
-    /* Form Fields */
+    /* Input Fields */
     .form-group {
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
-    label {
-      display: flex;
-      justify-content: space-between;
+    .field-label {
+      display: block;
       font-size: 13px;
       font-weight: 700;
       color: #334155;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
-    .input-wrap {
+    .input-field-wrap {
       position: relative;
       display: flex;
       align-items: center;
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      transition: all 0.25s ease;
-    }
-
-    .input-wrap:focus-within {
       background: #ffffff;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+      border: 1.5px solid var(--border-glass);
+      border-radius: 14px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
 
-    .input-wrap i.field-icon {
+    .input-field-wrap:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+      background: #ffffff;
+    }
+
+    .input-field-wrap i.field-icon {
       padding-left: 16px;
       color: #94a3b8;
       font-size: 15px;
       transition: color 0.2s;
     }
 
-    .input-wrap:focus-within i.field-icon {
+    .input-field-wrap:focus-within i.field-icon {
       color: var(--primary);
     }
 
-    .input-wrap input {
+    .input-field-wrap input {
       width: 100%;
       padding: 13px 14px;
       border: none;
@@ -207,12 +278,12 @@
       font-weight: 500;
     }
 
-    .input-wrap input::placeholder {
+    .input-field-wrap input::placeholder {
       color: #94a3b8;
       font-weight: 400;
     }
 
-    .eye-btn {
+    .btn-password-eye {
       background: none;
       border: none;
       padding: 0 16px;
@@ -222,27 +293,46 @@
       transition: color 0.2s;
     }
 
-    .eye-btn:hover {
+    .btn-password-eye:hover {
       color: var(--primary);
     }
 
-    /* CapsLock Warning */
-    .caps-warning {
+    /* Real-Time Password Strength Meter */
+    .strength-meter-wrap {
       display: none;
-      font-size: 11px;
-      font-weight: 700;
-      color: #d97706;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
-    .form-extras {
+    .strength-meter-bars {
+      display: flex;
+      gap: 5px;
+      height: 4px;
+    }
+
+    .bar {
+      flex: 1;
+      height: 100%;
+      background: #e2e8f0;
+      border-radius: 99px;
+      transition: background 0.3s ease;
+    }
+
+    .strength-text {
+      display: block;
+      font-size: 11px;
+      color: var(--slate);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .forgot-link-box {
       display: flex;
       justify-content: flex-end;
-      margin-top: -6px;
-      margin-bottom: 24px;
+      margin-top: 6px;
+      margin-bottom: 22px;
     }
 
-    .form-extras a {
+    .forgot-link-box a {
       font-size: 12px;
       font-weight: 600;
       color: var(--primary);
@@ -250,15 +340,16 @@
       transition: color 0.2s;
     }
 
-    .form-extras a:hover {
+    .forgot-link-box a:hover {
       color: var(--primary-hover);
       text-decoration: underline;
     }
 
-    /* Action Button */
-    .btn-submit {
+    /* Submit Button with modern glow effect */
+    .btn-submit-action {
+      position: relative;
       width: 100%;
-      background: var(--primary);
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
       border: none;
       padding: 14px;
@@ -266,73 +357,67 @@
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
-      transition: all 0.25s ease;
+      box-shadow: 0 10px 22px var(--primary-glow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
     }
 
-    .btn-submit:hover {
-      background: var(--primary-hover);
+    .btn-submit-action:hover {
       transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.35);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
+      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
     }
 
-    .btn-submit:active {
+    .btn-submit-action:active {
       transform: translateY(0);
     }
 
-    /* Footer Navigation & Security Info */
-    .back-home {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
+    /* Security Trust Badge */
+    .card-footer-sec {
       margin-top: 24px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--slate);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .back-home:hover {
-      color: var(--primary);
-    }
-
-    .security-badge {
+      padding-top: 18px;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      font-size: 11px;
+      gap: 8px;
+      font-size: 11.5px;
       color: #94a3b8;
       font-weight: 600;
-      margin-top: 26px;
-      padding-top: 18px;
-      border-top: 1px solid #f1f5f9;
     }
 
-    .security-badge i {
+    .card-footer-sec i {
       color: #10b981;
+      font-size: 13px;
     }
   </style>
 </head>
 
 <body>
-  <div class="bg-dots"></div>
-  <div class="bg-ambient-glow"></div>
+  <div class="bg-grid"></div>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
 
-  <div class="login-wrapper">
-    <div class="login-card">
-      <div class="brand-section">
-        <div class="brand-icon-wrapper">
-          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+  <!-- Top Floating Nav -->
+  <div class="nav-float">
+    <a href="/" class="back-btn-pill">
+      <i class="fa-solid fa-arrow-left"></i> Return to Main Hub
+    </a>
+  </div>
+
+  <div class="auth-box-wrapper">
+    <div class="glass-card">
+      <div class="card-top-header">
+        <div class="brand-icon-halo">
+          <div class="brand-icon-inner">
+            <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+          </div>
         </div>
         <h1>Student Portal</h1>
-        <p>Sign in to access your modules & active progress</p>
+        <p>Enter your credentials to access your courses</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -348,57 +433,62 @@
 
       <form method="POST">
         <div class="form-group">
-          <label for="email">Username or Email</label>
-          <div class="input-wrap">
+          <label class="field-label" for="email">Username or Email</label>
+          <div class="input-field-wrap">
             <i class="fa-regular fa-envelope field-icon"></i>
-            <input id="email" type="text" name="email" placeholder="Enter your registered email" required autofocus>
+            <input id="email" type="text" name="email" placeholder="student@university.edu" required autofocus>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="password">Password</label>
-          <div class="input-wrap">
+          <label class="field-label" for="password">Password</label>
+          <div class="input-field-wrap">
             <i class="fa-solid fa-lock field-icon"></i>
-            <input id="password" type="password" name="password" placeholder="Enter your secret password" required>
-            <button type="button" class="eye-btn" id="togglePassword" aria-label="Toggle password">
+            <input id="password" type="password" name="password" placeholder="Enter your password" required>
+            <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
               <i class="fa-regular fa-eye" id="eyeIcon"></i>
             </button>
           </div>
-          <div class="caps-warning" id="capsWarning">
-            <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
+
+          <!-- Dynamic Strength Indicator -->
+          <div class="strength-meter-wrap" id="strengthWrap">
+            <div class="strength-meter-bars">
+              <div class="bar" id="b1"></div>
+              <div class="bar" id="b2"></div>
+              <div class="bar" id="b3"></div>
+            </div>
+            <span class="strength-text" id="strengthText">Security status</span>
           </div>
         </div>
 
-        <div class="form-extras">
+        <div class="forgot-link-box">
           <a href="#">Forgot Password?</a>
         </div>
 
-        <button class="btn-submit" type="submit">
+        <button class="btn-submit-action" type="submit">
           <span>Sign In to Student Space</span>
           <i class="fa-solid fa-arrow-right"></i>
         </button>
       </form>
 
-      <div style="text-align: center;">
-        <a href="/" class="back-home">
-          <i class="fa-solid fa-arrow-left"></i> Back to Main Page
-        </a>
-      </div>
-
-      <div class="security-badge">
+      <div class="card-footer-sec">
         <i class="fa-solid fa-shield-halved"></i>
-        <span>256-bit Encrypted Student Session</span>
+        <span>End-to-End Encrypted Session</span>
       </div>
     </div>
   </div>
 
   <script>
-    const toggleBtn = document.getElementById('togglePassword');
+    // Password Toggle
+    const toggleBtn = document.getElementById('togglePasswordBtn');
     const passwordInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
-    const capsWarning = document.getElementById('capsWarning');
+    const strengthWrap = document.getElementById('strengthWrap');
+    const b1 = document.getElementById('b1');
+    const b2 = document.getElementById('b2');
+    const b3 = document.getElementById('b3');
+    const strengthText = document.getElementById('strengthText');
 
-    // Password Toggle
     if (toggleBtn && passwordInput && eyeIcon) {
       toggleBtn.addEventListener('click', function () {
         const isPassword = passwordInput.getAttribute('type') === 'password';
@@ -408,13 +498,34 @@
       });
     }
 
-    // CapsLock Detection
-    if (passwordInput && capsWarning) {
-      passwordInput.addEventListener('keyup', function(event) {
-        if (event.getModifierState('CapsLock')) {
-          capsWarning.style.display = 'block';
+    // Dynamic Password Strength Meter
+    if (passwordInput && strengthWrap) {
+      passwordInput.addEventListener('input', function() {
+        const val = passwordInput.value;
+        if (val.length === 0) {
+          strengthWrap.style.display = 'none';
+          return;
+        }
+        strengthWrap.style.display = 'block';
+
+        if (val.length < 5) {
+          b1.style.background = '#ef4444';
+          b2.style.background = '#e2e8f0';
+          b3.style.background = '#e2e8f0';
+          strengthText.textContent = 'Too short';
+          strengthText.style.color = '#ef4444';
+        } else if (val.length < 8) {
+          b1.style.background = '#f59e0b';
+          b2.style.background = '#f59e0b';
+          b3.style.background = '#e2e8f0';
+          strengthText.textContent = 'Moderate security';
+          strengthText.style.color = '#f59e0b';
         } else {
-          capsWarning.style.display = 'none';
+          b1.style.background = '#10b981';
+          b2.style.background = '#10b981';
+          b3.style.background = '#10b981';
+          strengthText.textContent = 'Strong password';
+          strengthText.style.color = '#10b981';
         }
       });
     }
