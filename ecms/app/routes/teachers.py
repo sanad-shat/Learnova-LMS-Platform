@@ -132,7 +132,7 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login with a dedicated sandboxed demo account."""
+    """Handle teacher login with a dedicated sandboxed demo account and seed data."""
     if current_user.is_authenticated and getattr(current_user, 'role', '').lower() == "teacher":
         return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
@@ -140,17 +140,19 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المعزول (Dedicated Demo Account)
+        # 1. الدخول التجريبي المعزول مع تعبئة بيانات استعراضية تلقائياً
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             demo_teacher = User.query.filter_by(username="demo_teacher").first()
 
-            # إنشاء حساب ديمو مستقل تلقائياً إذا لم يكن موجوداً
+            # إنشاء حساب ديمو مستقل إذا لم يكن موجوداً
             if not demo_teacher:
                 demo_teacher = User(
                     username="demo_teacher",
                     email="instructor@learnova.edu",
                     role="teacher",
-                    name_person="Dr. Demo Instructor"
+                    name_person="Dr. Demo Instructor",
+                    employee_id="DEMO-T101",
+                    department="Computer Science"
                 )
                 if hasattr(demo_teacher, 'set_password'):
                     demo_teacher.set_password("demo123")
@@ -160,8 +162,56 @@ def login():
                 db.session.add(demo_teacher)
                 db.session.commit()
 
+            # التحقق هل يملك المعلم التجريبي مساقات؟ إذا لا، ننشئ له بيئة كاملة فوراً
+            if not demo_teacher.courses:
+                # 1. إنشاء مساق تجريبي
+                demo_course = Course(
+                    code="CS101",
+                    name="Introduction to Python & Web Systems",
+                    description="A foundational course exploring basic algorithms, modern SaaS architecture, and backend engineering.",
+                    teacher_id=demo_teacher.id,
+                    course_identifier="cs101-demo"
+                )
+                db.session.add(demo_course)
+                db.session.flush()
+
+                # 2. إضافة وحدة تعليمية
+                demo_unit = Unit(
+                    title="Week 1: Fundamentals of Cloud Platforms",
+                    content="Introduction to MVC pattern, database relationships, and RESTful routing.",
+                    course_id=demo_course.id
+                )
+                db.session.add(demo_unit)
+
+                # 3. إضافة واجب للتجربة
+                demo_assignment = Assignment(
+                    title="Assignment 1: Data Structures Analysis",
+                    description="Submit a brief evaluation detailing runtime complexities and hash table implementations.",
+                    assignment_type="homework",
+                    start_date=datetime.now(),
+                    due_date=datetime.now(),
+                    course_id=demo_course.id
+                )
+                db.session.add(demo_assignment)
+                db.session.flush()
+
+                # 4. إشراك طالب تجريبي في المساق ليرى المعلم تفاعلات ودرجات
+                demo_student = User.query.filter_by(role="student").first()
+                if demo_student:
+                    enrollment = Enrollment(student_id=demo_student.id, course_id=demo_course.id)
+                    db.session.add(enrollment)
+                    # تسليم تجريبي غير مصحح ليجرب الزائر تصحيحه
+                    demo_submission = Submission(
+                        student_id=demo_student.id,
+                        assignment_id=demo_assignment.id,
+                        feedback="Pending instructor review."
+                    )
+                    db.session.add(demo_submission)
+
+                db.session.commit()
+
             login_user(demo_teacher)
-            flash("Signed in as Demo Instructor (Sandbox Mode).", "success")
+            flash("Signed in as Demo Instructor (Sandbox Mode with pre-loaded mock data).", "success")
             return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
 
         # 2. التحقق الاعتيادي لحسابات المعلمين الحقيقية
@@ -179,7 +229,6 @@ def login():
 
         flash("Invalid credentials or not authorized as an instructor.", "danger")
     return render_template("teacher/login.html")
-
 @teachers_bp.route("/logout")
 @login_required
 def logout():
