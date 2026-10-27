@@ -76,7 +76,10 @@ def create_app():
 
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAX_CONTENT_LENGTH'] = 25 * 1024 * 1024
-
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
