@@ -19,7 +19,8 @@
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin-bottom: 26px !important;
+    margin-bottom: 24px !important;
+    gap: 16px !important;
   }
 
   .page-title-row h1 {
@@ -48,18 +49,20 @@
     font-weight: 700 !important;
     color: #334155 !important;
     box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03) !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
   }
 
   .date-chip i {
     color: #4f46e5 !important;
   }
 
-  /* Compact & Unified KPI Grid */
+  /* Compact KPI Grid */
   .stats-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     gap: 18px !important;
-    margin-bottom: 26px !important;
+    margin-bottom: 24px !important;
   }
 
   .metric-card {
@@ -100,6 +103,7 @@
     display: flex !important;
     flex-direction: column !important;
     gap: 2px !important;
+    min-width: 0 !important;
   }
 
   .metric-info small {
@@ -107,6 +111,9 @@
     font-weight: 600 !important;
     color: #64748b !important;
     line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   .metric-info strong {
@@ -122,6 +129,9 @@
     font-size: 11px !important;
     color: #94a3b8 !important;
     font-weight: 500 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 
   /* Panels Layout */
@@ -129,14 +139,14 @@
     display: grid !important;
     grid-template-columns: 1.8fr 1.2fr !important;
     gap: 22px !important;
-    margin-bottom: 26px !important;
+    margin-bottom: 24px !important;
   }
 
   .panel {
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
     border-radius: 20px !important;
-    padding: 24px 26px !important;
+    padding: 24px !important;
     box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02) !important;
   }
 
@@ -145,6 +155,7 @@
     justify-content: space-between !important;
     align-items: center !important;
     margin-bottom: 20px !important;
+    gap: 10px !important;
   }
 
   .panel-head h2 {
@@ -166,6 +177,7 @@
     display: inline-flex !important;
     align-items: center !important;
     gap: 6px !important;
+    white-space: nowrap !important;
     transition: all 0.2s ease !important;
   }
 
@@ -252,7 +264,7 @@
   }
 
   .mini-row span {
-    width: 90px !important;
+    width: 85px !important;
     font-size: 13px !important;
     font-weight: 600 !important;
     color: #475569 !important;
@@ -281,7 +293,7 @@
     color: #0f172a !important;
   }
 
-  /* Quick Actions (Uniform 2x2 Grid) */
+  /* Quick Actions (Uniform Grid) */
   .course-actions {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
@@ -295,12 +307,13 @@
     justify-content: center !important;
     gap: 8px !important;
     height: 48px !important;
-    padding: 0 14px !important;
+    padding: 0 12px !important;
     border-radius: 12px !important;
-    font-size: 13px !important;
+    font-size: 12.5px !important;
     font-weight: 700 !important;
     text-decoration: none !important;
     transition: all 0.25s ease !important;
+    text-align: center !important;
   }
 
   .course-actions .primary-btn {
@@ -312,7 +325,6 @@
   .course-actions .primary-btn:hover {
     background: #4338ca !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3) !important;
   }
 
   .course-actions .secondary-btn {
@@ -365,16 +377,106 @@
     display: inline-block !important;
   }
 
+  /* ========================================================
+     RESPONSIVE BREAKPOINTS (Tablet & Mobile Optimization)
+     ======================================================== */
   @media (max-width: 1200px) {
-    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-    .three-grid { grid-template-columns: 1fr !important; }
-    .dashboard-grid { grid-template-columns: 1fr !important; }
+    .stats-grid { 
+      grid-template-columns: repeat(2, 1fr) !important; 
+      gap: 16px !important;
+    }
+    .dashboard-grid { 
+      grid-template-columns: 1fr !important; 
+    }
+    .three-grid { 
+      grid-template-columns: 1fr !important; 
+      gap: 18px !important;
+    }
   }
 
-  @media (max-width: 640px) {
-    .stats-grid { grid-template-columns: 1fr !important; }
-    .page-title-row { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
-    .course-actions { grid-template-columns: 1fr !important; }
+  @media (max-width: 768px) {
+    .admin-main, .admin-content, main.content {
+      padding: 20px 16px 40px !important;
+    }
+
+    .page-title-row {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 14px !important;
+      margin-bottom: 20px !important;
+    }
+
+    .page-title-row h1 {
+      font-size: 22px !important;
+    }
+
+    .date-chip {
+      align-self: flex-start !important;
+      font-size: 11.5px !important;
+      padding: 6px 14px !important;
+    }
+
+    /* Balanced 2-columns on mobile for KPIs */
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 12px !important;
+    }
+
+    .metric-card {
+      padding: 14px !important;
+      border-radius: 16px !important;
+      gap: 10px !important;
+    }
+
+    .metric-icon {
+      width: 40px !important;
+      height: 40px !important;
+      font-size: 16px !important;
+      border-radius: 10px !important;
+    }
+
+    .metric-info strong {
+      font-size: 20px !important;
+    }
+
+    .metric-info small {
+      font-size: 11px !important;
+    }
+
+    .metric-info em {
+      font-size: 10px !important;
+    }
+
+    .panel {
+      padding: 18px 16px !important;
+      border-radius: 16px !important;
+    }
+
+    .chart-wrap {
+      height: 230px !important;
+    }
+
+    .course-actions {
+      grid-template-columns: 1fr 1fr !important;
+      gap: 10px !important;
+    }
+
+    .course-actions a {
+      height: 44px !important;
+      font-size: 12px !important;
+      padding: 0 8px !important;
+    }
+  }
+
+  @media (max-width: 420px) {
+    /* Full width on ultra small screens */
+    .stats-grid {
+      grid-template-columns: 1fr !important;
+    }
+    
+    .course-actions {
+      grid-template-columns: 1fr !important;
+    }
   }
 </style>
 {% endblock %}
@@ -566,8 +668,8 @@
     const ctx = document.getElementById('overviewChart').getContext('2d');
     
     // Very subtle, airy modern gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.15)');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.16)');
     gradient.addColorStop(1, 'rgba(79, 70, 229, 0.00)');
 
     new Chart(ctx, {
