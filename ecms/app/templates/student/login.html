@@ -22,351 +22,202 @@
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      margin: 0;
       min-height: 100vh;
       background: var(--bg);
       color: var(--navy);
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       align-items: center;
-      position: relative;
-      overflow-x: hidden;
-      padding: 30px 20px;
+      justify-content: center;
+      padding: 24px 16px;
     }
 
-    /* Ambient Dot Grid & Glow */
-    .bg-grid {
-      position: absolute;
-      top: 0;
-      left: 0;
+    .login-card {
       width: 100%;
-      height: 100%;
-      background-image: radial-gradient(rgba(79, 70, 229, 0.12) 1.2px, transparent 1.2px);
-      background-size: 28px 28px;
-      mask-image: radial-gradient(circle at 50% 35%, #000 50%, transparent 90%);
-      -webkit-mask-image: radial-gradient(circle at 50% 35%, #000 50%, transparent 90%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .bg-glow {
-      position: absolute;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 600px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
-      filter: blur(50px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* Top Nav Row */
-    .top-nav {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .back-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--slate);
+      max-width: 420px;
       background: #ffffff;
       border: 1px solid var(--border);
-      padding: 8px 16px;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-      transition: all 0.2s ease;
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
     }
 
-    .back-link:hover {
-      color: var(--primary);
-      border-color: #c7d2fe;
-      transform: translateX(-3px);
-    }
-
-    .portal-chip {
-      background: #eef2ff;
-      color: var(--primary);
-      font-size: 11px;
-      font-weight: 800;
-      padding: 6px 14px;
-      border-radius: 99px;
-      border: 1px solid rgba(79, 70, 229, 0.15);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    /* Main Auth Box */
-    .auth-container {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      max-width: 460px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 40px 36px;
-      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(0,0,0,0.02);
-    }
-
-    .brand-center {
+    .brand-header {
       text-align: center;
       margin-bottom: 28px;
     }
 
     .brand-icon {
-      width: 52px;
-      height: 52px;
+      width: 48px;
+      height: 48px;
       margin-bottom: 12px;
-      filter: drop-shadow(0 6px 12px rgba(79, 70, 229, 0.25));
     }
 
-    .brand-center h1 {
-      font-size: 26px;
+    .brand-header h1 {
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: -0.8px;
-      margin: 0 0 6px;
       color: var(--navy);
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
     }
 
-    .brand-center p {
+    .brand-header p {
       font-size: 14px;
       color: var(--slate);
-      margin: 0;
     }
 
-    /* Alert / Flash */
-    .flash-box {
-      padding: 12px 16px;
-      border-radius: 12px;
+    /* Flash Message */
+    .flash {
+      padding: 12px 14px;
+      border-radius: 10px;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
-    .flash-box.danger, .flash-box.error {
+    .flash.danger, .flash.error {
       background: #fef2f2;
       color: #dc2626;
       border: 1px solid #fee2e2;
     }
-    .flash-box.success {
+    .flash.success {
       background: #f0fdf4;
       color: #16a34a;
       border: 1px solid #dcfce7;
     }
-    .flash-box.info {
-      background: #eff6ff;
-      color: #2563eb;
-      border: 1px solid #dbeafe;
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 18px;
     }
 
-    /* Form Fields */
-    .field-group {
-      margin-bottom: 20px;
-    }
-
-    .field-label {
+    label {
       display: block;
       font-size: 13px;
       font-weight: 700;
       color: #334155;
-      margin-bottom: 8px;
+      margin-bottom: 7px;
     }
 
-    .input-box {
+    .input-wrap {
       position: relative;
       display: flex;
       align-items: center;
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 14px;
-      transition: all 0.25s ease;
+      border-radius: 12px;
+      transition: all 0.2s ease;
     }
 
-    .input-box:focus-within {
+    .input-wrap:focus-within {
       background: #ffffff;
       border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
     }
 
-    .input-box i.input-icon {
-      padding-left: 16px;
+    .input-wrap i.field-icon {
+      padding-left: 14px;
       color: #94a3b8;
       font-size: 15px;
     }
 
-    .input-box input {
+    .input-wrap input {
       width: 100%;
-      padding: 13px 14px;
+      padding: 12px 14px;
       border: none;
       background: transparent;
       outline: none;
       font-size: 14px;
       color: var(--navy);
-      font-weight: 500;
     }
 
-    .input-box input::placeholder {
+    .input-wrap input::placeholder {
       color: #94a3b8;
     }
 
-    .eye-toggle {
+    .eye-btn {
       background: none;
       border: none;
-      padding: 0 16px;
+      padding: 0 14px;
       cursor: pointer;
       color: #94a3b8;
       font-size: 15px;
-      transition: color 0.2s;
     }
 
-    .eye-toggle:hover {
+    .eye-btn:hover {
       color: var(--primary);
     }
 
-    .forgot-wrap {
+    .form-extras {
       display: flex;
       justify-content: flex-end;
       margin-top: -6px;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
-    .forgot-btn {
+    .form-extras a {
       font-size: 12px;
       font-weight: 600;
       color: var(--primary);
       text-decoration: none;
     }
 
-    .forgot-btn:hover {
+    .form-extras a:hover {
       text-decoration: underline;
     }
 
-    .submit-btn {
+    .btn-submit {
       width: 100%;
       background: var(--primary);
       color: #ffffff;
       border: none;
-      padding: 14px;
-      border-radius: 14px;
+      padding: 13px;
+      border-radius: 12px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
-      transition: all 0.25s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      transition: all 0.2s ease;
     }
 
-    .submit-btn:hover {
+    .btn-submit:hover {
       background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
     }
 
-    /* Switch Roles Divider */
-    .switch-roles {
-      margin-top: 26px;
-      padding-top: 22px;
-      border-top: 1px solid var(--border);
-      text-align: center;
-    }
-
-    .switch-roles small {
+    .back-home {
       display: block;
-      font-size: 12px;
-      color: var(--slate);
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    .role-pills {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .role-pill {
-      font-size: 12px;
-      font-weight: 700;
-      text-decoration: none;
-      color: #475569;
-      background: #f1f5f9;
-      padding: 7px 16px;
-      border-radius: 10px;
-      transition: all 0.2s;
-      border: 1px solid transparent;
-    }
-
-    .role-pill:hover {
-      background: #eef2ff;
-      color: var(--primary);
-      border-color: #c7d2fe;
-    }
-
-    /* Footer text */
-    .page-footer {
-      position: relative;
-      z-index: 2;
-      font-size: 12px;
-      color: #94a3b8;
       text-align: center;
       margin-top: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--slate);
+      text-decoration: none;
     }
 
-    @media (max-width: 520px) {
-      .auth-container {
-        padding: 30px 22px;
-      }
+    .back-home:hover {
+      color: var(--primary);
     }
   </style>
 </head>
 
 <body>
-  <div class="bg-grid"></div>
-  <div class="bg-glow"></div>
-
-  <!-- Header Navigation -->
-  <div class="top-nav">
-    <a href="/" class="back-link">
-      <i class="fa-solid fa-arrow-left"></i> Home
-    </a>
-    <span class="portal-chip">Student Space</span>
-  </div>
-
-  <!-- Center Card -->
-  <div class="auth-container">
-    <div class="brand-center">
+  <div class="login-card">
+    <div class="brand-header">
       <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-icon">
-      <h1>Welcome Back!</h1>
-      <p>Sign in to access your modules & grades</p>
+      <h1>Student Login</h1>
+      <p>Enter your credentials to access your account</p>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="flash-box {{ category }}">
+          <div class="flash {{ category }}">
             <i class="fa-solid fa-circle-exclamation"></i>
             <span>{{ message }}</span>
           </div>
@@ -375,66 +226,50 @@
     {% endwith %}
 
     <form method="POST">
-      <div class="field-group">
-        <label class="field-label" for="email">Username or Email</label>
-        <div class="input-box">
-          <i class="fa-regular fa-envelope input-icon"></i>
-          <input id="email" type="text" name="email" placeholder="e.g. alex@example.com" required autofocus>
+      <div class="form-group">
+        <label for="email">Username or Email</label>
+        <div class="input-wrap">
+          <i class="fa-regular fa-envelope field-icon"></i>
+          <input id="email" type="text" name="email" placeholder="Enter your email" required autofocus>
         </div>
       </div>
 
-      <div class="field-group">
-        <label class="field-label" for="login-pass">Password</label>
-        <div class="input-box">
-          <i class="fa-solid fa-lock input-icon"></i>
-          <input id="login-pass" type="password" name="password" placeholder="Enter your password" required>
-          <button type="button" class="eye-toggle" id="togglePassBtn" aria-label="Toggle password">
-            <i class="fa-regular fa-eye" id="togglePassIcon"></i>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap">
+          <i class="fa-solid fa-lock field-icon"></i>
+          <input id="password" type="password" name="password" placeholder="Enter your password" required>
+          <button type="button" class="eye-btn" id="togglePassword">
+            <i class="fa-regular fa-eye" id="eyeIcon"></i>
           </button>
         </div>
       </div>
 
-      <div class="forgot-wrap">
-        <a class="forgot-btn" href="#">Forgot password?</a>
+      <div class="form-extras">
+        <a href="#">Forgot Password?</a>
       </div>
 
-      <button class="submit-btn" type="submit">
-        <span>Sign In</span>
-        <i class="fa-solid fa-arrow-right"></i>
-      </button>
+      <button class="btn-submit" type="submit">Sign In</button>
     </form>
 
-    <div class="switch-roles">
-      <small>Sign in to other portals:</small>
-      <div class="role-pills">
-        <a href="{{ url_for('teachers.login') }}" class="role-pill">
-          <i class="fa-solid fa-chalkboard-user"></i> Instructor
-        </a>
-        <a href="{{ url_for('admin.dashboard') }}" class="role-pill">
-          <i class="fa-solid fa-shield-halved"></i> Admin
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <div class="page-footer">
-    &copy; 2026 Learnova LMS. All rights reserved.
+    <a href="/" class="back-home">
+      <i class="fa-solid fa-arrow-left"></i> Back to Home
+    </a>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const btn = document.getElementById('togglePassBtn');
-      const input = document.getElementById('login-pass');
-      const icon = document.getElementById('togglePassIcon');
-      if (btn && input && icon) {
-        btn.addEventListener('click', function () {
-          const isPass = input.type === 'password';
-          input.type = isPass ? 'text' : 'password';
-          icon.classList.toggle('fa-eye', !isPass);
-          icon.classList.toggle('fa-eye-slash', isPass);
-        });
-      }
-    });
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    if (toggleBtn && passwordInput && eyeIcon) {
+      toggleBtn.addEventListener('click', function () {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        eyeIcon.classList.toggle('fa-eye', !isPassword);
+        eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+      });
+    }
   </script>
 </body>
 </html>
