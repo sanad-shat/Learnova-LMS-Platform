@@ -8,6 +8,7 @@ dependencies = [
     "flask-migrate",
     "psycopg[binary]",
     "psycopg2-binary",
+    "pillow",
     "gunicorn",
     "werkzeug"
 ]
