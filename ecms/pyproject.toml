@@ -1,2 +1,15 @@
+[project]
+name = "learnova-lms"
+version = "0.1.0"
+dependencies = [
+    "flask",
+    "flask-sqlalchemy",
+    "flask-login",
+    "flask-migrate",
+    "psycopg2-binary",
+    "gunicorn",
+    "werkzeug"
+]
+
 [tool.vercel]
 entrypoint = "run:app"
