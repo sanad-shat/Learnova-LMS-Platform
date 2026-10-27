@@ -119,12 +119,11 @@
     .hero-container {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 70px 24px 40px;
+      padding: 60px 24px 30px;
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 60px;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 50px;
       align-items: center;
-      position: relative;
     }
 
     .hero-badge {
@@ -142,12 +141,8 @@
       border: 1px solid rgba(79, 70, 229, 0.15);
     }
 
-    .hero-badge i {
-      font-size: 11px;
-    }
-
     .hero-title {
-      font-size: 58px;
+      font-size: 56px;
       line-height: 1.1;
       font-weight: 800;
       letter-spacing: -2px;
@@ -224,234 +219,38 @@
       transform: translateY(-2px);
     }
 
-    /* Showcase Card & Floating Badges */
-    .showcase-wrapper {
+    /* Modern Educational Vector Showcase */
+    .illustration-wrapper {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 20px;
     }
 
-    .hero-showcase-card {
-      position: relative;
-      background: linear-gradient(145deg, #0b1528 0%, #172544 100%);
-      border-radius: 28px;
-      padding: 38px 32px;
-      color: #ffffff;
-      box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      width: 100%;
-      overflow: hidden;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .hero-showcase-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 35px 70px -12px rgba(79, 70, 229, 0.25);
-    }
-
-    .card-glow {
+    .illustration-bg-glow {
       position: absolute;
-      top: -80px;
-      right: -80px;
-      width: 240px;
-      height: 240px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(56, 189, 248, 0.05) 60%, transparent 80%);
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(124, 58, 237, 0.08) 50%, transparent 70%);
       border-radius: 50%;
-      filter: blur(20px);
-      pointer-events: none;
+      filter: blur(40px);
+      z-index: 1;
     }
 
-    .card-content {
+    .illustration-img {
       position: relative;
       z-index: 2;
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+      filter: drop-shadow(0 20px 30px rgba(79, 70, 229, 0.12));
+      animation: gentleFloat 5s ease-in-out infinite alternate;
     }
 
-    .card-top-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 22px;
-    }
-
-    .brand-large-icon {
-      width: 68px;
-      height: 68px;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 12px;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
-      margin-bottom: 0 !important;
-    }
-
-    .live-status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.25);
-      padding: 5px 12px;
-      border-radius: 99px;
-    }
-
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
-      background: #4ade80;
-      border-radius: 50%;
-      box-shadow: 0 0 8px #4ade80;
-      animation: pulseAnim 2s infinite ease-in-out;
-    }
-
-    @keyframes pulseAnim {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.75); }
-    }
-
-    .card-title {
-      font-size: 26px;
-      font-weight: 800;
-      margin: 0 0 6px;
-    }
-
-    .card-tagline {
-      color: #94a3b8;
-      font-size: 14px;
-      margin: 0 0 24px;
-    }
-
-    .showcase-stat-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 24px;
-    }
-
-    .stat-mini-pill {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .stat-mini-pill i {
-      font-size: 20px;
-      color: #818cf8;
-    }
-
-    .stat-mini-pill div span {
-      display: block;
-      font-size: 11px;
-      color: #94a3b8;
-      text-transform: uppercase;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    .stat-mini-pill div strong {
-      font-size: 17px;
-      color: #fff;
-    }
-
-    .completion-bar-wrap {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 14px 18px;
-    }
-
-    .completion-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: #cbd5e1;
-    }
-
-    .completion-bar {
-      height: 7px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-
-    .completion-progress {
-      width: 92%;
-      height: 100%;
-      background: linear-gradient(90deg, #6366f1, #38bdf8);
-      border-radius: 99px;
-      animation: growProgress 1.5s ease-out;
-    }
-
-    @keyframes growProgress {
-      0% { width: 0%; }
-      100% { width: 92%; }
-    }
-
-    /* Floating Badges */
-    .floating-badge {
-      position: absolute;
-      z-index: 10;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      padding: 10px 16px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04);
-      animation: floatBadge 4s ease-in-out infinite alternate;
-    }
-
-    .badge-top {
-      top: -24px;
-      left: -28px;
-    }
-
-    .badge-bottom {
-      bottom: -22px;
-      right: -24px;
-      animation-delay: 2s;
-    }
-
-    @keyframes floatBadge {
+    @keyframes gentleFloat {
       0% { transform: translateY(0px); }
-      100% { transform: translateY(-8px); }
-    }
-
-    .badge-icon-wrap {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
-
-    .bg-green-subtle { background: #dcfce7; color: #16a34a; }
-    .bg-amber-subtle { background: #fef3c7; color: #d97706; }
-
-    .badge-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.2;
-    }
-
-    .badge-sub {
-      font-size: 11px;
-      color: #64748b;
-      font-weight: 500;
+      100% { transform: translateY(-10px); }
     }
 
     /* Portals Selection Grid */
@@ -493,7 +292,6 @@
       text-decoration: none;
       color: inherit;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -641,9 +439,10 @@
       .hero-title { font-size: 42px; }
       .hero-description { margin-left: auto; margin-right: auto; }
       .quick-actions { justify-content: center; }
+      .illustration-wrapper { order: -1; }
+      .illustration-img { max-width: 320px; }
       .portals-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .badge-top, .badge-bottom { display: none; }
     }
 
     @media (max-width: 576px) {
@@ -677,7 +476,7 @@
     <section class="hero-container">
       <div>
         <div class="hero-badge">
-          <i class="fa-solid fa-sparkles"></i> NEXT-GENERATION LEARNING EXPERIENCE
+          <i class="fa-solid fa-graduation-cap"></i> NEXT-GENERATION LEARNING EXPERIENCE
         </div>
         <h1 class="hero-title">
           Learn smarter.<br>
@@ -700,69 +499,15 @@
         </div>
       </div>
 
-      <!-- Right Visual Component with Floating Badges -->
-      <div class="showcase-wrapper">
-        <!-- Floating Badge Top Left -->
-        <div class="floating-badge badge-top">
-          <div class="badge-icon-wrap bg-green-subtle">
-            <i class="fa-solid fa-shield-check"></i>
-          </div>
-          <div>
-            <div class="badge-title">Database Synced</div>
-            <div class="badge-sub">Neon Cloud Active</div>
-          </div>
-        </div>
-
-        <!-- Floating Badge Bottom Right -->
-        <div class="floating-badge badge-bottom">
-          <div class="badge-icon-wrap bg-amber-subtle">
-            <i class="fa-solid fa-award"></i>
-          </div>
-          <div>
-            <div class="badge-title">Certificates</div>
-            <div class="badge-sub">Auto-Issued & Verified</div>
-          </div>
-        </div>
-
-        <div class="hero-showcase-card">
-          <div class="card-glow"></div>
-          <div class="card-content">
-            <div class="card-top-bar">
-              <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-large-icon">
-              <span class="live-status-pill"><span class="pulse-dot"></span> Live Hub</span>
-            </div>
-            
-            <h2 class="card-title">Learnova LMS Suite</h2>
-            <p class="card-tagline">Centralized academic performance & real-time analytics.</p>
-
-            <div class="showcase-stat-row">
-              <div class="stat-mini-pill">
-                <i class="fa-solid fa-bolt"></i>
-                <div>
-                  <span>Cloud Engine</span>
-                  <strong>Fast & Resilient</strong>
-                </div>
-              </div>
-              <div class="stat-mini-pill">
-                <i class="fa-solid fa-chart-line-up"></i>
-                <div>
-                  <span>Success Rate</span>
-                  <strong>98.4%</strong>
-                </div>
-              </div>
-            </div>
-
-            <div class="completion-bar-wrap">
-              <div class="completion-header">
-                <span><i class="fa-solid fa-graduation-cap" style="margin-right:6px"></i> System Progression</span>
-                <span>92%</span>
-              </div>
-              <div class="completion-bar">
-                <div class="completion-progress"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Modern Educational Illustration Component -->
+      <div class="illustration-wrapper">
+        <div class="illustration-bg-glow"></div>
+        <img 
+          src="https://illustrations.popsy.co/amber/student-going-to-school.svg" 
+          alt="Online Education" 
+          class="illustration-img"
+          loading="lazy"
+        >
       </div>
     </section>
 
