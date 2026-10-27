@@ -132,18 +132,37 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login."""
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+    """Handle teacher login with demo bypass support."""
+    if current_user.is_authenticated and current_user.role.lower() == "teacher":
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
-        user = User.query.filter_by(email=email).first()
-        if user and user.check_password(password) and user.role.lower() == "teacher":
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = request.form.get("password") or ""
+
+        # 1. الدخول التجريبي السريع بنقرة واحدة (One-Click Demo Override)
+        if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
+            demo_teacher = User.query.filter_by(role="teacher").first()
+            if demo_teacher:
+                login_user(demo_teacher)
+                flash("Signed in successfully with Demo Instructor Account.", "success")
+                return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+
+        # 2. التحقق الاعتيادي من قاعدة البيانات
+        user = User.query.filter((User.email == email) | (User.username == email)).first()
+        is_valid = False
+        if user:
+            if hasattr(user, "check_password"):
+                is_valid = user.check_password(password)
+            else:
+                is_valid = (user.password == password)
+
+        if user and is_valid and user.role.lower() == "teacher":
             login_user(user)
             return redirect(url_for("teachers.dashboard", teacher_id=user.id))
-        flash("Invalid credentials or not a teacher.", "danger")
-    return render_template("teacher/login.html")
 
+        flash("Invalid credentials or not authorized as an instructor.", "danger")
+    return render_template("teacher/login.html")
 
 @teachers_bp.route("/logout")
 @login_required
