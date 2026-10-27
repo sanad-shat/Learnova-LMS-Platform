@@ -1,9 +1,58 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from functools import wraps
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from sqlalchemy.exc import IntegrityError
 from app import db
 from app.models import User, Course, Enrollment, Assignment, Submission, Grade, Activity, Quiz, Exam, Certificate, DiscussionTopic, Notification
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            flash('Please log in with administrator credentials first.', 'danger')
+            return redirect(url_for('admin.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@admin_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if session.get('admin_logged_in'):
+        return redirect(url_for('admin.dashboard'))
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        admin_user = User.query.filter_by(username=username, role='admin').first()
+
+        # يدعم التحقق سواء كانت كلمة المرور مشفرة أو نص عادي
+        is_valid = False
+        if admin_user:
+            if hasattr(admin_user, 'check_password'):
+                is_valid = admin_user.check_password(password)
+            else:
+                is_valid = (admin_user.password == password)
+
+        if admin_user and is_valid:
+            session['admin_id'] = admin_user.id
+            session['admin_logged_in'] = True
+            flash('Welcome back, Admin!', 'success')
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Invalid admin credentials. Access restricted.', 'danger')
+
+    return render_template('admin/login.html')
+
+
+@admin_bp.route('/logout')
+def logout():
+    session.pop('admin_id', None)
+    session.pop('admin_logged_in', None)
+    flash('You have logged out from the admin console.', 'success')
+    return redirect(url_for('admin.login'))
 
 
 def _duplicate_profile_id(field_name, value, exclude_id=None):
@@ -46,6 +95,7 @@ def _duplicate_user(username, email, exclude_id=None):
 
 
 @admin_bp.route('/')
+@admin_required
 def dashboard():
     stats = {
         'students': User.query.filter_by(role='student').count(),
@@ -62,11 +112,13 @@ def dashboard():
 
 
 @admin_bp.route('/students')
+@admin_required
 def manage_students():
     return render_template('admin/manage_students.html', students=User.query.filter_by(role='student').all())
 
 
 @admin_bp.route('/students/add', methods=['GET', 'POST'])
+@admin_required
 def add_student():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
@@ -99,6 +151,7 @@ def add_student():
 
 
 @admin_bp.route('/students/delete/<int:student_id>', methods=['POST'])
+@admin_required
 def delete_student(student_id):
     student = User.query.get_or_404(student_id)
     if student.role != 'student':
@@ -106,14 +159,17 @@ def delete_student(student_id):
         return redirect(url_for('admin.manage_students'))
     try:
         Activity.query.filter_by(student_id=student.id).delete(synchronize_session=False)
-        db.session.delete(student); db.session.commit()
+        db.session.delete(student)
+        db.session.commit()
         flash('Student and related records deleted successfully.', 'success')
     except Exception:
-        db.session.rollback(); flash('Student could not be deleted because related data still exists.', 'danger')
+        db.session.rollback()
+        flash('Student could not be deleted because related data still exists.', 'danger')
     return redirect(url_for('admin.manage_students'))
 
 
 @admin_bp.route('/students/<int:student_id>/edit', methods=['GET', 'POST'])
+@admin_required
 def edit_student(student_id):
     student = User.query.get_or_404(student_id)
     if request.method == 'POST':
@@ -140,6 +196,7 @@ def edit_student(student_id):
 
 
 @admin_bp.route('/students/<int:student_id>/reset-password', methods=['GET','POST'])
+@admin_required
 def reset_student_password(student_id):
     return _reset_password(student_id, 'student', 'admin.manage_students')
 
@@ -147,7 +204,8 @@ def reset_student_password(student_id):
 def _reset_password(user_id, role, redirect_endpoint):
     user = User.query.get_or_404(user_id)
     if user.role != role:
-        flash('Invalid account type.', 'danger'); return redirect(url_for(redirect_endpoint))
+        flash('Invalid account type.', 'danger')
+        return redirect(url_for(redirect_endpoint))
     if request.method == 'POST':
         password = request.form.get('new_password','')
         confirm = request.form.get('confirm_password','')
@@ -156,14 +214,19 @@ def _reset_password(user_id, role, redirect_endpoint):
         elif password != confirm:
             flash('Passwords do not match.', 'danger')
         else:
-            user.set_password(password); user.visible_password = password; db.session.commit()
-            flash('Password reset successfully.', 'success'); return redirect(url_for(redirect_endpoint))
+            user.set_password(password)
+            user.visible_password = password
+            db.session.commit()
+            flash('Password reset successfully.', 'success')
+            return redirect(url_for(redirect_endpoint))
     return render_template('admin/reset_password.html', user=user)
 
 
 @admin_bp.route('/students/<int:student_id>/enroll', methods=['GET', 'POST'])
+@admin_required
 def enroll_courses(student_id):
-    student = User.query.get_or_404(student_id); courses = Course.query.all()
+    student = User.query.get_or_404(student_id)
+    courses = Course.query.all()
     if request.method == 'POST':
         ids = request.form.getlist('course_ids')
         if not ids:
@@ -172,17 +235,20 @@ def enroll_courses(student_id):
             for cid in ids:
                 if not Enrollment.query.filter_by(student_id=student.id, course_id=int(cid)).first():
                     db.session.add(Enrollment(student_id=student.id, course_id=int(cid)))
-            db.session.commit(); flash('Courses enrolled successfully!', 'success')
+            db.session.commit()
+            flash('Courses enrolled successfully!', 'success')
             return redirect(url_for('admin.manage_students'))
     return render_template('admin/enroll_courses.html', student=student, courses=courses)
 
 
 @admin_bp.route('/teachers')
+@admin_required
 def manage_teachers():
     return render_template('admin/manage_teachers.html', teachers=User.query.filter_by(role='teacher').all())
 
 
 @admin_bp.route('/teachers/add', methods=['GET','POST'])
+@admin_required
 def add_teacher():
     if request.method == 'POST':
         username = request.form.get('username','').strip()
@@ -209,16 +275,20 @@ def add_teacher():
 
 
 @admin_bp.route('/teachers/delete/<int:teacher_id>', methods=['POST'])
+@admin_required
 def delete_teacher(teacher_id):
-    teacher=User.query.get_or_404(teacher_id)
+    teacher = User.query.get_or_404(teacher_id)
     if teacher.courses:
         flash('Reassign or delete this teacher’s courses before deleting the account.', 'warning')
     else:
-        db.session.delete(teacher); db.session.commit(); flash('Teacher deleted successfully!','success')
+        db.session.delete(teacher)
+        db.session.commit()
+        flash('Teacher deleted successfully!','success')
     return redirect(url_for('admin.manage_teachers'))
 
 
 @admin_bp.route('/teachers/<int:teacher_id>/edit', methods=['GET','POST'])
+@admin_required
 def edit_teacher(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
     if request.method == 'POST':
@@ -245,78 +315,110 @@ def edit_teacher(teacher_id):
 
 
 @admin_bp.route('/teachers/<int:teacher_id>/reset-password', methods=['GET','POST'])
+@admin_required
 def reset_teacher_password(teacher_id):
     return _reset_password(teacher_id, 'teacher', 'admin.manage_teachers')
 
 
 @admin_bp.route('/teachers/<int:teacher_id>/assign_courses', methods=['GET','POST'])
+@admin_required
 def assign_courses(teacher_id):
-    teacher=User.query.get_or_404(teacher_id); courses=Course.query.all()
-    if request.method=='POST':
-        course=Course.query.get_or_404(int(request.form['course_id'])); course.teacher_id=teacher.id
-        db.session.commit(); flash('Course assigned to teacher!','success'); return redirect(url_for('admin.manage_teachers'))
+    teacher = User.query.get_or_404(teacher_id)
+    courses = Course.query.all()
+    if request.method == 'POST':
+        course = Course.query.get_or_404(int(request.form['course_id']))
+        course.teacher_id = teacher.id
+        db.session.commit()
+        flash('Course assigned to teacher!','success')
+        return redirect(url_for('admin.manage_teachers'))
     return render_template('admin/assign_courses.html',teacher=teacher,courses=courses)
 
 
 @admin_bp.route('/courses')
-def manage_courses(): return render_template('admin/manage_courses.html',courses=Course.query.all())
+@admin_required
+def manage_courses():
+    return render_template('admin/manage_courses.html',courses=Course.query.all())
 
 
 @admin_bp.route('/courses/add', methods=['GET','POST'])
+@admin_required
 def add_course():
-    teachers=User.query.filter_by(role='teacher').all()
-    if request.method=='POST':
-        teacher_id=request.form.get('teacher_id')
+    teachers = User.query.filter_by(role='teacher').all()
+    if request.method == 'POST':
+        teacher_id = request.form.get('teacher_id')
         if not teacher_id:
-            flash('Please select a teacher.','danger'); return render_template('admin/add_course.html',teachers=teachers)
-        course=Course(code=request.form['code'].strip(),name=request.form['name'].strip(),description=request.form.get('description',''),teacher_id=int(teacher_id),course_identifier=request.form.get('course_identifier','').strip())
+            flash('Please select a teacher.','danger')
+            return render_template('admin/add_course.html',teachers=teachers)
+        course = Course(code=request.form['code'].strip(),name=request.form['name'].strip(),description=request.form.get('description',''),teacher_id=int(teacher_id),course_identifier=request.form.get('course_identifier','').strip())
         try:
-            db.session.add(course); db.session.commit(); flash('Course added successfully!','success'); return redirect(url_for('admin.manage_courses'))
+            db.session.add(course)
+            db.session.commit()
+            flash('Course added successfully!','success')
+            return redirect(url_for('admin.manage_courses'))
         except IntegrityError:
-            db.session.rollback(); flash('Course code or identifier already exists.','danger')
+            db.session.rollback()
+            flash('Course code or identifier already exists.','danger')
     return render_template('admin/add_course.html',teachers=teachers)
 
 
 @admin_bp.route('/courses/delete/<int:course_id>', methods=['POST'])
+@admin_required
 def delete_course(course_id):
-    course=Course.query.get_or_404(course_id)
+    course = Course.query.get_or_404(course_id)
     try:
         Activity.query.filter_by(course_id=course.id).delete(synchronize_session=False)
-        db.session.delete(course); db.session.commit(); flash('Course deleted successfully!','success')
+        db.session.delete(course)
+        db.session.commit()
+        flash('Course deleted successfully!','success')
     except Exception:
-        db.session.rollback(); flash('Course could not be deleted because related data still exists.','danger')
+        db.session.rollback()
+        flash('Course could not be deleted because related data still exists.','danger')
     return redirect(url_for('admin.manage_courses'))
 
 
 @admin_bp.route('/courses/<int:course_id>/edit', methods=['GET','POST'])
+@admin_required
 def edit_course(course_id):
-    course=Course.query.get_or_404(course_id); teachers=User.query.filter_by(role='teacher').all()
-    if request.method=='POST':
-        course.code=request.form['code'].strip(); course.name=request.form['name'].strip(); course.description=request.form.get('description','')
-        teacher_id=request.form.get('teacher_id'); course.teacher_id=int(teacher_id) if teacher_id else course.teacher_id
-        db.session.commit(); flash('Course updated successfully!','success'); return redirect(url_for('admin.manage_courses'))
+    course = Course.query.get_or_404(course_id)
+    teachers = User.query.filter_by(role='teacher').all()
+    if request.method == 'POST':
+        course.code = request.form['code'].strip()
+        course.name = request.form['name'].strip()
+        course.description = request.form.get('description','')
+        teacher_id = request.form.get('teacher_id')
+        course.teacher_id = int(teacher_id) if teacher_id else course.teacher_id
+        db.session.commit()
+        flash('Course updated successfully!','success')
+        return redirect(url_for('admin.manage_courses'))
     return render_template('admin/edit_course.html',course=course,teachers=teachers)
 
 
 @admin_bp.route('/courses/<int:course_id>/assign', methods=['GET','POST'])
+@admin_required
 def assign_course(course_id):
-    course=Course.query.get_or_404(course_id); teachers=User.query.filter_by(role='teacher').all()
-    if request.method=='POST':
-        course.teacher_id=int(request.form['teacher_id']); db.session.commit(); flash('Teacher assigned successfully!','success'); return redirect(url_for('admin.manage_courses'))
+    course = Course.query.get_or_404(course_id)
+    teachers = User.query.filter_by(role='teacher').all()
+    if request.method == 'POST':
+        course.teacher_id = int(request.form['teacher_id'])
+        db.session.commit()
+        flash('Teacher assigned successfully!','success')
+        return redirect(url_for('admin.manage_courses'))
     return render_template('admin/assign_course.html',course=course,teachers=teachers)
 
 
 @admin_bp.route('/reports')
+@admin_required
 def reports_teachers():
-    report_data=[]
+    report_data = []
     for teacher in User.query.filter_by(role='teacher').all():
-        courses_data=[]
+        courses_data = []
         for course in teacher.courses:
-            students_data=[]
+            students_data = []
             for enrollment in course.enrollments:
-                student=enrollment.student; subs=[]
+                student = enrollment.student
+                subs = []
                 for assignment in course.assignments:
-                    submission=Submission.query.filter_by(student_id=student.id,assignment_id=assignment.id).first()
+                    submission = Submission.query.filter_by(student_id=student.id,assignment_id=assignment.id).first()
                     subs.append({'assignment_title':assignment.title,'grade':submission.grade if submission else 'Not graded'})
                 students_data.append({'student':student,'submissions':subs})
             courses_data.append({'course':course,'student_count':len(course.enrollments),'assignments':course.assignments,'students_data':students_data})
@@ -325,22 +427,26 @@ def reports_teachers():
 
 
 @admin_bp.route('/courses/<int:course_id>/students')
+@admin_required
 def course_students(course_id):
-    course=Course.query.get_or_404(course_id); data=[]
+    course = Course.query.get_or_404(course_id)
+    data = []
     for enrollment in course.enrollments:
-        student=enrollment.student
-        total=sum(s.grade for s in student.submissions if s.assignment.course_id==course.id and s.grade is not None)
+        student = enrollment.student
+        total = sum(s.grade for s in student.submissions if s.assignment.course_id==course.id and s.grade is not None)
         data.append({'student':student,'total_grade':total})
     return render_template('admin/course_students.html',course=course,student_data=data)
 
 
 @admin_bp.route('/certificates')
+@admin_required
 def certificates():
     items = Certificate.query.order_by(Certificate.issued_at.desc()).all()
     return render_template('admin/certificates.html', certificates=items)
 
 
 @admin_bp.route('/certificates/<int:certificate_id>')
+@admin_required
 def view_certificate(certificate_id):
     certificate = Certificate.query.get_or_404(certificate_id)
     return render_template('student/certificate.html', student=certificate.student, course=certificate.course,
@@ -355,27 +461,37 @@ def admin_header_counts():
         'admin_message_count': DiscussionTopic.query.count(),
     }
 
+
 @admin_bp.route('/notifications')
+@admin_required
 def notifications():
     items = Notification.query.order_by(Notification.created_at.desc()).limit(100).all()
     return render_template('admin/notifications.html', notifications=items)
 
+
 @admin_bp.route('/notifications/read-all', methods=['POST'])
+@admin_required
 def clear_notifications():
     Notification.query.update({'is_read': True}, synchronize_session=False)
     db.session.commit()
     flash('All notifications marked as read.', 'success')
     return redirect(url_for('admin.notifications'))
 
+
 @admin_bp.route('/messages')
+@admin_required
 def messages():
     topics = DiscussionTopic.query.order_by(DiscussionTopic.updated_at.desc()).limit(50).all()
     return render_template('admin/messages.html', topics=topics)
 
+
 @admin_bp.route('/settings')
+@admin_required
 def settings():
     return render_template('admin/settings.html')
 
+
 @admin_bp.route('/help')
+@admin_required
 def help_center():
     return render_template('admin/help.html')
