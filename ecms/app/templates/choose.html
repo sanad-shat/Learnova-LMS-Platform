@@ -502,22 +502,74 @@
       color: #94a3b8;
     }
 
-    /* Responsive */
+    /* ========================================================
+       RESPONSIVE BREAKPOINTS (Tablet & Mobile Optimization)
+       ======================================================== */
     @media (max-width: 992px) {
-      .hero-title { font-size: 44px; }
-      .portals-grid { grid-template-columns: 1fr; }
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
-      .why-section { grid-template-columns: 1fr; gap: 24px; }
+      .hero-title {
+        font-size: 46px;
+        letter-spacing: -1.5px;
+      }
+      .portals-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .why-section {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 30px 24px;
+      }
     }
 
-    @media (max-width: 576px) {
-      .top-header { padding: 14px 20px; }
-      .nav-links a:not(.nav-cta) { display: none; }
-      .features-grid { grid-template-columns: 1fr; }
-      .trust-metrics-bar { grid-template-columns: 1fr; gap: 14px; }
-      .metric-col::after { display: none !important; }
-      .hero-cta-group { flex-direction: column; width: 100%; }
-      .btn-main { width: 100%; justify-content: center; }
+    @media (max-width: 640px) {
+      .top-header {
+        padding: 14px 20px;
+      }
+      .nav-links a:not(.nav-cta) {
+        display: none;
+      }
+      .hero-center {
+        padding: 40px 16px 20px;
+      }
+      .hero-title {
+        font-size: 34px;
+        letter-spacing: -1px;
+      }
+      .hero-subtitle {
+        font-size: 15px;
+        margin-bottom: 26px;
+      }
+      .hero-cta-group {
+        flex-direction: column;
+        width: 100%;
+        gap: 12px;
+      }
+      .btn-main {
+        width: 100%;
+        justify-content: center;
+        padding: 12px 20px;
+      }
+      .trust-metrics-bar {
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 16px;
+      }
+      .metric-col:not(:last-child)::after {
+        display: none !important;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .section-heading h2 {
+        font-size: 26px;
+      }
+      .portal-card {
+        padding: 24px 20px;
+      }
     }
   </style>
 </head>
@@ -539,7 +591,9 @@
     <nav class="nav-links">
       <a href="#portals">Portals</a>
       <a href="#features">Features</a>
-      <a href="{{ url_for('students.login') }}" class="nav-cta">Sign In <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 4px;"></i></a>
+      <a href="{{ url_for('students.login') }}" class="nav-cta">
+        Sign In <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 4px;"></i>
+      </a>
     </nav>
   </header>
 
@@ -611,7 +665,7 @@
         <a href="{{ url_for('teachers.login') }}" class="portal-card">
           <div>
             <div class="portal-icon icon-teacher">
-              <i class="fa-solid fa-chalkboard-teacher"></i>
+              <i class="fa-solid fa-chalkboard-user"></i>
             </div>
             <h3>Instructor Studio</h3>
             <p>Build and organize syllabus units, publish assignments, grade student submissions, and engage through discussion boards.</p>
@@ -622,8 +676,8 @@
           </div>
         </a>
 
-        <!-- Admin -->
-        <a href="{{ url_for('admin.dashboard') }}" class="portal-card">
+        <!-- Admin: points directly to admin.login -->
+        <a href="{{ url_for('admin.login') }}" class="portal-card">
           <div>
             <div class="portal-icon icon-admin">
               <i class="fa-solid fa-sliders"></i>
