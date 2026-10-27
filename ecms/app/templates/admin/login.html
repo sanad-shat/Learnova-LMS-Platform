@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Authentication | Learnova LMS</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-glow: rgba(79, 70, 229, 0.35);
+      --navy: #0f172a;
+      --slate: #64748b;
+      --border-glass: rgba(226, 232, 240, 0.8);
+      --bg-page: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-page);
+      color: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 30px 16px;
+    }
+
+    /* Living Grid Background */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(rgba(79, 70, 229, 0.16) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(226, 232, 240, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(226, 232, 240, 0.35) 1px, transparent 1px);
+      background-size: 32px 32px, 96px 96px, 96px 96px;
+      mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Dynamic Aurora Glows */
+    .orb-1 {
+      position: absolute;
+      width: 520px;
+      height: 520px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.22) 0%, rgba(99, 102, 241, 0.1) 45%, transparent 70%);
+      top: 10%;
+      left: 50%;
+      transform: translate(-50%, -20%);
+      filter: blur(65px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 10s ease-in-out infinite alternate;
+    }
+
+    .orb-2 {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(15, 23, 42, 0.08) 0%, transparent 70%);
+      bottom: 5%;
+      right: 25%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(-50%, -15%) scale(1); }
+      100% { transform: translate(-48%, -25%) scale(1.08); }
+    }
+
+    /* Top Floating Hub Link */
+    .nav-float {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 22px;
+    }
+
+    .back-btn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      padding: 8px 18px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+      transition: all 0.25s ease;
+    }
+
+    .back-btn-pill:hover {
+      color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
+      border-color: #c7d2fe;
+    }
+
+    /* Glass Modern Container */
+    .auth-box-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .glass-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      border-radius: 28px;
+      padding: 38px 34px 32px;
+      box-shadow: 
+        0 24px 48px -12px rgba(15, 23, 42, 0.09),
+        0 4px 16px -2px rgba(79, 70, 229, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    }
+
+    /* Admin Crown Icon Halo */
+    .card-top-header {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .brand-icon-halo {
+      position: relative;
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .brand-icon-halo::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(30, 41, 59, 0.25));
+      filter: blur(8px);
+      z-index: 1;
+    }
+
+    .brand-icon-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .brand-icon-inner i {
+      font-size: 26px;
+      color: var(--primary);
+    }
+
+    .card-top-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+
+    .card-top-header p {
+      font-size: 13px;
+      color: var(--slate);
+      font-weight: 500;
+    }
+
+    /* Flash Messages */
+    .flash {
+      padding: 11px 15px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .flash.danger, .flash.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fee2e2;
+    }
+    .flash.success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #dcfce7;
+    }
+
+    /* Form Fields */
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 7px;
+    }
+
+    .input-field-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1.5px solid var(--border-glass);
+      border-radius: 14px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .input-field-wrap:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+      background: #ffffff;
+    }
+
+    .input-field-wrap i.field-icon {
+      padding-left: 16px;
+      color: #94a3b8;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .input-field-wrap:focus-within i.field-icon {
+      color: var(--primary);
+    }
+
+    .input-field-wrap input {
+      width: 100%;
+      padding: 13px 14px;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      color: var(--navy);
+      font-weight: 500;
+    }
+
+    .input-field-wrap input::placeholder {
+      color: #94a3b8;
+      font-weight: 400;
+    }
+
+    .btn-password-eye {
+      background: none;
+      border: none;
+      padding: 0 16px;
+      cursor: pointer;
+      color: #94a3b8;
+      font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .btn-password-eye:hover {
+      color: var(--primary);
+    }
+
+    /* Warning Alert */
+    .caps-warning {
+      display: none;
+      font-size: 11px;
+      font-weight: 700;
+      color: #d97706;
+      margin-top: 6px;
+    }
+
+    /* Submit Button */
+    .btn-submit-action {
+      margin-top: 8px;
+      width: 100%;
+      background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+      color: #ffffff;
+      border: none;
+      padding: 13.5px;
+      border-radius: 14px;
+      font-size: 14.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px var(--primary-glow);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
+      background: linear-gradient(135deg, #4338ca 0%, #3730a3 100%);
+    }
+
+    .btn-submit-action:active {
+      transform: translateY(0);
+    }
+
+    /* Restricted Notice & Security Footnote */
+    .card-footer-sec {
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+    }
+
+    .card-footer-sec i {
+      color: #f59e0b;
+      font-size: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .glass-card {
+        padding: 30px 22px 26px;
+        border-radius: 22px;
+      }
+      .card-top-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb-1"></div>
+  <div class="orb-2"></div>
+
+  <!-- Top Floating Nav -->
+  <div class="nav-float">
+    <a href="/" class="back-btn-pill">
+      <i class="fa-solid fa-arrow-left"></i> Return to Main Hub
+    </a>
+  </div>
+
+  <div class="auth-box-wrapper">
+    <div class="glass-card">
+      <div class="card-top-header">
+        <div class="brand-icon-halo">
+          <div class="brand-icon-inner">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+        </div>
+        <h1>Admin Console</h1>
+        <p>Restricted access for system administrators</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="form-group">
+          <label class="field-label" for="username">Administrator Username</label>
+          <div class="input-field-wrap">
+            <i class="fa-regular fa-user field-icon"></i>
+            <input id="username" type="text" name="username" placeholder="admin" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label" for="password">Security Password</label>
+          <div class="input-field-wrap">
+            <i class="fa-solid fa-key field-icon"></i>
+            <input id="password" type="password" name="password" placeholder="Enter root password" required>
+            <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
+              <i class="fa-regular fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          <div class="caps-warning" id="capsWarning">
+            <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is active
+          </div>
+        </div>
+
+        <button class="btn-submit-action" type="submit">
+          <span>Authorize & Enter Console</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <div class="card-footer-sec">
+        <i class="fa-solid fa-lock"></i>
+        <span>Encrypted Admin Session • IP Audited</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const capsWarning = document.getElementById('capsWarning');
+
+    if (toggleBtn && passwordInput && eyeIcon) {
+      toggleBtn.addEventListener('click', function () {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        eyeIcon.classList.toggle('fa-eye', !isPassword);
+        eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+      });
+    }
+
+    if (passwordInput && capsWarning) {
+      passwordInput.addEventListener('keyup', function(event) {
+        if (event.getModifierState('CapsLock')) {
+          capsWarning.style.display = 'block';
+        } else {
+          capsWarning.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
