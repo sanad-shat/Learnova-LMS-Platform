@@ -32,55 +32,117 @@
       background: var(--bg);
       color: var(--navy);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 16px;
+      position: relative;
+      overflow-x: hidden;
+      padding: 30px 16px;
+    }
+
+    /* Modern Background System */
+    .bg-dots {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(rgba(79, 70, 229, 0.14) 1.2px, transparent 1.2px);
+      background-size: 26px 26px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 50%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 50%, transparent 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-ambient-glow {
+      position: absolute;
+      width: 650px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.08) 45%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(60px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glass Modern Container */
+    .login-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 440px;
     }
 
     .login-card {
-      width: 100%;
-      max-width: 420px;
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 36px 32px;
-      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.08);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      border-radius: 26px;
+      padding: 42px 36px 36px;
+      box-shadow: 
+        0 20px 40px -15px rgba(15, 23, 42, 0.08),
+        0 0 0 1px rgba(79, 70, 229, 0.06),
+        0 2px 4px rgba(0, 0, 0, 0.02);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .brand-header {
+    .login-card:hover {
+      box-shadow: 
+        0 25px 50px -12px rgba(79, 70, 229, 0.12),
+        0 0 0 1px rgba(79, 70, 229, 0.12),
+        0 4px 6px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Brand Section */
+    .brand-section {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 30px;
     }
 
-    .brand-icon {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
+    .brand-icon-wrapper {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(145deg, #ffffff, #f1f5f9);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
     }
 
-    .brand-header h1 {
-      font-size: 24px;
+    .brand-icon-wrapper img {
+      width: 36px;
+      height: 36px;
+    }
+
+    .brand-section h1 {
+      font-size: 26px;
       font-weight: 800;
       color: var(--navy);
-      letter-spacing: -0.5px;
+      letter-spacing: -0.8px;
       margin-bottom: 6px;
     }
 
-    .brand-header p {
+    .brand-section p {
       font-size: 14px;
       color: var(--slate);
+      font-weight: 500;
     }
 
     /* Flash Message */
     .flash {
-      padding: 12px 14px;
-      border-radius: 10px;
+      padding: 12px 16px;
+      border-radius: 12px;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
     .flash.danger, .flash.error {
       background: #fef2f2;
@@ -93,17 +155,18 @@
       border: 1px solid #dcfce7;
     }
 
-    /* Form Elements */
+    /* Form Fields */
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     label {
-      display: block;
+      display: flex;
+      justify-content: space-between;
       font-size: 13px;
       font-weight: 700;
       color: #334155;
-      margin-bottom: 7px;
+      margin-bottom: 8px;
     }
 
     .input-wrap {
@@ -112,54 +175,71 @@
       align-items: center;
       background: #f8fafc;
       border: 1px solid var(--border);
-      border-radius: 12px;
-      transition: all 0.2s ease;
+      border-radius: 14px;
+      transition: all 0.25s ease;
     }
 
     .input-wrap:focus-within {
       background: #ffffff;
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     }
 
     .input-wrap i.field-icon {
-      padding-left: 14px;
+      padding-left: 16px;
       color: #94a3b8;
       font-size: 15px;
+      transition: color 0.2s;
+    }
+
+    .input-wrap:focus-within i.field-icon {
+      color: var(--primary);
     }
 
     .input-wrap input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 13px 14px;
       border: none;
       background: transparent;
       outline: none;
       font-size: 14px;
       color: var(--navy);
+      font-weight: 500;
     }
 
     .input-wrap input::placeholder {
       color: #94a3b8;
+      font-weight: 400;
     }
 
     .eye-btn {
       background: none;
       border: none;
-      padding: 0 14px;
+      padding: 0 16px;
       cursor: pointer;
       color: #94a3b8;
       font-size: 15px;
+      transition: color 0.2s;
     }
 
     .eye-btn:hover {
       color: var(--primary);
     }
 
+    /* CapsLock Warning */
+    .caps-warning {
+      display: none;
+      font-size: 11px;
+      font-weight: 700;
+      color: #d97706;
+      margin-top: 6px;
+    }
+
     .form-extras {
       display: flex;
       justify-content: flex-end;
       margin-top: -6px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .form-extras a {
@@ -167,107 +247,175 @@
       font-weight: 600;
       color: var(--primary);
       text-decoration: none;
+      transition: color 0.2s;
     }
 
     .form-extras a:hover {
+      color: var(--primary-hover);
       text-decoration: underline;
     }
 
+    /* Action Button */
     .btn-submit {
       width: 100%;
       background: var(--primary);
       color: #ffffff;
       border: none;
-      padding: 13px;
-      border-radius: 12px;
+      padding: 14px;
+      border-radius: 14px;
       font-size: 15px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s ease;
+      box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .btn-submit:hover {
       background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.35);
     }
 
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    /* Footer Navigation & Security Info */
     .back-home {
-      display: block;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       text-align: center;
-      margin-top: 20px;
+      margin-top: 24px;
       font-size: 13px;
       font-weight: 600;
       color: var(--slate);
       text-decoration: none;
+      transition: color 0.2s;
     }
 
     .back-home:hover {
       color: var(--primary);
     }
+
+    .security-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-top: 26px;
+      padding-top: 18px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .security-badge i {
+      color: #10b981;
+    }
   </style>
 </head>
 
 <body>
-  <div class="login-card">
-    <div class="brand-header">
-      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-icon">
-      <h1>Student Login</h1>
-      <p>Enter your credentials to access your account</p>
-    </div>
+  <div class="bg-dots"></div>
+  <div class="bg-ambient-glow"></div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span>{{ message }}</span>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="brand-section">
+        <div class="brand-icon-wrapper">
+          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+        </div>
+        <h1>Student Portal</h1>
+        <p>Sign in to access your modules & active progress</p>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <i class="fa-solid fa-circle-exclamation"></i>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <div class="form-group">
+          <label for="email">Username or Email</label>
+          <div class="input-wrap">
+            <i class="fa-regular fa-envelope field-icon"></i>
+            <input id="email" type="text" name="email" placeholder="Enter your registered email" required autofocus>
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <form method="POST">
-      <div class="form-group">
-        <label for="email">Username or Email</label>
-        <div class="input-wrap">
-          <i class="fa-regular fa-envelope field-icon"></i>
-          <input id="email" type="text" name="email" placeholder="Enter your email" required autofocus>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-wrap">
-          <i class="fa-solid fa-lock field-icon"></i>
-          <input id="password" type="password" name="password" placeholder="Enter your password" required>
-          <button type="button" class="eye-btn" id="togglePassword">
-            <i class="fa-regular fa-eye" id="eyeIcon"></i>
-          </button>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class="fa-solid fa-lock field-icon"></i>
+            <input id="password" type="password" name="password" placeholder="Enter your secret password" required>
+            <button type="button" class="eye-btn" id="togglePassword" aria-label="Toggle password">
+              <i class="fa-regular fa-eye" id="eyeIcon"></i>
+            </button>
+          </div>
+          <div class="caps-warning" id="capsWarning">
+            <i class="fa-solid fa-triangle-exclamation"></i> Caps Lock is ON
+          </div>
         </div>
+
+        <div class="form-extras">
+          <a href="#">Forgot Password?</a>
+        </div>
+
+        <button class="btn-submit" type="submit">
+          <span>Sign In to Student Space</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <div style="text-align: center;">
+        <a href="/" class="back-home">
+          <i class="fa-solid fa-arrow-left"></i> Back to Main Page
+        </a>
       </div>
 
-      <div class="form-extras">
-        <a href="#">Forgot Password?</a>
+      <div class="security-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>256-bit Encrypted Student Session</span>
       </div>
-
-      <button class="btn-submit" type="submit">Sign In</button>
-    </form>
-
-    <a href="/" class="back-home">
-      <i class="fa-solid fa-arrow-left"></i> Back to Home
-    </a>
+    </div>
   </div>
 
   <script>
     const toggleBtn = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
     const eyeIcon = document.getElementById('eyeIcon');
+    const capsWarning = document.getElementById('capsWarning');
 
+    // Password Toggle
     if (toggleBtn && passwordInput && eyeIcon) {
       toggleBtn.addEventListener('click', function () {
         const isPassword = passwordInput.getAttribute('type') === 'password';
         passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
         eyeIcon.classList.toggle('fa-eye', !isPassword);
         eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+      });
+    }
+
+    // CapsLock Detection
+    if (passwordInput && capsWarning) {
+      passwordInput.addEventListener('keyup', function(event) {
+        if (event.getModifierState('CapsLock')) {
+          capsWarning.style.display = 'block';
+        } else {
+          capsWarning.style.display = 'none';
+        }
       });
     }
   </script>
