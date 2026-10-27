@@ -300,11 +300,35 @@
       padding: 10px 0;
     }
 
-    .edu-progress-box {
+    /* Welcome Footnote Box */
+    .edu-welcome-box {
       background: #f8fafc;
-      padding: 12px 16px;
-      border-radius: 14px;
+      padding: 14px 18px;
+      border-radius: 16px;
       border: 1px solid #edf2f7;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .edu-welcome-box i {
+      font-size: 20px;
+      color: #4f46e5;
+      flex-shrink: 0;
+    }
+
+    .edu-welcome-box div strong {
+      display: block;
+      font-size: 13px;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    .edu-welcome-box div span {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 2px;
     }
 
     /* Portals Selection Grid */
@@ -596,13 +620,12 @@
             </svg>
           </div>
 
-          <div class="edu-progress-box">
-            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">
-              <span>Interactive Modules</span>
-              <span style="color: #4f46e5;">100% Digital</span>
-            </div>
-            <div style="height: 6px; background: #e2e8f0; border-radius: 99px; overflow: hidden;">
-              <div style="width: 78%; height: 100%; background: linear-gradient(90deg, #4f46e5, #06b6d4); border-radius: 99px;"></div>
+          <!-- Replaced with clean informative banner -->
+          <div class="edu-welcome-box">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div>
+              <strong>Self-Paced Learning</strong>
+              <span>Anytime, anywhere educational access.</span>
             </div>
           </div>
         </div>
