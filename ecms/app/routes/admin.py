@@ -26,9 +26,15 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
-        admin_user = User.query.filter_by(username=username, role='admin').first()
+        # بيانات دخول ثابتة ومباشرة خاصة بك
+        if username == 'admin' and password == 'sanad@2004':
+            session['admin_id'] = 1
+            session['admin_logged_in'] = True
+            flash('Welcome back, Admin!', 'success')
+            return redirect(url_for('admin.dashboard'))
 
-        # يدعم التحقق سواء كانت كلمة المرور مشفرة أو نص عادي
+        # التحقق من قاعدة البيانات كخيار بديل
+        admin_user = User.query.filter_by(username=username, role='admin').first()
         is_valid = False
         if admin_user:
             if hasattr(admin_user, 'check_password'):
