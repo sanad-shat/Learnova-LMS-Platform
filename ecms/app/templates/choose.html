@@ -26,6 +26,10 @@
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       background: var(--bg-page);
@@ -33,18 +37,33 @@
       overflow-x: hidden;
     }
 
-    /* Ambient Background Glow */
-    .hero-glow-bg {
+    /* Modern Dot Grid Background */
+    .hero-bg-wrapper {
       position: absolute;
       top: 0;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
       width: 100%;
-      max-width: 1100px;
-      height: 480px;
-      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, rgba(238, 242, 255, 0.05) 50%, transparent 80%);
+      height: 620px;
+      background-image: radial-gradient(rgba(79, 70, 229, 0.12) 1.2px, transparent 1.2px);
+      background-size: 28px 28px;
+      mask-image: radial-gradient(ellipse 65% 55% at 50% 30%, #000 60%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 30%, #000 60%, transparent 100%);
       pointer-events: none;
       z-index: 0;
+    }
+
+    /* Ambient Glow */
+    .hero-glow-bg {
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.06) 45%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(40px);
     }
 
     /* Top Navbar */
@@ -133,7 +152,7 @@
       z-index: 1;
       max-width: 900px;
       margin: 0 auto;
-      padding: 80px 24px 40px;
+      padding: 70px 24px 30px;
       text-align: center;
     }
 
@@ -153,7 +172,7 @@
     }
 
     .hero-title {
-      font-size: 64px;
+      font-size: 62px;
       line-height: 1.08;
       font-weight: 800;
       letter-spacing: -2.5px;
@@ -171,73 +190,107 @@
       font-size: 19px;
       line-height: 1.6;
       color: #64748b;
-      margin: 0 auto 36px;
+      margin: 0 auto 34px;
       max-width: 620px;
     }
 
-    /* Centered Action Badges */
-    .portals-pills {
+    /* Hero CTA Group */
+    .hero-cta-group {
       display: flex;
       justify-content: center;
-      flex-wrap: wrap;
+      align-items: center;
       gap: 14px;
-      margin-bottom: 50px;
+      margin-bottom: 40px;
     }
 
-    .pill-btn {
+    .btn-main {
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      padding: 13px 26px;
+      padding: 14px 28px;
       border-radius: 14px;
       font-weight: 700;
       font-size: 15px;
       text-decoration: none;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.25s ease;
     }
 
-    .pill-student {
+    .btn-primary-action {
       background: var(--primary);
       color: #ffffff;
       box-shadow: 0 10px 22px rgba(79, 70, 229, 0.25);
     }
-    .pill-student:hover {
+
+    .btn-primary-action:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
       box-shadow: 0 14px 28px rgba(79, 70, 229, 0.35);
     }
 
-    .pill-teacher {
+    .btn-secondary-action {
       background: #ffffff;
       color: #334155;
       border: 1px solid var(--border-color);
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
     }
-    .pill-teacher:hover {
+
+    .btn-secondary-action:hover {
       background: #f8fafc;
       color: var(--primary);
       border-color: #cbd5e1;
       transform: translateY(-2px);
     }
 
-    .pill-admin {
-      background: #ffffff;
-      color: #334155;
+    /* Trust / Stats Bar */
+    .trust-metrics-bar {
+      max-width: 720px;
+      margin: 0 auto 40px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
       border: 1px solid var(--border-color);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+      border-radius: 16px;
+      padding: 18px 24px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.03);
     }
-    .pill-admin:hover {
-      background: #0f172a;
-      color: #ffffff;
-      border-color: #0f172a;
-      transform: translateY(-2px);
+
+    .metric-col {
+      text-align: center;
+      position: relative;
+    }
+
+    .metric-col:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 15%;
+      height: 70%;
+      width: 1px;
+      background: #e2e8f0;
+    }
+
+    .metric-col strong {
+      display: block;
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.5px;
+    }
+
+    .metric-col span {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+      margin-top: 2px;
     }
 
     /* Main Container & Sections */
     .section-wrap {
       max-width: 1140px;
       margin: 0 auto;
-      padding: 0 24px;
+      padding: 20px 24px 0;
     }
 
     .section-heading {
@@ -278,6 +331,7 @@
       flex-direction: column;
       justify-content: space-between;
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.02);
+      position: relative;
     }
 
     .portal-card:hover {
@@ -342,7 +396,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
-      margin-bottom: 80px;
+      margin-bottom: 70px;
     }
 
     .feature-item {
@@ -400,6 +454,44 @@
       color: #64748b;
     }
 
+    /* Value Proposition Section */
+    .why-section {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 44px 36px;
+      margin-bottom: 80px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+
+    .why-col {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .why-col i {
+      font-size: 24px;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    .why-col h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--navy);
+    }
+
+    .why-col p {
+      margin: 0;
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.6;
+    }
+
     /* Footer */
     footer {
       border-top: 1px solid var(--border-color);
@@ -415,17 +507,23 @@
       .hero-title { font-size: 44px; }
       .portals-grid { grid-template-columns: 1fr; }
       .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-section { grid-template-columns: 1fr; gap: 24px; }
     }
 
     @media (max-width: 576px) {
       .top-header { padding: 14px 20px; }
       .nav-links a:not(.nav-cta) { display: none; }
       .features-grid { grid-template-columns: 1fr; }
+      .trust-metrics-bar { grid-template-columns: 1fr; gap: 14px; }
+      .metric-col::after { display: none !important; }
+      .hero-cta-group { flex-direction: column; width: 100%; }
+      .btn-main { width: 100%; justify-content: center; }
     }
   </style>
 </head>
 
 <body>
+  <div class="hero-bg-wrapper"></div>
   <div class="hero-glow-bg"></div>
 
   <!-- Navbar -->
@@ -459,16 +557,30 @@
         A centralized learning ecosystem uniting students, educators, and administrators with structured coursework, assignments, quizzes, and verified certification.
       </p>
 
-      <div class="portals-pills">
-        <a class="pill-btn pill-student" href="{{ url_for('students.login') }}">
-          <i class="fa-solid fa-user-graduate"></i> Student Portal
+      <!-- Clean Action Buttons -->
+      <div class="hero-cta-group">
+        <a class="btn-main btn-primary-action" href="#portals">
+          <i class="fa-solid fa-compass"></i> Explore Portals
         </a>
-        <a class="pill-btn pill-teacher" href="{{ url_for('teachers.login') }}">
-          <i class="fa-solid fa-chalkboard-user"></i> Instructor Portal
+        <a class="btn-main btn-secondary-action" href="#features">
+          <i class="fa-solid fa-sparkles"></i> Platform Features
         </a>
-        <a class="pill-btn pill-admin" href="{{ url_for('admin.dashboard') }}">
-          <i class="fa-solid fa-shield-halved"></i> Admin Console
-        </a>
+      </div>
+
+      <!-- Trust Metrics Bar -->
+      <div class="trust-metrics-bar">
+        <div class="metric-col">
+          <strong>100%</strong>
+          <span>Cloud Hosted</span>
+        </div>
+        <div class="metric-col">
+          <strong>3 Portals</strong>
+          <span>Unified Access</span>
+        </div>
+        <div class="metric-col">
+          <strong>Fast & Secure</strong>
+          <span>PostgreSQL Active</span>
+        </div>
       </div>
     </section>
 
@@ -573,6 +685,31 @@
             <span>Verified completion proofs</span>
           </div>
         </article>
+      </div>
+
+      <!-- Why Learnova Proposition Cards -->
+      <div class="why-section">
+        <div class="why-col">
+          <i class="fa-solid fa-laptop-code"></i>
+          <div>
+            <h4>Flexible Access</h4>
+            <p>Seamless learning experience designed across mobile, tablet, and desktop devices.</p>
+          </div>
+        </div>
+        <div class="why-col">
+          <i class="fa-solid fa-bolt-lightning"></i>
+          <div>
+            <h4>Instant Assessments</h4>
+            <p>Automatic evaluation for quizzes, real-time feedback, and grade transparency.</p>
+          </div>
+        </div>
+        <div class="why-col">
+          <i class="fa-solid fa-shield-halved"></i>
+          <div>
+            <h4>Enterprise Reliability</h4>
+            <p>Backed by modern cloud architecture ensuring zero data loss and persistent uptime.</p>
+          </div>
+        </div>
       </div>
     </section>
   </main>
