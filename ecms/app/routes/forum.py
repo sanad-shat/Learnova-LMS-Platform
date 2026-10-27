@@ -9,7 +9,10 @@ from app.services import notify_course_students
 
 forum_bp = Blueprint('forum', __name__, url_prefix='/forum')
 UPLOAD_DIR = Path(__file__).resolve().parents[1] / 'static' / 'forum_uploads'
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 ALLOWED = {'pdf','doc','docx','ppt','pptx','png','jpg','jpeg','zip','txt'}
 
 def _save_file(file):
