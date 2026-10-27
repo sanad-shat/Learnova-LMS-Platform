@@ -132,23 +132,39 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login with demo bypass support."""
-    if current_user.is_authenticated and current_user.role.lower() == "teacher":
+    """Handle teacher login with a dedicated sandboxed demo account."""
+    if current_user.is_authenticated and getattr(current_user, 'role', '').lower() == "teacher":
         return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي السريع بنقرة واحدة (One-Click Demo Override)
+        # 1. الدخول التجريبي المعزول (Dedicated Demo Account)
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
-            demo_teacher = User.query.filter_by(role="teacher").first()
-            if demo_teacher:
-                login_user(demo_teacher)
-                flash("Signed in successfully with Demo Instructor Account.", "success")
-                return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+            demo_teacher = User.query.filter_by(username="demo_teacher").first()
 
-        # 2. التحقق الاعتيادي من قاعدة البيانات
+            # إنشاء حساب ديمو مستقل تلقائياً إذا لم يكن موجوداً
+            if not demo_teacher:
+                demo_teacher = User(
+                    username="demo_teacher",
+                    email="instructor@learnova.edu",
+                    role="teacher",
+                    name_person="Dr. Demo Instructor"
+                )
+                if hasattr(demo_teacher, 'set_password'):
+                    demo_teacher.set_password("demo123")
+                else:
+                    demo_teacher.password = "demo123"
+                demo_teacher.visible_password = "demo123"
+                db.session.add(demo_teacher)
+                db.session.commit()
+
+            login_user(demo_teacher)
+            flash("Signed in as Demo Instructor (Sandbox Mode).", "success")
+            return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+
+        # 2. التحقق الاعتيادي لحسابات المعلمين الحقيقية
         user = User.query.filter((User.email == email) | (User.username == email)).first()
         is_valid = False
         if user:
@@ -157,7 +173,7 @@ def login():
             else:
                 is_valid = (user.password == password)
 
-        if user and is_valid and user.role.lower() == "teacher":
+        if user and is_valid and getattr(user, 'role', '').lower() == "teacher":
             login_user(user)
             return redirect(url_for("teachers.dashboard", teacher_id=user.id))
 
