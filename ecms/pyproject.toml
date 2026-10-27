@@ -6,6 +6,7 @@ dependencies = [
     "flask-sqlalchemy",
     "flask-login",
     "flask-migrate",
+    "psycopg[binary]",
     "psycopg2-binary",
     "gunicorn",
     "werkzeug"
