@@ -6,7 +6,6 @@
   <title>Student Sign In | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,12 +14,10 @@
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --primary-light: #eef2ff;
       --navy: #0f172a;
       --slate: #64748b;
-      --border-color: #e2e8f0;
-      --bg-surface: #ffffff;
-      --bg-page: #f8fafc;
+      --border: #e2e8f0;
+      --bg: #f8fafc;
     }
 
     * {
@@ -28,259 +25,166 @@
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
-    body.auth-page {
+    body {
       margin: 0;
-      padding: 0;
       min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: var(--bg-surface);
+      background: var(--bg);
       color: var(--navy);
-      overflow-x: hidden;
-    }
-
-    /* Left Side: Modern Visual Presentation */
-    .auth-visual {
-      position: relative;
-      background: linear-gradient(150deg, #091326 0%, #0f1d38 50%, #152445 100%);
-      color: #ffffff;
-      padding: 48px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      overflow: hidden;
+      align-items: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 30px 20px;
     }
 
-    /* Subtle Pattern & Glow */
-    .auth-visual::before {
-      content: '';
+    /* Ambient Dot Grid & Glow */
+    .bg-grid {
       position: absolute;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1.2px, transparent 1.2px);
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(rgba(79, 70, 229, 0.12) 1.2px, transparent 1.2px);
       background-size: 28px 28px;
-      opacity: 0.8;
+      mask-image: radial-gradient(circle at 50% 35%, #000 50%, transparent 90%);
+      -webkit-mask-image: radial-gradient(circle at 50% 35%, #000 50%, transparent 90%);
       pointer-events: none;
+      z-index: 0;
     }
 
-    .auth-visual::after {
-      content: '';
+    .bg-glow {
       position: absolute;
-      width: 400px;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
       height: 400px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, rgba(124, 58, 237, 0.08) 50%, transparent 70%);
-      border-radius: 50%;
-      top: 20%;
-      left: 20%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(168, 85, 247, 0.05) 50%, transparent 70%);
       filter: blur(50px);
       pointer-events: none;
+      z-index: 0;
     }
 
-    .auth-brand {
+    /* Top Nav Row */
+    .top-nav {
       position: relative;
       z-index: 2;
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      width: fit-content;
-    }
-
-    .auth-brand img {
-      width: 42px;
-      height: 42px;
-      filter: drop-shadow(0 4px 8px rgba(79, 70, 229, 0.3));
-    }
-
-    .auth-brand strong {
-      font-size: 20px;
-      font-weight: 800;
-      color: #ffffff;
-      display: block;
-      line-height: 1.1;
-      letter-spacing: -0.5px;
-    }
-
-    .auth-brand strong b {
-      color: #818cf8;
-    }
-
-    .auth-brand small {
-      font-size: 10px;
-      letter-spacing: 1.8px;
-      color: #94a3b8;
-      font-weight: 700;
-      display: block;
-    }
-
-    .auth-copy {
-      position: relative;
-      z-index: 2;
-      max-width: 460px;
-      margin: auto 0;
-      padding: 40px 0;
-    }
-
-    /* Floating Educational Card */
-    .visual-glass-card {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      padding: 20px 24px;
-      display: inline-flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 32px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    }
-
-    .visual-card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, #4f46e5, #7c3aed);
-      color: #ffffff;
+      width: 100%;
+      max-width: 480px;
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      box-shadow: 0 8px 16px rgba(79, 70, 229, 0.35);
+      margin-bottom: 20px;
     }
 
-    .visual-card-info strong {
-      display: block;
-      font-size: 15px;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .visual-card-info span {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      color: #4ade80;
-      font-weight: 600;
-    }
-
-    .visual-card-info span i {
-      font-size: 8px;
-    }
-
-    .auth-copy h2 {
-      font-size: 38px;
-      line-height: 1.2;
-      font-weight: 800;
-      letter-spacing: -1.2px;
-      margin: 0 0 16px;
-      color: #ffffff;
-    }
-
-    .auth-copy p {
-      font-size: 16px;
-      line-height: 1.6;
-      color: #cbd5e1;
-      margin: 0;
-    }
-
-    .auth-footer {
-      position: relative;
-      z-index: 2;
-      font-size: 13px;
-      color: #94a3b8;
-    }
-
-    /* Right Side: Form */
-    .auth-form-side {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 48px 32px;
-      position: relative;
-      background: var(--bg-surface);
-    }
-
-    .back-home-btn {
-      position: absolute;
-      top: 36px;
-      left: 48px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--slate);
+    .back-link {
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--slate);
+      background: #ffffff;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
       transition: all 0.2s ease;
-      padding: 8px 14px;
-      border-radius: 10px;
-      background: #f1f5f9;
     }
 
-    .back-home-btn:hover {
+    .back-link:hover {
       color: var(--primary);
-      background: #eef2ff;
+      border-color: #c7d2fe;
       transform: translateX(-3px);
     }
 
-    .auth-card {
-      width: 100%;
-      max-width: 420px;
-      margin-top: 20px;
+    .portal-chip {
+      background: #eef2ff;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 99px;
+      border: 1px solid rgba(79, 70, 229, 0.15);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
-    .auth-card h1 {
-      font-size: 30px;
+    /* Main Auth Box */
+    .auth-container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 460px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 40px 36px;
+      box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .brand-center {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .brand-icon {
+      width: 52px;
+      height: 52px;
+      margin-bottom: 12px;
+      filter: drop-shadow(0 6px 12px rgba(79, 70, 229, 0.25));
+    }
+
+    .brand-center h1 {
+      font-size: 26px;
       font-weight: 800;
       letter-spacing: -0.8px;
+      margin: 0 0 6px;
       color: var(--navy);
-      margin: 0 0 8px;
     }
 
-    .auth-card p.subtitle {
+    .brand-center p {
       font-size: 14px;
       color: var(--slate);
-      margin: 0 0 28px;
+      margin: 0;
     }
 
-    /* Flash alerts */
-    .flash {
+    /* Alert / Flash */
+    .flash-box {
       padding: 12px 16px;
       border-radius: 12px;
       font-size: 13px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-    .flash.danger, .flash.error {
+    .flash-box.danger, .flash-box.error {
       background: #fef2f2;
       color: #dc2626;
       border: 1px solid #fee2e2;
     }
-    .flash.success {
+    .flash-box.success {
       background: #f0fdf4;
       color: #16a34a;
       border: 1px solid #dcfce7;
     }
-    .flash.info {
+    .flash-box.info {
       background: #eff6ff;
       color: #2563eb;
       border: 1px solid #dbeafe;
     }
 
-    /* Inputs */
-    .form-group {
+    /* Form Fields */
+    .field-group {
       margin-bottom: 20px;
     }
 
-    .form-group label {
+    .field-label {
       display: block;
       font-size: 13px;
       font-weight: 700;
@@ -288,30 +192,29 @@
       margin-bottom: 8px;
     }
 
-    .input-wrapper {
+    .input-box {
       position: relative;
       display: flex;
       align-items: center;
       background: #f8fafc;
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--border);
       border-radius: 14px;
       transition: all 0.25s ease;
     }
 
-    .input-wrapper:focus-within {
+    .input-box:focus-within {
       background: #ffffff;
       border-color: var(--primary);
       box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
     }
 
-    .input-wrapper .field-icon {
+    .input-box i.input-icon {
       padding-left: 16px;
       color: #94a3b8;
       font-size: 15px;
-      pointer-events: none;
     }
 
-    .input-wrapper input {
+    .input-box input {
       width: 100%;
       padding: 13px 14px;
       border: none;
@@ -322,49 +225,43 @@
       font-weight: 500;
     }
 
-    .input-wrapper input::placeholder {
+    .input-box input::placeholder {
       color: #94a3b8;
-      font-weight: 400;
     }
 
-    .password-toggle-btn {
+    .eye-toggle {
       background: none;
       border: none;
       padding: 0 16px;
       cursor: pointer;
       color: #94a3b8;
       font-size: 15px;
-      display: flex;
-      align-items: center;
       transition: color 0.2s;
     }
 
-    .password-toggle-btn:hover {
+    .eye-toggle:hover {
       color: var(--primary);
     }
 
-    .form-options {
+    .forgot-wrap {
       display: flex;
       justify-content: flex-end;
-      align-items: center;
       margin-top: -6px;
       margin-bottom: 22px;
     }
 
-    .forgot-link {
-      font-size: 13px;
+    .forgot-btn {
+      font-size: 12px;
       font-weight: 600;
       color: var(--primary);
       text-decoration: none;
-      transition: color 0.2s;
     }
 
-    .forgot-link:hover {
-      color: var(--primary-hover);
+    .forgot-btn:hover {
       text-decoration: underline;
     }
 
-    .auth-submit-btn {
+    .submit-btn {
       width: 100%;
       background: var(--primary);
       color: #ffffff;
@@ -379,202 +276,162 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .auth-submit-btn:hover {
+    .submit-btn:hover {
       background: var(--primary-hover);
       transform: translateY(-2px);
       box-shadow: 0 14px 26px rgba(79, 70, 229, 0.35);
     }
 
-    /* Alternate Portals Switcher */
-    .portal-switcher {
-      margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border-color);
+    /* Switch Roles Divider */
+    .switch-roles {
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid var(--border);
       text-align: center;
     }
 
-    .portal-switcher span {
+    .switch-roles small {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--slate);
       margin-bottom: 12px;
+      font-weight: 600;
     }
 
-    .switch-pills {
+    .role-pills {
       display: flex;
       justify-content: center;
       gap: 10px;
     }
 
-    .switch-pills a {
+    .role-pill {
       font-size: 12px;
       font-weight: 700;
       text-decoration: none;
       color: #475569;
       background: #f1f5f9;
-      padding: 6px 14px;
-      border-radius: 8px;
+      padding: 7px 16px;
+      border-radius: 10px;
       transition: all 0.2s;
+      border: 1px solid transparent;
     }
 
-    .switch-pills a:hover {
-      background: #e2e8f0;
+    .role-pill:hover {
+      background: #eef2ff;
       color: var(--primary);
+      border-color: #c7d2fe;
     }
 
-    .auth-help {
-      margin-top: 24px;
+    /* Footer text */
+    .page-footer {
+      position: relative;
+      z-index: 2;
       font-size: 12px;
       color: #94a3b8;
       text-align: center;
+      margin-top: 20px;
     }
 
-    /* Responsive */
-    @media (max-width: 900px) {
-      body.auth-page {
-        grid-template-columns: 1fr;
-      }
-      .auth-visual {
-        display: none;
-      }
-      .auth-form-side {
-        padding: 80px 24px 40px;
-        min-height: 100vh;
-      }
-      .back-home-btn {
-        top: 24px;
-        left: 24px;
+    @media (max-width: 520px) {
+      .auth-container {
+        padding: 30px 22px;
       }
     }
   </style>
 </head>
 
-<body class="auth-page">
-  <!-- Left Side: Visual Brand Presentation -->
-  <section class="auth-visual">
-    <a class="auth-brand" href="/">
-      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova LMS">
-      <span>
-        <strong>Learnova <b>LMS</b></strong>
-        <small>LEARN. GROW. SUCCEED.</small>
-      </span>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <!-- Header Navigation -->
+  <div class="top-nav">
+    <a href="/" class="back-link">
+      <i class="fa-solid fa-arrow-left"></i> Home
     </a>
+    <span class="portal-chip">Student Space</span>
+  </div>
 
-    <div class="auth-copy">
-      <div class="visual-glass-card">
-        <div class="visual-card-icon">
-          <i class="fa-solid fa-graduation-cap"></i>
-        </div>
-        <div class="visual-card-info">
-          <strong>Student Portal</strong>
-          <span><i class="fa-solid fa-circle"></i> Enrolled & Active Space</span>
-        </div>
-      </div>
-
-      <h2>Build your future, one lesson at a time.</h2>
-      <p>Access your structured courses, submit ongoing assignments, track real-time grades, and earn verified certificates.</p>
-    </div>
-
-    <div class="auth-footer">
-      &copy; 2026 Learnova LMS. All rights reserved.
-    </div>
-  </section>
-
-  <!-- Right Side: Clean Modern Form -->
-  <section class="auth-form-side">
-    <a href="/" class="back-home-btn">
-      <i class="fa-solid fa-arrow-left"></i> Back to home
-    </a>
-
-    <main class="auth-card">
+  <!-- Center Card -->
+  <div class="auth-container">
+    <div class="brand-center">
+      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-icon">
       <h1>Welcome Back!</h1>
-      <p class="subtitle">Sign in to your student account to continue</p>
+      <p>Sign in to access your modules & grades</p>
+    </div>
 
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="flash {{ category }}">
-              <i class="fa-solid fa-circle-exclamation"></i>
-              <span>{{ message }}</span>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      <form method="POST">
-        <div class="form-group">
-          <label for="email-input">Username or Email</label>
-          <div class="input-wrapper">
-            <span class="field-icon"><i class="fa-regular fa-envelope"></i></span>
-            <input 
-              id="email-input" 
-              type="text" 
-              name="email" 
-              placeholder="e.g. alex@example.com" 
-              required 
-              autofocus
-            >
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash-box {{ category }}">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ message }}</span>
           </div>
-        </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-        <div class="form-group">
-          <label for="login-password">Password</label>
-          <div class="input-wrapper">
-            <span class="field-icon"><i class="fa-solid fa-lock"></i></span>
-            <input 
-              id="login-password" 
-              type="password" 
-              name="password" 
-              placeholder="Enter your secret password" 
-              required
-            >
-            <button type="button" class="password-toggle-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">
-              <i class="fa-regular fa-eye" id="toggleEyeIcon"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-options">
-          <a class="forgot-link" href="#">Forgot Password?</a>
-        </div>
-
-        <button class="auth-submit-btn" type="submit">
-          <span>Sign In to Student Space</span>
-          <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </form>
-
-      <!-- Alternate Roles Switcher -->
-      <div class="portal-switcher">
-        <span>Not a student? Sign in to your portal:</span>
-        <div class="switch-pills">
-          <a href="{{ url_for('teachers.login') }}"><i class="fa-solid fa-chalkboard-user"></i> Instructor</a>
-          <a href="{{ url_for('admin.dashboard') }}"><i class="fa-solid fa-sliders"></i> Admin</a>
+    <form method="POST">
+      <div class="field-group">
+        <label class="field-label" for="email">Username or Email</label>
+        <div class="input-box">
+          <i class="fa-regular fa-envelope input-icon"></i>
+          <input id="email" type="text" name="email" placeholder="e.g. alex@example.com" required autofocus>
         </div>
       </div>
 
-      <div class="auth-help">
-        Need assistance with your account? Contact your institution administrator.
+      <div class="field-group">
+        <label class="field-label" for="login-pass">Password</label>
+        <div class="input-box">
+          <i class="fa-solid fa-lock input-icon"></i>
+          <input id="login-pass" type="password" name="password" placeholder="Enter your password" required>
+          <button type="button" class="eye-toggle" id="togglePassBtn" aria-label="Toggle password">
+            <i class="fa-regular fa-eye" id="togglePassIcon"></i>
+          </button>
+        </div>
       </div>
-    </main>
-  </section>
 
-  <!-- Interactive Password Toggle Script -->
+      <div class="forgot-wrap">
+        <a class="forgot-btn" href="#">Forgot password?</a>
+      </div>
+
+      <button class="submit-btn" type="submit">
+        <span>Sign In</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </form>
+
+    <div class="switch-roles">
+      <small>Sign in to other portals:</small>
+      <div class="role-pills">
+        <a href="{{ url_for('teachers.login') }}" class="role-pill">
+          <i class="fa-solid fa-chalkboard-user"></i> Instructor
+        </a>
+        <a href="{{ url_for('admin.dashboard') }}" class="role-pill">
+          <i class="fa-solid fa-shield-halved"></i> Admin
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    &copy; 2026 Learnova LMS. All rights reserved.
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const toggleBtn = document.getElementById('togglePasswordBtn');
-      const passwordInput = document.getElementById('login-password');
-      const eyeIcon = document.getElementById('toggleEyeIcon');
-
-      if (toggleBtn && passwordInput && eyeIcon) {
-        toggleBtn.addEventListener('click', function () {
-          const isPassword = passwordInput.getAttribute('type') === 'password';
-          passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-          eyeIcon.classList.toggle('fa-eye', !isPassword);
-          eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+      const btn = document.getElementById('togglePassBtn');
+      const input = document.getElementById('login-pass');
+      const icon = document.getElementById('togglePassIcon');
+      if (btn && input && icon) {
+        btn.addEventListener('click', function () {
+          const isPass = input.type === 'password';
+          input.type = isPass ? 'text' : 'password';
+          icon.classList.toggle('fa-eye', !isPass);
+          icon.classList.toggle('fa-eye-slash', isPass);
         });
       }
     });
