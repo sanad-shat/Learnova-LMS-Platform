@@ -1,1 +1,737 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Learnova LMS</title><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}"></head><body style="background:#fff"><header class="top-header" style="position:relative"><a href="/" style="display:flex;align-items:center;gap:10px"><img src="{{ url_for('static',filename='brand/learnova-icon.svg') }}" width="42"><span class="brand-copy"><strong style="color:#0b1b3a">Learnova <b>LMS</b></strong><small>LEARN. GROW. SUCCEED.</small></span></a><nav style="display:flex;gap:24px;font-size:12px;font-weight:650"><a href="#features">Features</a><a href="#portals">Portals</a><a href="{{ url_for('student.login') if false else url_for('students.login') }}">Login</a></nav></header><main style="max-width:1180px;margin:auto;padding:70px 24px"><section style="display:grid;grid-template-columns:1.15fr .85fr;gap:50px;align-items:center"><div><span class="badge" style="background:#eceaff;color:#503ce4">MODERN LEARNING MANAGEMENT SYSTEM</span><h1 style="font-size:58px;line-height:1.05;letter-spacing:-2px;margin:18px 0">Learn smarter.<br><span style="color:#5b46f5">Grow faster.</span></h1><p style="font-size:17px;color:#68758b;max-width:600px">A complete digital learning environment for courses, instructors, assignments, quizzes, grades, certificates, and discussions.</p><div class="course-actions" style="margin-top:25px"><a class="primary-btn" href="{{ url_for('students.login') }}">Student Portal</a><a class="secondary-btn" href="{{ url_for('teachers.login') }}">Instructor Portal</a><a class="secondary-btn" href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a></div></div><div class="panel" style="padding:28px;text-align:center;background:linear-gradient(145deg,#091b39,#163566);color:white"><img src="{{ url_for('static',filename='brand/learnova-icon.svg') }}" style="width:150px"><h2 style="font-size:30px;margin:10px 0">Learnova LMS</h2><p style="color:#c2cee0">Learn. Grow. Succeed.</p></div></section><section id="features" class="stats-grid" style="margin-top:80px"><article class="metric-card"><div class="metric-icon purple"><i class="fa-solid fa-book-open"></i></div><div><small>Learning</small><strong style="font-size:16px">Courses</strong><em>Organized content</em></div></article><article class="metric-card"><div class="metric-icon blue"><i class="fa-solid fa-list-check"></i></div><div><small>Assessment</small><strong style="font-size:16px">Activities</strong><em>Assignments & quizzes</em></div></article><article class="metric-card"><div class="metric-icon green"><i class="fa-solid fa-comments"></i></div><div><small>Community</small><strong style="font-size:16px">Discussions</strong><em>Student engagement</em></div></article><article class="metric-card"><div class="metric-icon amber"><i class="fa-solid fa-award"></i></div><div><small>Achievement</small><strong style="font-size:16px">Certificates</strong><em>Verified completion</em></div></article></section></main></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learnova LMS - Next Generation Learning</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: #eef2ff;
+      --navy: #0f172a;
+      --slate: #475569;
+      --border-color: #e2e8f0;
+      --bg-page: #f8fafc;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg-page);
+      color: var(--navy);
+      overflow-x: hidden;
+    }
+
+    /* Navbar styling */
+    .top-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 36px;
+    }
+
+    .brand-logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo-wrap img {
+      width: 40px;
+      height: 40px;
+      filter: drop-shadow(0 4px 6px rgba(79, 70, 229, 0.2));
+    }
+
+    .brand-copy strong {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--navy);
+      display: block;
+      line-height: 1.1;
+    }
+
+    .brand-copy strong b {
+      color: var(--primary);
+    }
+
+    .brand-copy small {
+      font-size: 10px;
+      letter-spacing: 1.8px;
+      color: var(--slate);
+      font-weight: 700;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--slate);
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-cta {
+      background: var(--primary);
+      color: #fff !important;
+      padding: 8px 18px;
+      border-radius: 9999px;
+      transition: all 0.25s ease !important;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    .nav-cta:hover {
+      background: var(--primary-hover) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(79, 70, 229, 0.4);
+    }
+
+    /* Hero Section */
+    .hero-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 70px 24px 40px;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 60px;
+      align-items: center;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(79, 70, 229, 0.15);
+    }
+
+    .hero-badge i {
+      font-size: 11px;
+    }
+
+    .hero-title {
+      font-size: 58px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin: 0 0 20px;
+      color: #0b1329;
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-description {
+      font-size: 18px;
+      line-height: 1.6;
+      color: #64748b;
+      margin-bottom: 35px;
+      max-width: 530px;
+    }
+
+    /* Quick Action Pill Buttons */
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .btn-portal-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px 22px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .btn-student {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
+    }
+    .btn-student:hover {
+      background: var(--primary-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-teacher {
+      background: white;
+      color: #334155;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .btn-teacher:hover {
+      background: #f1f5f9;
+      color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .btn-admin {
+      background: white;
+      color: #334155;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .btn-admin:hover {
+      background: #0f172a;
+      color: white;
+      border-color: #0f172a;
+      transform: translateY(-2px);
+    }
+
+    /* Modern Hero Visual Card */
+    .hero-showcase-card {
+      background: linear-gradient(145deg, #0e1e38 0%, #172a4d 100%);
+      border-radius: 24px;
+      padding: 36px 32px;
+      color: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .hero-showcase-card::before {
+      content: '';
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
+      top: -60px;
+      right: -60px;
+      z-index: 1;
+      border-radius: 50%;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 2;
+    }
+
+    .brand-large-icon {
+      width: 76px;
+      height: 76px;
+      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin: 0 0 6px;
+    }
+
+    .card-tagline {
+      color: #94a3b8;
+      font-size: 14px;
+      margin: 0 0 24px;
+    }
+
+    /* Interactive UI Preview items inside Hero Card */
+    .showcase-stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-mini-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .stat-mini-pill i {
+      font-size: 20px;
+      color: #818cf8;
+    }
+
+    .stat-mini-pill div span {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-mini-pill div strong {
+      font-size: 17px;
+      color: #fff;
+    }
+
+    .completion-bar-wrap {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 14px 18px;
+    }
+
+    .completion-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+    }
+
+    .completion-bar {
+      height: 7px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .completion-progress {
+      width: 88%;
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #38bdf8);
+      border-radius: 99px;
+    }
+
+    /* Portals Selection Grid */
+    .section-wrap {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+    }
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-heading h2 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin: 0 0 10px;
+    }
+
+    .section-heading p {
+      color: #64748b;
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .portals-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    .portal-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+
+    .portal-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+      border-color: #c7d2fe;
+    }
+
+    .portal-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    .portal-card:hover .portal-icon {
+      transform: scale(1.08);
+    }
+
+    .icon-student { background: #e0e7ff; color: #4338ca; }
+    .icon-teacher { background: #dbeafe; color: #1d4ed8; }
+    .icon-admin   { background: #f1f5f9; color: #0f172a; }
+
+    .portal-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      color: var(--navy);
+    }
+
+    .portal-card p {
+      font-size: 14px;
+      color: #64748b;
+      line-height: 1.5;
+      margin: 0 0 24px;
+    }
+
+    .portal-action {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .portal-card:hover .portal-action i {
+      transform: translateX(4px);
+    }
+
+    .portal-action i {
+      transition: transform 0.2s ease;
+    }
+
+    /* Metrics & Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 50px;
+      margin-bottom: 80px;
+    }
+
+    .feature-item {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s ease;
+    }
+
+    .feature-item:hover {
+      transform: translateY(-3px);
+      border-color: #cbd5e1;
+    }
+
+    .feature-icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .f-purple { background: #f3e8ff; color: #7e22ce; }
+    .f-blue   { background: #e0f2fe; color: #0284c7; }
+    .f-green  { background: #dcfce7; color: #15803d; }
+    .f-amber  { background: #fef3c7; color: #b45309; }
+
+    .feature-info small {
+      display: block;
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-info strong {
+      display: block;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+      margin: 2px 0;
+    }
+
+    .feature-info span {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-color);
+      background: #ffffff;
+      padding: 30px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .hero-container {
+        grid-template-columns: 1fr;
+        padding-top: 40px;
+        text-align: center;
+      }
+      .hero-title { font-size: 42px; }
+      .hero-description { margin-left: auto; margin-right: auto; }
+      .quick-actions { justify-content: center; }
+      .portals-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 576px) {
+      .top-header { padding: 14px 20px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header / Navigation Bar -->
+  <header class="top-header">
+    <a href="/" class="brand-logo-wrap">
+      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova Logo">
+      <span class="brand-copy">
+        <strong>Learnova <b>LMS</b></strong>
+        <small>LEARN. GROW. SUCCEED.</small>
+      </span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#portals">Portals</a>
+      <a href="{{ url_for('students.login') }}" class="nav-cta">Sign In <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 4px;"></i></a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-container">
+      <div>
+        <div class="hero-badge">
+          <i class="fa-solid fa-sparkles"></i> NEXT-GENERATION LEARNING EXPERIENCE
+        </div>
+        <h1 class="hero-title">
+          Learn smarter.<br>
+          <span class="gradient-text">Grow faster.</span>
+        </h1>
+        <p class="hero-description">
+          A centralized, powerful digital learning ecosystem uniting students, educators, and administrators with streamlined courses, real-time assessments, and certified outcomes.
+        </p>
+
+        <div class="quick-actions">
+          <a class="btn-portal-pill btn-student" href="{{ url_for('students.login') }}">
+            <i class="fa-solid fa-graduation-cap"></i> Student Portal
+          </a>
+          <a class="btn-portal-pill btn-teacher" href="{{ url_for('teachers.login') }}">
+            <i class="fa-solid fa-chalkboard-user"></i> Instructor Portal
+          </a>
+          <a class="btn-portal-pill btn-admin" href="{{ url_for('admin.dashboard') }}">
+            <i class="fa-solid fa-shield-halved"></i> Admin Console
+          </a>
+        </div>
+      </div>
+
+      <!-- Right Visual Component (Live LMS Preview Mockup) -->
+      <div class="hero-showcase-card">
+        <div class="card-content">
+          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova" class="brand-large-icon">
+          <h2 class="card-title">Learnova LMS Suite</h2>
+          <p class="card-tagline">Continuous learning powered by reliable cloud data.</p>
+
+          <div class="showcase-stat-row">
+            <div class="stat-mini-pill">
+              <i class="fa-solid fa-users"></i>
+              <div>
+                <span>Community</span>
+                <strong>Active & Sync</strong>
+              </div>
+            </div>
+            <div class="stat-mini-pill">
+              <i class="fa-solid fa-circle-check"></i>
+              <div>
+                <span>Success Rate</span>
+                <strong>98.4%</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="completion-bar-wrap">
+            <div class="completion-header">
+              <span>Overall Course Completion</span>
+              <span>88%</span>
+            </div>
+            <div class="completion-bar">
+              <div class="completion-progress"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dedicated Portals Section -->
+    <section id="portals" class="section-wrap">
+      <div class="section-heading">
+        <h2>Choose Your Dedicated Portal</h2>
+        <p>Access your personalized learning and management environment</p>
+      </div>
+
+      <div class="portals-grid">
+        <!-- Student -->
+        <a href="{{ url_for('students.login') }}" class="portal-card">
+          <div>
+            <div class="portal-icon icon-student">
+              <i class="fa-solid fa-user-graduate"></i>
+            </div>
+            <h3>Student Space</h3>
+            <p>Access your enrolled modules, submit assignments, take interactive quizzes, and track your progress toward certification.</p>
+          </div>
+          <div class="portal-action">
+            <span>Enter as Student</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- Teacher -->
+        <a href="{{ url_for('teachers.login') }}" class="portal-card">
+          <div>
+            <div class="portal-icon icon-teacher">
+              <i class="fa-solid fa-chalkboard-teacher"></i>
+            </div>
+            <h3>Instructor Studio</h3>
+            <p>Create and manage syllabus units, publish assignments, grade student submissions, and lead discussion forums with ease.</p>
+          </div>
+          <div class="portal-action">
+            <span>Enter as Instructor</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- Admin -->
+        <a href="{{ url_for('admin.dashboard') }}" class="portal-card">
+          <div>
+            <div class="portal-icon icon-admin">
+              <i class="fa-solid fa-sliders"></i>
+            </div>
+            <h3>System Admin</h3>
+            <p>Full administrative supervision of enrolled users, system logs, security audits, database records, and platform governance.</p>
+          </div>
+          <div class="portal-action">
+            <span>Enter Admin Console</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-wrap">
+      <div class="features-grid">
+        <article class="feature-item">
+          <div class="feature-icon-box f-purple">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+          <div class="feature-info">
+            <small>Curriculum</small>
+            <strong>Courses</strong>
+            <span>Modular, structured lessons</span>
+          </div>
+        </article>
+
+        <article class="feature-item">
+          <div class="feature-icon-box f-blue">
+            <i class="fa-solid fa-list-check"></i>
+          </div>
+          <div class="feature-info">
+            <small>Evaluation</small>
+            <strong>Activities</strong>
+            <span>Instant quizzes & assignments</span>
+          </div>
+        </article>
+
+        <article class="feature-item">
+          <div class="feature-icon-box f-green">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <div class="feature-info">
+            <small>Collaboration</small>
+            <strong>Discussions</strong>
+            <span>Active student-led community</span>
+          </div>
+        </article>
+
+        <article class="feature-item">
+          <div class="feature-icon-box f-amber">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div class="feature-info">
+            <small>Credentials</small>
+            <strong>Certificates</strong>
+            <span>Verified completion proofs</span>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Learnova LMS. All rights reserved. Designed for smarter, faster learning.</p>
+  </footer>
+</body>
+</html>
