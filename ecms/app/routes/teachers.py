@@ -1251,3 +1251,34 @@ def delete_activity(teacher_id, course_id, student_id):
         db.session.commit()
         flash('Activity score removed.', 'success')
     return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+# ------------------------- Edit Quiz -------------------------
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_quiz(teacher_id, course_id, quiz_id):
+    teacher = User.query.get_or_404(teacher_id)
+    course = Course.query.get_or_404(course_id)
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if request.method == "POST":
+        quiz.title = request.form.get("title")
+        quiz.description = request.form.get("description")
+        start_date_str = request.form.get("start_date")
+        end_date_str = request.form.get("end_date")
+
+        if start_date_str:
+            quiz.start_date = datetime.fromisoformat(start_date_str)
+        if end_date_str:
+            quiz.end_date = datetime.fromisoformat(end_date_str)
+
+        db.session.commit()
+        flash("Quiz updated successfully!", "success")
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+
+    return render_template(
+        "teacher/edit_quiz.html",
+        teacher=teacher,
+        course=course,
+        quiz=quiz,
+        **_teacher_nav_context(teacher)
+    )
