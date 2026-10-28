@@ -118,11 +118,10 @@ def _teacher_nav_context(teacher):
     unread = Notification.query.filter_by(user_id=teacher.id, is_read=False).count()
     return {'nav_ungraded': ungraded, 'nav_notifications': unread}
 
-
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login with mirrored sandbox demo account."""
+    """Handle teacher login with demo bypass support."""
     if current_user.is_authenticated and getattr(current_user, 'role', '').lower() == "teacher":
         return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
@@ -130,93 +129,17 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المعزول والمستنسخ
+        # 1. الدخول التجريبي المباشر بحساب المعلم المتاح
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
-            try:
-                demo_teacher = User.query.filter_by(username="demo_teacher").first()
-
-                # إنشاء حساب المعلم التجريبي إذا لم يكن موجوداً
-                if not demo_teacher:
-                    demo_teacher = User(
-                        username="demo_teacher",
-                        email="demo_instructor@learnova.edu",
-                        role="teacher",
-                        name_person="Dr. Demo Instructor",
-                        employee_id="DEMO-746",
-                        department="Software Engineering",
-                        academic_rank="Lecturer",
-                        office_number="Demo Hall"
-                    )
-                    if hasattr(demo_teacher, 'set_password'):
-                        demo_teacher.set_password("demo123")
-                    else:
-                        demo_teacher.password = "demo123"
-                    demo_teacher.visible_password = "demo123"
-                    db.session.add(demo_teacher)
-                    db.session.commit()
-
-                # إذا لم يكن لدى المعلم التجريبي مساقات، نقوم باستنساخ مساق المعلمة الأصلية كاملاً
-                existing_demo_course = Course.query.filter_by(teacher_id=demo_teacher.id).first()
-                if not existing_demo_course:
-                    real_teacher = User.query.filter(User.role.ilike("teacher"), User.id != demo_teacher.id).first()
-
-                    if real_teacher and real_teacher.courses:
-                        src_course = real_teacher.courses[0]
-
-                        # توليد كود مساق مستقل وغير مكرر
-                        demo_code = f"{src_course.code}-DEMO"
-                        if Course.query.filter_by(code=demo_code).first():
-                            demo_code = f"DM-{src_course.code}"
-
-                        # 1. نسخ المساق الرئيسي
-                        cloned_course = Course(
-                            code=demo_code,
-                            name=f"{src_course.name} (Demo Sandbox)",
-                            description=src_course.description,
-                            teacher_id=demo_teacher.id
-                        )
-                        db.session.add(cloned_course)
-                        db.session.commit()
-
-                        # 2. نسخ الوحدات الدراسية (Units)
-                        for u in src_course.units:
-                            db.session.add(Unit(
-                                title=u.title,
-                                file_path=u.file_path,
-                                course_id=cloned_course.id
-                            ))
-
-                        # 3. نسخ الواجبات (Assignments)
-                        for a in src_course.assignments:
-                            if a.assignment_type != "quiz":
-                                db.session.add(Assignment(
-                                    title=a.title,
-                                    description=a.description,
-                                    assignment_type=a.assignment_type,
-                                    start_date=a.start_date,
-                                    due_date=a.due_date,
-                                    course_id=cloned_course.id
-                                ))
-
-                        # 4. تسجيل الطلاب لإظهار نفس عدد الطلاب والتفاعل
-                        for enrollment in src_course.enrollments:
-                            db.session.add(Enrollment(
-                                student_id=enrollment.student_id,
-                                course_id=cloned_course.id
-                            ))
-
-                        db.session.commit()
-
-            except Exception:
-                db.session.rollback()
-                demo_teacher = User.query.filter_by(username="demo_teacher").first() or User.query.filter(User.role.ilike("teacher")).first()
+            # جلب المعلم المسجل في النظام لعرض كافة مواده وبياناته
+            demo_teacher = User.query.filter(User.role.ilike("teacher")).first()
 
             if demo_teacher:
                 login_user(demo_teacher)
-                flash("Signed in as Demo Instructor (Safe Sandbox Environment).", "success")
+                flash("Signed in successfully with Demo Instructor Account.", "success")
                 return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
 
-        # 2. التحقق الاعتيادي لباقي المستخدمين
+        # 2. التحقق العادي لباقي المستخدمين
         user = User.query.filter((User.email == email) | (User.username == email)).first()
         is_valid = False
         if user:
@@ -244,17 +167,12 @@ def dashboard(teacher_id):
         return redirect(url_for('teachers.login'))
 
     courses = Course.query.filter_by(teacher_id=teacher.id).all()
-
-    student_ids = set()
-    assignment_count = 0
-    quiz_count = 0
+    student_ids = {e.student_id for c in courses for e in getattr(c, 'enrollments', [])}
+    assignment_count = sum(len(getattr(c, 'assignments', [])) for c in courses)
+    quiz_count = sum(len(getattr(c, 'quizzes', [])) for c in courses)
+    
     ungraded = 0
-
     for c in courses:
-        for e in getattr(c, 'enrollments', []):
-            student_ids.add(e.student_id)
-        assignment_count += len(getattr(c, 'assignments', []))
-        quiz_count += len(getattr(c, 'quizzes', []))
         for a in getattr(c, 'assignments', []):
             for s in getattr(a, 'submissions', []):
                 if s.grade is None:
