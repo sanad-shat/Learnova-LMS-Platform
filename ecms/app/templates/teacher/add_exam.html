@@ -1,10 +1,681 @@
-{% extends 'teacher/base.html' %}
-{% block title %}Create Exam | Learnova LMS{% endblock %}
+{% extends "teacher/base.html" %}
+{% block title %}Create Exam | {{ course.name }}{% endblock %}
+
 {% block content %}
-<div class="page-title-row"><div><span class="eyebrow">EXAM BUILDER</span><h1>Create New Exam</h1><p>Build a structured exam for <strong>{{ course.name }}</strong>.</p></div><a class="secondary-btn" href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}"><i class="fa-solid fa-arrow-left"></i> Back to Course</a></div>
-<form method="post" id="assessmentBuilderForm">
-<section class="data-card form-card-narrow"><div class="form-intro"><div class="form-intro-icon"><i class="fa-solid fa-file-circle-check"></i></div><div><h2>Exam Details</h2><p>Set the schedule and instructions. Total score is synchronized with question points.</p></div></div><div class="form-grid modern-editor-form"><label class="full-span">Exam Title<input name="title" required placeholder="Example: Final Examination" value="{{ request.form.get('title','') }}"></label><label>Total Score<input id="totalScore" type="number" min="1" step="0.5" name="total_score" value="{{ request.form.get('total_score','1') }}" required readonly></label><label>Start Date & Time<input type="datetime-local" name="start_date" required value="{{ request.form.get('start_date','') }}"></label><label>End Date & Time<input type="datetime-local" name="end_date" required value="{{ request.form.get('end_date','') }}"></label><label class="full-span">Instructions<textarea name="description" rows="4" placeholder="Add exam instructions and notes...">{{ request.form.get('description','') }}</textarea></label></div></section>
-<section class="data-card form-card-narrow question-builder-panel"><div class="builder-head"><div><span class="eyebrow">QUESTION BANK</span><h2>Exam Questions</h2><p>Add multiple-choice, true/false, short-answer, or essay questions.</p></div><div class="question-total"><strong id="questionCounter">0</strong><span>Questions</span></div></div><div class="question-type-toolbar"><button type="button" class="question-type-btn" data-add-type="mcq"><i class="fa-solid fa-list-ul"></i> Multiple Choice</button><button type="button" class="question-type-btn" data-add-type="true_false"><i class="fa-solid fa-toggle-on"></i> True / False</button><button type="button" class="question-type-btn" data-add-type="short_answer"><i class="fa-solid fa-pen"></i> Short Answer</button><button type="button" class="question-type-btn" data-add-type="essay"><i class="fa-solid fa-align-left"></i> Essay</button></div><div id="questionsContainer" class="question-stack"></div><div class="empty-question-builder" id="emptyBuilder"><i class="fa-solid fa-circle-plus"></i><h3>Add your first exam question</h3><p>Select a type above to begin.</p></div><div class="form-actions"><button class="primary-btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Create Exam</button><a class="secondary-btn" href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}">Cancel</a></div></section>
-</form>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  }
+
+  .full-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  .header-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  .back-navigation {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #eff6ff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-navigation:hover {
+    background: #2563eb;
+    color: #ffffff;
+    transform: translateX(-2px);
+  }
+
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+
+  .form-section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .main-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 34px 38px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-head-block {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .head-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.25);
+    flex-shrink: 0;
+  }
+  .head-texts h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .head-texts p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .form-field-group {
+    margin-bottom: 22px;
+  }
+  .form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .field-label .required-mark {
+    color: #ef4444;
+  }
+  .field-input, .field-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .field-input:focus, .field-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+  .field-textarea {
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  /* Question Bank Tools */
+  .qb-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .qb-counter-pill {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border: 1px solid #ddd6fe;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .question-type-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .btn-type-option {
+    border: 1.5px solid var(--border-normal);
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-type-option:hover {
+    border-color: #7c3aed;
+    color: #7c3aed;
+    background: #faf5ff;
+  }
+
+  .question-item-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .question-item-card .remove-q-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    color: #ef4444;
+    background: #fee2e2;
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+  .question-item-card .remove-q-btn:hover {
+    background: #dc2626;
+    color: #ffffff;
+  }
+
+  .empty-questions-notice {
+    text-align: center;
+    padding: 38px 20px;
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-lg);
+    background: #f8fafc;
+  }
+  .empty-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f5f3ff;
+    color: #7c3aed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 22px;
+  }
+
+  .form-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .btn-form-cancel {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-form-cancel:hover {
+    background: #e2e8f0;
+    color: var(--text-primary);
+  }
+  .btn-form-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 28px;
+    border-radius: var(--radius-md);
+    background: #7c3aed;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+    transition: all 0.2s;
+  }
+  .btn-form-submit:hover {
+    background: #6d28d9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.38);
+  }
+
+  .sidebar-guide-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 26px;
+    box-shadow: var(--shadow-card);
+  }
+  .guide-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .guide-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .guide-item i {
+    color: #7c3aed;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .guide-item-text h5 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .guide-item-text p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .total-score-badge-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  @media (max-width: 1024px) {
+    .layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .full-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .main-form-card {
+      padding: 24px 18px;
+    }
+    .form-row-2col, .question-type-selector {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .form-head-block {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .form-actions-row {
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+    .btn-form-cancel, .btn-form-submit {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="full-page-wrapper">
+  
+  <div class="header-actions-bar">
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
+      <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
+    </a>
+  </div>
+
+  <div class="layout-grid">
+    
+    <form method="POST" action="{{ url_for('teachers.add_exam', teacher_id=teacher.id, course_id=course.id) }}" class="form-section-stack" id="examForm">
+      
+      <!-- Card 1: Exam Details -->
+      <div class="main-form-card">
+        <div class="form-head-block">
+          <div class="head-icon-box">
+            <i class="fa-solid fa-file-signature"></i>
+          </div>
+          <div class="head-texts">
+            <h1>Exam Details</h1>
+            <p>Set schedule, overall passing score, and examination guidelines.</p>
+          </div>
+        </div>
+
+        <div class="form-field-group">
+          <label class="field-label" for="examTitle">
+            Exam Title <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="examTitle" 
+            name="title" 
+            class="field-input" 
+            placeholder="e.g. Midterm Examination / Final Assessment" 
+            required 
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-field-group form-row-2col">
+          <div>
+            <label class="field-label" for="totalScoreInput">
+              Total Score Points <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="number" 
+              id="totalScoreInput" 
+              name="total_score" 
+              class="field-input" 
+              value="0" 
+              step="0.5" 
+              required
+            >
+          </div>
+          <div>
+            <label class="field-label" for="startDate">
+              Start Date & Time <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="datetime-local" 
+              id="startDate" 
+              name="start_date" 
+              class="field-input" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-field-group">
+          <label class="field-label" for="endDate">
+            End Date & Time <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="datetime-local" 
+            id="endDate" 
+            name="end_date" 
+            class="field-input" 
+            required
+          >
+        </div>
+
+        <div class="form-field-group" style="margin-bottom: 0;">
+          <label class="field-label" for="instructions">
+            Instructions / Examination Rules
+          </label>
+          <textarea 
+            id="instructions" 
+            name="description" 
+            rows="4" 
+            class="field-textarea" 
+            placeholder="Specify proctoring notes, permitted resources, or honor code terms..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Card 2: Exam Questions -->
+      <div class="main-form-card">
+        <div class="qb-header-row">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">Exam Questions</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Select question types below to compose the formal exam paper.</p>
+          </div>
+          <span class="qb-counter-pill" id="questionCountPill">0 Questions</span>
+        </div>
+
+        <div class="question-type-selector">
+          <button type="button" class="btn-type-option" onclick="addExamQuestion('mcq')">
+            <i class="fa-solid fa-list-check" style="color: #2563eb;"></i> Multiple Choice
+          </button>
+          <button type="button" class="btn-type-option" onclick="addExamQuestion('true_false')">
+            <i class="fa-solid fa-toggle-on" style="color: #16a34a;"></i> True / False
+          </button>
+          <button type="button" class="btn-type-option" onclick="addExamQuestion('short_answer')">
+            <i class="fa-solid fa-pencil" style="color: #d97706;"></i> Short Answer
+          </button>
+          <button type="button" class="btn-type-option" onclick="addExamQuestion('essay')">
+            <i class="fa-solid fa-align-left" style="color: #7c3aed;"></i> Essay Question
+          </button>
+        </div>
+
+        <div id="questionsContainer">
+          <div class="empty-questions-notice" id="emptyQuestionsMsg">
+            <div class="empty-icon">
+              <i class="fa-solid fa-plus"></i>
+            </div>
+            <h4 style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">No Questions Added Yet</h4>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Click one of the question types above to append questions to the exam.</p>
+          </div>
+        </div>
+
+        <div class="form-actions-row">
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
+            Cancel
+          </a>
+          <button type="submit" class="btn-form-submit">
+            <i class="fa-solid fa-check"></i> Create Exam
+          </button>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Sidebar Guidelines -->
+    <div class="sidebar-guide-card">
+      <h3 class="guide-title">
+        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Exam Guidelines
+      </h3>
+      
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Score Synchronization</h5>
+          <p>Total score automatically tallies from each individual question mark added.</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Strict Time Deadlines</h5>
+          <p>Ensure the start and end dates accommodate students across various time zones if applicable.</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Accredited Evaluation</h5>
+          <p>Grades obtained from this exam calculate directly into student certificate eligibility.</p>
+        </div>
+      </div>
+
+      <div class="total-score-badge-card">
+        <div>
+          <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block;">Calculated Score</span>
+          <strong style="color: #7c3aed; font-size: 18px;" id="sidebarScoreDisplay">0.0 pts</strong>
+        </div>
+        <i class="fa-solid fa-calculator" style="font-size: 24px; color: #cbd5e1;"></i>
+      </div>
+
+      <div class="course-context-pill">
+        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Course</span>
+        <strong style="color: var(--text-primary); font-size: 14px;">{{ course.name }}</strong>
+        <span style="font-size: 12px; color: var(--primary); display: block; margin-top: 2px; font-weight: 600;">Code: {{ course.code }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let qNum = 0;
+
+  function recalculateScore() {
+    let total = 0;
+    const scoreInputs = document.querySelectorAll('.question-score-input');
+    scoreInputs.forEach(input => {
+      const val = parseFloat(input.value) || 0;
+      total += val;
+    });
+    const totalScoreField = document.getElementById('totalScoreInput');
+    if (totalScoreField) totalScoreField.value = total;
+    const sidebarScore = document.getElementById('sidebarScoreDisplay');
+    if (sidebarScore) sidebarScore.textContent = total.toFixed(1) + ' pts';
+  }
+
+  function updateQuestionStats() {
+    const totalCount = document.querySelectorAll('.question-item-card').length;
+    document.getElementById('questionCountPill').textContent = totalCount + ' Question' + (totalCount !== 1 ? 's' : '');
+    const emptyNotice = document.getElementById('emptyQuestionsMsg');
+    if (emptyNotice) {
+      emptyNotice.style.display = totalCount === 0 ? 'block' : 'none';
+    }
+    recalculateScore();
+  }
+
+  function addExamQuestion(type) {
+    qNum++;
+    const container = document.getElementById('questionsContainer');
+    const emptyNotice = document.getElementById('emptyQuestionsMsg');
+    if (emptyNotice) emptyNotice.style.display = 'none';
+
+    let typeTitle = 'Multiple Choice';
+    let typeBadgeColor = 'background: #eff6ff; color: #2563eb;';
+    if (type === 'true_false') {
+      typeTitle = 'True / False';
+      typeBadgeColor = 'background: #f0fdf4; color: #16a34a;';
+    } else if (type === 'short_answer') {
+      typeTitle = 'Short Answer';
+      typeBadgeColor = 'background: #fffbeb; color: #d97706;';
+    } else if (type === 'essay') {
+      typeTitle = 'Essay';
+      typeBadgeColor = 'background: #f5f3ff; color: #7c3aed;';
+    }
+
+    const card = document.createElement('div');
+    card.className = 'question-item-card';
+    card.id = 'examQuestionRow_' + qNum;
+
+    let bodyFields = '';
+
+    if (type === 'mcq') {
+      bodyFields = `
+        <div style="margin-top: 12px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Comma-Separated Options (e.g. Red, Blue, Green, Yellow):</label>
+          <input type="text" name="options_${qNum}" placeholder="Choice A, Choice B, Choice C, Choice D" class="field-input" style="margin-top: 4px;" required>
+        </div>
+        <div style="margin-top: 10px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Exact Correct Answer (Must match one option above):</label>
+          <input type="text" name="answer_${qNum}" placeholder="Type exact answer" class="field-input" style="margin-top: 4px;" required>
+        </div>
+      `;
+    } else if (type === 'true_false') {
+      bodyFields = `
+        <div style="margin-top: 12px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
+          <select name="answer_${qNum}" class="field-input" style="margin-top: 4px;">
+            <option value="True">True</option>
+            <option value="False">False</option>
+          </select>
+        </div>
+      `;
+    } else if (type === 'short_answer') {
+      bodyFields = `
+        <div style="margin-top: 12px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Expected Keyword / Answer:</label>
+          <input type="text" name="answer_${qNum}" placeholder="Expected answer" class="field-input" style="margin-top: 4px;" required>
+        </div>
+      `;
+    } else if (type === 'essay') {
+      bodyFields = `
+        <div style="margin-top: 12px;">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;"><i class="fa-solid fa-circle-info"></i> Essay questions require manual grading and feedback.</p>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <input type="hidden" name="type_${qNum}" value="${type}">
+      <button type="button" class="remove-q-btn" onclick="removeExamQuestion('${card.id}')" title="Delete Question">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; ${typeBadgeColor}">${typeTitle}</span>
+        <strong style="font-size: 13px; color: var(--text-primary);">Question #${qNum}</strong>
+      </div>
+
+      <div class="form-field-group" style="margin-bottom: 12px;">
+        <input type="text" name="question_${qNum}" placeholder="Type question prompt text here..." class="field-input" required autocomplete="off">
+      </div>
+
+      <div style="max-width: 140px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points / Marks</label>
+        <input type="number" name="score_${qNum}" value="5" min="0.5" step="0.5" class="field-input question-score-input" style="padding: 8px 12px; margin-top: 4px;" onchange="recalculateScore()" oninput="recalculateScore()" required>
+      </div>
+
+      ${bodyFields}
+    `;
+
+    container.appendChild(card);
+    updateQuestionStats();
+  }
+
+  function removeExamQuestion(rowId) {
+    const target = document.getElementById(rowId);
+    if (target) target.remove();
+    updateQuestionStats();
+  }
+</script>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/question-builder.js') }}"></script>{% endblock %}
