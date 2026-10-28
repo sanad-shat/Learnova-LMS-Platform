@@ -1,4 +1,605 @@
-{% extends 'teacher/base.html' %}{% set active_page='submissions' %}{% block title %}Submissions | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">ASSESSMENT REVIEW</span><h1>Student Submissions</h1><p>Review student work, assign grades, and provide feedback.</p></div><div class="date-chip"><i class="fa-solid fa-inbox"></i>{{ submissions|length }} Submissions</div></div>
-<div class="submission-grid">{% for s in submissions %}<article class="submission-card-modern" data-searchable><div class="submission-main"><div class="person-cell"><div class="avatar">{{ (s.student.name_person or s.student.username)[0]|upper }}</div><div><h3>{{ s.student.name_person or s.student.username }}</h3><p>{{ s.assignment.course.code }} · {{ s.assignment.title }}</p></div></div><p class="submission-copy">{{ s.submission_text or 'A file was submitted for this assignment.' }}</p><div class="submission-meta"><span><i class="fa-regular fa-clock"></i>{{ s.submitted_at.strftime('%d %b %Y, %H:%M') if s.submitted_at else 'No date' }}</span><span class="{{ 'status-pill active' if s.grade is not none else 'badge-warning status-pill' }}">{{ (s.grade|string + '/100') if s.grade is not none else 'Needs grading' }}</span></div>{% if s.submission_file %}<a class="secondary-btn" href="{{ url_for('static',filename=s.submission_file) }}"><i class="fa-solid fa-download"></i>Download File</a>{% endif %}</div><form method="post" action="{{ url_for('teachers.grade_submission',teacher_id=teacher.id,submission_id=s.id) }}" class="grade-form-modern"><label>Grade /100<input type="number" name="grade" min="0" max="100" step="0.1" value="{{ s.grade if s.grade is not none else '' }}" required></label><label>Feedback<textarea name="feedback" rows="4" placeholder="Write helpful feedback...">{{ s.feedback or '' }}</textarea></label><button class="primary-btn" type="submit"><i class="fa-solid fa-check"></i>Save Evaluation</button></form></article>{% else %}<div class="empty-state">No submissions received yet.</div>{% endfor %}</div>
+{% extends "teacher/base.html" %}
+{% block title %}Student Submissions | Instructor Workspace{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
+  }
+
+  .submissions-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  /* ---------------- Header Banner ---------------- */
+  .submissions-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-titles h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .header-titles p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .total-count-pill {
+    background: #ffffff;
+    border: 1px solid var(--border-normal);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ---------------- KPI Stats Cards ---------------- */
+  .kpi-metrics-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+  }
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .kpi-text h3 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+  }
+  .kpi-text p {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ---------------- Filter Tabs ---------------- */
+  .filters-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .filter-btn {
+    border: 1px solid var(--border-normal);
+    background: #ffffff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* ---------------- Submission Cards ---------------- */
+  .submissions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .submission-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .submission-card:hover {
+    box-shadow: var(--shadow-hover);
+  }
+
+  /* Card Inner Grid */
+  .submission-card-layout {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+    padding: 26px 30px;
+  }
+
+  /* Student & Task Meta */
+  .student-head-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .student-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .student-details h3 {
+    margin: 0 0 2px;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .student-details p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Submission Content Area */
+  .submission-body-box {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .submission-body-box h5 {
+    margin: 0 0 10px;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 800;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* Answers List (Decoded JSON) */
+  .answers-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+  .answers-item:last-child {
+    margin-bottom: 0;
+  }
+  .answers-item-badge {
+    font-weight: 800;
+    color: var(--primary);
+    margin-right: 6px;
+  }
+
+  /* File Download Box */
+  .attached-file-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 6px;
+    transition: all 0.2s;
+  }
+  .attached-file-btn:hover {
+    background: #eff6ff;
+  }
+
+  /* Time & Status Footer */
+  .submission-meta-footer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .score-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 800;
+    font-size: 11px;
+  }
+  .badge-graded {
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .badge-pending {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  /* Evaluation Form Column */
+  .grading-form-container {
+    background: #ffffff;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .grade-input-group {
+    margin-bottom: 16px;
+  }
+  .grade-score-field {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s;
+  }
+  .grade-score-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .feedback-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+    outline: none;
+    resize: vertical;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .feedback-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .btn-save-evaluation {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 12px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-save-evaluation:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(37, 99, 235, 0.35);
+  }
+
+  .empty-state-card {
+    text-align: center;
+    padding: 50px 20px;
+    background: #ffffff;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    color: var(--text-muted);
+  }
+
+  /* ---------------- Responsive Rules ---------------- */
+  @media (max-width: 992px) {
+    .kpi-metrics-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .submission-card-layout {
+      grid-template-columns: 1fr;
+      padding: 20px;
+      gap: 18px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .submissions-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .submissions-header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+  }
+</style>
+
+<div class="submissions-page-wrapper">
+
+  <!-- Header Section -->
+  <div class="submissions-header-bar">
+    <div class="header-titles">
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Assessment Review</span>
+      <h1>Student Submissions</h1>
+      <p>Review student work, assign grades, and provide constructive feedback.</p>
+    </div>
+    <div class="total-count-pill">
+      <i class="fa-solid fa-inbox" style="color: var(--primary);"></i>
+      <span>{{ submissions|length }} Total Submissions</span>
+    </div>
+  </div>
+
+  <!-- KPI Overview Cards -->
+  {% set total_subs = submissions|length %}
+  {% set pending_subs = submissions|selectattr('grade', 'none')|list|length %}
+  {% set graded_subs = total_subs - pending_subs %}
+
+  <div class="kpi-metrics-row">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;">
+        <i class="fa-solid fa-file-lines"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ total_subs }}</h3>
+        <p>Total Submitted</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #fffbeb; color: #d97706;">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ pending_subs }}</h3>
+        <p>Pending Evaluation</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ graded_subs }}</h3>
+        <p>Evaluated Work</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Buttons -->
+  <div class="filters-row">
+    <button type="button" class="filter-btn active" onclick="filterSubmissions('all', this)">All ({{ total_subs }})</button>
+    <button type="button" class="filter-btn" onclick="filterSubmissions('pending', this)">Pending ({{ pending_subs }})</button>
+    <button type="button" class="filter-btn" onclick="filterSubmissions('graded', this)">Graded ({{ graded_subs }})</button>
+  </div>
+
+  <!-- Submissions Feed -->
+  <div class="submissions-list">
+    {% for s in submissions %}
+    {% set is_graded = s.grade is not none %}
+    <div class="submission-card" data-status="{{ 'graded' if is_graded else 'pending' }}">
+      <div class="submission-card-layout">
+        
+        <!-- Left: Student info & Submission Body -->
+        <div>
+          <div class="student-head-info">
+            <div class="student-avatar">
+              {{ (s.student.name_person or s.student.username or 'S')[0]|upper }}
+            </div>
+            <div class="student-details">
+              <h3>{{ s.student.name_person or s.student.username }}</h3>
+              <p>
+                {{ s.assignment.course.code if s.assignment and s.assignment.course else 'Course' }}
+                &bull;
+                {{ s.assignment.title if s.assignment else 'Assignment' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Submission Answer Content -->
+          <div class="submission-body-box">
+            <h5>Student Submission Content</h5>
+            
+            <!-- Raw content container with dynamic JSON parsing via JS -->
+            <div class="submission-content-text" id="sub_content_{{ s.id }}">
+              {{ s.content or 'No text submission entered.' }}
+            </div>
+
+            {% if s.file_path %}
+            <div style="margin-top: 10px;">
+              <a href="{{ url_for('teachers.uploaded_file', filename=s.file_path) }}" class="attached-file-btn" target="_blank">
+                <i class="fa-solid fa-file-arrow-down"></i>
+                <span>Download Attachment</span>
+              </a>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Footer Timestamps & Tags -->
+          <div class="submission-meta-footer">
+            <span>
+              <i class="fa-regular fa-calendar-check" style="color: var(--text-muted); margin-right: 4px;"></i>
+              Submitted: {{ s.submitted_at.strftime('%d %b %Y, %H:%M') if s.submitted_at else '—' }}
+            </span>
+            
+            {% if is_graded %}
+            <span class="score-badge badge-graded">
+              <i class="fa-solid fa-check"></i> Graded: {{ "%.1f"|format(s.grade) }}/100
+            </span>
+            {% else %}
+            <span class="score-badge badge-pending">
+              <i class="fa-solid fa-clock"></i> Pending Review
+            </span>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Right: Instructor Grading Panel -->
+        <div class="grading-form-container">
+          <form method="POST" action="{{ url_for('teachers.grade_submission', teacher_id=teacher.id, submission_id=s.id) }}">
+            
+            <div class="grade-input-group">
+              <label class="form-label" for="grade_{{ s.id }}">
+                Grade Score (/100)[cite: 16]
+              </label>
+              <input 
+                type="number" 
+                id="grade_{{ s.id }}" 
+                name="grade" 
+                step="0.5" 
+                min="0" 
+                max="100" 
+                class="grade-score-field" 
+                value="{{ s.grade if s.grade is not none else '' }}" 
+                placeholder="e.g. 95" 
+                required
+              >
+            </div>
+
+            <div>
+              <label class="form-label" for="feedback_{{ s.id }}">
+                Instructor Feedback
+              </label>
+              <textarea 
+                id="feedback_{{ s.id }}" 
+                name="feedback" 
+                rows="4" 
+                class="feedback-textarea" 
+                placeholder="Write helpful feedback or correction notes for the student..."
+              >{{ s.feedback or '' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn-save-evaluation">
+              <i class="fa-solid fa-check-double"></i> Save Evaluation[cite: 16]
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state-card">
+      <i class="fa-solid fa-inbox" style="font-size: 38px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">No Submissions Found</h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 0;">There are currently no student submissions pending your review.</p>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<!-- JSON Decoder & Filtering Script -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // تنسيق إجابات الكويز المحفوظة بصيغة JSON تلقائياً
+    const contentNodes = document.querySelectorAll('.submission-content-text');
+    contentNodes.forEach(node => {
+      const text = node.textContent.trim();
+      if (text.startsWith('{') && text.endsWith('}')) {
+        try {
+          const parsed = JSON.parse(text);
+          let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+          let itemIndex = 1;
+          for (const key in parsed) {
+            html += `
+              <div class="answers-item">
+                <span class="answers-item-badge">Question ${itemIndex}:</span>
+                <span>${escapeHtml(parsed[key])}</span>
+              </div>
+            `;
+            itemIndex++;
+          }
+          html += '</div>';
+          node.innerHTML = html;
+        } catch (e) {
+          // في حال لم يكن JSON صالحاً، يترك النص كما هو
+        }
+      }
+    });
+  });
+
+  function escapeHtml(string) {
+    return String(string)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // تصفية البطاقات حسب الحالة (الكل، قيد المراجعة، مقيم)
+  function filterSubmissions(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.submission-card');
+    cards.forEach(card => {
+      if (status === 'all') {
+        card.style.display = 'block';
+      } else {
+        card.style.display = card.getAttribute('data-status') === status ? 'block' : 'none';
+      }
+    });
+  }
+</script>
 {% endblock %}
