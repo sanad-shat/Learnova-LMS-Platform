@@ -17,79 +17,97 @@
     --radius-xl: 22px;
     --radius-lg: 16px;
     --radius-md: 12px;
-    --shadow-card: 0 10px 30px -4px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03);
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   }
 
-  .form-page-wrapper {
-    max-width: 860px;
-    margin: 24px auto 60px;
-    padding: 0 20px;
+  /* الاستفادة الكاملة من عرض الشاشة وإزالة الفراغات الجانبية */
+  .full-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
   }
 
-  /* Navigation Breadcrumb */
+  /* شريط العنوان ومسار الرجوع */
+  .header-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
   .back-navigation {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: var(--text-muted);
+    color: var(--primary);
+    background: #eff6ff;
+    padding: 8px 16px;
+    border-radius: 30px;
     text-decoration: none;
-    margin-bottom: 20px;
-    transition: color 0.2s, transform 0.2s;
+    transition: all 0.2s;
   }
   .back-navigation:hover {
-    color: var(--primary);
-    transform: translateX(-3px);
+    background: #2563eb;
+    color: #ffffff;
+    transform: translateX(-2px);
   }
 
-  /* Form Card Container */
-  .modern-form-card {
+  /* الشبكة الرئيسية: نموذج الإدخال + لوحة المعاينة والإرشادات */
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+
+  /* بطاقة النموذج الرئيسية */
+  .main-form-card {
     background: var(--card-bg);
     border: 1px solid var(--border-normal);
     border-radius: var(--radius-xl);
-    padding: 38px 44px;
+    padding: 34px 38px;
     box-shadow: var(--shadow-card);
   }
 
-  /* Header Section */
   .form-head-block {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding-bottom: 26px;
-    margin-bottom: 28px;
+    gap: 18px;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
     border-bottom: 1px solid var(--border-subtle);
   }
   .head-icon-box {
-    width: 56px;
-    height: 56px;
-    border-radius: var(--radius-lg);
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
     background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+    font-size: 22px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
     flex-shrink: 0;
   }
   .head-texts h1 {
     font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
-    margin: 0 0 5px;
+    margin: 0 0 4px;
     letter-spacing: -0.4px;
   }
   .head-texts p {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-muted);
     margin: 0;
   }
 
-  /* Inputs & Labels */
+  /* الحقول */
   .form-field-group {
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .field-label {
     display: block;
@@ -105,7 +123,7 @@
     width: 100%;
     border: 1.5px solid var(--border-normal);
     border-radius: var(--radius-md);
-    padding: 13px 18px;
+    padding: 12px 16px;
     font-size: 14px;
     color: var(--text-primary);
     background: #ffffff;
@@ -121,12 +139,12 @@
     line-height: 1.6;
   }
 
-  /* File Dropzone Area */
+  /* منطقة السحب والإفلات */
   .dropzone-container {
     border: 2px dashed #cbd5e1;
     background: #f8fafc;
     border-radius: var(--radius-lg);
-    padding: 34px 24px;
+    padding: 32px 20px;
     text-align: center;
     position: relative;
     cursor: pointer;
@@ -147,29 +165,25 @@
     z-index: 5;
   }
   .dropzone-icon-circle {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
     background: #eff6ff;
     color: var(--primary);
-    border-radius: 14px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    margin: 0 auto 12px;
-    transition: transform 0.2s;
-  }
-  .dropzone-container:hover .dropzone-icon-circle {
-    transform: translateY(-2px);
+    font-size: 20px;
+    margin: 0 auto 10px;
   }
   .dropzone-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 4px;
   }
   .dropzone-subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-muted);
     margin: 0;
   }
@@ -186,36 +200,28 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--primary);
-    max-width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
-  /* Form Actions */
+  /* أزرار الإجراءات */
   .form-actions-row {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
-    margin-top: 32px;
-    padding-top: 22px;
+    margin-top: 28px;
+    padding-top: 20px;
     border-top: 1px solid var(--border-subtle);
   }
   .btn-form-cancel {
     display: inline-flex;
     align-items: center;
-    padding: 11px 24px;
+    padding: 10px 22px;
     border-radius: var(--radius-md);
     background: #f1f5f9;
     color: var(--text-secondary);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
-    border: none;
-    cursor: pointer;
     transition: all 0.2s;
   }
   .btn-form-cancel:hover {
@@ -226,36 +232,88 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 11px 28px;
+    padding: 10px 26px;
     border-radius: var(--radius-md);
     background: var(--primary);
     color: #ffffff;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
   }
   .btn-form-submit:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
   }
 
-  /* Mobile Responsive */
-  @media (max-width: 640px) {
-    .form-page-wrapper {
-      padding: 0 14px;
-      margin-top: 16px;
+  /* البطاقة الجانبية: إرشادات ومعلومات المساق */
+  .sidebar-guide-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 26px;
+    box-shadow: var(--shadow-card);
+  }
+  .guide-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .guide-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .guide-item i {
+    color: #10b981;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .guide-item-text h5 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .guide-item-text p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .course-context-pill {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 1024px) {
+    .layout-grid {
+      grid-template-columns: 1fr;
     }
-    .modern-form-card {
-      padding: 26px 20px;
+  }
+
+  @media (max-width: 768px) {
+    .full-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .main-form-card {
+      padding: 24px 18px;
     }
     .form-head-block {
       flex-direction: column;
       align-items: flex-start;
-      gap: 14px;
+      gap: 12px;
     }
     .form-actions-row {
       flex-direction: column-reverse;
@@ -268,103 +326,143 @@
   }
 </style>
 
-<div class="form-page-wrapper">
+<div class="full-page-wrapper">
   
-  <!-- Back to Course Link -->
-  <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
-    <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
-  </a>
+  <!-- Header Bar -->
+  <div class="header-actions-bar">
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
+      <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
+    </a>
+  </div>
 
-  <!-- Main Card -->
-  <div class="modern-form-card">
+  <div class="layout-grid">
     
-    <!-- Header -->
-    <div class="form-head-block">
-      <div class="head-icon-box">
-        <i class="fa-solid fa-folder-plus"></i>
-      </div>
-      <div class="head-texts">
-        <h1>Create New Learning Unit</h1>
-        <p>Publish a new lecture chapter, study module, or downloadable resource.</p>
-      </div>
-    </div>
-
-    <!-- Form -->
-    <form method="POST" action="{{ url_for('teachers.add_unit', teacher_id=teacher.id, course_id=course.id) }}" enctype="multipart/form-data">
+    <!-- بطاقة النموذج الأساسية -->
+    <div class="main-form-card">
       
-      <!-- Unit Title -->
-      <div class="form-field-group">
-        <label class="field-label" for="unitTitle">
-          Unit Title <span class="required-mark">*</span>
-        </label>
-        <input 
-          type="text" 
-          id="unitTitle" 
-          name="title" 
-          class="field-input" 
-          placeholder="e.g. Chapter 3: Data Structures & Algorithms" 
-          required 
-          autocomplete="off"
-        >
-      </div>
-
-      <!-- Description / Instructions (Optional) -->
-      <div class="form-field-group">
-        <label class="field-label" for="unitContent">
-          Overview / Learning Objectives <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">(Optional)</span>
-        </label>
-        <textarea 
-          id="unitContent" 
-          name="content" 
-          rows="4" 
-          class="field-textarea" 
-          placeholder="Brief description or key topics covered in this unit..."
-        ></textarea>
-      </div>
-
-      <!-- File Dropzone -->
-      <div class="form-field-group">
-        <label class="field-label">
-          <i class="fa-solid fa-paperclip" style="color: var(--primary); margin-right: 4px;"></i> Lecture File Attachment
-        </label>
-        
-        <div class="dropzone-container" id="dropArea">
-          <input 
-            type="file" 
-            name="file" 
-            id="unitFileInput" 
-            class="file-hidden-input"
-            accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.zip"
-          >
-          <div class="dropzone-icon-circle">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-          </div>
-          <h4 class="dropzone-title">Choose a file or drag it here</h4>
-          <p class="dropzone-subtitle">Supports PDF, PPTX, DOCX, ZIP up to 25MB</p>
-          
-          <div id="filePreview" class="file-preview-pill">
-            <i class="fa-solid fa-file-check"></i>
-            <span id="fileNameDisplay">Selected file</span>
-          </div>
+      <!-- Head Block -->
+      <div class="form-head-block">
+        <div class="head-icon-box">
+          <i class="fa-solid fa-folder-plus"></i>
+        </div>
+        <div class="head-texts">
+          <h1>Create New Learning Unit</h1>
+          <p>Publish a new lecture chapter, reading module, or course resource[cite: 22].</p>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="form-actions-row">
-        <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
-          Cancel
-        </a>
-        <button type="submit" class="btn-form-submit">
-          <i class="fa-solid fa-plus"></i> Create Unit
-        </button>
+      <form method="POST" action="{{ url_for('teachers.add_unit', teacher_id=teacher.id, course_id=course.id) }}" enctype="multipart/form-data">
+        
+        <!-- Unit Title -->
+        <div class="form-field-group">
+          <label class="field-label" for="unitTitle">
+            Unit Title <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="unitTitle" 
+            name="title" 
+            class="field-input" 
+            placeholder="e.g. Chapter 3: Data Structures & Algorithms" 
+            required 
+            autocomplete="off"
+          >
+        </div>
+
+        <!-- Content (Optional) -->
+        <div class="form-field-group">
+          <label class="field-label" for="unitContent">
+            Overview / Learning Objectives <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">(Optional)</span>
+          </label>
+          <textarea 
+            id="unitContent" 
+            name="content" 
+            rows="5" 
+            class="field-textarea" 
+            placeholder="Brief description or lecture outline..."
+          ></textarea>
+        </div>
+
+        <!-- File Attachment Dropzone -->
+        <div class="form-field-group">
+          <label class="field-label">
+            <i class="fa-solid fa-paperclip" style="color: var(--primary); margin-right: 4px;"></i> Lecture File Attachment
+          </label>
+          
+          <div class="dropzone-container" id="dropArea">
+            <input 
+              type="file" 
+              name="file" 
+              id="unitFileInput" 
+              class="file-hidden-input"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.zip"
+            >
+            <div class="dropzone-icon-circle">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h4 class="dropzone-title">Choose a file or drag it here</h4>
+            <p class="dropzone-subtitle">Supports PDF, PPTX, DOCX, ZIP up to 25MB[cite: 23]</p>
+            
+            <div id="filePreview" class="file-preview-pill">
+              <i class="fa-solid fa-file-check"></i>
+              <span id="fileNameDisplay">Selected file</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="form-actions-row">
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
+            Cancel[cite: 23]
+          </a>
+          <button type="submit" class="btn-form-submit">
+            <i class="fa-solid fa-plus"></i> Create Unit[cite: 23]
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- البطاقة الجانبية الذكية -->
+    <div class="sidebar-guide-card">
+      <h3 class="guide-title">
+        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Best Practices
+      </h3>
+      
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Standard Naming</h5>
+          <p>Use clear prefixes like "Week 1" or "Ch 1" to help students navigate smoothly.</p>
+        </div>
       </div>
 
-    </form>
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Optimized Documents</h5>
+          <p>Export lecture slides as PDF to guarantee readability across all student mobile devices.</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Instant Notification</h5>
+          <p>All enrolled students in this course will receive an automated alert once published[cite: 8, 9].</p>
+        </div>
+      </div>
+
+      <div class="course-context-pill">
+        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Course</span>
+        <strong style="color: var(--text-primary); font-size: 14px;">{{ course.name }}</strong>
+        <span style="font-size: 12px; color: var(--primary); display: block; margin-top: 2px; font-weight: 600;">Code: {{ course.code }}</span>
+      </div>
+    </div>
 
   </div>
 </div>
 
-<!-- Interactive Dropzone Script -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('unitFileInput');
