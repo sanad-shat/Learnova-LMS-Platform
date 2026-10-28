@@ -1,126 +1,423 @@
-from pathlib import Path
-import uuid
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_from_directory
-from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
-from app import db
-from app.models import Course, Enrollment, DiscussionTopic, DiscussionPost, DiscussionLike, Notification
-from app.services import notify_course_students
+{% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
+{% block title %}Discussion Forum | Course Community{% endblock %}
 
-forum_bp = Blueprint('forum', __name__, url_prefix='/forum')
-UPLOAD_DIR = Path(__file__).resolve().parents[1] / 'static' / 'forum_uploads'
-try:
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-except OSError:
-    pass
-ALLOWED = {'pdf','doc','docx','ppt','pptx','png','jpg','jpeg','zip','txt'}
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
+  }
 
-def _save_file(file):
-    if not file or not file.filename:
-        return None
-    name = secure_filename(file.filename)
-    if '.' not in name or name.rsplit('.',1)[1].lower() not in ALLOWED:
-        return None
-    final = f"{uuid.uuid4().hex}_{name}"
-    file.save(UPLOAD_DIR / final)
-    return final
+  .forum-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
 
-def _courses():
-    if current_user.role == 'admin': return Course.query.order_by(Course.name).all()
-    if current_user.role == 'teacher': return Course.query.filter_by(teacher_id=current_user.id).order_by(Course.name).all()
-    return [e.course for e in current_user.enrollments]
+  /* ---------------- Header Section ---------------- */
+  .forum-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-titles h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .header-titles p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .btn-new-topic {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    border: none;
+    cursor: pointer;
+  }
+  .btn-new-topic:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
 
-def _allowed(course):
-    return current_user.role == 'admin' or (current_user.role == 'teacher' and course.teacher_id == current_user.id) or Enrollment.query.filter_by(student_id=current_user.id, course_id=course.id).first() is not None
+  /* ---------------- Filter & Search Bar ---------------- */
+  .filter-panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .filter-form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-field-box {
+    position: relative;
+  }
+  .search-field-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .filter-input {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px 10px 38px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .filter-select {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .filter-input:focus, .filter-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .btn-filter-apply {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-filter-apply:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
 
-def _moderator(topic):
-    return current_user.role == 'admin' or (current_user.role == 'teacher' and topic.course.teacher_id == current_user.id)
+  /* ---------------- Discussions Feed ---------------- */
+  .topics-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .topic-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    padding: 22px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-decoration: none;
+  }
+  .topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: #bfdbfe;
+  }
 
-@forum_bp.route('/')
-@login_required
-def index():
-    courses=_courses(); ids=[c.id for c in courses]; q=request.args.get('q','').strip(); course_id=request.args.get('course_id',type=int); topic_type=request.args.get('type','').strip()
-    query=DiscussionTopic.query.filter(DiscussionTopic.course_id.in_(ids or [-1]))
-    if course_id in ids: query=query.filter_by(course_id=course_id)
-    if topic_type: query=query.filter_by(topic_type=topic_type)
-    if q: query=query.filter(db.or_(DiscussionTopic.title.ilike(f'%{q}%'),DiscussionTopic.body.ilike(f'%{q}%')))
-    topics=query.order_by(DiscussionTopic.is_pinned.desc(),DiscussionTopic.updated_at.desc()).all()
-    return render_template('forum/index.html',courses=courses,topics=topics,query=q,selected_course=course_id,selected_type=topic_type)
+  /* Vote Counter Box */
+  .vote-box {
+    min-width: 58px;
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .vote-box i {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  .vote-count {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
 
-@forum_bp.route('/new',methods=['GET','POST'])
-@login_required
-def new_topic():
-    courses=_courses()
-    if request.method=='POST':
-        course=Course.query.get_or_404(request.form.get('course_id',type=int))
-        if not _allowed(course): flash('Access denied.','danger'); return redirect(url_for('forum.index'))
-        title=request.form.get('title','').strip(); body=request.form.get('body','').strip(); t=request.form.get('topic_type','Discussion')
-        if t=='Announcement' and current_user.role not in ('teacher','admin'): t='Discussion'
-        if not title or not body: flash('Title and message are required.','danger')
-        else:
-            topic=DiscussionTopic(course_id=course.id,author_id=current_user.id,title=title,body=body,topic_type=t,attachment_path=_save_file(request.files.get('attachment')))
-            db.session.add(topic); db.session.flush(); notify_course_students(course,f'New {t.lower()}',f'{current_user.name_person or current_user.username}: {title}',url_for('forum.topic',topic_id=topic.id)); db.session.commit(); flash('Topic created.','success'); return redirect(url_for('forum.topic',topic_id=topic.id))
-    return render_template('forum/new_topic.html',courses=courses)
+  /* Topic Main Info */
+  .topic-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .topic-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #eff6ff;
+    color: var(--primary);
+    border: 1px solid #bfdbfe;
+  }
+  .topic-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+    text-decoration: none;
+    display: block;
+    line-height: 1.4;
+  }
+  .topic-snippet {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-@forum_bp.route('/topic/<int:topic_id>',methods=['GET','POST'])
-@login_required
-def topic(topic_id):
-    topic=DiscussionTopic.query.get_or_404(topic_id)
-    if not _allowed(topic.course): flash('Access denied.','danger'); return redirect(url_for('forum.index'))
-    if request.method=='POST':
-        if topic.is_locked and not _moderator(topic): flash('This discussion is locked.','warning'); return redirect(url_for('forum.topic',topic_id=topic.id))
-        body=request.form.get('body','').strip(); attachment=_save_file(request.files.get('attachment'))
-        if not body and not attachment: flash('Reply or attachment is required.','danger')
-        else:
-            db.session.add(DiscussionPost(topic_id=topic.id,author_id=current_user.id,body=body or 'Attachment',attachment_path=attachment))
-            recipients={topic.author_id,topic.course.teacher_id,*[e.student_id for e in topic.course.enrollments]}; recipients.discard(current_user.id)
-            for uid in recipients: db.session.add(Notification(user_id=uid,title='New forum reply',message=f'New reply in “{topic.title}”.',link=url_for('forum.topic',topic_id=topic.id)))
-            db.session.commit(); flash('Reply posted.','success'); return redirect(url_for('forum.topic',topic_id=topic.id))
-    liked=DiscussionLike.query.filter_by(topic_id=topic.id,user_id=current_user.id).first() is not None
-    return render_template('forum/topic.html',topic=topic,liked=liked)
+  /* Metadata Footer */
+  .topic-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-course {
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .meta-author {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
 
-@forum_bp.route('/topic/<int:topic_id>/like',methods=['POST'])
-@login_required
-def like_topic(topic_id):
-    topic=DiscussionTopic.query.get_or_404(topic_id)
-    if not _allowed(topic.course): return redirect(url_for('forum.index'))
-    like=DiscussionLike.query.filter_by(topic_id=topic.id,user_id=current_user.id).first()
-    if like: db.session.delete(like)
-    else: db.session.add(DiscussionLike(topic_id=topic.id,user_id=current_user.id))
-    db.session.commit(); return redirect(url_for('forum.topic',topic_id=topic.id))
+  /* Empty State */
+  .empty-forum-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
 
-@forum_bp.route('/topic/<int:topic_id>/edit',methods=['GET','POST'])
-@login_required
-def edit_topic(topic_id):
-    topic=DiscussionTopic.query.get_or_404(topic_id)
-    if current_user.id!=topic.author_id and not _moderator(topic): flash('You cannot edit this topic.','danger'); return redirect(url_for('forum.topic',topic_id=topic.id))
-    if request.method=='POST':
-        topic.title=request.form.get('title','').strip(); topic.body=request.form.get('body','').strip(); topic.topic_type=request.form.get('topic_type',topic.topic_type) if _moderator(topic) else topic.topic_type
-        attachment=_save_file(request.files.get('attachment')); topic.attachment_path=attachment or topic.attachment_path; db.session.commit(); flash('Topic updated.','success'); return redirect(url_for('forum.topic',topic_id=topic.id))
-    return render_template('forum/edit_topic.html',topic=topic)
+  /* ---------------- Responsive Rules ---------------- */
+  @media (max-width: 900px) {
+    .filter-form-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .btn-filter-apply {
+      grid-column: span 2;
+      width: 100%;
+    }
+  }
 
-@forum_bp.route('/topic/<int:topic_id>/delete',methods=['POST'])
-@login_required
-def delete_topic(topic_id):
-    topic=DiscussionTopic.query.get_or_404(topic_id)
-    if current_user.id!=topic.author_id and not _moderator(topic): flash('You cannot delete this topic.','danger')
-    else: db.session.delete(topic); db.session.commit(); flash('Topic deleted.','success')
-    return redirect(url_for('forum.index'))
+  @media (max-width: 640px) {
+    .forum-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .forum-header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .btn-new-topic {
+      width: 100%;
+      justify-content: center;
+    }
+    .filter-form-grid {
+      grid-template-columns: 1fr;
+    }
+    .btn-filter-apply {
+      grid-column: span 1;
+    }
+    .topic-card {
+      padding: 16px;
+      gap: 14px;
+    }
+  }
+</style>
 
-@forum_bp.route('/topic/<int:topic_id>/moderate',methods=['POST'])
-@login_required
-def moderate(topic_id):
-    topic=DiscussionTopic.query.get_or_404(topic_id)
-    if not _moderator(topic): flash('Moderator access required.','danger'); return redirect(url_for('forum.topic',topic_id=topic.id))
-    action=request.form.get('action')
-    if action=='pin': topic.is_pinned=not topic.is_pinned
-    elif action=='lock': topic.is_locked=not topic.is_locked
-    db.session.commit(); return redirect(url_for('forum.topic',topic_id=topic.id))
+<div class="forum-page-wrapper">
 
-@forum_bp.route('/post/<int:post_id>/delete',methods=['POST'])
-@login_required
-def delete_post(post_id):
-    post=DiscussionPost.query.get_or_404(post_id)
-    if current_user.id!=post.author_id and not _moderator(post.topic): flash('You cannot delete this reply.','danger')
-    else: tid=post.topic_id; db.session.delete(post); db.session.commit(); flash('Reply deleted.','success'); return redirect(url_for('forum.topic',topic_id=tid))
-    return redirect(url_for('forum.topic',topic_id=post.topic_id))
+  <!-- Header Banner -->
+  <div class="forum-header-bar">
+    <div class="header-titles">
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Course Community</span>
+      <h1>Discussion Forum</h1>
+      <p>Ask questions, share ideas, and collaborate with your learning community.</p>
+    </div>
+    <a href="{{ url_for('forum.new_topic') if 'forum.new_topic' in url_map else '#' }}" class="btn-new-topic">
+      <i class="fa-solid fa-plus"></i> New Topic
+    </a>
+  </div>
+
+  <!-- Filter & Search Panel -->
+  <div class="filter-panel-card">
+    <form method="GET" class="filter-form-grid">
+      <!-- Search Input -->
+      <div class="search-field-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ request.args.get('q', '') }}" 
+          class="filter-input" 
+          placeholder="Search discussions, questions, or keywords..."
+        >
+      </div>
+
+      <!-- Course Select -->
+      <div>
+        <select name="course" class="filter-select">
+          <option value="">All courses</option>
+          {% if courses %}
+            {% for c in courses %}
+            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
+              {{ c.name }}
+            </option>
+            {% endfor %}
+          {% elif teacher and teacher.courses %}
+            {% for c in teacher.courses %}
+            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
+              {{ c.name }}
+            </option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <!-- Category / Type Select -->
+      <div>
+        <select name="type" class="filter-select">
+          <option value="">All types</option>
+          <option value="discussion" {% if request.args.get('type') == 'discussion' %}selected{% endif %}>Discussion</option>
+          <option value="question" {% if request.args.get('type') == 'question' %}selected{% endif %}>Question</option>
+          <option value="announcement" {% if request.args.get('type') == 'announcement' %}selected{% endif %}>Announcement</option>
+        </select>
+      </div>
+
+      <!-- Filter Button -->
+      <button type="submit" class="btn-filter-apply">
+        <i class="fa-solid fa-filter"></i> Filter
+      </button>
+    </form>
+  </div>
+
+  <!-- Discussions Feed -->
+  <div class="topics-feed">
+    {% for topic in topics or discussions or [] %}
+    <div class="topic-card">
+      <div class="vote-box">
+        <i class="fa-solid fa-thumbs-up"></i>
+        <span class="vote-count">{{ topic.votes if topic.votes is defined else 0 }}</span>
+      </div>
+
+      <div class="topic-body">
+        <div class="topic-badge-row">
+          <span class="type-badge">{{ topic.category if topic.category is defined else 'Discussion' }}</span>
+        </div>
+
+        <a href="{{ url_for('forum.view_topic', topic_id=topic.id) if topic.id is defined else '#' }}" class="topic-title">
+          {{ topic.title }}
+        </a>
+
+        <p class="topic-snippet">
+          {{ topic.content }}
+        </p>
+
+        <div class="topic-meta-row">
+          <span class="meta-item meta-course">
+            <i class="fa-solid fa-book-bookmark"></i> {{ topic.course.name if topic.course is defined else 'General' }}
+          </span>
+          <span class="meta-item meta-author">
+            <i class="fa-regular fa-user"></i> {{ topic.author.name_person or topic.author.username if topic.author is defined else 'Learner' }}
+          </span>
+          <span class="meta-item">
+            <i class="fa-regular fa-comment-dots"></i> {{ topic.replies|length if topic.replies is defined else 0 }} replies
+          </span>
+          <span class="meta-item">
+            <i class="fa-regular fa-clock"></i> {{ topic.created_at.strftime('%d %b %Y') if topic.created_at is defined else '' }}
+          </span>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-forum-card">
+      <i class="fa-regular fa-comments" style="font-size: 42px; color: #cbd5e1; margin-bottom: 14px; display: block;"></i>
+      <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">No Discussions Yet</h3>
+      <p style="font-size: 13px; margin: 0 0 20px;">Be the first to start a conversation or ask a question in this community.</p>
+      <a href="{{ url_for('forum.new_topic') if 'forum.new_topic' in url_map else '#' }}" class="btn-new-topic" style="display: inline-flex;">
+        <i class="fa-solid fa-plus"></i> Start First Topic
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
