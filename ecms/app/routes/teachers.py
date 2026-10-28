@@ -132,7 +132,7 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login with a dedicated sandboxed demo account."""
+    """Handle teacher login with mirrored sandbox demo account."""
     if current_user.is_authenticated and getattr(current_user, 'role', '').lower() == "teacher":
         return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
@@ -140,17 +140,20 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المعزول والآمن
+        # 1. الدخول التجريبي المعزول مع استنساخ بيانات المعلم الأصلي
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             try:
                 demo_teacher = User.query.filter_by(username="demo_teacher").first()
 
+                # إنشاء حساب المعلم التجريبي إذا لم يكن موجوداً
                 if not demo_teacher:
                     demo_teacher = User(
                         username="demo_teacher",
                         email="instructor_demo@learnova.edu",
                         role="teacher",
-                        name_person="Dr. Demo Instructor"
+                        name_person="Dr. Demo Instructor",
+                        employee_id="DEMO-T101",
+                        department="Computer Science"
                     )
                     if hasattr(demo_teacher, 'set_password'):
                         demo_teacher.set_password("demo123")
@@ -160,29 +163,67 @@ def login():
                     db.session.add(demo_teacher)
                     db.session.commit()
 
-                # إضافة مساق تجريبي إذا لم يكن لديه مساقات بعد
+                # إذا لم يكن لدى المعلم التجريبي مساقات، نستنسخ مساق المعلم الحقيقي
                 if not demo_teacher.courses:
-                    # التحقق من عدم تكرار كود المساق
-                    existing_course = Course.query.filter_by(code="CS101").first()
-                    course_code = "CS101" if not existing_course else "DEMO101"
+                    # جلب أول معلم حقيقي في قاعدة البيانات يملك مساقاً
+                    real_teacher = User.query.filter(User.role.ilike("teacher"), User.id != demo_teacher.id).first()
+                    
+                    if real_teacher and real_teacher.courses:
+                        src_course = real_teacher.courses[0]
+                        # إنشاء مساق مكرر مستقل
+                        cloned_course = Course(
+                            code=f"{src_course.code}-DEMO",
+                            name=f"{src_course.name} (Interactive Demo)",
+                            description=src_course.description,
+                            teacher_id=demo_teacher.id,
+                            course_identifier=f"{getattr(src_course, 'course_identifier', 'demo')}-sandbox"
+                        )
+                        db.session.add(cloned_course)
+                        db.session.flush()
 
-                    demo_course = Course(
-                        code=course_code,
-                        name="Introduction to Web Engineering",
-                        description="Sandbox course for evaluating grading, units, and student interaction.",
-                        teacher_id=demo_teacher.id
-                    )
-                    db.session.add(demo_course)
-                    db.session.commit()
+                        # نسخ الوحدات الدراسية (Units)
+                        for u in src_course.units:
+                            cloned_unit = Unit(
+                                title=u.title,
+                                file_path=u.file_path,
+                                course_id=cloned_course.id
+                            )
+                            db.session.add(cloned_unit)
+
+                        # نسخ الواجبات (Assignments)
+                        for a in src_course.assignments:
+                            if a.assignment_type != "quiz":
+                                cloned_assign = Assignment(
+                                    title=a.title,
+                                    description=a.description,
+                                    assignment_type=a.assignment_type,
+                                    start_date=a.start_date,
+                                    due_date=a.due_date,
+                                    course_id=cloned_course.id
+                                )
+                                db.session.add(cloned_assign)
+                                db.session.flush()
+
+                                # تسجيل طالب تجريبي لتجربة التصحيح
+                                any_student = User.query.filter_by(role="student").first()
+                                if any_student:
+                                    if not Enrollment.query.filter_by(student_id=any_student.id, course_id=cloned_course.id).first():
+                                        db.session.add(Enrollment(student_id=any_student.id, course_id=cloned_course.id))
+                                    db.session.add(Submission(
+                                        student_id=any_student.id,
+                                        assignment_id=cloned_assign.id,
+                                        feedback="Pending review"
+                                    ))
+
+                        db.session.commit()
 
             except Exception:
                 db.session.rollback()
-                # في حال حدوث أي استثناء، نأخذ أول معلم متاح أو الحساب التجريبي ونسجل دخوله فوراً
                 demo_teacher = User.query.filter_by(username="demo_teacher").first() or User.query.filter_by(role="teacher").first()
 
             if demo_teacher:
                 login_user(demo_teacher)
-                flash("Signed in as Demo Instructor.", "success")
+                flash("Signed in as Demo Instructor (Safe Sandbox Environment).", "success")
                 return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
 
         # 2. التحقق الاعتيادي لباقي المستخدمين
