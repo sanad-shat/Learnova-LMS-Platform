@@ -27,7 +27,6 @@
     padding: 24px 28px 60px;
   }
 
-  /* ---------------- Header Banner ---------------- */
   .submissions-header-bar {
     display: flex;
     justify-content: space-between;
@@ -62,7 +61,6 @@
     box-shadow: var(--shadow-card);
   }
 
-  /* ---------------- KPI Stats Cards ---------------- */
   .kpi-metrics-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -102,7 +100,6 @@
     margin: 0;
   }
 
-  /* ---------------- Filter Tabs ---------------- */
   .filters-row {
     display: flex;
     gap: 10px;
@@ -125,7 +122,6 @@
     border-color: var(--primary);
   }
 
-  /* ---------------- Submission Cards ---------------- */
   .submissions-list {
     display: flex;
     flex-direction: column;
@@ -143,7 +139,6 @@
     box-shadow: var(--shadow-hover);
   }
 
-  /* Card Inner Grid */
   .submission-card-layout {
     display: grid;
     grid-template-columns: 1.6fr 1fr;
@@ -151,7 +146,6 @@
     padding: 26px 30px;
   }
 
-  /* Student & Task Meta */
   .student-head-info {
     display: flex;
     align-items: center;
@@ -184,7 +178,6 @@
     color: var(--text-muted);
   }
 
-  /* Submission Content Area */
   .submission-body-box {
     background: #f8fafc;
     border: 1px solid var(--border-normal);
@@ -201,7 +194,6 @@
     letter-spacing: 0.5px;
   }
 
-  /* Answers List (Decoded JSON) */
   .answers-item {
     background: #ffffff;
     border: 1px solid #e2e8f0;
@@ -221,7 +213,6 @@
     margin-right: 6px;
   }
 
-  /* File Download Box */
   .attached-file-btn {
     display: inline-flex;
     align-items: center;
@@ -241,7 +232,6 @@
     background: #eff6ff;
   }
 
-  /* Time & Status Footer */
   .submission-meta-footer {
     display: flex;
     align-items: center;
@@ -264,7 +254,6 @@
     color: #b45309;
   }
 
-  /* Evaluation Form Column */
   .grading-form-container {
     background: #ffffff;
     border: 1px solid var(--border-normal);
@@ -349,7 +338,6 @@
     color: var(--text-muted);
   }
 
-  /* ---------------- Responsive Rules ---------------- */
   @media (max-width: 992px) {
     .kpi-metrics-row {
       grid-template-columns: 1fr;
@@ -376,7 +364,6 @@
 
 <div class="submissions-page-wrapper">
 
-  <!-- Header Section -->
   <div class="submissions-header-bar">
     <div class="header-titles">
       <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Assessment Review</span>
@@ -389,7 +376,6 @@
     </div>
   </div>
 
-  <!-- KPI Overview Cards -->
   {% set total_subs = submissions|length %}
   {% set pending_subs = submissions|selectattr('grade', 'none')|list|length %}
   {% set graded_subs = total_subs - pending_subs %}
@@ -426,21 +412,19 @@
     </div>
   </div>
 
-  <!-- Filter Buttons -->
   <div class="filters-row">
     <button type="button" class="filter-btn active" onclick="filterSubmissions('all', this)">All ({{ total_subs }})</button>
     <button type="button" class="filter-btn" onclick="filterSubmissions('pending', this)">Pending ({{ pending_subs }})</button>
     <button type="button" class="filter-btn" onclick="filterSubmissions('graded', this)">Graded ({{ graded_subs }})</button>
   </div>
 
-  <!-- Submissions Feed -->
   <div class="submissions-list">
     {% for s in submissions %}
     {% set is_graded = s.grade is not none %}
+    {% set sub_content = s.content or s.submission_text or s.answers or '' %}
     <div class="submission-card" data-status="{{ 'graded' if is_graded else 'pending' }}">
       <div class="submission-card-layout">
         
-        <!-- Left: Student info & Submission Body -->
         <div>
           <div class="student-head-info">
             <div class="student-avatar">
@@ -456,13 +440,15 @@
             </div>
           </div>
 
-          <!-- Submission Answer Content -->
           <div class="submission-body-box">
             <h5>Student Submission Content</h5>
             
-            <!-- Raw content container with dynamic JSON parsing via JS -->
-            <div class="submission-content-text" id="sub_content_{{ s.id }}">
-              {{ s.content or 'No text submission entered.' }}
+            <div class="submission-content-text" data-raw="{{ sub_content }}">
+              {% if sub_content %}
+                {{ sub_content }}
+              {% else %}
+                <span style="color: var(--text-muted);">No text submission entered.</span>
+              {% endif %}
             </div>
 
             {% if s.file_path %}
@@ -475,7 +461,6 @@
             {% endif %}
           </div>
 
-          <!-- Footer Timestamps & Tags -->
           <div class="submission-meta-footer">
             <span>
               <i class="fa-regular fa-calendar-check" style="color: var(--text-muted); margin-right: 4px;"></i>
@@ -494,13 +479,12 @@
           </div>
         </div>
 
-        <!-- Right: Instructor Grading Panel -->
         <div class="grading-form-container">
           <form method="POST" action="{{ url_for('teachers.grade_submission', teacher_id=teacher.id, submission_id=s.id) }}">
             
             <div class="grade-input-group">
               <label class="form-label" for="grade_{{ s.id }}">
-                Grade Score (/100)[cite: 16]
+                Grade Score (/100)
               </label>
               <input 
                 type="number" 
@@ -530,7 +514,7 @@
             </div>
 
             <button type="submit" class="btn-save-evaluation">
-              <i class="fa-solid fa-check-double"></i> Save Evaluation[cite: 16]
+              <i class="fa-solid fa-check-double"></i> Save Evaluation
             </button>
           </form>
         </div>
@@ -548,16 +532,14 @@
 
 </div>
 
-<!-- JSON Decoder & Filtering Script -->
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    // تنسيق إجابات الكويز المحفوظة بصيغة JSON تلقائياً
     const contentNodes = document.querySelectorAll('.submission-content-text');
     contentNodes.forEach(node => {
-      const text = node.textContent.trim();
-      if (text.startsWith('{') && text.endsWith('}')) {
+      const rawText = (node.getAttribute('data-raw') || node.textContent).trim();
+      if (rawText.startsWith('{') && rawText.endsWith('}')) {
         try {
-          const parsed = JSON.parse(text);
+          const parsed = JSON.parse(rawText);
           let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
           let itemIndex = 1;
           for (const key in parsed) {
@@ -572,7 +554,7 @@
           html += '</div>';
           node.innerHTML = html;
         } catch (e) {
-          // في حال لم يكن JSON صالحاً، يترك النص كما هو
+          // في حال عدم صلاحية JSON يظل النص المعروض كما هو
         }
       }
     });
@@ -587,7 +569,6 @@
       .replace(/'/g, '&#039;');
   }
 
-  // تصفية البطاقات حسب الحالة (الكل، قيد المراجعة، مقيم)
   function filterSubmissions(status, btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
