@@ -1,7 +1,654 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ course.name }} | Learnova Instructor</title><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"><link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}"></head><body><div class="course-workspace"><aside class="workspace-side"><a class="sidebar-brand" href="{{ url_for('teachers.dashboard',teacher_id=teacher.id) }}"><img src="{{ url_for('static',filename='brand/learnova-icon.svg') }}"><span class="brand-copy"><strong>Learnova <b>LMS</b></strong><small>INSTRUCTOR PORTAL</small></span></a><div class="nav-section">Course Workspace</div><nav class="side-nav"><a href="{{ url_for('teachers.dashboard',teacher_id=teacher.id) }}"><i class="fa-solid fa-house"></i>Dashboard</a><a class="active" href="#overview"><i class="fa-solid fa-book-open"></i>Overview</a><a href="#units"><i class="fa-solid fa-layer-group"></i>Units</a><a href="#assignments"><i class="fa-solid fa-list-check"></i>Assignments</a><a href="#quizzes"><i class="fa-solid fa-circle-question"></i>Quizzes</a><a href="#exams"><i class="fa-solid fa-file-circle-check"></i>Exams</a><a href="#students"><i class="fa-solid fa-users"></i>Students</a><a href="{{ url_for('forum.index',course_id=course.id) }}"><i class="fa-solid fa-comments"></i>Discussions</a></nav></aside><main class="workspace-main"><div class="workspace-content"><section class="workspace-hero" id="overview"><div><span class="course-chip">{{ course.code }}</span><h1>{{ course.name }}</h1><p>{{ course.description or 'Course learning and assessment workspace.' }}</p><small>Identifier: {{ course.course_identifier }}</small></div><i class="fa-solid fa-graduation-cap" style="font-size:70px;opacity:.25"></i></section>
-<section class="stats-grid"><article class="metric-card"><div class="metric-icon purple"><i class="fa-solid fa-layer-group"></i></div><div><small>Units</small><strong>{{ course.units|length }}</strong><em>Learning materials</em></div></article><article class="metric-card"><div class="metric-icon blue"><i class="fa-solid fa-list-check"></i></div><div><small>Assignments</small><strong>{{ course.assignments|length }}</strong><em>Activities</em></div></article><article class="metric-card"><div class="metric-icon green"><i class="fa-solid fa-circle-question"></i></div><div><small>Quizzes</small><strong>{{ course.quizzes|length }}</strong><em>Assessments</em></div></article><article class="metric-card"><div class="metric-icon amber"><i class="fa-solid fa-users"></i></div><div><small>Students</small><strong>{{ course.enrollments|length }}</strong><em>Enrolled</em></div></article></section>
-<section class="workspace-section" id="units"><div class="workspace-section-head"><h2><i class="fa-solid fa-layer-group"></i> Learning Units</h2><a class="primary-btn" href="{{ url_for('teachers.add_unit',teacher_id=teacher.id,course_id=course.id) }}"><i class="fa-solid fa-plus"></i>Add Unit</a></div>{% for unit in course.units %}<article class="resource-card"><div><h3>{{ unit.title }}</h3><p>{{ unit.content[:130] if unit.content else 'No content description.' }}</p>{% if unit.filename %}<small><i class="fa-solid fa-paperclip"></i> {{ unit.filename }}</small>{% endif %}</div><div class="resource-actions"><a class="action-btn edit" href="{{ url_for('teachers.edit_unit_page',teacher_id=teacher.id,course_id=course.id,unit_id=unit.id) }}">Edit</a><form method="post" action="{{ url_for('teachers.delete_unit',teacher_id=teacher.id,course_id=course.id,unit_id=unit.id) }}" onsubmit="return confirm('Delete this unit?')"><button class="action-btn delete">Delete</button></form></div></article>{% else %}<div class="empty-state compact">No units yet.</div>{% endfor %}</section>
-<section class="workspace-section" id="assignments"><div class="workspace-section-head"><h2><i class="fa-solid fa-list-check"></i> Assignments</h2><a class="primary-btn" href="{{ url_for('teachers.add_assignment',teacher_id=teacher.id,course_id=course.id) }}"><i class="fa-solid fa-plus"></i>Add Assignment</a></div>{% for a in course.assignments %}{% if a.assignment_type != 'quiz' %}<article class="resource-card"><div><h3>{{ a.title }}</h3><p>{{ a.description or 'No description' }}</p><small>Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') }}</small></div><div class="resource-actions"><a class="action-btn edit" href="{{ url_for('teachers.edit_assignment_page',teacher_id=teacher.id,course_id=course.id,assignment_id=a.id) }}">Edit</a><form method="post" action="{{ url_for('teachers.delete_assignment',teacher_id=teacher.id,course_id=course.id,assignment_id=a.id) }}" onsubmit="return confirm('Delete assignment and submissions?')"><button class="action-btn delete">Delete</button></form></div></article>{% endif %}{% else %}<div class="empty-state compact">No assignments yet.</div>{% endfor %}</section>
-<section class="workspace-section" id="quizzes"><div class="workspace-section-head"><h2><i class="fa-solid fa-circle-question"></i> Quizzes</h2><a class="primary-btn" href="{{ url_for('teachers.add_quiz',teacher_id=teacher.id,course_id=course.id) }}"><i class="fa-solid fa-plus"></i>Add Quiz</a></div>{% for q in course.quizzes %}<article class="resource-card"><div><h3>{{ q.title }}</h3><p>{{ q.description or 'Quiz assessment' }}</p><small>{{ q.questions|length }} questions</small></div><div class="resource-actions"><a class="action-btn edit" href="{{ url_for('teachers.add_quiz_questions',quiz_id=q.id) }}">Questions</a><form method="post" action="{{ url_for('teachers.delete_quiz',teacher_id=teacher.id,course_id=course.id,quiz_id=q.id) }}" onsubmit="return confirm('Delete this quiz?')"><button class="action-btn delete">Delete</button></form></div></article>{% else %}<div class="empty-state compact">No quizzes yet.</div>{% endfor %}</section>
-<section class="workspace-section" id="exams"><div class="workspace-section-head"><h2><i class="fa-solid fa-file-circle-check"></i> Exams</h2><a class="primary-btn" href="{{ url_for('teachers.add_exam',teacher_id=teacher.id,course_id=course.id) }}"><i class="fa-solid fa-plus"></i>Add Exam</a></div>{% for e in course.exams %}<article class="resource-card"><div><h3>{{ e.title }}</h3><p>{{ e.description or 'Course exam' }}</p><small>Total score: {{ e.total_score }}</small></div><div class="resource-actions"><a class="action-btn edit" href="{{ url_for('teachers.preview_exam',teacher_id=teacher.id,course_id=course.id,exam_id=e.id) }}">Preview</a><a class="action-btn enroll" href="{{ url_for('teachers.edit_exam_page',teacher_id=teacher.id,course_id=course.id,exam_id=e.id) }}">Edit</a><form method="post" action="{{ url_for('teachers.delete_exam',teacher_id=teacher.id,course_id=course.id,exam_id=e.id) }}" onsubmit="return confirm('Delete this exam?')"><button class="action-btn delete">Delete</button></form></div></article>{% else %}<div class="empty-state compact">No exams yet.</div>{% endfor %}</section>
-<section class="workspace-section" id="students"><div class="workspace-section-head"><h2><i class="fa-solid fa-users"></i> Enrolled Students</h2></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Email</th><th>University ID</th><th>Action</th></tr></thead><tbody>{% for enrollment in course.enrollments %}<tr><td>{{ enrollment.student.name_person or enrollment.student.username }}</td><td>{{ enrollment.student.email }}</td><td>{{ enrollment.student.university_id or '—' }}</td><td><a class="action-btn edit" href="{{ url_for('teachers.student_details',teacher_id=teacher.id,course_id=course.id,student_id=enrollment.student.id) }}">View Progress</a></td></tr>{% else %}<tr><td colspan="4">No students enrolled.</td></tr>{% endfor %}</tbody></table></div></section></div></main></div></body></html>
+{% extends "teacher/base.html" %}
+{% block title %}{{ course.name }} | Course Workspace{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 12px 24px -4px rgba(37, 99, 235, 0.08);
+  }
+
+  .course-workspace-wrap {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  /* ---------------- Course Hero Banner ---------------- */
+  .course-hero-card {
+    position: relative;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #1d4ed8 100%);
+    border-radius: var(--radius-xl);
+    padding: 36px 40px;
+    color: #ffffff;
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: 0 16px 36px -10px rgba(37, 99, 235, 0.35);
+  }
+  .course-hero-card::after {
+    content: '\f19d';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 30px;
+    bottom: -15px;
+    font-size: 150px;
+    color: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+  }
+  .hero-tag-pills {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .course-code-tag {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .course-hero-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+  }
+  .course-hero-sub {
+    font-size: 15px;
+    color: #cbd5e1;
+    margin: 0 0 12px;
+  }
+  .course-identifier-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #93c5fd;
+    font-weight: 600;
+  }
+
+  /* ---------------- Metrics Grid ---------------- */
+  .workspace-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 30px;
+  }
+  .metric-tile-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .metric-tile-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+  .metric-tile-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .metric-tile-info h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+  }
+  .metric-tile-info p {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ---------------- Content Blocks ---------------- */
+  .module-section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .module-section-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+  .module-header-title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-add-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--primary);
+    color: #ffffff;
+    padding: 9px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  }
+  .btn-add-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+  }
+
+  /* ---------------- Item Rows ---------------- */
+  .items-list-group {
+    display: flex;
+    flex-direction: column;
+  }
+  .module-item-row {
+    padding: 18px 26px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    transition: background 0.15s ease;
+  }
+  .module-item-row:last-child {
+    border-bottom: none;
+  }
+  .module-item-row:hover {
+    background: #fbfcfe;
+  }
+  .item-meta-main h4 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .item-meta-main p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .item-meta-tags {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+  .item-meta-tags span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* ---------------- Action Buttons ---------------- */
+  .item-actions-cluster {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .btn-ctrl {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-ctrl-edit { background: #eff6ff; color: #2563eb; }
+  .btn-ctrl-edit:hover { background: #2563eb; color: #ffffff; }
+  
+  .btn-ctrl-preview { background: #eff6ff; color: #0284c7; }
+  .btn-ctrl-preview:hover { background: #0284c7; color: #ffffff; }
+
+  .btn-ctrl-questions { background: #f0fdf4; color: #16a34a; }
+  .btn-ctrl-questions:hover { background: #16a34a; color: #ffffff; }
+
+  .btn-ctrl-del { background: #fef2f2; color: #dc2626; }
+  .btn-ctrl-del:hover { background: #dc2626; color: #ffffff; }
+
+  /* ---------------- Enrolled Students Table ---------------- */
+  .students-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .students-data-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .students-data-table th {
+    background: #f8fafc;
+    padding: 14px 26px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-normal);
+  }
+  .students-data-table td {
+    padding: 16px 26px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .students-data-table tr:hover td {
+    background: #fbfcfe;
+  }
+  .student-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .student-avatar-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #bfdbfe;
+  }
+  .btn-progress-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 16px;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-progress-view:hover {
+    background: var(--primary-dark);
+  }
+
+  .empty-state-notice {
+    text-align: center;
+    padding: 36px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* ---------------- Responsive Rules ---------------- */
+  @media (max-width: 1100px) {
+    .workspace-metrics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .course-workspace-wrap {
+      padding: 16px 14px 40px;
+    }
+    .course-hero-card {
+      padding: 24px 20px;
+    }
+    .course-hero-title {
+      font-size: 24px;
+    }
+    .workspace-metrics-grid {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .module-item-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+    }
+    .item-actions-cluster {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    .btn-ctrl {
+      flex: 1;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="course-workspace-wrap">
+
+  <!-- Course Header Banner -->
+  <div class="course-hero-card">
+    <div class="hero-tag-pills">
+      <span class="course-code-tag">{{ course.code }}</span>
+    </div>
+    <h1 class="course-hero-title">{{ course.name }}</h1>
+    <p class="course-hero-sub">Course learning, assessment workspace, and student directory.</p>
+    <div class="course-identifier-badge">
+      <i class="fa-solid fa-barcode"></i> Identifier: {{ course.code }}
+    </div>
+  </div>
+
+  <!-- Quick KPI Tiles -->
+  <div class="workspace-metrics-grid">
+    <div class="metric-tile-card">
+      <div class="metric-tile-icon" style="background: #eff6ff; color: #2563eb;">
+        <i class="fa-solid fa-folder-tree"></i>
+      </div>
+      <div class="metric-tile-info">
+        <h3>{{ units|length }}</h3>
+        <p>Learning Units</p>
+      </div>
+    </div>
+
+    <div class="metric-tile-card">
+      <div class="metric-tile-icon" style="background: #eff6ff; color: #0284c7;">
+        <i class="fa-solid fa-list-check"></i>
+      </div>
+      <div class="metric-tile-info">
+        <h3>{{ assignments|length }}</h3>
+        <p>Assignments</p>
+      </div>
+    </div>
+
+    <div class="metric-tile-card">
+      <div class="metric-tile-icon" style="background: #f0fdf4; color: #16a34a;">
+        <i class="fa-solid fa-circle-question"></i>
+      </div>
+      <div class="metric-tile-info">
+        <h3>{{ quizzes|length }}</h3>
+        <p>Quizzes</p>
+      </div>
+    </div>
+
+    <div class="metric-tile-card">
+      <div class="metric-tile-icon" style="background: #fffbeb; color: #d97706;">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+      <div class="metric-tile-info">
+        <h3>{{ students|length }}</h3>
+        <p>Enrolled Students</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. Learning Units Section -->
+  <div class="module-section-card">
+    <div class="module-section-header">
+      <h2 class="module-header-title">
+        <i class="fa-solid fa-folder-open" style="color: #2563eb;"></i> Learning Units
+      </h2>
+      <a href="{{ url_for('teachers.add_unit', teacher_id=teacher.id, course_id=course.id) }}" class="btn-add-primary">
+        <i class="fa-solid fa-plus"></i> Add Unit
+      </a>
+    </div>
+
+    <div class="items-list-group">
+      {% for u in units %}
+      <div class="module-item-row">
+        <div class="item-meta-main">
+          <h4>{{ u.title }}</h4>
+          <p>{{ u.content or 'No content description.' }}</p>
+          {% if u.file_path %}
+          <div class="item-meta-tags">
+            <span><i class="fa-solid fa-paperclip" style="color: #2563eb;"></i> Attached Material</span>
+          </div>
+          {% endif %}
+        </div>
+        <div class="item-actions-cluster">
+          <a href="{{ url_for('teachers.edit_unit_page', teacher_id=teacher.id, course_id=course.id, unit_id=u.id) }}" class="btn-ctrl btn-ctrl-edit">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+          <form method="POST" action="{{ url_for('teachers.delete_unit', teacher_id=teacher.id, course_id=course.id, unit_id=u.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this unit?');">
+            <button type="submit" class="btn-ctrl btn-ctrl-del">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state-notice">
+        <i class="fa-solid fa-folder-open" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
+        No learning units uploaded yet. Click <strong>+ Add Unit</strong> to publish materials.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 2. Assignments Section -->
+  <div class="module-section-card">
+    <div class="module-section-header">
+      <h2 class="module-header-title">
+        <i class="fa-solid fa-list-check" style="color: #0284c7;"></i> Assignments
+      </h2>
+      <a href="{{ url_for('teachers.add_assignment', teacher_id=teacher.id, course_id=course.id) }}" class="btn-add-primary">
+        <i class="fa-solid fa-plus"></i> Add Assignment
+      </a>
+    </div>
+
+    <div class="items-list-group">
+      {% for a in assignments %}
+      {% if a.assignment_type != 'quiz' %}
+      <div class="module-item-row">
+        <div class="item-meta-main">
+          <h4>{{ a.title }}</h4>
+          <p>{{ a.description or 'No instructions provided.' }}</p>
+          <div class="item-meta-tags">
+            <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date else 'No deadline' }}</span>
+            <span><i class="fa-solid fa-inbox"></i> {{ a.submissions|length }} Submissions</span>
+          </div>
+        </div>
+        <div class="item-actions-cluster">
+          <a href="{{ url_for('teachers.edit_assignment_page', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" class="btn-ctrl btn-ctrl-edit">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+          <form method="POST" action="{{ url_for('teachers.delete_assignment', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
+            <button type="submit" class="btn-ctrl btn-ctrl-del">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="empty-state-notice">
+        <i class="fa-solid fa-clipboard" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
+        No homework assignments created yet.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 3. Quizzes Section -->
+  <div class="module-section-card">
+    <div class="module-section-header">
+      <h2 class="module-header-title">
+        <i class="fa-solid fa-circle-question" style="color: #16a34a;"></i> Quizzes
+      </h2>
+      <a href="{{ url_for('teachers.add_quiz', teacher_id=teacher.id, course_id=course.id) }}" class="btn-add-primary">
+        <i class="fa-solid fa-plus"></i> Add Quiz
+      </a>
+    </div>
+
+    <div class="items-list-group">
+      {% for q in quizzes %}
+      <div class="module-item-row">
+        <div class="item-meta-main">
+          <h4>{{ q.title }}</h4>
+          <p>{{ q.description or 'No instructions.' }}</p>
+          <div class="item-meta-tags">
+            <span><i class="fa-solid fa-list-ol" style="color: #16a34a;"></i> {{ q.questions|length }} Questions</span>
+            <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Ends: {{ q.end_date.strftime('%d %b %Y, %H:%M') if q.end_date else '—' }}</span>
+          </div>
+        </div>
+        <div class="item-actions-cluster">
+          <a href="{{ url_for('teachers.add_quiz_questions', quiz_id=q.id) }}" class="btn-ctrl btn-ctrl-questions">
+            <i class="fa-solid fa-sliders"></i> Questions
+          </a>
+          <a href="{{ url_for('teachers.edit_quiz_page', teacher_id=teacher.id, course_id=course.id, quiz_id=q.id) }}" class="btn-ctrl btn-ctrl-edit">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+          <form method="POST" action="{{ url_for('teachers.delete_quiz', teacher_id=teacher.id, course_id=course.id, quiz_id=q.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this quiz?');">
+            <button type="submit" class="btn-ctrl btn-ctrl-del">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state-notice">
+        <i class="fa-solid fa-circle-question" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
+        No quizzes created yet.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 4. Exams Section -->
+  <div class="module-section-card">
+    <div class="module-section-header">
+      <h2 class="module-header-title">
+        <i class="fa-solid fa-file-signature" style="color: #7c3aed;"></i> Exams
+      </h2>
+      <a href="{{ url_for('teachers.add_exam', teacher_id=teacher.id, course_id=course.id) }}" class="btn-add-primary">
+        <i class="fa-solid fa-plus"></i> Add Exam
+      </a>
+    </div>
+
+    <div class="items-list-group">
+      {% for e in exams %}
+      <div class="module-item-row">
+        <div class="item-meta-main">
+          <h4>{{ e.title }}</h4>
+          <p>{{ e.description or 'Course Exam' }}</p>
+          <div class="item-meta-tags">
+            <span><i class="fa-solid fa-award" style="color: #7c3aed;"></i> Total Score: {{ e.total_score }}</span>
+            <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Date: {{ e.start_date.strftime('%d %b %Y, %H:%M') if e.start_date else '—' }}</span>
+          </div>
+        </div>
+        <div class="item-actions-cluster">
+          <a href="{{ url_for('teachers.preview_exam', teacher_id=teacher.id, course_id=course.id, exam_id=e.id) }}" class="btn-ctrl btn-ctrl-preview">
+            <i class="fa-solid fa-eye"></i> Preview
+          </a>
+          <a href="{{ url_for('teachers.edit_exam_page', teacher_id=teacher.id, course_id=course.id, exam_id=e.id) }}" class="btn-ctrl btn-ctrl-edit">
+            <i class="fa-solid fa-pen-to-square"></i> Edit
+          </a>
+          <form method="POST" action="{{ url_for('teachers.delete_exam', teacher_id=teacher.id, course_id=course.id, exam_id=e.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this exam?');">
+            <button type="submit" class="btn-ctrl btn-ctrl-del">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+      {% else %}
+      <div class="empty-state-notice">
+        <i class="fa-solid fa-file-signature" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
+        No exams published yet.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 5. Enrolled Students Section -->
+  <div class="module-section-card">
+    <div class="module-section-header">
+      <h2 class="module-header-title">
+        <i class="fa-solid fa-users" style="color: #2563eb;"></i> Enrolled Students
+      </h2>
+      <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);">{{ students|length }} Enrolled</span>
+    </div>
+
+    <div class="students-table-wrap">
+      <table class="students-data-table">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Email</th>
+            <th>University ID</th>
+            <th style="text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr>
+            <td>
+              <div class="student-user-cell">
+                <div class="student-avatar-badge">
+                  {{ (student.name_person or student.username)[0]|upper }}
+                </div>
+                <strong>{{ student.name_person or student.username }}</strong>
+              </div>
+            </td>
+            <td>{{ student.email }}</td>
+            <td style="font-family: monospace; font-weight: 600;">{{ student.university_id or student.id }}</td>
+            <td style="text-align: right;">
+              <a href="{{ url_for('teachers.student_details', teacher_id=teacher.id, course_id=course.id, student_id=student.id) }}" class="btn-progress-view">
+                <i class="fa-solid fa-chart-line"></i> View Progress
+              </a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 36px; color: var(--text-muted);">
+              No students are currently enrolled in this course.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
