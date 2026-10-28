@@ -41,7 +41,15 @@
       <div class="header-left"><button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="teacherGlobalSearch" placeholder="Search this page..."></div></div>
       <div class="header-right">
         <a class="header-icon" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-regular fa-bell"></i>{% if nav_notifications %}<span class="icon-badge">{{ nav_notifications }}</span>{% endif %}</a>
-        <div class="profile-chip"><div class="profile-avatar">{{ (teacher.name_person or teacher.username)[0]|upper }}</div><div class="profile-copy"><strong>{{ teacher.name_person or teacher.username }}</strong><small>Instructor</small></div></div>
+        <div class="profile-chip">
+          {% if session.get('is_demo') %}
+            <div class="profile-avatar">D</div>
+            <div class="profile-copy"><strong>Dr. Demo Instructor</strong><small>@demo_teacher &bull; instructor@learnova.edu</small></div>
+          {% else %}
+            <div class="profile-avatar">{{ (teacher.name_person or teacher.username)[0]|upper }}</div>
+            <div class="profile-copy"><strong>{{ teacher.name_person or teacher.username }}</strong><small>{{ teacher.email }}</small></div>
+          {% endif %}
+        </div>
       </div>
     </header>
     <main class="content">
