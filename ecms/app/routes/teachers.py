@@ -191,15 +191,23 @@ def dashboard(teacher_id):
     upcoming = sorted([a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()], key=lambda a: a.due_date)[:5]
     stats = {'courses': len(courses), 'students': len(student_ids), 'assignments': assignment_count, 'quizzes': quiz_count, 'ungraded': ungraded}
 
-    # إذا كان الزائر داخل عبر زر الديمو، نعدل الاسم المعروض في الذاكرة فقط دون مساس بقاعدة البيانات
-    if session.get('is_demo'):
-        teacher.name_person = "Dr. Demo Instructor"
-        teacher.email = "instructor@learnova.edu"
-        teacher.username = "demo_teacher"
+    # تجهيز النصوص للعرض فقط دون لمس كائن الـ ORM
+    is_demo = session.get('is_demo', False)
+    display_name = "Dr. Demo Instructor" if is_demo else (teacher.name_person or teacher.username)
+    display_email = "instructor@learnova.edu" if is_demo else teacher.email
+    display_username = "demo_teacher" if is_demo else teacher.username
 
-    return render_template("teacher/dashboard.html", teacher=teacher, courses=courses, stats=stats, upcoming=upcoming, **_teacher_nav_context(teacher))
-
-
+    return render_template(
+        "teacher/dashboard.html",
+        teacher=teacher,
+        courses=courses,
+        stats=stats,
+        upcoming=upcoming,
+        display_name=display_name,
+        display_email=display_email,
+        display_username=display_username,
+        **_teacher_nav_context(teacher)
+    )
 # ------------------------- Courses List -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses")
 @login_required
