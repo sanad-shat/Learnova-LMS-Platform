@@ -118,6 +118,7 @@ def _teacher_nav_context(teacher):
     unread = Notification.query.filter_by(user_id=teacher.id, is_read=False).count()
     return {'nav_ungraded': ungraded, 'nav_notifications': unread}
 
+
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -131,29 +132,42 @@ def login():
 
         # 1. الدخول التجريبي المباشر بحساب المعلم المتاح
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
-            # جلب المعلم المسجل في النظام لعرض كافة مواده وبياناته
-            demo_teacher = User.query.filter(User.role.ilike("teacher")).first()
-
-            if demo_teacher:
-                login_user(demo_teacher)
-                flash("Signed in successfully with Demo Instructor Account.", "success")
-                return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+            try:
+                db.session.rollback()
+                demo_teacher = User.query.filter(User.role.ilike("teacher")).first()
+                if demo_teacher:
+                    login_user(demo_teacher)
+                    flash("Signed in successfully with Demo Instructor Account.", "success")
+                    return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+            except Exception:
+                db.session.rollback()
 
         # 2. التحقق العادي لباقي المستخدمين
-        user = User.query.filter((User.email == email) | (User.username == email)).first()
-        is_valid = False
-        if user:
-            if hasattr(user, "check_password"):
-                is_valid = user.check_password(password)
-            else:
-                is_valid = (user.password == password)
+        try:
+            user = User.query.filter((User.email == email) | (User.username == email)).first()
+            is_valid = False
+            if user:
+                if hasattr(user, "check_password"):
+                    is_valid = user.check_password(password)
+                else:
+                    is_valid = (user.password == password)
 
-        if user and is_valid and getattr(user, 'role', '').lower() == "teacher":
-            login_user(user)
-            return redirect(url_for("teachers.dashboard", teacher_id=user.id))
+            if user and is_valid and getattr(user, 'role', '').lower() == "teacher":
+                login_user(user)
+                return redirect(url_for("teachers.dashboard", teacher_id=user.id))
+        except Exception:
+            db.session.rollback()
 
         flash("Invalid credentials or not authorized as an instructor.", "danger")
     return render_template("teacher/login.html")
+
+
+@teachers_bp.route("/logout")
+@login_required
+def logout():
+    """Log out the current teacher."""
+    logout_user()
+    return redirect(url_for("teachers.login"))
 
 
 # ------------------------- Dashboard -------------------------
@@ -170,27 +184,9 @@ def dashboard(teacher_id):
     student_ids = {e.student_id for c in courses for e in getattr(c, 'enrollments', [])}
     assignment_count = sum(len(getattr(c, 'assignments', [])) for c in courses)
     quiz_count = sum(len(getattr(c, 'quizzes', [])) for c in courses)
-    
-    ungraded = 0
-    for c in courses:
-        for a in getattr(c, 'assignments', []):
-            for s in getattr(a, 'submissions', []):
-                if s.grade is None:
-                    ungraded += 1
-
-    upcoming = sorted(
-        [a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()],
-        key=lambda a: a.due_date
-    )[:5]
-
-    stats = {
-        'courses': len(courses),
-        'students': len(student_ids),
-        'assignments': assignment_count,
-        'quizzes': quiz_count,
-        'ungraded': ungraded
-    }
-
+    ungraded = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id, Submission.grade.is_(None)).count()
+    upcoming = sorted([a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()], key=lambda a: a.due_date)[:5]
+    stats = {'courses': len(courses), 'students': len(student_ids), 'assignments': assignment_count, 'quizzes': quiz_count, 'ungraded': ungraded}
     return render_template("teacher/dashboard.html", teacher=teacher, courses=courses, stats=stats, upcoming=upcoming, **_teacher_nav_context(teacher))
 
 
@@ -204,11 +200,6 @@ def courses(teacher_id):
         flash('Access denied.', 'danger')
         return redirect(url_for('teachers.login'))
     courses = Course.query.filter_by(teacher_id=teacher.id).all()
-    if not courses and teacher.username == "demo_teacher":
-        fallback = User.query.filter(User.role.ilike("teacher"), User.id != teacher.id).first()
-        if fallback and fallback.courses:
-            courses = fallback.courses
-
     student_ids = {e.student_id for c in courses for e in c.enrollments}
     stats = {'students': len(student_ids), 'assignments': sum(len(c.assignments) for c in courses), 'quizzes': sum(len(c.quizzes) for c in courses)}
     return render_template("teacher/courses.html", teacher=teacher, courses=courses, stats=stats, **_teacher_nav_context(teacher))
@@ -220,14 +211,8 @@ def courses(teacher_id):
 def students(teacher_id):
     """Display all students enrolled in the teacher's courses."""
     teacher = User.query.get_or_404(teacher_id)
-    courses_to_inspect = teacher.courses
-    if not courses_to_inspect and teacher.username == "demo_teacher":
-        fallback = User.query.filter(User.role.ilike("teacher"), User.id != teacher.id).first()
-        if fallback:
-            courses_to_inspect = fallback.courses
-
     enrolled_students = set()
-    for course in courses_to_inspect:
+    for course in teacher.courses:
         for enrollment in course.enrollments:
             enrolled_students.add(enrollment.student)
 
@@ -241,11 +226,6 @@ def assignments(teacher_id):
     """Display all assignments in all courses."""
     teacher = User.query.get_or_404(teacher_id)
     items = Assignment.query.join(Course).filter(Course.teacher_id == teacher.id).all()
-    if not items and teacher.username == "demo_teacher":
-        fallback = User.query.filter(User.role.ilike("teacher"), User.id != teacher.id).first()
-        if fallback:
-            items = Assignment.query.join(Course).filter(Course.teacher_id == fallback.id).all()
-
     return render_template("teacher/assignments.html", teacher=teacher, assignments=items, **_teacher_nav_context(teacher))
 
 
