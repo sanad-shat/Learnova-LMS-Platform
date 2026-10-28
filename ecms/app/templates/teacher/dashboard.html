@@ -1,3 +1,419 @@
-{% extends 'teacher/base.html' %}{% set active_page='dashboard' %}{% block title %}Instructor Dashboard | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><h1>Instructor Dashboard</h1><p>Welcome back! Manage courses, learners, and assessments.</p></div><div class="date-chip"><i class="fa-regular fa-calendar"></i>Academic Workspace</div></div><section class="stats-grid"><article class="metric-card"><div class="metric-icon purple"><i class="fa-solid fa-book-open"></i></div><div><small>My Courses</small><strong>{{ stats.courses }}</strong><em>Assigned courses</em></div></article><article class="metric-card"><div class="metric-icon blue"><i class="fa-solid fa-users"></i></div><div><small>Total Students</small><strong>{{ stats.students }}</strong><em>Active learners</em></div></article><article class="metric-card"><div class="metric-icon green"><i class="fa-solid fa-list-check"></i></div><div><small>Assignments</small><strong>{{ stats.assignments }}</strong><em>Published activities</em></div></article><article class="metric-card"><div class="metric-icon amber"><i class="fa-solid fa-inbox"></i></div><div><small>Ungraded</small><strong>{{ stats.ungraded }}</strong><em>Needs attention</em></div></article></section><div class="page-title-row" style="margin-top:22px"><div><h2>Your Courses</h2><p>Open a course to manage units, assignments, quizzes, exams, and students.</p></div><a class="secondary-btn" href="{{ url_for('teachers.courses',teacher_id=teacher.id) }}">View All</a></div><section class="course-grid">{% for c in courses %}<article class="course-card" data-searchable><div class="course-cover"><span class="course-code">{{ c.code }}</span><i class="fa-solid fa-book-open"></i></div><div class="course-body"><h3>{{ c.name }}</h3><p>{{ c.description or 'Course learning space' }}</p><p>{{ c.enrollments|length }} students · {{ c.assignments|length }} assignments · {{ c.quizzes|length }} quizzes</p><div class="course-actions"><a class="primary-btn" href="{{ url_for('teachers.view_course',teacher_id=teacher.id,course_id=c.id) }}">Manage Course</a></div></div></article>{% else %}<div class="empty-state">No courses assigned yet.</div>{% endfor %}</section>{% if upcoming %}<section class="panel" style="margin-top:18px"><div class="panel-head"><h2>Upcoming Deadlines</h2></div><div class="activity-list">{% for a in upcoming %}<div class="activity-item"><span class="activity-dot"><i class="fa-regular fa-calendar"></i></span><div><strong>{{ a.title }}</strong><small>{{ a.course.name }} · {{ a.due_date.strftime('%d %b %Y') }}</small></div></div>{% endfor %}</div></section>{% endif %}
+{% extends "teacher/base.html" %}
+{% block title %}Instructor Dashboard | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #3b82f6;
+    --primary-light: #eff6ff;
+    --primary-dark: #1d4ed8;
+    --surface: #ffffff;
+    --bg-page: #f8fafc;
+    --border-color: #e2e8f0;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 8px 10px -6px rgba(15, 23, 42, 0.03);
+    --shadow-hover: 0 20px 30px -10px rgba(15, 23, 42, 0.08);
+  }
+
+  .dash-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px 20px 48px;
+  }
+
+  /* Welcome Hero Section */
+  .welcome-banner {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: var(--radius-lg);
+    padding: 36px 40px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow-md);
+  }
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, rgba(59, 130, 246, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .welcome-text h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 8px;
+    letter-spacing: -0.5px;
+  }
+  .welcome-text p {
+    color: #94a3b8;
+    margin: 0;
+    font-size: 15px;
+  }
+  .quick-actions {
+    display: flex;
+    gap: 12px;
+  }
+  .btn-quick {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.2s ease;
+  }
+  .btn-quick:hover {
+    background: #ffffff;
+    color: #0f172a;
+    transform: translateY(-2px);
+  }
+
+  /* Key Metrics Grid */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
+  }
+  .metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+    border-color: #cbd5e1;
+  }
+  .metric-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .metric-content h3 {
+    margin: 0 0 4px;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+  .metric-content span {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  /* Content Split (Main Content vs Sidebar) */
+  .dash-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 28px;
+  }
+
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .section-header h2 {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .view-all-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .view-all-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Course Cards */
+  .course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .course-item {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    background: #ffffff;
+  }
+  .course-item:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-sm);
+    transform: translateY(-2px);
+  }
+  .course-details {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .course-badge {
+    width: 44px;
+    height: 44px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .course-info h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .course-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 14px;
+  }
+  .btn-manage {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-manage:hover {
+    background: var(--primary);
+    color: #ffffff;
+  }
+
+  /* Upcoming Assignments Sidebar */
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .task-item {
+    padding: 14px 16px;
+    background: var(--bg-page);
+    border-radius: var(--radius-md);
+    border-left: 4px solid var(--primary);
+  }
+  .task-item h5 {
+    margin: 0 0 4px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .task-item p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .dash-layout {
+      grid-template-columns: 1fr;
+    }
+    .welcome-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .metrics-grid {
+      grid-template-columns: 1fr;
+    }
+    .course-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .btn-manage {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="dash-container">
+  
+  <!-- Hero Section -->
+  <div class="welcome-banner">
+    <div class="welcome-text">
+      <h1>Welcome back, {% if session.get('is_demo') %}Dr. Demo Instructor{% else %}{{ teacher.name_person or teacher.username }}{% endif %} 👋</h1>
+      <p>Here is what's happening with your courses and active students today.</p>
+    </div>
+    <div class="quick-actions">
+      <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}" class="btn-quick">
+        <i class="fa-solid fa-graduation-cap"></i> Courses
+      </a>
+      <a href="{{ url_for('teachers.submissions', teacher_id=teacher.id) }}" class="btn-quick">
+        <i class="fa-solid fa-inbox"></i> Grading
+      </a>
+    </div>
+  </div>
+
+  <!-- Key Statistics Grid -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon" style="background: #eff6ff; color: #3b82f6;">
+        <i class="fa-solid fa-book-open"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ stats.courses }}</h3>
+        <span>Total Courses</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon" style="background: #f0fdf4; color: #16a34a;">
+        <i class="fa-solid fa-user-graduate"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ stats.students }}</h3>
+        <span>Active Students</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon" style="background: #fef3c7; color: #d97706;">
+        <i class="fa-solid fa-list-check"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ stats.assignments }}</h3>
+        <span>Assignments</span>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon" style="background: #faf5ff; color: #9333ea;">
+        <i class="fa-solid fa-clock"></i>
+      </div>
+      <div class="metric-content">
+        <h3>{{ stats.ungraded }}</h3>
+        <span>Pending Reviews</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace Grid -->
+  <div class="dash-layout">
+    
+    <!-- Left Column: Courses -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-layer-group text-primary"></i> Active Courses</h2>
+        <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}" class="view-all-link">Manage All <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+
+      <div class="course-list">
+        {% for course in courses %}
+        <div class="course-item">
+          <div class="course-details">
+            <div class="course-badge">
+              <i class="fa-solid fa-code"></i>
+            </div>
+            <div class="course-info">
+              <h4>{{ course.name }}</h4>
+              <p>
+                <span><i class="fa-solid fa-fingerprint"></i> {{ course.code }}</span>
+                <span><i class="fa-solid fa-users"></i> {{ course.enrollments|length }} Enrolled</span>
+                <span><i class="fa-solid fa-folder-tree"></i> {{ course.units|length }} Units</span>
+              </p>
+            </div>
+          </div>
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-manage">
+            Open Course
+          </a>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+          <i class="fa-solid fa-chalkboard" style="font-size: 36px; margin-bottom: 12px; display: block;"></i>
+          No assigned courses found.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Right Column: Deadlines & Reviews -->
+    <div class="section-card">
+      <div class="section-header">
+        <h2><i class="fa-solid fa-bell text-warning"></i> Due Soon</h2>
+      </div>
+
+      <div class="task-list">
+        {% for a in upcoming %}
+        <div class="task-item">
+          <h5>{{ a.title }}</h5>
+          <p>
+            <i class="fa-regular fa-calendar"></i> Due: {{ a.due_date.strftime('%b %d, %H:%M') if a.due_date else 'No deadline' }}
+          </p>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 13px;">
+          <i class="fa-regular fa-circle-check" style="font-size: 28px; margin-bottom: 8px; display: block; color: #16a34a;"></i>
+          All caught up! No upcoming assignments due.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</div>
 {% endblock %}
