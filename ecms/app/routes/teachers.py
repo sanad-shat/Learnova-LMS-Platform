@@ -128,7 +128,6 @@ def _teacher_nav_context(teacher):
     ungraded = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id, Submission.grade.is_(None)).count()
     unread = Notification.query.filter_by(user_id=teacher.id, is_read=False).count()
     return {'nav_ungraded': ungraded, 'nav_notifications': unread}
-
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -182,6 +181,63 @@ def login():
 
         flash("Invalid credentials or not authorized as an instructor.", "danger")
     return render_template("teacher/login.html")
+
+
+@teachers_bp.route("/logout")
+@login_required
+def logout():
+    """Log out the current teacher."""
+    logout_user()
+    return redirect(url_for("teachers.login"))
+
+
+# ------------------------- Dashboard -------------------------
+@teachers_bp.route("/<int:teacher_id>/dashboard")
+@login_required
+def dashboard(teacher_id):
+    """Main dashboard showing teacher info and courses."""
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+
+    courses = Course.query.filter_by(teacher_id=teacher.id).all()
+
+    # إذا كان الحساب تجريبياً ولا يملك مساقات، نعرض مساقات أي معلم متاح في النظام
+    if not courses and teacher.username == "demo_teacher":
+        fallback_teacher = User.query.filter(User.role.ilike("teacher"), User.id != teacher.id).first()
+        if fallback_teacher:
+            courses = fallback_teacher.courses or []
+
+    student_ids = set()
+    assignment_count = 0
+    quiz_count = 0
+    ungraded = 0
+
+    for c in courses:
+        for e in getattr(c, 'enrollments', []):
+            student_ids.add(e.student_id)
+        assignment_count += len(getattr(c, 'assignments', []))
+        quiz_count += len(getattr(c, 'quizzes', []))
+        for a in getattr(c, 'assignments', []):
+            for s in getattr(a, 'submissions', []):
+                if s.grade is None:
+                    ungraded += 1
+
+    upcoming = sorted(
+        [a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()],
+        key=lambda a: a.due_date
+    )[:5]
+
+    stats = {
+        'courses': len(courses),
+        'students': len(student_ids),
+        'assignments': assignment_count,
+        'quizzes': quiz_count,
+        'ungraded': ungraded
+    }
+
+    return render_template("teacher/dashboard.html", teacher=teacher, courses=courses, stats=stats, upcoming=upcoming, **_teacher_nav_context(teacher))
 
 
 @teachers_bp.route("/logout")
