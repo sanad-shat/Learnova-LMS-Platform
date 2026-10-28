@@ -18,54 +18,53 @@
         .btn-danger { background: #e74c3c; border: none; }
         .btn-danger:hover { background: #c0392b; }
     </style>
-<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+</head>
 <body>
     <div class="container mt-5">
-        <div class="card shadow-lg">
+        <div class="card shadow-lg max-w-2xl mx-auto">
             <h2 class="mb-4 text-center">Edit Unit</h2>
 
             <form method="POST" action="{{ url_for('teachers.edit_unit_page', teacher_id=teacher.id, course_id=course.id, unit_id=unit.id) }}" enctype="multipart/form-data">
                 
                 <!-- Unit Title -->
                 <div class="mb-3">
-                    <label for="title" class="form-label">Unit Title</label>
+                    <label for="title" class="form-label font-bold">Unit Title</label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ unit.title }}" required>
                 </div>
 
                 <!-- Unit Content -->
                 <div class="mb-3">
-                    <label for="content" class="form-label">Unit Content</label>
-                    <textarea class="form-control" id="content" name="content" rows="5" placeholder="Enter unit content" required>{{ unit.content }}</textarea>
+                    <label for="content" class="form-label font-bold">Unit Content</label>
+                    <textarea class="form-control" id="content" name="content" rows="5" placeholder="Enter unit content">{{ unit.content or '' }}</textarea>
                 </div>
 
                 <!-- File Action Block -->
                 {% if unit.file_path %}
                 <div class="mb-3">
-                    <label class="form-label">Current File:</label>
+                    <label class="form-label font-bold">Current File:</label>
                     <p>
-                        <a href="{{ url_for('static', filename='uploads/' + unit.file_path) }}" target="_blank">{{ unit.file_path }}</a>
+                        <a href="{{ url_for('teachers.uploaded_file', filename=unit.file_path) }}" target="_blank" class="text-primary text-decoration-none">
+                            <i class="fa-solid fa-paperclip me-1"></i>{{ unit.file_path.split('_', 1)[-1] }}
+                        </a>
                     </p>
                     <!-- Replace File -->
                     <div class="mb-2">
-                        <label for="file" class="form-label">Replace File:</label>
+                        <label for="file" class="form-label">Replace File (Optional):</label>
                         <input class="form-control" type="file" id="file" name="file">
                     </div>
-                    <!-- Delete File -->
-                    <a href="{{ url_for('teachers.delete_unit_file', teacher_id=teacher.id, course_id=course.id, unit_id=unit.id) }}" 
-                       class="btn btn-danger btn-sm mb-3">
-                        <i class="fas fa-trash"></i> Delete File
-                    </a>
                 </div>
                 {% else %}
                 <!-- Upload File if none exists -->
                 <div class="mb-3">
-                    <label for="file" class="form-label">Attach File</label>
+                    <label for="file" class="form-label font-bold">Attach File (Optional):</label>
                     <input class="form-control" type="file" id="file" name="file">
                 </div>
                 {% endif %}
 
                 <!-- Buttons -->
-                <div class="text-center">
+                <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary px-5">Save Changes</button>
                     <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn btn-secondary px-4">Cancel</a>
                 </div>
