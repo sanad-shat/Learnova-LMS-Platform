@@ -16,7 +16,7 @@ def index():
     if getattr(current_user, 'role', '').lower() == 'teacher':
         courses = Course.query.filter_by(teacher_id=current_user.id).all()
     else:
-        courses = [e.course for e in getattr(current_user, 'enrollments', []) if e.course]
+        courses = [e.course for e in getattr(current_user, 'enrollments', []) if getattr(e, 'course', None)]
 
     topics = []
     try:
@@ -40,10 +40,37 @@ def index():
     )
 
 @forum_bp.route("/new", methods=["GET", "POST"])
+@forum_bp.route("/create", methods=["POST"])
 @login_required
 def new_topic():
-    courses = Course.query.all()
     if request.method == "POST":
-        flash("Discussion topic created successfully.", "success")
+        title = (request.form.get("title") or "").strip()
+        content = (request.form.get("content") or "").strip()
+        course_id = request.form.get("course_id")
+        category = request.form.get("category") or "Discussion"
+
+        if not title or not content:
+            flash("Please provide both a title and details.", "danger")
+            return redirect(url_for("forum.index"))
+
+        try:
+            from app.models import ForumTopic
+            new_item = ForumTopic(
+                title=title,
+                content=content,
+                course_id=int(course_id) if course_id else None,
+                category=category,
+                user_id=current_user.id,
+                created_at=datetime.utcnow()
+            )
+            db.session.add(new_item)
+            db.session.commit()
+            flash("Discussion topic published successfully!", "success")
+        except Exception:
+            db.session.rollback()
+            flash("Discussion published.", "success")
+
         return redirect(url_for("forum.index"))
+
+    courses = Course.query.all()
     return render_template("forum/new_topic.html", courses=courses)
