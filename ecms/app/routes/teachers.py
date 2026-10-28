@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, session
 from flask_login import login_required, current_user, login_user, logout_user
 from app.models import (
     User, Course, Unit, Assignment, Quiz, QuizQuestion, 
@@ -130,12 +130,13 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المباشر بحساب المعلم المتاح
+        # 1. الدخول التجريبي المباشر
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             try:
                 db.session.rollback()
                 demo_teacher = User.query.filter(User.role.ilike("teacher")).first()
                 if demo_teacher:
+                    session['is_demo'] = True
                     login_user(demo_teacher)
                     flash("Signed in successfully with Demo Instructor Account.", "success")
                     return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
@@ -143,6 +144,7 @@ def login():
                 db.session.rollback()
 
         # 2. التحقق العادي لباقي المستخدمين
+        session.pop('is_demo', None)
         try:
             user = User.query.filter((User.email == email) | (User.username == email)).first()
             is_valid = False
@@ -166,6 +168,7 @@ def login():
 @login_required
 def logout():
     """Log out the current teacher."""
+    session.pop('is_demo', None)
     logout_user()
     return redirect(url_for("teachers.login"))
 
