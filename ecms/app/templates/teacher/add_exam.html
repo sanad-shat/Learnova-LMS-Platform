@@ -670,12 +670,27 @@
       `;
     } else if (type === 'true_false') {
       bodyFields = `
-        <div style="margin-top: 12px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
-          <select name="answer_${qNum}" class="field-input" style="margin-top: 4px;">
-            <option value="True">True</option>
-            <option value="False">False</option>
-          </select>
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+            Select the Correct Answer:
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <!-- True Option Card -->
+            <label style="display: flex; align-items: center; gap: 12px; background: #ffffff; padding: 12px 18px; border-radius: 10px; border: 1.5px solid var(--border-normal); cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="answer_${qNum}" value="True" checked style="cursor: pointer; accent-color: #16a34a; width: 18px; height: 18px;">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: #16a34a;">
+                <i class="fa-solid fa-circle-check"></i> True
+              </span>
+            </label>
+
+            <!-- False Option Card -->
+            <label style="display: flex; align-items: center; gap: 12px; background: #ffffff; padding: 12px 18px; border-radius: 10px; border: 1.5px solid var(--border-normal); cursor: pointer; transition: all 0.2s;">
+              <input type="radio" name="answer_${qNum}" value="False" style="cursor: pointer; accent-color: #dc2626; width: 18px; height: 18px;">
+              <span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 14px; color: #dc2626;">
+                <i class="fa-solid fa-circle-xmark"></i> False
+              </span>
+            </label>
+          </div>
         </div>
       `;
     } else if (type === 'short_answer') {
