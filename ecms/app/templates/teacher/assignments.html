@@ -270,14 +270,13 @@
     color: #ffffff;
   }
 
-  /* Empty State inside table */
   .empty-table-row td {
     padding: 50px 20px;
     text-align: center;
     color: var(--text-muted);
   }
 
-  /* ---------------- Responsive (Mobile View) ---------------- */
+  /* Responsive Rules */
   @media (max-width: 992px) {
     .assignments-wrapper {
       padding: 16px 16px 40px;
@@ -299,7 +298,6 @@
       padding-bottom: 4px;
     }
     
-    /* Turn table into stacked modern cards on phones */
     .assignments-data-table thead {
       display: none;
     }
@@ -332,7 +330,7 @@
     <div>
       <span class="pre-title-tag">Assessments Management</span>
       <h1 class="main-page-title">Assignments & Quizzes</h1>
-      <p class="main-page-desc">Review and manage coursework, deadlines, and student submissions across all courses.</p>
+      <p class="main-page-desc">Review and manage coursework, deadlines, and student submissions across all courses[cite: 14].</p>
     </div>
     <div class="total-count-pill">
       <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
@@ -372,7 +370,7 @@
       </thead>
       <tbody id="assignmentsTableBody">
         {% for a in assignments %}
-        <tr class="assignment-row" data-type="{{ a.assignment_type|lower }}" data-title="{{ a.title|lower }}" data-course="{{ (a.course.name ~ ' ' ~ a.course.code)|lower }}">
+        <tr class="assignment-row" data-type="{{ (a.assignment_type or 'homework')|lower }}" data-title="{{ (a.title or '')|lower }}" data-course="{{ ((a.course.name if a.course else '') ~ ' ' ~ (a.course.code if a.course else ''))|lower }}">
           <!-- Title & Desc -->
           <td>
             <div class="item-title-box">
@@ -385,14 +383,14 @@
           <td>
             <div class="course-badge-pill">
               <i class="fa-solid fa-graduation-cap"></i>
-              <span>{{ a.course.code }}[cite: 14]</span>
+              <span>{{ a.course.code if a.course else 'General' }}[cite: 14]</span>
             </div>
           </td>
 
           <!-- Type -->
           <td>
-            <span class="type-pill type-{{ a.assignment_type|lower }}">
-              {{ a.assignment_type }}[cite: 14]
+            <span class="type-pill type-{{ (a.assignment_type or 'homework')|lower }}">
+              {{ a.assignment_type or 'Homework' }}[cite: 14]
             </span>
           </td>
 
@@ -415,23 +413,17 @@
           <!-- Submissions Count -->
           <td>
             <span class="submissions-count-badge">
-              {{ a.submissions|length }}[cite: 14]
+              {{ a.submissions|length if a.submissions else 0 }}[cite: 14]
             </span>
           </td>
 
           <!-- Actions -->
           <td style="text-align: right;">
             <div class="table-actions-cluster" style="justify-content: flex-end;">
-              <!-- Edit -->
-              {% if a.assignment_type == 'quiz' and a.quiz %}
-              <a href="{{ url_for('teachers.edit_quiz_page', teacher_id=teacher.id, course_id=a.course_id, quiz_id=a.quiz.id) }}" class="btn-action-icon btn-action-edit" title="Edit Quiz">
-                <i class="fa-solid fa-pen-to-square"></i> Edit[cite: 14]
-              </a>
-              {% else %}
+              <!-- Edit Safe Route -->
               <a href="{{ url_for('teachers.edit_assignment_page', teacher_id=teacher.id, course_id=a.course_id, assignment_id=a.id) }}" class="btn-action-icon btn-action-edit" title="Edit Assignment">
                 <i class="fa-solid fa-pen-to-square"></i> Edit[cite: 14]
               </a>
-              {% endif %}
 
               <!-- Submissions -->
               <a href="{{ url_for('teachers.submissions', teacher_id=teacher.id) }}" class="btn-action-icon btn-action-subs" title="View Submissions">
@@ -439,7 +431,7 @@
               </a>
 
               <!-- Delete -->
-              <form method="POST" action="{{ url_for('teachers.delete_assignment', teacher_id=teacher.id, course_id=a.course_id, assignment_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to permanently delete this assignment?');">
+              <form method="POST" action="{{ url_for('teachers.delete_assignment', teacher_id=teacher.id, course_id=a.course_id, assignment_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
                 <button type="submit" class="btn-action-icon btn-action-del" title="Delete">
                   <i class="fa-solid fa-trash-can"></i> Delete[cite: 14]
                 </button>
