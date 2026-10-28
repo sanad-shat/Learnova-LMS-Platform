@@ -140,20 +140,17 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المعزول مع استنساخ بيانات المعلم الأصلي
+        # 1. الدخول التجريبي المعزول مع استنساخ بيانات المعلم الأصلي فوراً
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             try:
                 demo_teacher = User.query.filter_by(username="demo_teacher").first()
 
-                # إنشاء حساب المعلم التجريبي إذا لم يكن موجوداً
                 if not demo_teacher:
                     demo_teacher = User(
                         username="demo_teacher",
                         email="instructor_demo@learnova.edu",
                         role="teacher",
-                        name_person="Dr. Demo Instructor",
-                        employee_id="DEMO-T101",
-                        department="Computer Science"
+                        name_person="Dr. Demo Instructor"
                     )
                     if hasattr(demo_teacher, 'set_password'):
                         demo_teacher.set_password("demo123")
@@ -163,57 +160,55 @@ def login():
                     db.session.add(demo_teacher)
                     db.session.commit()
 
-                # إذا لم يكن لدى المعلم التجريبي مساقات، نستنسخ مساق المعلم الحقيقي
-                if not demo_teacher.courses:
-                    # جلب أول معلم حقيقي في قاعدة البيانات يملك مساقاً
+                # التحقق من وجود مساقات للمعلم التجريبي
+                existing_demo_courses = Course.query.filter_by(teacher_id=demo_teacher.id).all()
+
+                if not existing_demo_courses:
+                    # جلب أول معلم حقيقي في النظام لديه مساق
                     real_teacher = User.query.filter(User.role.ilike("teacher"), User.id != demo_teacher.id).first()
                     
                     if real_teacher and real_teacher.courses:
                         src_course = real_teacher.courses[0]
-                        # إنشاء مساق مكرر مستقل
+                        
+                        # إنشاء كود مساق غير متكرر
+                        new_code = f"{src_course.code}-DEMO"
+                        check_course = Course.query.filter_by(code=new_code).first()
+                        if check_course:
+                            new_code = f"DM-{src_course.code}"
+
                         cloned_course = Course(
-                            code=f"{src_course.code}-DEMO",
+                            code=new_code,
                             name=f"{src_course.name} (Interactive Demo)",
                             description=src_course.description,
-                            teacher_id=demo_teacher.id,
-                            course_identifier=f"{getattr(src_course, 'course_identifier', 'demo')}-sandbox"
+                            teacher_id=demo_teacher.id
                         )
                         db.session.add(cloned_course)
-                        db.session.flush()
+                        db.session.commit()
 
-                        # نسخ الوحدات الدراسية (Units)
+                        # نسخ الوحدات الدراسية
                         for u in src_course.units:
-                            cloned_unit = Unit(
+                            db.session.add(Unit(
                                 title=u.title,
                                 file_path=u.file_path,
                                 course_id=cloned_course.id
-                            )
-                            db.session.add(cloned_unit)
+                            ))
 
-                        # نسخ الواجبات (Assignments)
+                        # نسخ الواجبات
                         for a in src_course.assignments:
                             if a.assignment_type != "quiz":
-                                cloned_assign = Assignment(
+                                db.session.add(Assignment(
                                     title=a.title,
                                     description=a.description,
                                     assignment_type=a.assignment_type,
                                     start_date=a.start_date,
                                     due_date=a.due_date,
                                     course_id=cloned_course.id
-                                )
-                                db.session.add(cloned_assign)
-                                db.session.flush()
+                                ))
 
-                                # تسجيل طالب تجريبي لتجربة التصحيح
-                                any_student = User.query.filter_by(role="student").first()
-                                if any_student:
-                                    if not Enrollment.query.filter_by(student_id=any_student.id, course_id=cloned_course.id).first():
-                                        db.session.add(Enrollment(student_id=any_student.id, course_id=cloned_course.id))
-                                    db.session.add(Submission(
-                                        student_id=any_student.id,
-                                        assignment_id=cloned_assign.id,
-                                        feedback="Pending review"
-                                    ))
+                        # ربط طالب تجريبي بالمساق
+                        any_student = User.query.filter_by(role="student").first()
+                        if any_student:
+                            db.session.add(Enrollment(student_id=any_student.id, course_id=cloned_course.id))
 
                         db.session.commit()
 
@@ -226,7 +221,7 @@ def login():
                 flash("Signed in as Demo Instructor (Safe Sandbox Environment).", "success")
                 return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
 
-        # 2. التحقق الاعتيادي لباقي المستخدمين
+        # 2. التحقق الاعتيادي
         user = User.query.filter((User.email == email) | (User.username == email)).first()
         is_valid = False
         if user:
