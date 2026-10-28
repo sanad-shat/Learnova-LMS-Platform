@@ -14,7 +14,6 @@ from app.services import notify_course_students, course_progress, final_grade, i
 import os
 import uuid
 
-# Try to import StudentActivity (used in student tracking)
 try:
     from app.models import StudentActivity
 except ImportError:
@@ -22,7 +21,7 @@ except ImportError:
 
 teachers_bp = Blueprint("teachers", __name__, url_prefix="/teacher")
 
-# Upload configuration safe for Vercel/Serverless
+# Upload configuration safe for Vercel Serverless
 if os.environ.get('VERCEL'):
     UPLOAD_FOLDER = '/tmp/uploads'
 else:
@@ -36,14 +35,12 @@ except Exception:
 
 
 def allowed_file(filename):
-    """Return True when an uploaded file has an allowed extension."""
     if not filename:
         return False
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def _parse_datetime(value, label):
-    """Parse a datetime-local form value and provide a clear validation error."""
     if not value:
         raise ValueError(f"{label} is required.")
     try:
@@ -53,7 +50,6 @@ def _parse_datetime(value, label):
 
 
 def _question_numbers(form):
-    """Return sorted dynamic question indexes from question_1, question_2, ... fields."""
     numbers = []
     for key in form.keys():
         if key.startswith("question_"):
@@ -64,7 +60,6 @@ def _question_numbers(form):
 
 
 def _question_payload(form, number):
-    """Validate and normalize a quiz/exam question submitted by the builder UI."""
     text = (form.get(f"question_{number}") or "").strip()
     question_type = (form.get(f"type_{number}") or "short_answer").strip()
     options = (form.get(f"options_{number}") or "").strip()
@@ -116,7 +111,6 @@ def _question_payload(form, number):
 
 @login_manager.user_loader
 def load_user(user_id):
-    """Load user by ID for Flask-Login."""
     return User.query.get(int(user_id))
 
 
@@ -129,7 +123,6 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle teacher login with demo bypass support."""
     if current_user.is_authenticated and getattr(current_user, 'role', '').lower() == "teacher":
         return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
@@ -137,7 +130,6 @@ def login():
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        # 1. الدخول التجريبي المباشر
         if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             try:
                 db.session.rollback()
@@ -150,7 +142,6 @@ def login():
             except Exception:
                 db.session.rollback()
 
-        # 2. التحقق العادي لباقي المستخدمين
         session.pop('is_demo', None)
         try:
             user = User.query.filter((User.email == email) | (User.username == email)).first()
@@ -174,7 +165,6 @@ def login():
 @teachers_bp.route("/logout")
 @login_required
 def logout():
-    """Log out the current teacher."""
     session.pop('is_demo', None)
     logout_user()
     return redirect(url_for("teachers.login"))
@@ -184,7 +174,6 @@ def logout():
 @teachers_bp.route("/<int:teacher_id>/dashboard")
 @login_required
 def dashboard(teacher_id):
-    """Main dashboard showing teacher info and courses."""
     teacher = User.query.get_or_404(teacher_id)
     if current_user.id != teacher.id or current_user.role != 'teacher':
         flash('Access denied.', 'danger')
@@ -204,7 +193,6 @@ def dashboard(teacher_id):
 @teachers_bp.route("/<int:teacher_id>/courses")
 @login_required
 def courses(teacher_id):
-    """Display all courses taught by the teacher."""
     teacher = User.query.get_or_404(teacher_id)
     if current_user.id != teacher.id or current_user.role != 'teacher':
         flash('Access denied.', 'danger')
@@ -219,7 +207,6 @@ def courses(teacher_id):
 @teachers_bp.route("/<int:teacher_id>/students")
 @login_required
 def students(teacher_id):
-    """Display all students enrolled in the teacher's courses."""
     teacher = User.query.get_or_404(teacher_id)
     enrolled_students = set()
     for course in teacher.courses:
@@ -233,7 +220,6 @@ def students(teacher_id):
 @teachers_bp.route("/<int:teacher_id>/assignments")
 @login_required
 def assignments(teacher_id):
-    """Display all assignments in all courses."""
     teacher = User.query.get_or_404(teacher_id)
     items = Assignment.query.join(Course).filter(Course.teacher_id == teacher.id).all()
     return render_template("teacher/assignments.html", teacher=teacher, assignments=items, **_teacher_nav_context(teacher))
@@ -285,17 +271,18 @@ def add_unit(teacher_id, course_id):
                 try:
                     original = secure_filename(file.filename)
                     filename = f'{uuid.uuid4().hex}_{original}'
-                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    upload_target = '/tmp/uploads' if os.environ.get('VERCEL') else UPLOAD_FOLDER
+                    os.makedirs(upload_target, exist_ok=True)
+                    file.save(os.path.join(upload_target, filename))
                 except Exception:
                     filename = None
 
         try:
             unit = Unit(title=title, file_path=filename, course_id=course_id)
             db.session.add(unit)
-            db.session.commit()  # حفظ الوحدة بنجاح أولاً
+            db.session.commit()
             flash("Unit added successfully.", "success")
 
-            # إرسال الإشعارات بشكل منفصل دون التأثير على إضافة الوحدة
             try:
                 notify_course_students(course, 'New learning unit', f'A new unit “{title}” was added to {course.name}.', f'/student/courses/{course.id}')
                 db.session.commit()
@@ -303,10 +290,14 @@ def add_unit(teacher_id, course_id):
                 db.session.rollback()
 
             return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
+
         except Exception as exc:
             db.session.rollback()
             flash(f"Could not add unit: {exc}", "danger")
             return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
+
+    return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
+
 
 # ------------------------- Add Assignment -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_assignment", methods=["GET", "POST"])
@@ -366,22 +357,21 @@ def add_assignment(teacher_id, course_id):
                 try:
                     original_name = secure_filename(assignment_file.filename)
                     stored_name = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-                    assignment_file.save(os.path.join(UPLOAD_FOLDER, stored_name))
+                    upload_target = '/tmp/uploads' if os.environ.get('VERCEL') else UPLOAD_FOLDER
+                    os.makedirs(upload_target, exist_ok=True)
+                    assignment_file.save(os.path.join(upload_target, stored_name))
                 except Exception:
                     pass
 
-            try:
-                notify_course_students(
-                    course,
-                    "New assignment",
-                    f"‘{title}’ was added to {course.name}. Due: {due_date:%d %b %Y %H:%M}.",
-                    f"/student/courses/{course.id}",
-                )
-            except Exception:
-                pass
-
             db.session.commit()
             flash("Assignment created successfully.", "success")
+
+            try:
+                notify_course_students(course, "New assignment", f"‘{title}’ was added to {course.name}. Due: {due_date:%d %b %Y %H:%M}.", f"/student/courses/{course.id}")
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
             return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
@@ -476,13 +466,15 @@ def add_quiz(teacher_id, course_id):
             for payload in questions:
                 db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
 
-            try:
-                notify_course_students(course, "New quiz", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
-            except Exception:
-                pass
-
             db.session.commit()
             flash(f"Quiz created successfully with {len(questions)} questions.", "success")
+
+            try:
+                notify_course_students(course, "New quiz", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
             return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
@@ -575,13 +567,15 @@ def add_exam(teacher_id, course_id):
             for payload in questions:
                 db.session.add(ExamQuestion(exam_id=exam.id, **payload))
 
-            try:
-                notify_course_students(course, "New exam", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
-            except Exception:
-                pass
-
             db.session.commit()
             flash(f"Exam created successfully with {len(questions)} questions.", "success")
+
+            try:
+                notify_course_students(course, "New exam", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
             return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
@@ -731,7 +725,9 @@ def edit_unit_page(teacher_id, course_id, unit_id):
         if file and file.filename and allowed_file(file.filename):
             try:
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                upload_target = '/tmp/uploads' if os.environ.get('VERCEL') else UPLOAD_FOLDER
+                os.makedirs(upload_target, exist_ok=True)
+                file.save(os.path.join(upload_target, filename))
                 unit.file_path = filename
             except Exception:
                 pass
@@ -809,7 +805,9 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
             try:
                 original_name = secure_filename(assignment_file.filename)
                 saved_new_file = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-                assignment_file.save(os.path.join(UPLOAD_FOLDER, saved_new_file))
+                upload_target = '/tmp/uploads' if os.environ.get('VERCEL') else UPLOAD_FOLDER
+                os.makedirs(upload_target, exist_ok=True)
+                assignment_file.save(os.path.join(upload_target, saved_new_file))
             except Exception:
                 saved_new_file = None
 
@@ -829,9 +827,9 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
 
             try:
                 notify_course_students(course, "Assignment updated", f"‘{title}’ was updated in {course.name}.", f"/student/courses/{course.id}")
+                db.session.commit()
             except Exception:
-                pass
-            db.session.commit()
+                db.session.rollback()
 
         except Exception as exc:
             db.session.rollback()
@@ -898,9 +896,10 @@ def update_student_quiz_score(teacher_id, course_id, quiz_id, student_id):
 
     try:
         db.session.add(Notification(user_id=student_id, title='Quiz grade published', message=f'Your grade for {quiz.title} has been updated.', link=f'/student/courses/{course_id}'))
+        db.session.commit()
     except Exception:
-        pass
-    db.session.commit()
+        db.session.rollback()
+
     return jsonify({"status": "success", "message": "Grade updated"})
 
 
@@ -919,9 +918,10 @@ def update_student_exam_score(teacher_id, course_id, exam_id, student_id):
 
     try:
         db.session.add(Notification(user_id=student_id, title='Exam grade published', message=f'Your grade for {exam.title} has been updated.', link=f'/student/courses/{course_id}'))
+        db.session.commit()
     except Exception:
-        pass
-    db.session.commit()
+        db.session.rollback()
+
     return jsonify({"status": "success", "message": "Exam grade updated"})
 
 
@@ -1081,9 +1081,9 @@ def grade_submission(teacher_id, submission_id):
         submission.feedback = feedback
         try:
             db.session.add(Notification(user_id=submission.student_id, title='Assignment graded', message=f'Your submission for {submission.assignment.title} received {score}/100.', link=f'/student/courses/{submission.assignment.course_id}'))
+            db.session.commit()
         except Exception:
-            pass
-        db.session.commit()
+            db.session.rollback()
         flash('Submission graded successfully.', 'success')
     return redirect(url_for('teachers.submissions', teacher_id=teacher_id))
 
