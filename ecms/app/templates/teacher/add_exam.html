@@ -584,6 +584,28 @@
     recalculateScore();
   }
 
+  function syncMcqPayload(index) {
+    const optA = (document.getElementById(`mcq_opt_a_${index}`)?.value || '').trim();
+    const optB = (document.getElementById(`mcq_opt_b_${index}`)?.value || '').trim();
+    const optC = (document.getElementById(`mcq_opt_c_${index}`)?.value || '').trim();
+    const optD = (document.getElementById(`mcq_opt_d_${index}`)?.value || '').trim();
+
+    const selectedRadio = document.querySelector(`input[name="mcq_radio_${index}"]:checked`);
+    const optionsHidden = document.getElementById(`options_hidden_${index}`);
+    const answerHidden = document.getElementById(`answer_hidden_${index}`);
+
+    const optionsList = [optA, optB, optC, optD].filter(Boolean);
+    if (optionsHidden) {
+      optionsHidden.value = optionsList.join(', ');
+    }
+
+    if (answerHidden && selectedRadio) {
+      const selectedKey = selectedRadio.value;
+      const valMap = { a: optA, b: optB, c: optC, d: optD };
+      answerHidden.value = valMap[selectedKey] || '';
+    }
+  }
+
   function addExamQuestion(type) {
     qNum++;
     const container = document.getElementById('questionsContainer');
@@ -611,13 +633,39 @@
 
     if (type === 'mcq') {
       bodyFields = `
-        <div style="margin-top: 12px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Comma-Separated Options (e.g. Red, Blue, Green, Yellow):</label>
-          <input type="text" name="options_${qNum}" placeholder="Choice A, Choice B, Choice C, Choice D" class="field-input" style="margin-top: 4px;" required>
-        </div>
-        <div style="margin-top: 10px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Exact Correct Answer (Must match one option above):</label>
-          <input type="text" name="answer_${qNum}" placeholder="Type exact answer" class="field-input" style="margin-top: 4px;" required>
+        <input type="hidden" name="options_${qNum}" id="options_hidden_${qNum}" value="">
+        <input type="hidden" name="answer_${qNum}" id="answer_hidden_${qNum}" value="">
+
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+            Answer Choices (Select the radio icon for the correct one):
+          </label>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qNum}" value="a" onchange="syncMcqPayload(${qNum})" checked style="cursor: pointer; accent-color: #2563eb; width: 18px; height: 18px;">
+              <span style="font-weight: 800; font-size: 13px; color: #2563eb;">A</span>
+              <input type="text" id="mcq_opt_a_${qNum}" placeholder="Option A text..." class="field-input" style="border: none; padding: 6px 8px;" oninput="syncMcqPayload(${qNum})" required>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qNum}" value="b" onchange="syncMcqPayload(${qNum})" style="cursor: pointer; accent-color: #2563eb; width: 18px; height: 18px;">
+              <span style="font-weight: 800; font-size: 13px; color: #2563eb;">B</span>
+              <input type="text" id="mcq_opt_b_${qNum}" placeholder="Option B text..." class="field-input" style="border: none; padding: 6px 8px;" oninput="syncMcqPayload(${qNum})" required>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qNum}" value="c" onchange="syncMcqPayload(${qNum})" style="cursor: pointer; accent-color: #2563eb; width: 18px; height: 18px;">
+              <span style="font-weight: 800; font-size: 13px; color: #2563eb;">C</span>
+              <input type="text" id="mcq_opt_c_${qNum}" placeholder="Option C text..." class="field-input" style="border: none; padding: 6px 8px;" oninput="syncMcqPayload(${qNum})">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; background: #ffffff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qNum}" value="d" onchange="syncMcqPayload(${qNum})" style="cursor: pointer; accent-color: #2563eb; width: 18px; height: 18px;">
+              <span style="font-weight: 800; font-size: 13px; color: #2563eb;">D</span>
+              <input type="text" id="mcq_opt_d_${qNum}" placeholder="Option D text..." class="field-input" style="border: none; padding: 6px 8px;" oninput="syncMcqPayload(${qNum})">
+            </div>
+          </div>
         </div>
       `;
     } else if (type === 'true_false') {
