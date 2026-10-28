@@ -190,6 +190,13 @@ def dashboard(teacher_id):
     ungraded = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id, Submission.grade.is_(None)).count()
     upcoming = sorted([a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()], key=lambda a: a.due_date)[:5]
     stats = {'courses': len(courses), 'students': len(student_ids), 'assignments': assignment_count, 'quizzes': quiz_count, 'ungraded': ungraded}
+
+    # إذا كان الزائر داخل عبر زر الديمو، نعدل الاسم المعروض في الذاكرة فقط دون مساس بقاعدة البيانات
+    if session.get('is_demo'):
+        teacher.name_person = "Dr. Demo Instructor"
+        teacher.email = "instructor@learnova.edu"
+        teacher.username = "demo_teacher"
+
     return render_template("teacher/dashboard.html", teacher=teacher, courses=courses, stats=stats, upcoming=upcoming, **_teacher_nav_context(teacher))
 
 
