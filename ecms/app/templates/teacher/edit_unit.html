@@ -2,60 +2,492 @@
 {% block title %}Edit Unit | {{ course.name }}{% endblock %}
 
 {% block content %}
-<div class="form-page-container" style="max-width: 900px; margin: 30px auto; padding: 0 15px;">
-  <div class="card" style="background: #ffffff; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #edf2f7; padding: 35px;">
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  }
+
+  .full-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  .header-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  .back-navigation {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #eff6ff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-navigation:hover {
+    background: #2563eb;
+    color: #ffffff;
+    transform: translateX(-2px);
+  }
+
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+
+  .main-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 34px 38px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-head-block {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .head-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+  }
+  .head-texts h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .head-texts p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .form-field-group {
+    margin-bottom: 22px;
+  }
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .field-label .required-mark {
+    color: #ef4444;
+  }
+  .field-input, .field-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .field-input:focus, .field-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+  .field-textarea {
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .dropzone-container {
+    border: 2px dashed #cbd5e1;
+    background: #f8fafc;
+    border-radius: var(--radius-lg);
+    padding: 32px 20px;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .dropzone-container:hover, .dropzone-container.dragover {
+    border-color: var(--primary);
+    background: #eff6ff;
+  }
+  .file-hidden-input {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 5;
+  }
+  .dropzone-icon-circle {
+    width: 48px;
+    height: 48px;
+    background: #eff6ff;
+    color: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 10px;
+  }
+  .dropzone-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+  }
+  .dropzone-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .current-file-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 6px 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .file-preview-pill {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .form-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .btn-form-cancel {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-form-cancel:hover {
+    background: #e2e8f0;
+    color: var(--text-primary);
+  }
+  .btn-form-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 26px;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-form-submit:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
+
+  .sidebar-guide-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 26px;
+    box-shadow: var(--shadow-card);
+  }
+  .guide-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .guide-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .guide-item i {
+    color: #10b981;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .guide-item-text h5 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .guide-item-text p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .course-context-pill {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 1024px) {
+    .layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .full-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .main-form-card {
+      padding: 24px 18px;
+    }
+    .form-head-block {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .form-actions-row {
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+    .btn-form-cancel, .btn-form-submit {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="full-page-wrapper">
+  
+  <div class="header-actions-bar">
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
+      <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
+    </a>
+  </div>
+
+  <div class="layout-grid">
     
-    <!-- Header -->
-    <div style="display: flex; align-items: center; gap: 18px; margin-bottom: 28px;">
-      <div style="width: 52px; height: 52px; background: #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 22px;">
-        <i class="fa-solid fa-pen-to-square"></i>
-      </div>
-      <div>
-        <h2 style="margin: 0; font-size: 22px; font-weight: 700; color: #1e293b;">Unit Details</h2>
-        <p style="margin: 4px 0 0; color: #64748b; font-size: 14px;">Edit the unit title, lecture description, and attached course material.</p>
-      </div>
-    </div>
-
-    <form method="POST" action="{{ url_for('teachers.edit_unit_page', teacher_id=teacher.id, course_id=course.id, unit_id=unit.id) }}" enctype="multipart/form-data">
-      
-      <!-- Unit Title -->
-      <div style="margin-bottom: 22px;">
-        <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">Unit Title</label>
-        <input type="text" name="title" value="{{ unit.title }}" required style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; font-size: 15px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
-      </div>
-
-      <!-- Content / Instructions -->
-      <div style="margin-bottom: 22px;">
-        <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">Content / Description</label>
-        <textarea name="content" rows="6" placeholder="Enter lecture outline or study objectives..." style="width: 100%; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; font-size: 14px; outline: none; line-height: 1.6; resize: vertical; transition: border-color 0.2s;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">{{ unit.content or '' }}</textarea>
-      </div>
-
-      <!-- File Dropzone -->
-      <div style="margin-bottom: 28px;">
-        <label style="display: block; font-weight: 600; color: #1e293b; font-size: 14px; margin-bottom: 8px;">
-          <i class="fa-solid fa-paperclip" style="color: #64748b; margin-right: 6px;"></i>Attachment Material
-        </label>
-        
-        <div style="border: 2px dashed #cbd5e1; background: #f8fafc; border-radius: 14px; padding: 30px; text-align: center; position: relative;">
-          <input type="file" name="file" id="unitFileInput" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0; cursor:pointer;" onchange="document.getElementById('fileNameUnit').textContent = this.files[0] ? this.files[0].name : 'No new file selected';">
-          <div style="width: 48px; height: 48px; background: #3b82f6; border-radius: 12px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px;">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-          </div>
-          <strong style="display: block; font-size: 15px; color: #1e293b; margin-bottom: 4px;">Choose a file or drag it here</strong>
-          <span style="font-size: 13px; color: #64748b;">Leave empty to keep the existing document</span>
-          <div id="fileNameUnit" style="font-size: 13px; color: #3b82f6; margin-top: 10px; font-weight: 600;">
-            {% if unit.file_path %}Current: {{ unit.file_path.split('_', 1)[-1] }}{% else %}No file uploaded{% endif %}
-          </div>
+    <div class="main-form-card">
+      <div class="form-head-block">
+        <div class="head-icon-box">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </div>
+        <div class="head-texts">
+          <h1>Unit Details</h1>
+          <p>Edit the unit title, lecture description, and attached course material.</p>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div style="display: flex; justify-content: flex-end; gap: 12px; padding-top: 15px; border-top: 1px solid #f1f5f9;">
-        <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" style="padding: 10px 22px; border-radius: 10px; background: #f1f5f9; color: #475569; text-decoration: none; font-weight: 600; font-size: 14px; border: none; display: inline-flex; align-items: center;">Cancel</a>
-        <button type="submit" style="padding: 10px 26px; border-radius: 10px; background: #3b82f6; color: #fff; font-weight: 600; font-size: 14px; border: none; cursor: pointer; display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(59,130,246,0.25);">Save Changes</button>
+      <form method="POST" action="{{ url_for('teachers.edit_unit_page', teacher_id=teacher.id, course_id=course.id, unit_id=unit.id) }}" enctype="multipart/form-data">
+        
+        <div class="form-field-group">
+          <label class="field-label" for="unitTitle">
+            Unit Title <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="unitTitle" 
+            name="title" 
+            class="field-input" 
+            value="{{ unit.title }}"
+            required 
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-field-group">
+          <label class="field-label" for="unitContent">
+            Content / Description <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">(Optional)</span>
+          </label>
+          <textarea 
+            id="unitContent" 
+            name="content" 
+            rows="5" 
+            class="field-textarea" 
+            placeholder="Enter lecture outline or study objectives..."
+          >{{ unit.content or '' }}</textarea>
+        </div>
+
+        <div class="form-field-group">
+          <label class="field-label">
+            <i class="fa-solid fa-paperclip" style="color: var(--primary); margin-right: 4px;"></i> Attachment Material
+          </label>
+          
+          <div class="dropzone-container" id="dropArea">
+            <input 
+              type="file" 
+              name="file" 
+              id="unitFileInput" 
+              class="file-hidden-input"
+              accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.zip"
+            >
+            <div class="dropzone-icon-circle">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h4 class="dropzone-title">Choose a file or drag it here</h4>
+            <p class="dropzone-subtitle">Leave empty to keep the existing document</p>
+            
+            {% if unit.file_path %}
+            <div class="current-file-badge">
+              <i class="fa-solid fa-paperclip"></i>
+              <span>Current: {{ unit.file_path.split('_', 1)[-1] }}</span>
+            </div>
+            {% endif %}
+
+            <div id="filePreview" class="file-preview-pill">
+              <i class="fa-solid fa-file-check"></i>
+              <span id="fileNameDisplay">Selected file</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions-row">
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
+            Cancel
+          </a>
+          <button type="submit" class="btn-form-submit">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="sidebar-guide-card">
+      <h3 class="guide-title">
+        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Information
+      </h3>
+      
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Preserve Attachments</h5>
+          <p>If you don't select a new file, the current uploaded presentation or PDF will remain unchanged.</p>
+        </div>
       </div>
 
-    </form>
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Instant Sync</h5>
+          <p>Any modifications to titles or descriptions reflect immediately across student portals.</p>
+        </div>
+      </div>
+
+      <div class="course-context-pill">
+        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Course</span>
+        <strong style="color: var(--text-primary); font-size: 14px;">{{ course.name }}</strong>
+        <span style="font-size: 12px; color: var(--primary); display: block; margin-top: 2px; font-weight: 600;">Code: {{ course.code }}</span>
+      </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const fileInput = document.getElementById('unitFileInput');
+    const filePreview = document.getElementById('filePreview');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+    const dropArea = document.getElementById('dropArea');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+          fileNameDisplay.textContent = this.files[0].name;
+          filePreview.style.display = 'inline-flex';
+        } else {
+          filePreview.style.display = 'none';
+        }
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropArea.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropArea.classList.remove('dragover');
+        }, false);
+      });
+    }
+  });
+</script>
 {% endblock %}
