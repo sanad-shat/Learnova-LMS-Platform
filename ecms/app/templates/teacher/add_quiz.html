@@ -1,24 +1,608 @@
-{% extends 'teacher/base.html' %}
-{% block title %}Create Quiz | Learnova LMS{% endblock %}
+{% extends "teacher/base.html" %}
+{% block title %}Create New Quiz | {{ course.name }}{% endblock %}
+
 {% block content %}
-<div class="page-title-row"><div><span class="eyebrow">QUIZ BUILDER</span><h1>Create New Quiz</h1><p>Create a complete online quiz for <strong>{{ course.name }}</strong>.</p></div><a class="secondary-btn" href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}"><i class="fa-solid fa-arrow-left"></i> Back to Course</a></div>
-<form method="post" id="assessmentBuilderForm">
-<section class="data-card form-card-narrow">
-  <div class="form-intro"><div class="form-intro-icon"><i class="fa-solid fa-circle-question"></i></div><div><h2>Quiz Details</h2><p>Set availability, instructions, then build the question bank.</p></div></div>
-  <div class="form-grid modern-editor-form">
-    <label class="full-span">Quiz Title<input name="title" required placeholder="Example: Chapter 1 Quiz" value="{{ request.form.get('title','') }}"></label>
-    <label>Start Date & Time<input type="datetime-local" name="start_date" required value="{{ request.form.get('start_date','') }}"></label>
-    <label>End Date & Time<input type="datetime-local" name="end_date" required value="{{ request.form.get('end_date','') }}"></label>
-    <label class="full-span">Instructions<textarea name="description" rows="4" placeholder="Explain what students should do...">{{ request.form.get('description','') }}</textarea></label>
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 22px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  }
+
+  .full-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  .header-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  .back-navigation {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    background: #eff6ff;
+    padding: 8px 16px;
+    border-radius: 30px;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .back-navigation:hover {
+    background: #2563eb;
+    color: #ffffff;
+    transform: translateX(-2px);
+  }
+
+  .layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 26px;
+    align-items: start;
+  }
+
+  .form-section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .main-form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 34px 38px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .form-head-block {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding-bottom: 24px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .head-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    flex-shrink: 0;
+  }
+  .head-texts h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .head-texts p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .form-field-group {
+    margin-bottom: 22px;
+  }
+  .form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .field-label .required-mark {
+    color: #ef4444;
+  }
+  .field-input, .field-textarea {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .field-input:focus, .field-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  }
+  .field-textarea {
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  /* Question Bank Tools */
+  .qb-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .qb-counter-pill {
+    background: #f1f5f9;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .question-type-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .btn-type-option {
+    border: 1.5px solid var(--border-normal);
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-type-option:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #eff6ff;
+  }
+
+  .question-item-card {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .question-item-card .remove-q-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    color: #ef4444;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+  .empty-questions-notice {
+    text-align: center;
+    padding: 36px 20px;
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-lg);
+    background: #f8fafc;
+  }
+  .empty-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 20px;
+  }
+
+  .form-actions-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+  .btn-form-cancel {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-form-cancel:hover {
+    background: #e2e8f0;
+    color: var(--text-primary);
+  }
+  .btn-form-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 26px;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-form-submit:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
+
+  .sidebar-guide-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 26px;
+    box-shadow: var(--shadow-card);
+  }
+  .guide-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .guide-item {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .guide-item i {
+    color: #10b981;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .guide-item-text h5 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .guide-item-text p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .course-context-pill {
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 1024px) {
+    .layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .full-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .main-form-card {
+      padding: 24px 18px;
+    }
+    .form-row-2col, .question-type-selector {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .form-head-block {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .form-actions-row {
+      flex-direction: column-reverse;
+      gap: 10px;
+    }
+    .btn-form-cancel, .btn-form-submit {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="full-page-wrapper">
+  
+  <div class="header-actions-bar">
+    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
+      <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
+    </a>
   </div>
-</section>
-<section class="data-card form-card-narrow question-builder-panel">
-  <div class="builder-head"><div><span class="eyebrow">QUESTION BANK</span><h2>Quiz Questions</h2><p>Add multiple-choice, true/false, short-answer, or essay questions.</p></div><div class="question-total"><strong id="questionCounter">0</strong><span>Questions</span></div></div>
-  <div class="question-type-toolbar"><button type="button" class="question-type-btn" data-add-type="mcq"><i class="fa-solid fa-list-ul"></i> Multiple Choice</button><button type="button" class="question-type-btn" data-add-type="true_false"><i class="fa-solid fa-toggle-on"></i> True / False</button><button type="button" class="question-type-btn" data-add-type="short_answer"><i class="fa-solid fa-pen"></i> Short Answer</button><button type="button" class="question-type-btn" data-add-type="essay"><i class="fa-solid fa-align-left"></i> Essay</button></div>
-  <div id="questionsContainer" class="question-stack"></div>
-  <div class="empty-question-builder" id="emptyBuilder"><i class="fa-solid fa-circle-plus"></i><h3>Add your first question</h3><p>Select a question type above to begin.</p></div>
-  <div class="form-actions"><button class="primary-btn" type="submit"><i class="fa-solid fa-floppy-disk"></i> Create Quiz</button><a class="secondary-btn" href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}">Cancel</a></div>
-</section>
-</form>
+
+  <div class="layout-grid">
+    
+    <form method="POST" action="{{ url_for('teachers.add_quiz', teacher_id=teacher.id, course_id=course.id) }}" class="form-section-stack">
+      
+      <!-- Card 1: Quiz Details -->
+      <div class="main-form-card">
+        <div class="form-head-block">
+          <div class="head-icon-box">
+            <i class="fa-solid fa-clipboard-question"></i>
+          </div>
+          <div class="head-texts">
+            <h1>Quiz Details</h1>
+            <p>Set scheduling, title, and exam instructions for students.</p>
+          </div>
+        </div>
+
+        <div class="form-field-group">
+          <label class="field-label" for="quizTitle">
+            Quiz Title <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="quizTitle" 
+            name="title" 
+            class="field-input" 
+            placeholder="e.g. Chapter 1 Quiz: Foundations of AI" 
+            required 
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="form-field-group form-row-2col">
+          <div>
+            <label class="field-label" for="startDate">
+              Start Date & Time <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="datetime-local" 
+              id="startDate" 
+              name="start_date" 
+              class="field-input" 
+              required
+            >
+          </div>
+          <div>
+            <label class="field-label" for="endDate">
+              End Date & Time <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="datetime-local" 
+              id="endDate" 
+              name="end_date" 
+              class="field-input" 
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-field-group" style="margin-bottom: 0;">
+          <label class="field-label" for="instructions">
+            Instructions / Guidelines
+          </label>
+          <textarea 
+            id="instructions" 
+            name="description" 
+            rows="4" 
+            class="field-textarea" 
+            placeholder="Explain guidelines, allowed attempts, or timing restrictions..."
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Card 2: Question Bank -->
+      <div class="main-form-card">
+        <div class="qb-header-row">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">Quiz Question Bank</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Select question types below to compose the evaluation.</p>
+          </div>
+          <span class="qb-counter-pill" id="questionCountPill">0 Questions</span>
+        </div>
+
+        <div class="question-type-selector">
+          <button type="button" class="btn-type-option" onclick="addQuestion('mcq')">
+            <i class="fa-solid fa-list-check" style="color: #2563eb;"></i> Multiple Choice
+          </button>
+          <button type="button" class="btn-type-option" onclick="addQuestion('tf')">
+            <i class="fa-solid fa-toggle-on" style="color: #16a34a;"></i> True / False
+          </button>
+          <button type="button" class="btn-type-option" onclick="addQuestion('short')">
+            <i class="fa-solid fa-pencil" style="color: #d97706;"></i> Short Answer
+          </button>
+          <button type="button" class="btn-type-option" onclick="addQuestion('essay')">
+            <i class="fa-solid fa-align-left" style="color: #7c3aed;"></i> Essay Question
+          </button>
+        </div>
+
+        <div id="questionsContainer">
+          <div class="empty-questions-notice" id="emptyQuestionsMsg">
+            <div class="empty-icon">
+              <i class="fa-solid fa-plus"></i>
+            </div>
+            <h4 style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">No Questions Added Yet</h4>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Click one of the question types above to start drafting.</p>
+          </div>
+        </div>
+
+        <div class="form-actions-row">
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
+            Cancel
+          </a>
+          <button type="submit" class="btn-form-submit">
+            <i class="fa-solid fa-check"></i> Create Quiz
+          </button>
+        </div>
+      </div>
+
+    </form>
+
+    <!-- Sidebar Guidelines -->
+    <div class="sidebar-guide-card">
+      <h3 class="guide-title">
+        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Quiz Best Practices
+      </h3>
+      
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Balanced Scoring</h5>
+          <p>Allocate proportional marks according to question complexity.</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Clear Time Window</h5>
+          <p>Ensure the end date allows sufficient time buffer for students experiencing network lag.</p>
+        </div>
+      </div>
+
+      <div class="guide-item">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="guide-item-text">
+          <h5>Instant Gradebook Integration</h5>
+          <p>Multiple-choice and True/False questions can be evaluated automatically upon submission.</p>
+        </div>
+      </div>
+
+      <div class="course-context-pill">
+        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Course</span>
+        <strong style="color: var(--text-primary); font-size: 14px;">{{ course.name }}</strong>
+        <span style="font-size: 12px; color: var(--primary); display: block; margin-top: 2px; font-weight: 600;">Code: {{ course.code }}</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let qIndex = 0;
+
+  function updateCount() {
+    const total = document.querySelectorAll('.question-item-card').length;
+    document.getElementById('questionCountPill').textContent = total + ' Question' + (total !== 1 ? 's' : '');
+    const emptyMsg = document.getElementById('emptyQuestionsMsg');
+    if (emptyMsg) {
+      emptyMsg.style.display = total === 0 ? 'block' : 'none';
+    }
+  }
+
+  function addQuestion(type) {
+    qIndex++;
+    const container = document.getElementById('questionsContainer');
+    const emptyMsg = document.getElementById('emptyQuestionsMsg');
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    let typeTitle = 'Multiple Choice';
+    if (type === 'tf') typeTitle = 'True / False';
+    if (type === 'short') typeTitle = 'Short Answer';
+    if (type === 'essay') typeTitle = 'Essay';
+
+    const card = document.createElement('div');
+    card.className = 'question-item-card';
+    card.id = 'qCard_' + qIndex;
+
+    let optionsHtml = '';
+    if (type === 'mcq') {
+      optionsHtml = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+          <input type="text" name="q_${qIndex}_opt1" placeholder="Option A" class="field-input">
+          <input type="text" name="q_${qIndex}_opt2" placeholder="Option B" class="field-input">
+          <input type="text" name="q_${qIndex}_opt3" placeholder="Option C" class="field-input">
+          <input type="text" name="q_${qIndex}_opt4" placeholder="Option D" class="field-input">
+        </div>
+        <div style="margin-top: 10px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
+          <select name="q_${qIndex}_answer" class="field-input" style="padding: 8px 12px; margin-top: 4px;">
+            <option value="A">Option A</option>
+            <option value="B">Option B</option>
+            <option value="C">Option C</option>
+            <option value="D">Option D</option>
+          </select>
+        </div>
+      `;
+    } else if (type === 'tf') {
+      optionsHtml = `
+        <div style="margin-top: 10px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
+          <select name="q_${qIndex}_answer" class="field-input" style="padding: 8px 12px; margin-top: 4px;">
+            <option value="True">True</option>
+            <option value="False">False</option>
+          </select>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <input type="hidden" name="q_${qIndex}_type" value="${type}">
+      <button type="button" class="remove-q-btn" onclick="removeQuestion('${card.id}')" title="Remove Question">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px;">${typeTitle}</span>
+        <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Question #${qIndex}</span>
+      </div>
+      <input type="text" name="q_${qIndex}_text" placeholder="Type question prompt here..." class="field-input" required>
+      <div style="margin-top: 10px; max-width: 140px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points</label>
+        <input type="number" name="q_${qIndex}_points" value="1" min="0.5" step="0.5" class="field-input" style="padding: 8px 12px;">
+      </div>
+      ${optionsHtml}
+    `;
+
+    container.appendChild(card);
+    updateCount();
+  }
+
+  function removeQuestion(cardId) {
+    const el = document.getElementById(cardId);
+    if (el) el.remove();
+    updateCount();
+  }
+</script>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/question-builder.js') }}"></script>{% endblock %}
