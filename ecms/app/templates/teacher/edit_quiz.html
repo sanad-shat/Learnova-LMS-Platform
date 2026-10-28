@@ -285,7 +285,7 @@
         </div>
       </div>
 
-      <form method="POST" action="{{ url_for('teachers.edit_quiz_page', teacher_id=teacher.id, course_id=course.id, quiz_id=quiz.id) }}">
+      <form method="POST" action="{{ url_for('teachers.edit_quiz', teacher_id=teacher.id, course_id=course.id, quiz_id=quiz.id) }}">
         
         <div class="form-field-group">
           <label class="field-label" for="quizTitle">
