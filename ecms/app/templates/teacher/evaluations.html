@@ -1,5 +1,517 @@
-{% extends 'teacher/base.html' %}{% set active_page='evaluations' %}{% block title %}Evaluations | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">ACADEMIC EVALUATION</span><h1>Evaluations & Grades</h1><p>Monitor assignment grades, exam results, and learner performance.</p></div><a class="primary-btn" href="{{ url_for('teachers.submissions',teacher_id=teacher.id) }}"><i class="fa-solid fa-pen"></i>Grade Submissions</a></div>
-<section class="stats-grid"><article class="metric-card"><div class="metric-icon purple"><i class="fa-solid fa-file-pen"></i></div><div><small>Graded Assignments</small><strong>{{ graded_submissions }}</strong><em>Completed reviews</em></div></article><article class="metric-card"><div class="metric-icon amber"><i class="fa-solid fa-hourglass-half"></i></div><div><small>Pending Reviews</small><strong>{{ pending_submissions }}</strong><em>Needs attention</em></div></article><article class="metric-card"><div class="metric-icon blue"><i class="fa-solid fa-clipboard-check"></i></div><div><small>Exam Grades</small><strong>{{ exam_grades|length }}</strong><em>Recorded results</em></div></article><article class="metric-card"><div class="metric-icon green"><i class="fa-solid fa-chart-line"></i></div><div><small>Average</small><strong>{{ average_score }}%</strong><em>Across graded work</em></div></article></section>
-<div class="data-card"><div class="panel-head"><h2>Recent Evaluation Records</h2></div><div class="table-wrap"><table><thead><tr><th>Student</th><th>Course</th><th>Assessment</th><th>Type</th><th>Score</th><th>Status</th></tr></thead><tbody>{% for row in evaluation_rows %}<tr data-searchable><td>{{ row.student }}</td><td>{{ row.course }}</td><td>{{ row.title }}</td><td>{{ row.type }}</td><td><strong>{{ row.score }}</strong></td><td><span class="status-pill active">Graded</span></td></tr>{% else %}<tr><td colspan="6"><div class="empty-state">No graded evaluations yet.</div></td></tr>{% endfor %}</tbody></table></div></div>
+{% extends "teacher/base.html" %}
+{% block title %}Evaluations & Grades | Instructor Workspace{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
+  }
+
+  .evaluations-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  /* ---------------- Header Banner ---------------- */
+  .eval-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-titles h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .header-titles p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .btn-grade-quick {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+  }
+  .btn-grade-quick:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
+
+  /* ---------------- KPI Overview Grid ---------------- */
+  .kpi-metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 28px;
+  }
+  .kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+  .kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .kpi-text h3 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 2px;
+  }
+  .kpi-text p {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ---------------- Search & Filter Toolbar ---------------- */
+  .table-toolbar-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 18px 24px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    box-shadow: var(--shadow-card);
+    flex-wrap: wrap;
+  }
+  .search-input-box {
+    position: relative;
+    flex: 1;
+    max-width: 420px;
+  }
+  .search-input-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .search-input-box input {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: 30px;
+    padding: 10px 16px 10px 38px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .search-input-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .filter-tabs-cluster {
+    display: flex;
+    gap: 8px;
+  }
+  .filter-tab-btn {
+    border: 1px solid var(--border-normal);
+    background: #ffffff;
+    padding: 7px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .filter-tab-btn.active, .filter-tab-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* ---------------- Data Table ---------------- */
+  .main-table-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .table-card-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .table-card-header h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .eval-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .eval-data-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  .eval-data-table th {
+    background: #f8fafc;
+    padding: 14px 24px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-normal);
+  }
+  .eval-data-table td {
+    padding: 16px 24px;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .eval-data-table tr:hover td {
+    background: #fbfcfe;
+  }
+  .eval-data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Cell Component Badges */
+  .student-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .student-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .student-name-text {
+    font-weight: 800;
+    color: var(--text-primary);
+    font-size: 13px;
+  }
+
+  .course-badge-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .type-tag-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .type-exam { color: #7c3aed; }
+  .type-assignment { color: #0284c7; }
+
+  .score-cell-badge {
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text-primary);
+    background: #f1f5f9;
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  .status-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .empty-state-notice {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+  }
+
+  /* ---------------- Responsive Rules ---------------- */
+  @media (max-width: 1024px) {
+    .kpi-metrics-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .evaluations-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .eval-header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .btn-grade-quick {
+      width: 100%;
+      justify-content: center;
+    }
+    .kpi-metrics-row {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .table-toolbar-card {
+      padding: 14px 16px;
+    }
+    .search-input-box {
+      max-width: 100%;
+    }
+  }
+</style>
+
+<div class="evaluations-page-wrapper">
+
+  <!-- Header Section -->
+  <div class="eval-header-bar">
+    <div class="header-titles">
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Academic Evaluation</span>
+      <h1>Evaluations & Grades</h1>
+      <p>Monitor assignment grades, exam results, and learner performance.</p>
+    </div>
+    <a href="{{ url_for('teachers.submissions', teacher_id=teacher.id) }}" class="btn-grade-quick">
+      <i class="fa-solid fa-pen-nib"></i> Grade Submissions[cite: 20]
+    </a>
+  </div>
+
+  <!-- KPI Overview Grid -->
+  <div class="kpi-metrics-row">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;">
+        <i class="fa-solid fa-file-circle-check"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ graded_submissions }}</h3>
+        <p>Graded Assignments[cite: 20]</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #fffbeb; color: #d97706;">
+        <i class="fa-solid fa-hourglass-half"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ pending_submissions }}</h3>
+        <p>Pending Reviews[cite: 20]</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #f5f3ff; color: #7c3aed;">
+        <i class="fa-solid fa-clipboard-check"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ exam_grades|length }}</h3>
+        <p>Exam Grades[cite: 20]</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div class="kpi-text">
+        <h3>{{ average_score }}%</h3>
+        <p>Average Performance</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filter Toolbar -->
+  <div class="table-toolbar-card">
+    <div class="search-input-box">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="evalSearchInput" placeholder="Search by student, course, or assessment..." onkeyup="filterEvaluationsTable()">
+    </div>
+    <div class="filter-tabs-cluster">
+      <button type="button" class="filter-tab-btn active" onclick="filterByType('all', this)">All</button>
+      <button type="button" class="filter-tab-btn" onclick="filterByType('Assignment', this)">Assignments</button>
+      <button type="button" class="filter-tab-btn" onclick="filterByType('Exam', this)">Exams</button>
+    </div>
+  </div>
+
+  <!-- Evaluations Data Table -->
+  <div class="main-table-card">
+    <div class="table-card-header">
+      <h2>Recent Evaluation Records[cite: 20]</h2>
+      <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);" id="visibleRecordsCount">
+        Showing {{ evaluation_rows|length }} record(s)
+      </span>
+    </div>
+
+    <div class="eval-table-wrap">
+      <table class="eval-data-table" id="evaluationsTable">
+        <thead>
+          <tr>
+            <th>Student[cite: 20]</th>
+            <th>Course[cite: 20]</th>
+            <th>Assessment[cite: 20]</th>
+            <th>Type[cite: 20]</th>
+            <th>Score[cite: 20]</th>
+            <th>Status[cite: 20]</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in evaluation_rows %}
+          <tr class="eval-row" data-type="{{ row.type }}">
+            <td>
+              <div class="student-user-cell">
+                <div class="student-avatar">
+                  {{ row.student[0]|upper }}
+                </div>
+                <span class="student-name-text">{{ row.student }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="course-badge-pill">{{ row.course }}</span>
+            </td>
+            <td>
+              <strong style="color: var(--text-primary);">{{ row.title }}</strong>
+            </td>
+            <td>
+              <span class="type-tag-pill {{ 'type-exam' if row.type == 'Exam' else 'type-assignment' }}">
+                <i class="fa-solid {{ 'fa-award' if row.type == 'Exam' else 'fa-file-lines' }}"></i>
+                {{ row.type }}
+              </span>
+            </td>
+            <td>
+              <span class="score-cell-badge">{{ row.score }}</span>
+            </td>
+            <td>
+              <span class="status-badge-pill">
+                <i class="fa-solid fa-circle-check"></i> Graded[cite: 20]
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state-notice">
+                <i class="fa-solid fa-clipboard-list" style="font-size: 36px; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">No Evaluation Records</h3>
+                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Evaluated assignments and exam scores will appear here automatically.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Real-time Filter & Search Script -->
+<script>
+  let activeTypeFilter = 'all';
+
+  function filterEvaluationsTable() {
+    const query = document.getElementById('evalSearchInput').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.eval-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const matchesQuery = text.includes(query);
+      const rowType = row.getAttribute('data-type');
+      const matchesType = (activeTypeFilter === 'all') || (rowType === activeTypeFilter);
+
+      if (matchesQuery && matchesType) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const countDisplay = document.getElementById('visibleRecordsCount');
+    if (countDisplay) {
+      countDisplay.textContent = `Showing ${visibleCount} record(s)`;
+    }
+  }
+
+  function filterByType(type, btn) {
+    document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeTypeFilter = type;
+    filterEvaluationsTable();
+  }
+</script>
 {% endblock %}
