@@ -347,7 +347,7 @@
       <p>Monitor assignment grades, exam results, and learner performance.</p>
     </div>
     <a href="{{ url_for('teachers.submissions', teacher_id=teacher.id) }}" class="btn-grade-quick">
-      <i class="fa-solid fa-pen-nib"></i> Grade Submissions[cite: 20]
+      <i class="fa-solid fa-pen-nib"></i> Grade Submissions
     </a>
   </div>
 
@@ -359,7 +359,7 @@
       </div>
       <div class="kpi-text">
         <h3>{{ graded_submissions }}</h3>
-        <p>Graded Assignments[cite: 20]</p>
+        <p>Graded Assignments</p>
       </div>
     </div>
 
@@ -369,7 +369,7 @@
       </div>
       <div class="kpi-text">
         <h3>{{ pending_submissions }}</h3>
-        <p>Pending Reviews[cite: 20]</p>
+        <p>Pending Reviews</p>
       </div>
     </div>
 
@@ -379,7 +379,7 @@
       </div>
       <div class="kpi-text">
         <h3>{{ exam_grades|length }}</h3>
-        <p>Exam Grades[cite: 20]</p>
+        <p>Exam Grades</p>
       </div>
     </div>
 
@@ -410,7 +410,7 @@
   <!-- Evaluations Data Table -->
   <div class="main-table-card">
     <div class="table-card-header">
-      <h2>Recent Evaluation Records[cite: 20]</h2>
+      <h2>Recent Evaluation Records</h2>
       <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);" id="visibleRecordsCount">
         Showing {{ evaluation_rows|length }} record(s)
       </span>
@@ -420,12 +420,12 @@
       <table class="eval-data-table" id="evaluationsTable">
         <thead>
           <tr>
-            <th>Student[cite: 20]</th>
-            <th>Course[cite: 20]</th>
-            <th>Assessment[cite: 20]</th>
-            <th>Type[cite: 20]</th>
-            <th>Score[cite: 20]</th>
-            <th>Status[cite: 20]</th>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Assessment</th>
+            <th>Type</th>
+            <th>Score</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
@@ -456,7 +456,7 @@
             </td>
             <td>
               <span class="status-badge-pill">
-                <i class="fa-solid fa-circle-check"></i> Graded[cite: 20]
+                <i class="fa-solid fa-circle-check"></i> Graded
               </span>
             </td>
           </tr>
