@@ -27,7 +27,6 @@
     padding: 24px 28px 60px;
   }
 
-  /* ---------------- Header Section ---------------- */
   .forum-header-bar {
     display: flex;
     justify-content: space-between;
@@ -70,7 +69,6 @@
     box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
   }
 
-  /* ---------------- Filter & Search Bar ---------------- */
   .filter-panel-card {
     background: var(--card-bg);
     border: 1px solid var(--border-normal);
@@ -141,7 +139,6 @@
     border-color: var(--primary);
   }
 
-  /* ---------------- Discussions Feed ---------------- */
   .topics-feed {
     display: flex;
     flex-direction: column;
@@ -258,7 +255,6 @@
     color: var(--text-muted);
   }
 
-  /* ---------------- New Topic Modal ---------------- */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -396,20 +392,17 @@
 
 <div class="forum-page-wrapper">
 
-  <!-- Header Banner -->
   <div class="forum-header-bar">
     <div class="header-titles">
       <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Course Community</span>
       <h1>Discussion Forum</h1>
       <p>Ask questions, share ideas, and collaborate with your learning community.</p>
     </div>
-    <!-- تشغيل المودال فوراً عند الضغط -->
     <button type="button" class="btn-new-topic" onclick="openTopicModal()">
       <i class="fa-solid fa-plus"></i> New Topic
     </button>
   </div>
 
-  <!-- Filter & Search Panel -->
   <div class="filter-panel-card">
     <form method="GET" class="filter-form-grid">
       <div class="search-field-box">
@@ -426,11 +419,13 @@
       <div>
         <select name="course" class="filter-select">
           <option value="">All courses</option>
-          {% for c in courses %}
-          <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
-            {{ c.name }}
-          </option>
-          {% endfor %}
+          {% if courses %}
+            {% for c in courses %}
+            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
+              {{ c.name }}
+            </option>
+            {% endfor %}
+          {% endif %}
         </select>
       </div>
 
@@ -449,7 +444,6 @@
     </form>
   </div>
 
-  <!-- Discussions Feed -->
   <div class="topics-feed">
     {% for topic in topics %}
     <div class="topic-card">
@@ -489,7 +483,6 @@
       <i class="fa-regular fa-comments" style="font-size: 42px; color: #cbd5e1; margin-bottom: 14px; display: block;"></i>
       <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">No Discussions Yet</h3>
       <p style="font-size: 13px; margin: 0 0 20px;">Be the first to start a conversation or ask a question in this community.</p>
-      <!-- تشغيل المودال فوراً عند الضغط -->
       <button type="button" class="btn-new-topic" onclick="openTopicModal()" style="display: inline-flex;">
         <i class="fa-solid fa-plus"></i> Start First Topic
       </button>
@@ -499,14 +492,14 @@
 
 </div>
 
-<!-- New Topic Modal Form -->
+<!-- نافذة إضافة موضوع (مع رابط مباشر آمن دون استخدام url_for المعطل) -->
 <div class="modal-overlay" id="topicModal">
   <div class="modal-container">
     <div class="modal-header">
       <h3>Start a New Discussion</h3>
       <button type="button" class="modal-close-btn" onclick="closeTopicModal()">&times;</button>
     </div>
-    <form method="POST" action="{{ url_for('forum.create_topic') }}">
+    <form method="POST" action="/forum/create">
       <div class="modal-form-group">
         <label class="modal-form-label" for="topicTitle">Title / Question</label>
         <input type="text" id="topicTitle" name="title" class="modal-input" placeholder="What would you like to discuss?" required>
@@ -517,9 +510,11 @@
           <label class="modal-form-label" for="topicCourse">Course</label>
           <select id="topicCourse" name="course_id" class="modal-select">
             <option value="">General Community</option>
-            {% for c in courses %}
-            <option value="{{ c.id }}">{{ c.name }}</option>
-            {% endfor %}
+            {% if courses %}
+              {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            {% endif %}
           </select>
         </div>
         <div>
@@ -556,7 +551,6 @@
     if (modal) modal.style.display = 'none';
   }
 
-  // إغلاق النافذة إذا ضغط المستخدم خارج الصندوق
   window.addEventListener('click', function(e) {
     const modal = document.getElementById('topicModal');
     if (e.target === modal) {
@@ -565,3 +559,4 @@
   });
 </script>
 {% endblock %}
+
