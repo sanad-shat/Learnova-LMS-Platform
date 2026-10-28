@@ -22,10 +22,17 @@ except ImportError:
 
 teachers_bp = Blueprint("teachers", __name__, url_prefix="/teacher")
 
-# Upload configuration
-UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'uploads'))
+# Upload configuration safe for Vercel/Serverless
+if os.environ.get('VERCEL'):
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'uploads'))
+
 ALLOWED_EXTENSIONS = {'pdf','doc','docx','ppt','pptx','xls','xlsx','txt','jpg','jpeg','png','zip'}
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+try:
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+except Exception:
+    pass
 
 
 def allowed_file(filename):
@@ -190,24 +197,9 @@ def dashboard(teacher_id):
     ungraded = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id, Submission.grade.is_(None)).count()
     upcoming = sorted([a for c in courses for a in getattr(c, 'assignments', []) if a.due_date and a.due_date >= datetime.now()], key=lambda a: a.due_date)[:5]
     stats = {'courses': len(courses), 'students': len(student_ids), 'assignments': assignment_count, 'quizzes': quiz_count, 'ungraded': ungraded}
+    return render_template("teacher/dashboard.html", teacher=teacher, courses=courses, stats=stats, upcoming=upcoming, **_teacher_nav_context(teacher))
 
-    # تجهيز النصوص للعرض فقط دون لمس كائن الـ ORM
-    is_demo = session.get('is_demo', False)
-    display_name = "Dr. Demo Instructor" if is_demo else (teacher.name_person or teacher.username)
-    display_email = "instructor@learnova.edu" if is_demo else teacher.email
-    display_username = "demo_teacher" if is_demo else teacher.username
 
-    return render_template(
-        "teacher/dashboard.html",
-        teacher=teacher,
-        courses=courses,
-        stats=stats,
-        upcoming=upcoming,
-        display_name=display_name,
-        display_email=display_email,
-        display_username=display_username,
-        **_teacher_nav_context(teacher)
-    )
 # ------------------------- Courses List -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses")
 @login_required
@@ -280,23 +272,38 @@ def add_unit(teacher_id, course_id):
     course = Course.query.get_or_404(course_id)
 
     if request.method == "POST":
-        title = request.form.get("title")
+        title = (request.form.get("title") or "").strip()
         file = request.files.get("file")
+
+        if not title:
+            flash("Unit title is required.", "danger")
+            return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
         filename = None
         if file and file.filename and file.filename.strip() != '':
             if allowed_file(file.filename):
-                original = secure_filename(file.filename)
-                filename = f'{uuid.uuid4().hex}_{original}'
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                try:
+                    original = secure_filename(file.filename)
+                    filename = f'{uuid.uuid4().hex}_{original}'
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                except Exception:
+                    filename = None
 
-        unit = Unit(title=title, file_path=filename, course_id=course_id)
-        db.session.add(unit)
-        db.session.flush()
-        notify_course_students(course, 'New learning unit', f'A new unit “{title}” was added to {course.name}.', f'/student/courses/{course.id}')
-        db.session.commit()
-        flash("Unit added successfully.", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
+        try:
+            unit = Unit(title=title, file_path=filename, course_id=course_id)
+            db.session.add(unit)
+            db.session.flush()
+            try:
+                notify_course_students(course, 'New learning unit', f'A new unit “{title}” was added to {course.name}.', f'/student/courses/{course.id}')
+            except Exception:
+                pass
+            db.session.commit()
+            flash("Unit added successfully.", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Could not add unit: {exc}", "danger")
+            return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
     return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
@@ -343,38 +350,43 @@ def add_assignment(teacher_id, course_id):
             flash("Unsupported assignment file type.", "danger")
             return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-        assignment = Assignment(
-            title=title,
-            description=description,
-            assignment_type=assignment_type,
-            start_date=start_date,
-            due_date=due_date,
-            course_id=course.id,
-        )
-
         try:
+            assignment = Assignment(
+                title=title,
+                description=description,
+                assignment_type=assignment_type,
+                start_date=start_date,
+                due_date=due_date,
+                course_id=course.id,
+            )
             db.session.add(assignment)
             db.session.flush()
 
             if assignment_file and assignment_file.filename:
-                original_name = secure_filename(assignment_file.filename)
-                stored_name = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-                assignment_file.save(os.path.join(UPLOAD_FOLDER, stored_name))
+                try:
+                    original_name = secure_filename(assignment_file.filename)
+                    stored_name = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
+                    assignment_file.save(os.path.join(UPLOAD_FOLDER, stored_name))
+                except Exception:
+                    pass
 
-            notify_course_students(
-                course,
-                "New assignment",
-                f"‘{title}’ was added to {course.name}. Due: {due_date:%d %b %Y %H:%M}.",
-                f"/student/courses/{course.id}",
-            )
+            try:
+                notify_course_students(
+                    course,
+                    "New assignment",
+                    f"‘{title}’ was added to {course.name}. Due: {due_date:%d %b %Y %H:%M}.",
+                    f"/student/courses/{course.id}",
+                )
+            except Exception:
+                pass
+
             db.session.commit()
+            flash("Assignment created successfully.", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Could not create assignment: {exc}", "danger")
             return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
-
-        flash("Assignment created successfully.", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
     return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
@@ -394,7 +406,9 @@ def assignment_attachment(assignment_id):
         return redirect(url_for("teachers.login"))
 
     prefix = f"assignment_{assignment.id}_"
-    matches = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(prefix))
+    matches = []
+    if os.path.exists(UPLOAD_FOLDER):
+        matches = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(prefix))
 
     if not matches:
         flash("No attachment was uploaded for this assignment.", "warning")
@@ -436,35 +450,44 @@ def add_quiz(teacher_id, course_id):
             flash(str(exc), "danger")
             return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-        assignment = Assignment(
-            title=title,
-            description=description,
-            assignment_type="quiz",
-            start_date=start_date,
-            due_date=end_date,
-            course_id=course.id,
-        )
-        db.session.add(assignment)
-        db.session.flush()
+        try:
+            assignment = Assignment(
+                title=title,
+                description=description,
+                assignment_type="quiz",
+                start_date=start_date,
+                due_date=end_date,
+                course_id=course.id,
+            )
+            db.session.add(assignment)
+            db.session.flush()
 
-        quiz = Quiz(
-            assignment_id=assignment.id,
-            course_id=course.id,
-            title=title,
-            description=description,
-            start_date=start_date,
-            end_date=end_date,
-        )
-        db.session.add(quiz)
-        db.session.flush()
+            quiz = Quiz(
+                assignment_id=assignment.id,
+                course_id=course.id,
+                title=title,
+                description=description,
+                start_date=start_date,
+                end_date=end_date,
+            )
+            db.session.add(quiz)
+            db.session.flush()
 
-        for payload in questions:
-            db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
+            for payload in questions:
+                db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
 
-        notify_course_students(course, "New quiz", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
-        db.session.commit()
-        flash(f"Quiz created successfully with {len(questions)} questions.", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+            try:
+                notify_course_students(course, "New quiz", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
+            except Exception:
+                pass
+
+            db.session.commit()
+            flash(f"Quiz created successfully with {len(questions)} questions.", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Error creating quiz: {exc}", "danger")
+            return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
     return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
@@ -491,11 +514,15 @@ def add_quiz_questions(quiz_id):
             flash(str(exc), "danger")
             return render_template("teacher/quiz_questions.html", quiz=quiz, course=course, teacher=teacher, **_teacher_nav_context(teacher))
 
-        for payload in questions:
-            db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
-        db.session.commit()
-        flash(f"Added {len(questions)} question(s) successfully.", "success")
-        return redirect(url_for("teachers.add_quiz_questions", quiz_id=quiz.id))
+        try:
+            for payload in questions:
+                db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
+            db.session.commit()
+            flash(f"Added {len(questions)} question(s) successfully.", "success")
+            return redirect(url_for("teachers.add_quiz_questions", quiz_id=quiz.id))
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Failed to add questions: {exc}", "danger")
 
     return render_template("teacher/quiz_questions.html", quiz=quiz, course=course, teacher=teacher, **_teacher_nav_context(teacher))
 
@@ -533,24 +560,33 @@ def add_exam(teacher_id, course_id):
             flash(str(exc), "danger")
             return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-        exam = Exam(
-            title=title,
-            description=description,
-            total_score=total_score,
-            start_date=start_date,
-            end_date=end_date,
-            course_id=course.id,
-        )
-        db.session.add(exam)
-        db.session.flush()
+        try:
+            exam = Exam(
+                title=title,
+                description=description,
+                total_score=total_score,
+                start_date=start_date,
+                end_date=end_date,
+                course_id=course.id,
+            )
+            db.session.add(exam)
+            db.session.flush()
 
-        for payload in questions:
-            db.session.add(ExamQuestion(exam_id=exam.id, **payload))
+            for payload in questions:
+                db.session.add(ExamQuestion(exam_id=exam.id, **payload))
 
-        notify_course_students(course, "New exam", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
-        db.session.commit()
-        flash(f"Exam created successfully with {len(questions)} questions.", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+            try:
+                notify_course_students(course, "New exam", f"‘{title}’ is now available in {course.name}.", f"/student/courses/{course.id}")
+            except Exception:
+                pass
+
+            db.session.commit()
+            flash(f"Exam created successfully with {len(questions)} questions.", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Failed to create exam: {exc}", "danger")
+            return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
     return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
@@ -693,9 +729,12 @@ def edit_unit_page(teacher_id, course_id, unit_id):
 
         file = request.files.get("file")
         if file and file.filename and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            unit.file_path = filename
+            try:
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                unit.file_path = filename
+            except Exception:
+                pass
 
         db.session.commit()
         flash("Unit updated successfully.", "success")
@@ -730,7 +769,9 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
             return redirect(url_for("teachers.add_quiz_questions", quiz_id=quiz.id))
 
     attachment_prefix = f"assignment_{assignment.id}_"
-    current_attachments = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(attachment_prefix))
+    current_attachments = []
+    if os.path.exists(UPLOAD_FOLDER):
+        current_attachments = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(attachment_prefix))
     current_attachment = current_attachments[-1] if current_attachments else None
     current_attachment_name = current_attachment.split("_", 3)[-1] if current_attachment else None
 
@@ -765,9 +806,12 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
                 flash("Unsupported assignment file type.", "danger")
                 return render_template("teacher/edit_assignment.html", teacher=teacher, course=course, assignment=assignment, current_attachment=current_attachment, current_attachment_name=current_attachment_name, **_teacher_nav_context(teacher))
 
-            original_name = secure_filename(assignment_file.filename)
-            saved_new_file = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-            assignment_file.save(os.path.join(UPLOAD_FOLDER, saved_new_file))
+            try:
+                original_name = secure_filename(assignment_file.filename)
+                saved_new_file = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
+                assignment_file.save(os.path.join(UPLOAD_FOLDER, saved_new_file))
+            except Exception:
+                saved_new_file = None
 
         try:
             assignment.title = title
@@ -783,7 +827,10 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
                     if os.path.isfile(old_path):
                         os.remove(old_path)
 
-            notify_course_students(course, "Assignment updated", f"‘{title}’ was updated in {course.name}.", f"/student/courses/{course.id}")
+            try:
+                notify_course_students(course, "Assignment updated", f"‘{title}’ was updated in {course.name}.", f"/student/courses/{course.id}")
+            except Exception:
+                pass
             db.session.commit()
 
         except Exception as exc:
@@ -849,7 +896,10 @@ def update_student_quiz_score(teacher_id, course_id, quiz_id, student_id):
         submission = Submission(student_id=student_id, assignment_id=assignment_id, grade=new_grade)
         db.session.add(submission)
 
-    db.session.add(Notification(user_id=student_id, title='Quiz grade published', message=f'Your grade for {quiz.title} has been updated.', link=f'/student/courses/{course_id}'))
+    try:
+        db.session.add(Notification(user_id=student_id, title='Quiz grade published', message=f'Your grade for {quiz.title} has been updated.', link=f'/student/courses/{course_id}'))
+    except Exception:
+        pass
     db.session.commit()
     return jsonify({"status": "success", "message": "Grade updated"})
 
@@ -867,14 +917,20 @@ def update_student_exam_score(teacher_id, course_id, exam_id, student_id):
         grade = Grade(exam_id=exam.id, student_id=student_id, score=new_score)
         db.session.add(grade)
 
-    db.session.add(Notification(user_id=student_id, title='Exam grade published', message=f'Your grade for {exam.title} has been updated.', link=f'/student/courses/{course_id}'))
+    try:
+        db.session.add(Notification(user_id=student_id, title='Exam grade published', message=f'Your grade for {exam.title} has been updated.', link=f'/student/courses/{course_id}'))
+    except Exception:
+        pass
     db.session.commit()
     return jsonify({"status": "success", "message": "Exam grade updated"})
 
 
 def generate_signature_image(teacher_name, signature_id):
-    sig_dir = os.path.join("app", "static", "signatures")
-    os.makedirs(sig_dir, exist_ok=True)
+    sig_dir = os.path.join(UPLOAD_FOLDER, "signatures") if os.environ.get('VERCEL') else os.path.join("app", "static", "signatures")
+    try:
+        os.makedirs(sig_dir, exist_ok=True)
+    except Exception:
+        pass
 
     filename = f"signature_{signature_id}.png"
     filepath = os.path.join(sig_dir, filename)
@@ -882,17 +938,20 @@ def generate_signature_image(teacher_name, signature_id):
     if os.path.exists(filepath):
         return filename
 
-    width, height = 400, 80
-    img = Image.new('RGBA', (width, height), (255, 255, 255, 0))
-    draw = ImageDraw.Draw(img)
-
     try:
-        font = ImageFont.truetype("app/static/fonts/DancingScript-Bold.ttf", 48)
-    except:
-        font = ImageFont.load_default()
+        width, height = 400, 80
+        img = Image.new('RGBA', (width, height), (255, 255, 255, 0))
+        draw = ImageDraw.Draw(img)
 
-    draw.text((10, 10), teacher_name, fill=(0, 0, 0, 255), font=font)
-    img.save(filepath)
+        try:
+            font = ImageFont.truetype("app/static/fonts/DancingScript-Bold.ttf", 48)
+        except Exception:
+            font = ImageFont.load_default()
+
+        draw.text((10, 10), teacher_name, fill=(0, 0, 0, 255), font=font)
+        img.save(filepath)
+    except Exception:
+        pass
     return filename
 
 
@@ -1020,7 +1079,10 @@ def grade_submission(teacher_id, submission_id):
     else:
         submission.grade = score
         submission.feedback = feedback
-        db.session.add(Notification(user_id=submission.student_id, title='Assignment graded', message=f'Your submission for {submission.assignment.title} received {score}/100.', link=f'/student/courses/{submission.assignment.course_id}'))
+        try:
+            db.session.add(Notification(user_id=submission.student_id, title='Assignment graded', message=f'Your submission for {submission.assignment.title} received {score}/100.', link=f'/student/courses/{submission.assignment.course_id}'))
+        except Exception:
+            pass
         db.session.commit()
         flash('Submission graded successfully.', 'success')
     return redirect(url_for('teachers.submissions', teacher_id=teacher_id))
