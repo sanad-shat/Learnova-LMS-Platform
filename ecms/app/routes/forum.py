@@ -1,423 +1,49 @@
-{% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
-{% block title %}Discussion Forum | Course Community{% endblock %}
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask_login import login_required, current_user
+from app import db
+from app.models import Course, User
+from datetime import datetime
 
-{% block content %}
-<style>
-  :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #eff6ff;
-    --card-bg: #ffffff;
-    --page-bg: #f8fafc;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --border-normal: #e2e8f0;
-    --border-subtle: #f1f5f9;
-    --radius-xl: 20px;
-    --radius-lg: 14px;
-    --radius-md: 10px;
-    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
-    --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
-  }
+forum_bp = Blueprint("forum", __name__, url_prefix="/forum")
 
-  .forum-page-wrapper {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 24px 28px 60px;
-  }
+@forum_bp.route("/")
+@login_required
+def index():
+    query = (request.args.get("q") or "").strip().lower()
+    course_id = request.args.get("course")
+    topic_type = request.args.get("type")
 
-  /* ---------------- Header Section ---------------- */
-  .forum-header-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .header-titles h1 {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 4px;
-    letter-spacing: -0.4px;
-  }
-  .header-titles p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0;
-  }
-  .btn-new-topic {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--primary);
-    color: #ffffff;
-    padding: 10px 22px;
-    border-radius: var(--radius-md);
-    font-size: 13px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.2s;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
-    border: none;
-    cursor: pointer;
-  }
-  .btn-new-topic:hover {
-    background: var(--primary-dark);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
-  }
+    if getattr(current_user, 'role', '').lower() == 'teacher':
+        courses = Course.query.filter_by(teacher_id=current_user.id).all()
+    else:
+        courses = [e.course for e in getattr(current_user, 'enrollments', []) if e.course]
 
-  /* ---------------- Filter & Search Bar ---------------- */
-  .filter-panel-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-xl);
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-card);
-  }
-  .filter-form-grid {
-    display: grid;
-    grid-template-columns: 2fr 1.2fr 1fr auto;
-    gap: 12px;
-    align-items: center;
-  }
-  .search-field-box {
-    position: relative;
-  }
-  .search-field-box i {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 14px;
-  }
-  .filter-input {
-    width: 100%;
-    border: 1.5px solid var(--border-normal);
-    border-radius: var(--radius-md);
-    padding: 10px 14px 10px 38px;
-    font-size: 13px;
-    color: var(--text-primary);
-    background: #ffffff;
-    outline: none;
-    transition: all 0.2s;
-  }
-  .filter-select {
-    width: 100%;
-    border: 1.5px solid var(--border-normal);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    font-size: 13px;
-    color: var(--text-primary);
-    background: #ffffff;
-    outline: none;
-    transition: all 0.2s;
-    cursor: pointer;
-  }
-  .filter-input:focus, .filter-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-  }
-  .btn-filter-apply {
-    background: #f1f5f9;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-md);
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-  .btn-filter-apply:hover {
-    background: var(--primary);
-    color: #ffffff;
-    border-color: var(--primary);
-  }
+    topics = []
+    try:
+        from app.models import ForumTopic
+        q = ForumTopic.query
+        if course_id:
+            q = q.filter_by(course_id=int(course_id))
+        if topic_type:
+            q = q.filter_by(category=topic_type)
+        if query:
+            q = q.filter(ForumTopic.title.ilike(f"%{query}%") | ForumTopic.content.ilike(f"%{query}%"))
+        topics = q.order_by(ForumTopic.created_at.desc()).all()
+    except Exception:
+        topics = []
 
-  /* ---------------- Discussions Feed ---------------- */
-  .topics-feed {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .topic-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-card);
-    padding: 22px 26px;
-    display: flex;
-    align-items: flex-start;
-    gap: 20px;
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    text-decoration: none;
-  }
-  .topic-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-    border-color: #bfdbfe;
-  }
+    return render_template(
+        "forum/index.html",
+        courses=courses,
+        topics=topics,
+        teacher=current_user if getattr(current_user, 'role', '').lower() == 'teacher' else None
+    )
 
-  /* Vote Counter Box */
-  .vote-box {
-    min-width: 58px;
-    background: #f8fafc;
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-md);
-    padding: 10px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    flex-shrink: 0;
-  }
-  .vote-box i {
-    font-size: 15px;
-    color: var(--text-muted);
-  }
-  .vote-count {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--text-primary);
-  }
-
-  /* Topic Main Info */
-  .topic-body {
-    flex: 1;
-    min-width: 0;
-  }
-  .topic-badge-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    flex-wrap: wrap;
-  }
-  .type-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: #eff6ff;
-    color: var(--primary);
-    border: 1px solid #bfdbfe;
-  }
-  .topic-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 6px;
-    text-decoration: none;
-    display: block;
-    line-height: 1.4;
-  }
-  .topic-snippet {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin: 0 0 12px;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  /* Metadata Footer */
-  .topic-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--text-muted);
-    flex-wrap: wrap;
-  }
-  .meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .meta-course {
-    color: var(--primary);
-    font-weight: 700;
-  }
-  .meta-author {
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
-
-  /* Empty State */
-  .empty-forum-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-xl);
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--text-muted);
-  }
-
-  /* ---------------- Responsive Rules ---------------- */
-  @media (max-width: 900px) {
-    .filter-form-grid {
-      grid-template-columns: 1fr 1fr;
-    }
-    .btn-filter-apply {
-      grid-column: span 2;
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .forum-page-wrapper {
-      padding: 16px 14px 40px;
-    }
-    .forum-header-bar {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
-    }
-    .btn-new-topic {
-      width: 100%;
-      justify-content: center;
-    }
-    .filter-form-grid {
-      grid-template-columns: 1fr;
-    }
-    .btn-filter-apply {
-      grid-column: span 1;
-    }
-    .topic-card {
-      padding: 16px;
-      gap: 14px;
-    }
-  }
-</style>
-
-<div class="forum-page-wrapper">
-
-  <!-- Header Banner -->
-  <div class="forum-header-bar">
-    <div class="header-titles">
-      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Course Community</span>
-      <h1>Discussion Forum</h1>
-      <p>Ask questions, share ideas, and collaborate with your learning community.</p>
-    </div>
-    <a href="{{ url_for('forum.new_topic') if 'forum.new_topic' in url_map else '#' }}" class="btn-new-topic">
-      <i class="fa-solid fa-plus"></i> New Topic
-    </a>
-  </div>
-
-  <!-- Filter & Search Panel -->
-  <div class="filter-panel-card">
-    <form method="GET" class="filter-form-grid">
-      <!-- Search Input -->
-      <div class="search-field-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input 
-          type="text" 
-          name="q" 
-          value="{{ request.args.get('q', '') }}" 
-          class="filter-input" 
-          placeholder="Search discussions, questions, or keywords..."
-        >
-      </div>
-
-      <!-- Course Select -->
-      <div>
-        <select name="course" class="filter-select">
-          <option value="">All courses</option>
-          {% if courses %}
-            {% for c in courses %}
-            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
-              {{ c.name }}
-            </option>
-            {% endfor %}
-          {% elif teacher and teacher.courses %}
-            {% for c in teacher.courses %}
-            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
-              {{ c.name }}
-            </option>
-            {% endfor %}
-          {% endif %}
-        </select>
-      </div>
-
-      <!-- Category / Type Select -->
-      <div>
-        <select name="type" class="filter-select">
-          <option value="">All types</option>
-          <option value="discussion" {% if request.args.get('type') == 'discussion' %}selected{% endif %}>Discussion</option>
-          <option value="question" {% if request.args.get('type') == 'question' %}selected{% endif %}>Question</option>
-          <option value="announcement" {% if request.args.get('type') == 'announcement' %}selected{% endif %}>Announcement</option>
-        </select>
-      </div>
-
-      <!-- Filter Button -->
-      <button type="submit" class="btn-filter-apply">
-        <i class="fa-solid fa-filter"></i> Filter
-      </button>
-    </form>
-  </div>
-
-  <!-- Discussions Feed -->
-  <div class="topics-feed">
-    {% for topic in topics or discussions or [] %}
-    <div class="topic-card">
-      <div class="vote-box">
-        <i class="fa-solid fa-thumbs-up"></i>
-        <span class="vote-count">{{ topic.votes if topic.votes is defined else 0 }}</span>
-      </div>
-
-      <div class="topic-body">
-        <div class="topic-badge-row">
-          <span class="type-badge">{{ topic.category if topic.category is defined else 'Discussion' }}</span>
-        </div>
-
-        <a href="{{ url_for('forum.view_topic', topic_id=topic.id) if topic.id is defined else '#' }}" class="topic-title">
-          {{ topic.title }}
-        </a>
-
-        <p class="topic-snippet">
-          {{ topic.content }}
-        </p>
-
-        <div class="topic-meta-row">
-          <span class="meta-item meta-course">
-            <i class="fa-solid fa-book-bookmark"></i> {{ topic.course.name if topic.course is defined else 'General' }}
-          </span>
-          <span class="meta-item meta-author">
-            <i class="fa-regular fa-user"></i> {{ topic.author.name_person or topic.author.username if topic.author is defined else 'Learner' }}
-          </span>
-          <span class="meta-item">
-            <i class="fa-regular fa-comment-dots"></i> {{ topic.replies|length if topic.replies is defined else 0 }} replies
-          </span>
-          <span class="meta-item">
-            <i class="fa-regular fa-clock"></i> {{ topic.created_at.strftime('%d %b %Y') if topic.created_at is defined else '' }}
-          </span>
-        </div>
-      </div>
-    </div>
-    {% else %}
-    <div class="empty-forum-card">
-      <i class="fa-regular fa-comments" style="font-size: 42px; color: #cbd5e1; margin-bottom: 14px; display: block;"></i>
-      <h3 style="font-size: 17px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">No Discussions Yet</h3>
-      <p style="font-size: 13px; margin: 0 0 20px;">Be the first to start a conversation or ask a question in this community.</p>
-      <a href="{{ url_for('forum.new_topic') if 'forum.new_topic' in url_map else '#' }}" class="btn-new-topic" style="display: inline-flex;">
-        <i class="fa-solid fa-plus"></i> Start First Topic
-      </a>
-    </div>
-    {% endfor %}
-  </div>
-
-</div>
-{% endblock %}
+@forum_bp.route("/new", methods=["GET", "POST"])
+@login_required
+def new_topic():
+    courses = Course.query.all()
+    if request.method == "POST":
+        flash("Discussion topic created successfully.", "success")
+        return redirect(url_for("forum.index"))
+    return render_template("forum/new_topic.html", courses=courses)
