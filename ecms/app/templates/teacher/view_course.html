@@ -387,7 +387,7 @@
         <i class="fa-solid fa-folder-tree"></i>
       </div>
       <div class="metric-tile-info">
-        <h3>{{ units|length }}</h3>
+        <h3>{{ units|length if units else 0 }}</h3>
         <p>Learning Units</p>
       </div>
     </div>
@@ -397,7 +397,7 @@
         <i class="fa-solid fa-list-check"></i>
       </div>
       <div class="metric-tile-info">
-        <h3>{{ assignments|length }}</h3>
+        <h3>{{ assignments|length if assignments else 0 }}</h3>
         <p>Assignments</p>
       </div>
     </div>
@@ -407,7 +407,7 @@
         <i class="fa-solid fa-circle-question"></i>
       </div>
       <div class="metric-tile-info">
-        <h3>{{ quizzes|length }}</h3>
+        <h3>{{ quizzes|length if quizzes else 0 }}</h3>
         <p>Quizzes</p>
       </div>
     </div>
@@ -417,7 +417,7 @@
         <i class="fa-solid fa-user-graduate"></i>
       </div>
       <div class="metric-tile-info">
-        <h3>{{ students|length }}</h3>
+        <h3>{{ students|length if students else 0 }}</h3>
         <p>Enrolled Students</p>
       </div>
     </div>
@@ -478,35 +478,38 @@
     </div>
 
     <div class="items-list-group">
+      {% set assignment_list = [] %}
       {% for a in assignments %}
-      {% if a.assignment_type != 'quiz' %}
-      <div class="module-item-row">
-        <div class="item-meta-main">
-          <h4>{{ a.title }}</h4>
-          <p>{{ a.description or 'No instructions provided.' }}</p>
-          <div class="item-meta-tags">
-            <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date else 'No deadline' }}</span>
-            <span><i class="fa-solid fa-inbox"></i> {{ a.submissions|length }} Submissions</span>
+        {% if a.assignment_type != 'quiz' %}
+          {% set _ = assignment_list.append(a) %}
+          <div class="module-item-row">
+            <div class="item-meta-main">
+              <h4>{{ a.title }}</h4>
+              <p>{{ a.description or 'No instructions provided.' }}</p>
+              <div class="item-meta-tags">
+                <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date else 'No deadline' }}</span>
+              </div>
+            </div>
+            <div class="item-actions-cluster">
+              <a href="{{ url_for('teachers.edit_assignment_page', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" class="btn-ctrl btn-ctrl-edit">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </a>
+              <form method="POST" action="{{ url_for('teachers.delete_assignment', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
+                <button type="submit" class="btn-ctrl btn-ctrl-del">
+                  <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
-        <div class="item-actions-cluster">
-          <a href="{{ url_for('teachers.edit_assignment_page', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" class="btn-ctrl btn-ctrl-edit">
-            <i class="fa-solid fa-pen-to-square"></i> Edit
-          </a>
-          <form method="POST" action="{{ url_for('teachers.delete_assignment', teacher_id=teacher.id, course_id=course.id, assignment_id=a.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this assignment?');">
-            <button type="submit" class="btn-ctrl btn-ctrl-del">
-              <i class="fa-solid fa-trash-can"></i> Delete
-            </button>
-          </form>
-        </div>
-      </div>
-      {% endif %}
-      {% else %}
+        {% endif %}
+      {% endfor %}
+
+      {% if assignment_list|length == 0 %}
       <div class="empty-state-notice">
         <i class="fa-solid fa-clipboard" style="font-size: 28px; margin-bottom: 8px; display: block;"></i>
         No homework assignments created yet.
       </div>
-      {% endfor %}
+      {% endif %}
     </div>
   </div>
 
@@ -528,16 +531,13 @@
           <h4>{{ q.title }}</h4>
           <p>{{ q.description or 'No instructions.' }}</p>
           <div class="item-meta-tags">
-            <span><i class="fa-solid fa-list-ol" style="color: #16a34a;"></i> {{ q.questions|length }} Questions</span>
+            <span><i class="fa-solid fa-list-ol" style="color: #16a34a;"></i> {{ q.questions|length if q.questions else 0 }} Questions</span>
             <span style="color: #d97706;"><i class="fa-regular fa-clock"></i> Ends: {{ q.end_date.strftime('%d %b %Y, %H:%M') if q.end_date else '—' }}</span>
           </div>
         </div>
         <div class="item-actions-cluster">
           <a href="{{ url_for('teachers.add_quiz_questions', quiz_id=q.id) }}" class="btn-ctrl btn-ctrl-questions">
             <i class="fa-solid fa-sliders"></i> Questions
-          </a>
-          <a href="{{ url_for('teachers.edit_quiz_page', teacher_id=teacher.id, course_id=course.id, quiz_id=q.id) }}" class="btn-ctrl btn-ctrl-edit">
-            <i class="fa-solid fa-pen-to-square"></i> Edit
           </a>
           <form method="POST" action="{{ url_for('teachers.delete_quiz', teacher_id=teacher.id, course_id=course.id, quiz_id=q.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this quiz?');">
             <button type="submit" class="btn-ctrl btn-ctrl-del">
@@ -578,9 +578,6 @@
           </div>
         </div>
         <div class="item-actions-cluster">
-          <a href="{{ url_for('teachers.preview_exam', teacher_id=teacher.id, course_id=course.id, exam_id=e.id) }}" class="btn-ctrl btn-ctrl-preview">
-            <i class="fa-solid fa-eye"></i> Preview
-          </a>
           <a href="{{ url_for('teachers.edit_exam_page', teacher_id=teacher.id, course_id=course.id, exam_id=e.id) }}" class="btn-ctrl btn-ctrl-edit">
             <i class="fa-solid fa-pen-to-square"></i> Edit
           </a>
@@ -606,7 +603,7 @@
       <h2 class="module-header-title">
         <i class="fa-solid fa-users" style="color: #2563eb;"></i> Enrolled Students
       </h2>
-      <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);">{{ students|length }} Enrolled</span>
+      <span style="font-size: 13px; font-weight: 700; color: var(--text-muted);">{{ students|length if students else 0 }} Enrolled</span>
     </div>
 
     <div class="students-table-wrap">
@@ -615,7 +612,7 @@
           <tr>
             <th>Student</th>
             <th>Email</th>
-            <th>University ID</th>
+            <th>ID</th>
             <th style="text-align: right;">Action</th>
           </tr>
         </thead>
@@ -625,13 +622,15 @@
             <td>
               <div class="student-user-cell">
                 <div class="student-avatar-badge">
-                  {{ (student.name_person or student.username)[0]|upper }}
+                  {{ (student.name_person or student.username or 'S')[0]|upper }}
                 </div>
                 <strong>{{ student.name_person or student.username }}</strong>
               </div>
             </td>
             <td>{{ student.email }}</td>
-            <td style="font-family: monospace; font-weight: 600;">{{ student.university_id or student.id }}</td>
+            <td style="font-family: monospace; font-weight: 600;">
+              {{ getattr(student, 'university_id', None) or student.id }}
+            </td>
             <td style="text-align: right;">
               <a href="{{ url_for('teachers.student_details', teacher_id=teacher.id, course_id=course.id, student_id=student.id) }}" class="btn-progress-view">
                 <i class="fa-solid fa-chart-line"></i> View Progress
