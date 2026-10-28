@@ -290,6 +290,13 @@ def add_unit(teacher_id, course_id):
                     filename = None
 
         try:
+            # مزامنة عداد التسلسل في PostgreSQL لتجنب خطأ duplicate key نهائياً
+            try:
+                db.session.execute(db.text("SELECT setval(pg_get_serial_sequence('unit', 'id'), coalesce(max(id), 0) + 1, false) FROM unit;"))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
             unit = Unit(title=title, file_path=filename, course_id=course_id)
             db.session.add(unit)
             db.session.flush()
@@ -306,7 +313,6 @@ def add_unit(teacher_id, course_id):
             return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
     return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
-
 
 # ------------------------- Add Assignment -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_assignment", methods=["GET", "POST"])
