@@ -290,29 +290,23 @@ def add_unit(teacher_id, course_id):
                     filename = None
 
         try:
-            # مزامنة عداد التسلسل في PostgreSQL لتجنب خطأ duplicate key نهائياً
+            unit = Unit(title=title, file_path=filename, course_id=course_id)
+            db.session.add(unit)
+            db.session.commit()  # حفظ الوحدة بنجاح أولاً
+            flash("Unit added successfully.", "success")
+
+            # إرسال الإشعارات بشكل منفصل دون التأثير على إضافة الوحدة
             try:
-                db.session.execute(db.text("SELECT setval(pg_get_serial_sequence('unit', 'id'), coalesce(max(id), 0) + 1, false) FROM unit;"))
+                notify_course_students(course, 'New learning unit', f'A new unit “{title}” was added to {course.name}.', f'/student/courses/{course.id}')
                 db.session.commit()
             except Exception:
                 db.session.rollback()
 
-            unit = Unit(title=title, file_path=filename, course_id=course_id)
-            db.session.add(unit)
-            db.session.flush()
-            try:
-                notify_course_students(course, 'New learning unit', f'A new unit “{title}” was added to {course.name}.', f'/student/courses/{course.id}')
-            except Exception:
-                pass
-            db.session.commit()
-            flash("Unit added successfully.", "success")
             return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Could not add unit: {exc}", "danger")
             return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
-
-    return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
 # ------------------------- Add Assignment -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_assignment", methods=["GET", "POST"])
