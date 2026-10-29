@@ -21,7 +21,7 @@ except ImportError:
 
 teachers_bp = Blueprint("teachers", __name__, url_prefix="/teacher")
 
-# إعدادات رفع الملفات الآمنة لـ Vercel
+# إعدادات رفع الملفات لبيئة سيرفرليس
 if os.environ.get('VERCEL'):
     UPLOAD_FOLDER = '/tmp/uploads'
 else:
@@ -138,7 +138,6 @@ def login():
                     session['is_demo'] = True
                     login_user(demo_teacher)
                     
-                    # إشعار تسجيل الدخول للحساب التجريبي
                     db.session.add(Notification(
                         user_id=demo_teacher.id,
                         title="Instructor Login Session",
@@ -167,7 +166,6 @@ def login():
             if user and is_valid and getattr(user, 'role', '').lower() == "teacher":
                 login_user(user)
                 
-                # إشعار تسجيل الدخول للمحاضر
                 try:
                     db.session.add(Notification(
                         user_id=user.id,
@@ -1185,11 +1183,11 @@ def profile(teacher_id):
 @login_required
 def notifications(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
-    if current_user.id != teacher.id or current_user.role != 'teacher':
+    if current_user.id != teacher.id or current_user.role.lower() != 'teacher':
         flash('Access denied.', 'danger')
         return redirect(url_for('teachers.login'))
 
-    # فحص وتوليد إشعارات تلقائية فورية لتسليمات الطلاب والمهام المعلقة
+    # فحص وتوليد إشعارات تلقائية فورية لتسليمات الطلاب
     try:
         for course in teacher.courses:
             for assignment in course.assignments:
@@ -1197,8 +1195,7 @@ def notifications(teacher_id):
                     sub_title = f"New Submission: {assignment.title}"
                     existing = Notification.query.filter_by(
                         user_id=teacher.id,
-                        title=sub_title,
-                        link=f"/teacher/{teacher.id}/submissions"
+                        title=sub_title
                     ).first()
                     
                     if not existing:
@@ -1216,33 +1213,48 @@ def notifications(teacher_id):
     except Exception:
         db.session.rollback()
 
-    items = Notification.query.filter_by(user_id=teacher.id).order_by(Notification.created_at.desc()).all()
-    return render_template('teacher/notifications.html', teacher=teacher, notifications=items, **_teacher_nav_context(teacher))
+    items = []
+    try:
+        items = Notification.query.filter_by(user_id=teacher.id).order_by(Notification.created_at.desc()).all()
+    except Exception:
+        items = []
+
+    return render_template(
+        'teacher/notifications.html',
+        teacher=teacher,
+        notifications=items,
+        active_page="notifications",
+        **_teacher_nav_context(teacher)
+    )
 
 
 @teachers_bp.route('/<int:teacher_id>/notifications/read', methods=['POST'])
 @login_required
 def mark_notifications_read(teacher_id):
-    if current_user.id != teacher_id or current_user.role != 'teacher':
+    if current_user.id != teacher_id or current_user.role.lower() != 'teacher':
         return jsonify({'status': 'error'}), 403
-    Notification.query.filter_by(user_id=teacher_id, is_read=False).update({'is_read': True})
-    db.session.commit()
-    flash('All notifications marked as read.', 'success')
+    try:
+        Notification.query.filter_by(user_id=teacher_id, is_read=False).update({'is_read': True})
+        db.session.commit()
+        flash('All notifications marked as read.', 'success')
+    except Exception:
+        db.session.rollback()
     return redirect(url_for('teachers.notifications', teacher_id=teacher_id))
 
 
 @teachers_bp.route('/<int:teacher_id>/notifications/delete/<int:notif_id>', methods=['POST'])
 @login_required
 def delete_notification(teacher_id, notif_id):
-    if current_user.id != teacher_id or current_user.role != 'teacher':
+    if current_user.id != teacher_id or current_user.role.lower() != 'teacher':
         flash('Access denied.', 'danger')
         return redirect(url_for('teachers.login'))
     
-    notif = Notification.query.filter_by(id=notif_id, user_id=teacher_id).first_or_404()
     try:
-        db.session.delete(notif)
-        db.session.commit()
-        flash('Notification removed.', 'success')
+        notif = Notification.query.filter_by(id=notif_id, user_id=teacher_id).first()
+        if notif:
+            db.session.delete(notif)
+            db.session.commit()
+            flash('Notification removed.', 'success')
     except Exception:
         db.session.rollback()
     return redirect(url_for('teachers.notifications', teacher_id=teacher_id))
