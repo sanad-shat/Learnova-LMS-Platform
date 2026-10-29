@@ -1445,7 +1445,7 @@ def profile(teacher_id):
     return render_template("teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher))
 
 
-# ------------------------- Notifications System (عرض آمن وبسيط) -------------------------
+# ------------------------- Notifications System -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
 def notifications(teacher_id):
@@ -1454,18 +1454,14 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    items = []
+    # جلب الإشعارات بأمان تام مع تفادي أي تعليق بقاعدة البيانات
     try:
-        items = (
-            Notification.query.filter_by(user_id=teacher.id)
-            .order_by(Notification.created_at.desc())
-            .all()
-        )
+        items = Notification.query.filter_by(user_id=teacher.id).order_by(Notification.created_at.desc()).all()
     except Exception:
         db.session.rollback()
         items = []
 
-    nav_ctx = {}
+    # جلب عداد القائمة الجانبية بأمان
     try:
         nav_ctx = _teacher_nav_context(teacher)
     except Exception:
@@ -1476,7 +1472,7 @@ def notifications(teacher_id):
         teacher=teacher,
         notifications=items,
         active_page="notifications",
-        **nav_ctx,
+        **nav_ctx
     )
 
 
