@@ -55,9 +55,6 @@ def new_topic():
             return redirect(url_for("forum.index"))
 
         try:
-            # التأكد من إنشاء جدول discussions إن لم يكن موجوداً
-            db.create_all()
-
             new_item = Discussion(
                 title=title,
                 content=content,
@@ -71,7 +68,11 @@ def new_topic():
             flash("Discussion topic published successfully!", "success")
         except Exception as exc:
             db.session.rollback()
-            flash(f"Could not publish topic: {exc}", "danger")
+            flash(f"Error publishing topic: {str(exc)}", "danger")
+
+        return redirect(url_for("forum.index"))
+
+    return redirect(url_for("forum.index"))
 
         return redirect(url_for("forum.index"))
 
