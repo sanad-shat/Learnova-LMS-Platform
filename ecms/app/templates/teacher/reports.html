@@ -22,7 +22,7 @@
 
 {% set overall_avg = (ns.total_score / ns.graded_subs) if ns.graded_subs > 0 else 14.8 %}
 
-<!-- تضمين مكتبات Chart.js و html2pdf.js للتصدير المباشر -->
+<!-- تضمين مكتبات الرسم والتصدير -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -48,9 +48,58 @@
     margin: 0 auto;
     padding: 10px 20px 80px;
     box-sizing: border-box;
+    background: transparent;
   }
 
-  /* ---------------- الترويسة والأزرار ---------------- */
+  /* ---------------- ترويسة الـ PDF الرسمية (تظهر أثناء التحميل والطباعة فقط) ---------------- */
+  .pdf-official-header {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--ln-brand);
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+  }
+  .pdf-logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .pdf-logo-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--ln-brand);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 22px;
+  }
+  .pdf-logo-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--ln-title);
+    margin: 0;
+    line-height: 1.1;
+  }
+  .pdf-logo-subtitle {
+    font-size: 11px;
+    color: var(--ln-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin: 0;
+  }
+  .pdf-meta-box {
+    text-align: right;
+    font-size: 12px;
+    color: var(--ln-muted);
+  }
+  .pdf-meta-box strong {
+    color: var(--ln-title);
+  }
+
+  /* ---------------- الترويسة الرئيسية ---------------- */
   .reports-header-section {
     display: flex;
     justify-content: space-between;
@@ -132,6 +181,7 @@
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     margin-bottom: 28px;
+    page-break-inside: avoid;
   }
   .stat-card-box {
     background: var(--ln-card-bg);
@@ -143,10 +193,6 @@
     align-items: center;
     gap: 18px;
     transition: all 0.2s ease;
-  }
-  .stat-card-box:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
   }
   .stat-badge-icon {
     width: 52px;
@@ -192,6 +238,7 @@
     grid-template-columns: 2fr 1fr;
     gap: 20px;
     margin-bottom: 28px;
+    page-break-inside: avoid;
   }
   .chart-card-panel {
     background: var(--ln-card-bg);
@@ -199,6 +246,7 @@
     border-radius: var(--radius-xl);
     padding: 24px;
     box-shadow: var(--shadow-card);
+    position: relative;
   }
   .chart-card-header {
     display: flex;
@@ -219,6 +267,7 @@
     flex-direction: column;
     gap: 20px;
     margin-bottom: 28px;
+    page-break-inside: avoid;
   }
   .course-performance-card {
     background: var(--ln-card-bg);
@@ -292,13 +341,14 @@
     border-radius: 20px;
   }
 
-  /* ---------------- جدول أداء الطلاب ---------------- */
+  /* ---------------- جدول الطلاب ---------------- */
   .table-card-panel {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
     padding: 24px;
     box-shadow: var(--shadow-card);
+    page-break-inside: avoid;
   }
   .table-top-bar {
     display: flex;
@@ -331,9 +381,6 @@
     padding: 14px 16px;
     border-bottom: 1px solid #f1f5f9;
     color: var(--ln-body);
-  }
-  .students-data-table tr:hover td {
-    background: #f8fafc;
   }
   .user-cell-meta {
     display: flex;
@@ -369,6 +416,26 @@
     font-size: 12px;
   }
 
+  /* ---------------- تذييل الـ PDF الرسمي ---------------- */
+  .pdf-official-footer {
+    display: none;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--ln-border);
+    padding-top: 14px;
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--ln-muted);
+  }
+
+  /* فواصل واضحة لملف الـ PDF والطباعة لمنع تقطيع الصفحات */
+  .page-break-indicator {
+    page-break-before: always;
+    break-before: page;
+    height: 20px;
+    display: block;
+  }
+
   /* ---------------- التجاوب للشاشات ---------------- */
   @media (max-width: 1100px) {
     .stats-banner-grid { grid-template-columns: repeat(2, 1fr); }
@@ -385,9 +452,10 @@
     .metrics-mini-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
-  /* تنسيق الطباعة الافتراضية */
+  /* إعدادات الطباعة العادية في المتصفح */
   @media print {
     .btn-action-top, .filter-select-time, .sidebar, header, nav { display: none !important; }
+    .pdf-official-header, .pdf-official-footer { display: flex !important; }
     .reports-wrapper { padding: 0 !important; }
     .stat-card-box, .chart-card-panel, .course-performance-card, .table-card-panel {
       box-shadow: none !important;
@@ -397,9 +465,28 @@
   }
 </style>
 
-<div class="reports-wrapper">
+<div class="reports-wrapper" id="printableReportArea">
 
-  <!-- Header Banner -->
+  <!-- الترويسة الأكاديمية الرسمية للتقرير (تظهر داخل ملف PDF) -->
+  <div class="pdf-official-header" id="pdfOfficialHeader">
+    <div class="pdf-logo-wrap">
+      <div class="pdf-logo-icon">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+      <div>
+        <h2 class="pdf-logo-title">Learnova LMS</h2>
+        <p class="pdf-logo-subtitle">Academic Intelligence & Instructor Portal</p>
+      </div>
+    </div>
+    <div class="pdf-meta-box">
+      <div><strong>Instructor:</strong> {{ current_user.name_person or current_user.username }}</div>
+      <div><strong>Email:</strong> {{ current_user.email }}</div>
+      <div><strong>Date:</strong> <span id="reportPrintDate"></span></div>
+      <div><strong>Document Ref:</strong> LN-REP-{{ current_user.id }}-2026</div>
+    </div>
+  </div>
+
+  <!-- Header Banner في واجهة الويب -->
   <div class="reports-header-section">
     <div>
       <span class="tag-analytics">Analytics</span>
@@ -420,7 +507,7 @@
         <i class="fa-solid fa-file-arrow-down"></i> Export CSV
       </button>
 
-      <!-- زر تنزيل التقرير PDF المفعّل -->
+      <!-- زر تنزيل التقرير الرسمي PDF -->
       <button type="button" class="btn-action-top btn-action-primary" id="btnDownloadPdf" onclick="downloadReportPDF()">
         <i class="fa-solid fa-file-pdf"></i> Download PDF
       </button>
@@ -494,6 +581,9 @@
       </div>
     </div>
   </div>
+
+  <!-- فاصل صفحة ذكي ومنظم للـ PDF -->
+  <div class="page-break-indicator"></div>
 
   <!-- تفاصيل المقررات -->
   <div class="courses-report-stack">
@@ -601,13 +691,25 @@
     </div>
   </div>
 
+  <!-- التذييل الرسمي للتقرير داخل الـ PDF -->
+  <div class="pdf-official-footer" id="pdfOfficialFooter">
+    <span>Learnova LMS &bull; Academic Intelligence Platform &bull; Confidential</span>
+    <span>Generated by: {{ current_user.name_person or current_user.username }} &bull; Page 1 of 1</span>
+  </div>
+
 </div>
 
-<!-- دوال JavaScript لمعالجة الرسوم، الفلاتر وتصدير PDF/CSV -->
+<!-- دوال JavaScript للتحكم بالرسوم والتصدير -->
 <script>
   let trendChart, doughnutChart;
 
   document.addEventListener('DOMContentLoaded', function () {
+    // وضع التاريخ الحالي تلقائياً في ترويسة التقرير
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const printDateEl = document.getElementById('reportPrintDate');
+    if (printDateEl) printDateEl.innerText = formattedDate;
+
     // 1. رسم مخطط المنحنى البياني للأداء
     const ctxTrend = document.getElementById('performanceTrendChart').getContext('2d');
     trendChart = new Chart(ctxTrend, {
@@ -667,41 +769,53 @@
     });
   });
 
-  // ميزة تنزيل التقرير كملف PDF
+  // ميزة تنزيل التقرير الأكاديمي الرسمي كـ PDF
   function downloadReportPDF() {
     const btn = document.getElementById('btnDownloadPdf');
     const originalHtml = btn.innerHTML;
     
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing PDF...';
     btn.disabled = true;
 
-    const element = document.querySelector('.reports-wrapper');
+    const element = document.getElementById('printableReportArea');
     const actionsBar = document.querySelector('.header-actions');
+    const pdfHeader = document.getElementById('pdfOfficialHeader');
+    const pdfFooter = document.getElementById('pdfOfficialFooter');
 
-    actionsBar.style.visibility = 'hidden';
+    // إظهار الترويسة والتذييل الرسميين وإخفاء أزرار التحكم
+    actionsBar.style.display = 'none';
+    pdfHeader.style.display = 'flex';
+    pdfFooter.style.display = 'flex';
 
+    // ضبط خيارات PDF احترافية لعدم تقطيع الصفحات
     const opt = {
-      margin:       [10, 10, 10, 10],
-      filename:     'Learnova_Instructor_Report.pdf',
+      margin:       [10, 12, 10, 12],
+      filename:     'Learnova_Instructor_Report_{{ current_user.username }}.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' },
+      pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-      actionsBar.style.visibility = 'visible';
+      // استعادة الوضع الطبيعي للشاشة
+      actionsBar.style.display = 'flex';
+      pdfHeader.style.display = 'none';
+      pdfFooter.style.display = 'none';
       btn.innerHTML = originalHtml;
       btn.disabled = false;
     }).catch((err) => {
       console.error('PDF Export Error:', err);
-      actionsBar.style.visibility = 'visible';
+      actionsBar.style.display = 'flex';
+      pdfHeader.style.display = 'none';
+      pdfFooter.style.display = 'none';
       btn.innerHTML = originalHtml;
       btn.disabled = false;
       window.print();
     });
   }
 
-  // تصدير بيانات الطلاب إلى CSV
+  // تصدير جدول الطلاب إلى CSV
   function exportStudentsCSV() {
     const table = document.getElementById('studentsTable');
     let csv = [];
