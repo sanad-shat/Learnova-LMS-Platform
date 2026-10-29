@@ -1,43 +1,55 @@
 {% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
-{% block title %}Discussion Forum | Course Community{% endblock %}
+{% block title %}Discussion Forum | Community{% endblock %}
 
 {% block content %}
 <style>
   :root {
     --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --card-bg: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
-    --border-normal: #e2e8f0;
-    --radius-xl: 20px;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #eff6ff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --surface-card: #ffffff;
+    --border-subtle: #e2e8f0;
+    --radius-xl: 16px;
     --radius-md: 10px;
-    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+    --shadow-soft: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 10px 25px -4px rgba(37, 99, 235, 0.08);
   }
 
-  .forum-page-wrapper {
-    max-width: 1440px;
+  .forum-shell {
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 24px 28px 60px;
+    padding: 24px 20px 80px;
   }
 
-  .forum-header-bar {
+  /* Header Section */
+  .forum-top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
     flex-wrap: wrap;
     gap: 16px;
   }
-  .header-titles h1 {
-    font-size: 24px;
+  .tag-subtitle {
+    font-size: 11px;
     font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 4px;
+    text-transform: uppercase;
+    color: var(--primary);
+    letter-spacing: 0.8px;
+    display: inline-block;
+    margin-bottom: 4px;
   }
-  .header-titles p {
-    font-size: 13px;
+  .forum-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    margin: 0 0 6px;
+  }
+  .forum-desc {
+    font-size: 14px;
     color: var(--text-muted);
     margin: 0;
   }
@@ -47,119 +59,246 @@
     gap: 8px;
     background: var(--primary);
     color: #ffffff;
-    padding: 10px 22px;
+    padding: 11px 24px;
     border-radius: var(--radius-md);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
-    transition: all 0.2s;
     border: none;
     cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: all 0.2s ease;
   }
   .btn-new-topic:hover {
-    background: var(--primary-dark);
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
   }
 
-  .filter-panel-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
+  /* Filter Toolbar */
+  .toolbar-card {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
-    padding: 16px 20px;
+    padding: 14px 18px;
     margin-bottom: 24px;
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-soft);
   }
-  .filter-form-grid {
+  .toolbar-form {
     display: grid;
     grid-template-columns: 2fr 1.2fr 1fr auto;
     gap: 12px;
     align-items: center;
   }
-  .filter-input, .filter-select {
+  .search-wrapper {
+    position: relative;
+  }
+  .search-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .ctrl-input {
     width: 100%;
-    border: 1.5px solid var(--border-normal);
+    border: 1.5px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 10px 14px 10px 38px;
+    font-size: 13.5px;
+    outline: none;
+    color: var(--text-main);
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .ctrl-select {
+    width: 100%;
+    border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 14px;
-    font-size: 13px;
+    font-size: 13.5px;
     outline: none;
+    background: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.2s;
   }
-  .btn-filter-apply {
+  .ctrl-input:focus, .ctrl-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .btn-filter {
     background: #f1f5f9;
-    color: var(--text-secondary);
-    border: 1px solid var(--border-normal);
+    color: #334155;
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
-    padding: 10px 20px;
-    font-size: 13px;
+    padding: 10px 22px;
+    font-size: 13.5px;
     font-weight: 700;
     cursor: pointer;
+    transition: all 0.2s ease;
   }
-  .btn-filter-apply:hover {
+  .btn-filter:hover {
     background: var(--primary);
     color: #ffffff;
+    border-color: var(--primary);
   }
 
-  .topics-feed {
+  /* Discussion Cards */
+  .feed-stack {
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
-  .topic-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
+  .topic-item {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--shadow-soft);
     padding: 22px 26px;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  .topic-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: #cbd5e1;
+  }
+  .topic-header {
     display: flex;
-    align-items: flex-start;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
   }
-  .topic-body {
-    flex: 1;
-  }
-  .type-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
+  .pill-badge {
+    padding: 4px 11px;
+    border-radius: 30px;
     font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    background: #eff6ff;
-    color: var(--primary);
-    border: 1px solid #bfdbfe;
-    margin-bottom: 8px;
+    letter-spacing: 0.6px;
+    display: inline-block;
   }
-  .topic-title {
+  .badge-discussion { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+  .badge-question { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .badge-announcement { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+
+  /* Options Dropdown */
+  .opt-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
     font-size: 16px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 6px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s;
   }
-  .topic-snippet {
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin: 0 0 12px;
-    line-height: 1.5;
+  .opt-menu-btn:hover {
+    background: #f1f5f9;
+    color: var(--text-main);
   }
-  .topic-meta-row {
+  .dropdown-box {
+    position: relative;
+    display: inline-block;
+  }
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: #ffffff;
+    min-width: 140px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    z-index: 50;
+    padding: 6px 0;
+  }
+  .dropdown-content a, .dropdown-content button {
+    color: #334155;
+    padding: 8px 16px;
+    text-decoration: none;
     display: flex;
     align-items: center;
-    gap: 16px;
-    font-size: 12px;
-    color: var(--text-muted);
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    width: 100%;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+  }
+  .dropdown-content a:hover, .dropdown-content button:hover {
+    background-color: #f8fafc;
+    color: var(--primary);
+  }
+  .dropdown-content .delete-btn:hover {
+    color: #ef4444;
+    background-color: #fef2f2;
+  }
+  .show-dropdown {
+    display: block;
   }
 
-  .empty-forum-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
+  .topic-heading {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0 0 8px;
+    line-height: 1.4;
+  }
+  .topic-content-body {
+    font-size: 14px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 16px;
+    white-space: pre-line;
+  }
+  .topic-footer {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    border-top: 1px solid #f1f5f9;
+    padding-top: 14px;
+  }
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-course {
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .meta-user {
+    color: #334155;
+    font-weight: 600;
+  }
+
+  /* Empty State */
+  .empty-box {
+    background: var(--surface-card);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-xl);
-    padding: 60px 20px;
+    padding: 64px 20px;
     text-align: center;
-    color: var(--text-muted);
+    box-shadow: var(--shadow-soft);
+  }
+  .empty-icon {
+    font-size: 44px;
+    color: #cbd5e1;
+    margin-bottom: 14px;
   }
 
-  /* Modal */
-  .modal-overlay {
+  /* Modals */
+  .modal-backdrop {
     display: none;
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    inset: 0;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
     z-index: 1000;
@@ -167,50 +306,79 @@
     justify-content: center;
     padding: 20px;
   }
-  .modal-container {
+  .modal-card {
     background: #ffffff;
     border-radius: var(--radius-xl);
-    max-width: 600px;
+    max-width: 620px;
     width: 100%;
-    padding: 26px;
+    padding: 28px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+    position: relative;
+    animation: modalPop 0.2s ease-out;
   }
-  .modal-header {
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .modal-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f1f5f9;
   }
-  .modal-form-group {
+  .modal-top h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-main);
+  }
+  .modal-x {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .f-group {
     margin-bottom: 16px;
   }
-  .modal-form-label {
+  .f-label {
     display: block;
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 700;
+    color: var(--text-main);
     margin-bottom: 6px;
   }
-  .modal-input, .modal-textarea, .modal-select {
+  .f-input, .f-textarea, .f-select {
     width: 100%;
-    border: 1.5px solid var(--border-normal);
+    border: 1.5px solid var(--border-subtle);
     border-radius: var(--radius-md);
     padding: 10px 14px;
-    font-size: 13px;
+    font-size: 13.5px;
     outline: none;
   }
-  .modal-actions {
+  .f-input:focus, .f-textarea:focus, .f-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .modal-foot {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 22px;
   }
-  .btn-modal-cancel {
-    padding: 10px 18px;
+  .btn-neutral {
+    padding: 10px 20px;
     border-radius: var(--radius-md);
     background: #f1f5f9;
+    color: #475569;
     border: none;
+    font-weight: 700;
     cursor: pointer;
   }
-  .btn-modal-submit {
+  .btn-save {
     padding: 10px 24px;
     border-radius: var(--radius-md);
     background: var(--primary);
@@ -218,42 +386,78 @@
     border: none;
     font-weight: 700;
     cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   }
 
-  @media (max-width: 800px) {
-    .filter-form-grid {
+  /* Responsive Rules for Mobile */
+  @media (max-width: 860px) {
+    .toolbar-form {
+      grid-template-columns: 1fr 1fr;
+    }
+    .btn-filter {
+      grid-column: span 2;
+    }
+  }
+  @media (max-width: 600px) {
+    .forum-shell {
+      padding: 16px 12px 60px;
+    }
+    .forum-top-nav {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .btn-new-topic {
+      width: 100%;
+      justify-content: center;
+    }
+    .toolbar-form {
       grid-template-columns: 1fr;
+    }
+    .btn-filter {
+      grid-column: span 1;
+    }
+    .topic-item {
+      padding: 18px 16px;
+    }
+    .topic-footer {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
     }
   }
 </style>
 
-<div class="forum-page-wrapper">
+<div class="forum-shell">
 
-  <div class="forum-header-bar">
-    <div class="header-titles">
-      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary);">Course Community</span>
-      <h1>Discussion Forum</h1>
-      <p>Ask questions, share ideas, and collaborate with your learning community.</p>
+  <!-- Forum Top Nav -->
+  <div class="forum-top-nav">
+    <div>
+      <span class="tag-subtitle">Course Community</span>
+      <h1 class="forum-title">Discussion Forum</h1>
+      <p class="forum-desc">Share knowledge, ask questions, and engage with classmates & instructors.</p>
     </div>
-    <button type="button" class="btn-new-topic" onclick="openTopicModal()">
+    <button type="button" class="btn-new-topic" onclick="openModal('createModal')">
       <i class="fa-solid fa-plus"></i> New Topic
     </button>
   </div>
 
-  <div class="filter-panel-card">
-    <form method="GET" class="filter-form-grid">
-      <div>
+  <!-- Filter & Search Toolbar -->
+  <div class="toolbar-card">
+    <form method="GET" class="toolbar-form">
+      <div class="search-wrapper">
+        <i class="fa-solid fa-magnifying-glass"></i>
         <input 
           type="text" 
           name="q" 
           value="{{ request.args.get('q', '') }}" 
-          class="filter-input" 
-          placeholder="Search discussions..."
+          class="ctrl-input" 
+          placeholder="Search discussions or questions..."
         >
       </div>
 
       <div>
-        <select name="course" class="filter-select">
+        <select name="course" class="ctrl-select">
           <option value="">All courses</option>
           {% for c in courses %}
           <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
@@ -264,39 +468,71 @@
       </div>
 
       <div>
-        <select name="type" class="filter-select">
-          <option value="">All types</option>
+        <select name="type" class="ctrl-select">
+          <option value="">All categories</option>
           <option value="Discussion" {% if request.args.get('type') == 'Discussion' %}selected{% endif %}>Discussion</option>
           <option value="Question" {% if request.args.get('type') == 'Question' %}selected{% endif %}>Question</option>
           <option value="Announcement" {% if request.args.get('type') == 'Announcement' %}selected{% endif %}>Announcement</option>
         </select>
       </div>
 
-      <button type="submit" class="btn-filter-apply">Filter</button>
+      <button type="submit" class="btn-filter">
+        <i class="fa-solid fa-filter"></i> Filter
+      </button>
     </form>
   </div>
 
-  <div class="topics-feed">
+  <!-- Discussion Feed -->
+  <div class="feed-stack">
     {% for topic in topics %}
-    <div class="topic-card">
-      <div class="topic-body">
-        <span class="type-badge">{{ topic.category or 'Discussion' }}</span>
-        <div class="topic-title">{{ topic.title }}</div>
-        <p class="topic-snippet">{{ topic.content }}</p>
+    <div class="topic-item">
+      <div class="topic-header">
+        <span class="pill-badge {% if topic.category == 'Question' %}badge-question{% elif topic.category == 'Announcement' %}badge-announcement{% else %}badge-discussion{% endif %}">
+          {{ topic.category or 'Discussion' }}
+        </span>
 
-        <div class="topic-meta-row">
-          <span><i class="fa-solid fa-book-bookmark"></i> {{ topic.course.name if topic.course else 'General' }}</span>
-          <span><i class="fa-regular fa-user"></i> {{ topic.author.name_person or topic.author.username if topic.author else 'User' }}</span>
-          <span><i class="fa-regular fa-clock"></i> {{ topic.created_at.strftime('%d %b %Y') if topic.created_at else '' }}</span>
+        <!-- Dropdown for Edit & Delete (Permitted for owner, teacher, or admin) -->
+        {% if topic.user_id == current_user.id or current_user.role in ['teacher', 'admin'] %}
+        <div class="dropdown-box">
+          <button class="opt-menu-btn" onclick="toggleDropdown('drop-{{ topic.id }}', event)">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+          <div id="drop-{{ topic.id }}" class="dropdown-content">
+            <button type="button" onclick="prepareEdit('{{ topic.id }}', '{{ topic.title|escape }}', '{{ topic.content|escape }}', '{{ topic.category }}', '{{ topic.course_id or '' }}')">
+              <i class="fa-regular fa-pen-to-square"></i> Edit
+            </button>
+            <form method="POST" action="{{ url_for('forum.delete_topic', topic_id=topic.id) }}" onsubmit="return confirm('هل أنت متأكد من حذف هذه المناقشة؟');">
+              <button type="submit" class="delete-btn">
+                <i class="fa-regular fa-trash-can"></i> Delete
+              </button>
+            </form>
+          </div>
         </div>
+        {% endif %}
+      </div>
+
+      <h2 class="topic-heading">{{ topic.title }}</h2>
+      <div class="topic-content-body">{{ topic.content }}</div>
+
+      <div class="topic-footer">
+        <span class="meta-tag meta-course">
+          <i class="fa-solid fa-book-bookmark"></i> {{ topic.course.name if topic.course else 'General Community' }}
+        </span>
+        <span class="meta-tag meta-user">
+          <i class="fa-regular fa-user"></i> {{ topic.author.name_person or topic.author.username if topic.author else 'Community Member' }}
+        </span>
+        <span class="meta-tag">
+          <i class="fa-regular fa-clock"></i> {{ topic.created_at.strftime('%d %b %Y, %I:%M %p') if topic.created_at else '' }}
+        </span>
       </div>
     </div>
     {% else %}
-    <div class="empty-forum-card">
-      <h3 style="margin: 0 0 6px;">No Discussions Yet</h3>
-      <p style="margin: 0 0 16px;">Be the first to start a conversation in this community.</p>
-      <button type="button" class="btn-new-topic" onclick="openTopicModal()">
-        Start First Topic
+    <div class="empty-box">
+      <i class="fa-regular fa-comments empty-icon"></i>
+      <h3 style="font-size: 18px; font-weight: 800; margin: 0 0 6px; color: var(--text-main);">No Discussions Yet</h3>
+      <p style="font-size: 13.5px; color: var(--text-muted); margin: 0 0 20px;">Be the first to start a conversation in your learning community.</p>
+      <button type="button" class="btn-new-topic" onclick="openModal('createModal')">
+        <i class="fa-solid fa-plus"></i> Start First Topic
       </button>
     </div>
     {% endfor %}
@@ -304,32 +540,32 @@
 
 </div>
 
-<!-- نافذة إنشاء موضوع جديد -->
-<div class="modal-overlay" id="topicModal">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3 style="margin: 0;">Start a New Discussion</h3>
-      <button type="button" style="background: none; border: none; font-size: 20px; cursor: pointer;" onclick="closeTopicModal()">&times;</button>
+<!-- Modal: Create New Topic -->
+<div class="modal-backdrop" id="createModal">
+  <div class="modal-card">
+    <div class="modal-top">
+      <h3>Start a New Discussion</h3>
+      <button type="button" class="modal-x" onclick="closeModal('createModal')">&times;</button>
     </div>
     <form method="POST" action="{{ url_for('forum.new_topic') }}">
-      <div class="modal-form-group">
-        <label class="modal-form-label">Title / Question</label>
-        <input type="text" name="title" class="modal-input" placeholder="What is your topic about?" required>
+      <div class="f-group">
+        <label class="f-label">Title / Question</label>
+        <input type="text" name="title" class="f-input" placeholder="What would you like to discuss?" required>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" class="f-group">
         <div>
-          <label class="modal-form-label">Course</label>
-          <select name="course_id" class="modal-select">
-            <option value="">General</option>
+          <label class="f-label">Course</label>
+          <select name="course_id" class="f-select">
+            <option value="">General (No Course)</option>
             {% for c in courses %}
             <option value="{{ c.id }}">{{ c.name }}</option>
             {% endfor %}
           </select>
         </div>
         <div>
-          <label class="modal-form-label">Category</label>
-          <select name="category" class="modal-select">
+          <label class="f-label">Category</label>
+          <select name="category" class="f-select">
             <option value="Discussion">Discussion</option>
             <option value="Question">Question</option>
             <option value="Announcement">Announcement</option>
@@ -337,29 +573,101 @@
         </div>
       </div>
 
-      <div class="modal-form-group">
-        <label class="modal-form-label">Details</label>
-        <textarea name="content" rows="4" class="modal-textarea" placeholder="Explain your question or topic..." required></textarea>
+      <div class="f-group">
+        <label class="f-label">Discussion Details</label>
+        <textarea name="content" rows="5" class="f-textarea" placeholder="Describe your topic, ideas, or questions clearly..." required></textarea>
       </div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn-modal-cancel" onclick="closeTopicModal()">Cancel</button>
-        <button type="submit" class="btn-modal-submit">Post Discussion</button>
+      <div class="modal-foot">
+        <button type="button" class="btn-neutral" onclick="closeModal('createModal')">Cancel</button>
+        <button type="submit" class="btn-save">Publish Topic</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Edit Topic -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal-card">
+    <div class="modal-top">
+      <h3>Edit Discussion</h3>
+      <button type="button" class="modal-x" onclick="closeModal('editModal')">&times;</button>
+    </div>
+    <form id="editTopicForm" method="POST" action="">
+      <div class="f-group">
+        <label class="f-label">Title / Question</label>
+        <input type="text" id="editTitle" name="title" class="f-input" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;" class="f-group">
+        <div>
+          <label class="f-label">Course</label>
+          <select id="editCourse" name="course_id" class="f-select">
+            <option value="">General (No Course)</option>
+            {% for c in courses %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="f-label">Category</label>
+          <select id="editCategory" name="category" class="f-select">
+            <option value="Discussion">Discussion</option>
+            <option value="Question">Question</option>
+            <option value="Announcement">Announcement</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="f-group">
+        <label class="f-label">Discussion Details</label>
+        <textarea id="editContent" name="content" rows="5" class="f-textarea" required></textarea>
+      </div>
+
+      <div class="modal-foot">
+        <button type="button" class="btn-neutral" onclick="closeModal('editModal')">Cancel</button>
+        <button type="submit" class="btn-save">Save Changes</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  function openTopicModal() {
-    document.getElementById('topicModal').style.display = 'flex';
+  function openModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.style.display = 'flex';
   }
-  function closeTopicModal() {
-    document.getElementById('topicModal').style.display = 'none';
+
+  function closeModal(id) {
+    const m = document.getElementById(id);
+    if (m) m.style.display = 'none';
   }
+
+  function toggleDropdown(id, event) {
+    event.stopPropagation();
+    document.querySelectorAll('.dropdown-content').forEach(d => {
+      if (d.id !== id) d.classList.remove('show-dropdown');
+    });
+    const target = document.getElementById(id);
+    if (target) target.classList.toggle('show-dropdown');
+  }
+
   window.addEventListener('click', function(e) {
-    const modal = document.getElementById('topicModal');
-    if (e.target === modal) modal.style.display = 'none';
+    document.querySelectorAll('.dropdown-content').forEach(d => d.classList.remove('show-dropdown'));
+    ['createModal', 'editModal'].forEach(id => {
+      const m = document.getElementById(id);
+      if (e.target === m) m.style.display = 'none';
+    });
   });
+
+  function prepareEdit(id, title, content, category, courseId) {
+    const form = document.getElementById('editTopicForm');
+    form.action = '/forum/edit/' + id;
+    document.getElementById('editTitle').value = title;
+    document.getElementById('editContent').value = content;
+    document.getElementById('editCategory').value = category;
+    document.getElementById('editCourse').value = courseId;
+    openModal('editModal');
+  }
 </script>
 {% endblock %}
