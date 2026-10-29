@@ -1,1 +1,103 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New Topic | Learnova</title><link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head><body><main class="learnova-shell"><section class="learnova-card" style="max-width:800px;margin:auto;padding:32px"><img src="{{ url_for('static',filename='brand/learnova-logo.svg') }}" style="width:220px"><h1>Create Discussion Topic</h1><form method="post" enctype="multipart/form-data"><label>Course</label><select name="course_id" required style="width:100%;margin:7px 0 18px">{% for c in courses %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}</select><label>Topic type</label><select name="topic_type" style="width:100%;margin:7px 0 18px"><option>Question</option><option>Discussion</option>{% if current_user.role in ['teacher','admin'] %}<option>Announcement</option>{% endif %}</select><label>Title</label><input name="title" required style="width:100%;margin:7px 0 18px"><label>Message</label><textarea name="body" required rows="7" style="width:100%;margin:7px 0 18px"></textarea><label>Attachment (optional)</label><input type="file" name="attachment" style="width:100%;margin:7px 0 20px"><button>Create Topic</button> <a href="{{ url_for('forum.index') }}">Cancel</a></form></section></main></body></html>
+{% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
+{% block title %}Create Discussion | Course Community{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --card-bg: #ffffff;
+    --border-normal: #e2e8f0;
+    --radius-xl: 20px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+  }
+  .new-topic-wrap {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+  }
+  .new-topic-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 34px;
+    box-shadow: var(--shadow-card);
+  }
+  .form-group {
+    margin-bottom: 20px;
+  }
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #0f172a;
+  }
+  .form-control {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    font-size: 14px;
+    outline: none;
+  }
+  .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .btn-submit {
+    background: var(--primary);
+    color: #fff;
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    cursor: pointer;
+  }
+</style>
+
+<div class="new-topic-wrap">
+  <div class="new-topic-card">
+    <h2 style="margin: 0 0 6px; font-weight: 800; font-size: 22px;">Create Discussion Topic</h2>
+    <p style="margin: 0 0 24px; color: #64748b; font-size: 13px;">Ask questions or share ideas with your students and peers.</p>
+    
+    <form method="POST" action="{{ url_for('forum.new_topic') }}">
+      <div class="form-group">
+        <label class="form-label">Topic Title</label>
+        <input type="text" name="title" class="form-control" placeholder="Enter topic title..." required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;" class="form-group">
+        <div>
+          <label class="form-label">Course</label>
+          <select name="course_id" class="form-control">
+            <option value="">General</option>
+            {% for c in courses %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label">Category</label>
+          <select name="category" class="form-control">
+            <option value="Discussion">Discussion</option>
+            <option value="Question">Question</option>
+            <option value="Announcement">Announcement</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Content</label>
+        <textarea name="content" rows="5" class="form-control" placeholder="Write full discussion details here..." required></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+        <a href="{{ url_for('forum.index') }}" style="padding: 12px 20px; background: #f1f5f9; color: #475569; text-decoration: none; border-radius: 10px; font-weight: 700;">Cancel</a>
+        <button type="submit" class="btn-submit">Publish Topic</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
