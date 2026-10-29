@@ -31,7 +31,7 @@
     --ln-brand: #4f46e5;
     --ln-brand-dark: #4338ca;
     --ln-card-bg: #ffffff;
-    --ln-page-bg: #f1f5f9;
+    --ln-page-bg: #f8fafc;
     --ln-title: #0f172a;
     --ln-body: #334155;
     --ln-muted: #64748b;
@@ -44,68 +44,10 @@
 
   .reports-wrapper {
     width: 100%;
-    max-width: 1360px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 10px 20px 80px;
     box-sizing: border-box;
-  }
-
-  /* ---------------- ترويسة الـ PDF الرسمية ---------------- */
-  .pdf-official-banner {
-    display: none;
-    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
-    border-radius: var(--radius-xl);
-    padding: 22px 28px;
-    margin-bottom: 20px;
-    color: #ffffff;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-  }
-  .pdf-brand-identity {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .pdf-brand-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 22px;
-    color: #ffffff;
-  }
-  .pdf-brand-title {
-    font-size: 22px;
-    font-weight: 800;
-    color: #ffffff;
-    margin: 0 0 3px;
-    letter-spacing: -0.4px;
-  }
-  .pdf-brand-subtitle {
-    font-size: 11px;
-    color: #c7d2fe;
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-    font-weight: 600;
-  }
-  .pdf-meta-badge-box {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: var(--radius-md);
-    padding: 10px 16px;
-    text-align: right;
-    font-size: 11.5px;
-    color: #e0e7ff;
-    line-height: 1.5;
-  }
-  .pdf-meta-badge-box strong {
-    color: #ffffff;
   }
 
   /* ---------------- الترويسة العادية على المتصفح ---------------- */
@@ -189,9 +131,7 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 16px;
-    margin-bottom: 20px;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    margin-bottom: 24px;
   }
   .stat-card-box {
     background: var(--ln-card-bg);
@@ -201,17 +141,17 @@
     box-shadow: var(--shadow-card);
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     box-sizing: border-box;
   }
   .stat-badge-icon {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 19px;
+    font-size: 20px;
     color: #ffffff;
     flex-shrink: 0;
   }
@@ -227,7 +167,7 @@
     margin: 0 0 3px;
   }
   .stat-value-num {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0 0 2px;
@@ -245,20 +185,17 @@
   /* ---------------- الرسوم البيانية ---------------- */
   .charts-double-grid {
     display: grid;
-    grid-template-columns: 1.8fr 1.2fr;
-    gap: 16px;
-    margin-bottom: 20px;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
   }
   .chart-card-panel {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 18px 20px;
+    padding: 20px 24px;
     box-shadow: var(--shadow-card);
     box-sizing: border-box;
-    overflow: hidden;
   }
   .chart-card-header {
     display: flex;
@@ -267,7 +204,7 @@
     margin-bottom: 14px;
   }
   .chart-card-title {
-    font-size: 14.5px;
+    font-size: 15px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0;
@@ -277,20 +214,16 @@
   .courses-report-stack {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    gap: 18px;
+    margin-bottom: 24px;
   }
   .course-performance-card {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 20px 24px;
+    padding: 22px 26px;
     box-shadow: var(--shadow-card);
     box-sizing: border-box;
-    page-break-inside: avoid;
-    break-inside: avoid;
   }
   .course-card-top {
     display: flex;
@@ -299,7 +232,7 @@
     margin-bottom: 14px;
   }
   .course-code-name {
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0;
@@ -324,8 +257,6 @@
     border-radius: var(--radius-lg);
     padding: 12px;
     margin-bottom: 14px;
-    page-break-inside: avoid;
-    break-inside: avoid;
   }
   .metric-mini-item {
     text-align: center;
@@ -364,11 +295,9 @@
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 20px 24px;
+    padding: 22px 24px;
     box-shadow: var(--shadow-card);
     box-sizing: border-box;
-    page-break-inside: avoid;
-    break-inside: avoid;
   }
   .table-top-bar {
     display: flex;
@@ -434,58 +363,27 @@
     font-size: 11px;
   }
 
-  /* ---------------- تذييل الـ PDF ---------------- */
-  .pdf-official-footer {
-    display: none;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1.5px solid #cbd5e1;
-    padding-top: 12px;
-    margin-top: 20px;
-    font-size: 10.5px;
-    color: var(--ln-muted);
+  /* ---------------- التجاوب للشاشات ---------------- */
+  @media (max-width: 1100px) {
+    .stats-banner-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-double-grid { grid-template-columns: 1fr; }
+    .metrics-mini-grid { grid-template-columns: repeat(3, 1fr); }
+    .metric-mini-item { border-right: none; }
   }
-
-  /* تنسيق خاص وثابت لتوليد ملف الـ PDF لمنع انقطاع الحواف */
-  .pdf-render-canvas {
-    width: 1080px !important;
-    max-width: 1080px !important;
-    background-color: var(--ln-page-bg) !important;
-    padding: 20px !important;
-    box-sizing: border-box !important;
-    border-radius: 0 !important;
-  }
-
-  @media print {
-    .btn-action-top, .filter-select-time, .sidebar, header, nav { display: none !important; }
-    .pdf-official-banner, .pdf-official-footer { display: flex !important; }
-    .reports-wrapper { padding: 0 !important; }
+  @media (max-width: 640px) {
+    .reports-wrapper { padding: 10px 10px 50px; }
+    .reports-header-section { flex-direction: column; align-items: stretch; }
+    .header-actions { flex-direction: column; width: 100%; }
+    .btn-action-top, .filter-select-time { width: 100%; justify-content: center; }
+    .stats-banner-grid { grid-template-columns: 1fr; }
+    .metrics-mini-grid { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 
-<div class="reports-wrapper" id="printableReportArea">
-
-  <!-- الترويسة الأكاديمية الفاخرة للتقرير (تظهر فقط في ملف الـ PDF) -->
-  <div class="pdf-official-banner" id="pdfOfficialBanner">
-    <div class="pdf-brand-identity">
-      <div class="pdf-brand-icon">
-        <i class="fa-solid fa-graduation-cap"></i>
-      </div>
-      <div>
-        <h1 class="pdf-brand-title">Learnova LMS</h1>
-        <p class="pdf-brand-subtitle">Executive Academic Intelligence Report</p>
-      </div>
-    </div>
-    <div class="pdf-meta-badge-box">
-      <div><strong>Instructor:</strong> {{ current_user.name_person or current_user.username }}</div>
-      <div><strong>Email:</strong> {{ current_user.email }}</div>
-      <div><strong>Date:</strong> <span id="reportPrintDate"></span></div>
-      <div><strong>Ref Number:</strong> LN-REP-{{ current_user.id }}-2026</div>
-    </div>
-  </div>
+<div class="reports-wrapper">
 
   <!-- Header Banner في واجهة الويب -->
-  <div class="reports-header-section" id="webHeaderBar">
+  <div class="reports-header-section">
     <div>
       <span class="tag-analytics">Analytics</span>
       <h1 class="reports-title">Instructor Reports</h1>
@@ -565,7 +463,7 @@
       <div class="chart-card-header">
         <h3 class="chart-card-title"><i class="fa-solid fa-chart-column" style="color: var(--ln-brand); margin-right: 6px;"></i> Submissions & Evaluations Trend</h3>
       </div>
-      <div style="height: 200px;">
+      <div style="height: 220px;">
         <canvas id="performanceTrendChart"></canvas>
       </div>
     </div>
@@ -574,13 +472,13 @@
       <div class="chart-card-header">
         <h3 class="chart-card-title"><i class="fa-solid fa-chart-pie" style="color: #0ea5e9; margin-right: 6px;"></i> Grading Progress</h3>
       </div>
-      <div style="height: 200px;">
+      <div style="height: 220px;">
         <canvas id="gradingDoughnutChart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- تفاصيل المقررات (كاملة ومحمية من التجزئة) -->
+  <!-- تفاصيل المقررات -->
   <div class="courses-report-stack">
     {% for c in teacher_courses %}
     <div class="course-performance-card">
@@ -623,10 +521,10 @@
   <div class="table-card-panel">
     <div class="table-top-bar">
       <div>
-        <h3 style="margin: 0 0 3px; font-size: 14.5px; font-weight: 800; color: var(--ln-title);">
+        <h3 style="margin: 0 0 3px; font-size: 15px; font-weight: 800; color: var(--ln-title);">
           <i class="fa-solid fa-users-viewfinder" style="color: var(--ln-brand); margin-right: 6px;"></i> Students Performance Overview
         </h3>
-        <p style="margin: 0; font-size: 12px; color: var(--ln-muted);">Roster of all enrolled students, their completed tasks, and current standing.</p>
+        <p style="margin: 0; font-size: 12.5px; color: var(--ln-muted);">Roster of all enrolled students, their completed tasks, and current standing.</p>
       </div>
     </div>
 
@@ -651,7 +549,7 @@
                 </div>
                 <div>
                   <strong style="color: var(--ln-title); display: block;">{{ student.name_person or student.username }}</strong>
-                  <span style="font-size: 11px; color: var(--ln-muted);">{{ student.email }}</span>
+                  <span style="font-size: 11.5px; color: var(--ln-muted);">{{ student.email }}</span>
                 </div>
               </div>
             </td>
@@ -686,24 +584,13 @@
     </div>
   </div>
 
-  <!-- التذييل الرسمي للتقرير داخل الـ PDF -->
-  <div class="pdf-official-footer" id="pdfOfficialFooter">
-    <span>Learnova LMS &bull; Academic Intelligence Platform &bull; Confidential Document</span>
-    <span>Instructor: {{ current_user.name_person or current_user.username }} &bull; Page 1 of 1</span>
-  </div>
-
 </div>
 
-<!-- دوال JavaScript للتحكم بالرسوم والتصدير مع ضبط العرض -->
+<!-- دوال JavaScript للتحكم بالرسوم وتوليد الـ PDF الاحترافي -->
 <script>
   let trendChart, doughnutChart;
 
   document.addEventListener('DOMContentLoaded', function () {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    const printDateEl = document.getElementById('reportPrintDate');
-    if (printDateEl) printDateEl.innerText = formattedDate;
-
     // 1. رسم مخطط المنحنى البياني للأداء
     const ctxTrend = document.getElementById('performanceTrendChart').getContext('2d');
     trendChart = new Chart(ctxTrend, {
@@ -763,7 +650,7 @@
     });
   });
 
-  // ميزة تنزيل التقرير الأكاديمي الرسمي كـ PDF بدقة أبعاد A4
+  // ميزة تنزيل التقرير الأكاديمي المنسق كـ PDF دون تشويه أو انقطاع
   function downloadReportPDF() {
     const btn = document.getElementById('btnDownloadPdf');
     const originalHtml = btn.innerHTML;
@@ -771,20 +658,114 @@
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
     btn.disabled = true;
 
-    const element = document.getElementById('printableReportArea');
-    const webHeader = document.getElementById('webHeaderBar');
-    const pdfBanner = document.getElementById('pdfOfficialBanner');
-    const pdfFooter = document.getElementById('pdfOfficialFooter');
+    // استخراج بيانات الرسوم كصور لضمان عدم تشوهها أو اقتصاصها
+    const trendImg = trendChart.toBase64Image();
+    const doughnutImg = doughnutChart.toBase64Image();
 
-    // إعداد الصفحة لتناسب مقاس A4 Landscape بالضبط
-    element.classList.add('pdf-render-canvas');
-    webHeader.style.display = 'none';
-    pdfBanner.style.display = 'flex';
-    pdfFooter.style.display = 'flex';
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
-    // إعادة تحجيم المخططات فوراً لتطابق العرض الثابت الجديد
-    if (trendChart) trendChart.resize();
-    if (doughnutChart) doughnutChart.resize();
+    // بناء قالب PDF مستقل بمقاسات A4 Landscape ومظهر تنفيذي موحد
+    const pdfContainer = document.createElement('div');
+    pdfContainer.id = 'pdfRenderContainer';
+    pdfContainer.style.width = '1060px';
+    pdfContainer.style.padding = '24px';
+    pdfContainer.style.background = '#f8fafc';
+    pdfContainer.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    pdfContainer.style.color = '#0f172a';
+    pdfContainer.style.position = 'absolute';
+    pdfContainer.style.left = '-9999px';
+    pdfContainer.style.top = '0';
+
+    pdfContainer.innerHTML = `
+      <!-- الترويسة الأكاديمية الرسمية -->
+      <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); border-radius: 16px; padding: 20px 26px; color: #ffffff; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.18); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff;">
+            🎓
+          </div>
+          <div>
+            <h1 style="font-size: 22px; font-weight: 800; margin: 0 0 2px; color: #ffffff; letter-spacing: -0.4px;">Learnova LMS</h1>
+            <p style="font-size: 11px; color: #c7d2fe; margin: 0; text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600;">Executive Academic Intelligence Report</p>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 16px; text-align: right; font-size: 11.5px; color: #e0e7ff; line-height: 1.5;">
+          <div><strong>Instructor:</strong> {{ current_user.name_person or current_user.username }}</div>
+          <div><strong>Email:</strong> {{ current_user.email }}</div>
+          <div><strong>Date:</strong> ${formattedDate}</div>
+          <div><strong>Ref:</strong> LN-REP-{{ current_user.id }}-2026</div>
+        </div>
+      </div>
+
+      <!-- بطاقات الإحصائيات الأربعة -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: #6366f1; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">📖</div>
+          <div>
+            <p style="font-size: 11px; font-weight: 700; color: #64748b; margin: 0 0 2px;">Courses</p>
+            <p style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">{{ teacher_courses|length }}</p>
+            <p style="font-size: 10.5px; font-weight: 700; color: #10b981; margin: 0;">Assigned</p>
+          </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: #0ea5e9; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">👥</div>
+          <div>
+            <p style="font-size: 11px; font-weight: 700; color: #64748b; margin: 0 0 2px;">Students</p>
+            <p style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">{{ current_user.students|length }}</p>
+            <p style="font-size: 10.5px; font-weight: 700; color: #0284c7; margin: 0;">Unique learners</p>
+          </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">🚀</div>
+          <div>
+            <p style="font-size: 11px; font-weight: 700; color: #64748b; margin: 0 0 2px;">Submissions</p>
+            <p style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">{{ ns.total_subs }}</p>
+            <p style="font-size: 10.5px; font-weight: 700; color: #10b981; margin: 0;">Received</p>
+          </div>
+        </div>
+
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: #f59e0b; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 18px;">⏳</div>
+          <div>
+            <p style="font-size: 11px; font-weight: 700; color: #64748b; margin: 0 0 2px;">Ungraded</p>
+            <p style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">{{ ns.pending_subs }}</p>
+            <p style="font-size: 10.5px; font-weight: 700; color: #d97706; margin: 0;">Pending</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- الرسوم البيانية بدقة عالية وبدون اقتصاص -->
+      <div style="display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 16px; margin-bottom: 20px;">
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+          <h3 style="font-size: 14px; font-weight: 800; margin: 0 0 12px; color: #0f172a;">📊 Submissions & Evaluations Trend</h3>
+          <img src="${trendImg}" style="width: 100%; height: 210px; object-fit: contain;" />
+        </div>
+        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+          <h3 style="font-size: 14px; font-weight: 800; margin: 0 0 12px; color: #0f172a;">🥧 Grading Progress</h3>
+          <img src="${doughnutImg}" style="width: 100%; height: 210px; object-fit: contain;" />
+        </div>
+      </div>
+
+      <!-- تفاصيل المقررات -->
+      <div style="margin-bottom: 20px;">
+        ${document.querySelector('.courses-report-stack').outerHTML}
+      </div>
+
+      <!-- جدول أداء الطلاب -->
+      <div style="margin-bottom: 16px;">
+        ${document.querySelector('.table-card-panel').outerHTML}
+      </div>
+
+      <!-- تذييل التقرير الرسمي -->
+      <div style="border-top: 1.5px solid #cbd5e1; padding-top: 12px; display: flex; justify-content: space-between; font-size: 10.5px; color: #64748b;">
+        <span>Learnova LMS &bull; Academic Intelligence Platform &bull; Confidential Document</span>
+        <span>Instructor: {{ current_user.name_person or current_user.username }} &bull; Page 1 of 1</span>
+      </div>
+    `;
+
+    document.body.appendChild(pdfContainer);
 
     const opt = {
       margin:       [6, 6, 6, 6],
@@ -794,35 +775,25 @@
         scale: 2, 
         useCORS: true, 
         logging: false,
-        backgroundColor: '#f1f5f9',
-        windowWidth: 1120
+        backgroundColor: '#f8fafc',
+        width: 1060
       },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
-    // مهلة زمنية قصيرة (150ms) للتأكد من اكتمال رندرة الرسوم قبل أخذ اللقطة
-    setTimeout(() => {
-      html2pdf().set(opt).from(element).save().then(() => {
-        // استعادة العرض الطبيعي للمتصفح
-        element.classList.remove('pdf-render-canvas');
-        webHeader.style.display = 'flex';
-        pdfBanner.style.display = 'none';
-        pdfFooter.style.display = 'none';
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-        if (trendChart) trendChart.resize();
-        if (doughnutChart) doughnutChart.resize();
-      }).catch((err) => {
-        console.error('PDF Export Error:', err);
-        element.classList.remove('pdf-render-canvas');
-        webHeader.style.display = 'flex';
-        pdfBanner.style.display = 'none';
-        pdfFooter.style.display = 'none';
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
-        window.print();
-      });
-    }, 150);
+    html2pdf().set(opt).from(pdfContainer).save().then(() => {
+      document.body.removeChild(pdfContainer);
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+    }).catch((err) => {
+      console.error('PDF Export Error:', err);
+      if (document.body.contains(pdfContainer)) {
+        document.body.removeChild(pdfContainer);
+      }
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      window.print();
+    });
   }
 
   // تصدير جدول الطلاب إلى CSV
