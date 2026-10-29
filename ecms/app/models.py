@@ -353,34 +353,17 @@ class Certificate(db.Model):
     course = db.relationship('Course', backref=db.backref('certificates', lazy=True, cascade='all, delete-orphan'))
 
 
-class DiscussionTopic(db.Model):
-    __tablename__ = 'discussion_topic'
-    id = db.Column(db.Integer, primary_key=True)
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False, index=True)
-    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    title = db.Column(db.String(180), nullable=False)
-    body = db.Column(db.Text, nullable=False)
-    topic_type = db.Column(db.String(30), nullable=False, default='Discussion')
-    is_locked = db.Column(db.Boolean, default=False, nullable=False)
-    attachment_path = db.Column(db.String(255), nullable=True)
-    is_pinned = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
-    course = db.relationship('Course', backref=db.backref('discussion_topics', lazy=True, cascade='all, delete-orphan'))
-    author = db.relationship('User', backref=db.backref('discussion_topics', lazy=True, cascade='all, delete-orphan'))
-    posts = db.relationship('DiscussionPost', back_populates='topic', lazy=True, cascade='all, delete-orphan')
-
 class Discussion(db.Model):
     __tablename__ = 'discussions'
-    
+    __table_args__ = {'extend_existing': True}
+
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     category = db.Column(db.String(50), default='Discussion')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, nullable=True)
+    user_id = db.Column(db.Integer, nullable=False)
     
     course = db.relationship('Course', foreign_keys=[course_id], lazy=True)
     author = db.relationship('User', foreign_keys=[user_id], lazy=True)
