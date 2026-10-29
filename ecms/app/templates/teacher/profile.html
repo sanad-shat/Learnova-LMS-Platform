@@ -251,6 +251,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .form-label .lock-hint {
@@ -320,7 +322,7 @@
     box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
   }
 
-  /* Responsive Design */
+  /* Responsive Design for Mobile & Tablet */
   @media (max-width: 1024px) {
     .profile-grid-layout {
       grid-template-columns: 1fr;
@@ -338,10 +340,17 @@
       grid-column: span 1;
     }
     .profile-form-card {
-      padding: 22px;
+      padding: 20px;
+    }
+    .profile-overview-card {
+      padding: 24px 20px;
     }
     .profile-header-banner {
       padding: 20px;
+    }
+    .btn-save-profile {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style>
