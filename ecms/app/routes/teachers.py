@@ -159,16 +159,19 @@ def load_user(user_id):
 
 
 def _teacher_nav_context(teacher):
-    ungraded = (
-        Submission.query.join(Assignment)
-        .join(Course)
-        .filter(Course.teacher_id == teacher.id, Submission.grade.is_(None))
-        .count()
-    )
-    unread = Notification.query.filter_by(
-        user_id=teacher.id, is_read=False
-    ).count()
-    return {"nav_ungraded": ungraded, "nav_notifications": unread}
+    try:
+        ungraded = (
+            Submission.query.join(Assignment)
+            .join(Course)
+            .filter(Course.teacher_id == teacher.id, Submission.grade.is_(None))
+            .count()
+        )
+        unread = Notification.query.filter_by(
+            user_id=teacher.id, is_read=False
+        ).count()
+        return {"nav_ungraded": ungraded, "nav_notifications": unread}
+    except Exception:
+        return {"nav_ungraded": 0, "nav_notifications": 0}
 
 
 # ------------------------- Authentication -------------------------
@@ -204,17 +207,20 @@ def login():
                     session["is_demo"] = True
                     login_user(demo_teacher)
 
-                    db.session.add(
-                        Notification(
-                            user_id=demo_teacher.id,
-                            title="Instructor Login Session",
-                            message=f"Logged in successfully via Demo Account on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
-                            link=f"/teacher/{demo_teacher.id}/dashboard",
-                            is_read=False,
-                            created_at=datetime.now(timezone.utc),
+                    try:
+                        db.session.add(
+                            Notification(
+                                user_id=demo_teacher.id,
+                                title="Instructor Login Session",
+                                message=f"Logged in successfully via Demo Account on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                                link=f"/teacher/{demo_teacher.id}/dashboard",
+                                is_read=False,
+                                created_at=datetime.now(timezone.utc),
+                            )
                         )
-                    )
-                    db.session.commit()
+                        db.session.commit()
+                    except Exception:
+                        db.session.rollback()
 
                     flash(
                         "Signed in successfully with Demo Instructor Account.",
@@ -1883,7 +1889,7 @@ def profile(teacher_id):
     )
 
 
-# ------------------------- Notifications System -------------------------
+# ------------------------- Notifications System (Safe & Isolated) -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
 def notifications(teacher_id):
@@ -1892,38 +1898,42 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
+    # فحص وتسجيل إشعارات التسليمات المعلقة بأمان ودون إيقاف السيرفر
     try:
-        for course in teacher.courses:
-            for assignment in course.assignments:
-                for sub in assignment.submissions:
-                    sub_title = f"New Submission: {assignment.title}"
-                    existing = Notification.query.filter_by(
-                        user_id=teacher.id, title=sub_title
-                    ).first()
+        if hasattr(teacher, "courses") and teacher.courses:
+            for course in teacher.courses:
+                for assignment in getattr(course, "assignments", []):
+                    for sub in getattr(assignment, "submissions", []):
+                        sub_title = f"New Submission: {assignment.title}"
+                        existing = Notification.query.filter_by(
+                            user_id=teacher.id, title=sub_title
+                        ).first()
 
-                    if not existing:
-                        st_name = sub.student.name_person or sub.student.username
-                        status_note = (
-                            "Requires grading."
-                            if sub.grade is None
-                            else f"Graded ({sub.grade}/100)."
-                        )
-                        db.session.add(
-                            Notification(
+                        if not existing:
+                            st_name = (
+                                getattr(sub.student, "name_person", None)
+                                or getattr(sub.student, "username", "Student")
+                            )
+                            status_note = (
+                                "Requires grading."
+                                if sub.grade is None
+                                else f"Graded ({sub.grade}/100)."
+                            )
+                            new_alert = Notification(
                                 user_id=teacher.id,
                                 title=sub_title,
                                 message=f"Student {st_name} submitted task for '{assignment.title}' in {course.name}. {status_note}",
                                 link=f"/teacher/{teacher.id}/submissions",
                                 is_read=False,
-                                created_at=sub.submitted_at
+                                created_at=getattr(sub, "submitted_at", None)
                                 or datetime.now(timezone.utc),
                             )
-                        )
-        db.session.commit()
+                            db.session.add(new_alert)
+            db.session.commit()
     except Exception:
         db.session.rollback()
 
-    items = []
+    # جلب الإشعارات بأمان تام مع سياق التنقل
     try:
         items = (
             Notification.query.filter_by(user_id=teacher.id)
@@ -1931,14 +1941,21 @@ def notifications(teacher_id):
             .all()
         )
     except Exception:
+        db.session.rollback()
         items = []
+
+    nav_ctx = {}
+    try:
+        nav_ctx = _teacher_nav_context(teacher)
+    except Exception:
+        nav_ctx = {"nav_ungraded": 0, "nav_notifications": len(items)}
 
     return render_template(
         "teacher/notifications.html",
         teacher=teacher,
         notifications=items,
         active_page="notifications",
-        **_teacher_nav_context(teacher),
+        **nav_ctx,
     )
 
 
