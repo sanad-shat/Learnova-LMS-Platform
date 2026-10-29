@@ -384,16 +384,6 @@ class DiscussionPost(db.Model):
     author = db.relationship('User', backref=db.backref('discussion_posts', lazy=True, cascade='all, delete-orphan'))
 
 
-class DiscussionLike(db.Model):
-    __tablename__ = 'discussion_like'
-    id = db.Column(db.Integer, primary_key=True)
-    topic_id = db.Column(db.Integer, db.ForeignKey('discussion_topic.id'), nullable=False, index=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    __table_args__ = (db.UniqueConstraint('topic_id', 'user_id', name='uq_topic_user_like'),)
-    topic = db.relationship('DiscussionTopic', backref=db.backref('likes', lazy=True, cascade='all, delete-orphan'))
-    user = db.relationship('User', backref=db.backref('discussion_likes', lazy=True, cascade='all, delete-orphan'))
-
 class Discussion(db.Model):
     __tablename__ = 'discussions'
     
@@ -403,8 +393,9 @@ class Discussion(db.Model):
     category = db.Column(db.String(50), default='Discussion')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # استخدام المفرد هنا هو الحل
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # العلاقات
     course = db.relationship('Course', backref=db.backref('discussions', lazy=True))
