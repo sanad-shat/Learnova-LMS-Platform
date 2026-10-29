@@ -21,7 +21,7 @@ except ImportError:
 
 teachers_bp = Blueprint("teachers", __name__, url_prefix="/teacher")
 
-# Upload configuration safe for Vercel Serverless
+# إعدادات رفع الملفات الآمنة لـ Vercel
 if os.environ.get('VERCEL'):
     UPLOAD_FOLDER = '/tmp/uploads'
 else:
@@ -138,7 +138,7 @@ def login():
                     session['is_demo'] = True
                     login_user(demo_teacher)
                     
-                    # تسجيل إشعار دخول
+                    # إشعار تسجيل الدخول للحساب التجريبي
                     db.session.add(Notification(
                         user_id=demo_teacher.id,
                         title="Instructor Login Session",
@@ -167,7 +167,7 @@ def login():
             if user and is_valid and getattr(user, 'role', '').lower() == "teacher":
                 login_user(user)
                 
-                # تسجيل إشعار دخول نظامي
+                # إشعار تسجيل الدخول للمحاضر
                 try:
                     db.session.add(Notification(
                         user_id=user.id,
@@ -927,4 +927,432 @@ def update_student_quiz_score(teacher_id, course_id, quiz_id, student_id):
     except Exception:
         db.session.rollback()
 
-    return jsonify({"status": "success", "message
+    return jsonify({"status": "success", "message": "Grade updated"})
+
+
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exam/<int:exam_id>/student/<int:student_id>/update", methods=["POST"])
+@login_required
+def update_student_exam_score(teacher_id, course_id, exam_id, student_id):
+    exam = Exam.query.get_or_404(exam_id)
+    new_score = request.form.get("score", type=float)
+
+    grade = Grade.query.filter_by(exam_id=exam.id, student_id=student_id).first()
+    if grade:
+        grade.score = new_score
+    else:
+        grade = Grade(exam_id=exam.id, student_id=student_id, score=new_score)
+        db.session.add(grade)
+
+    try:
+        db.session.add(Notification(user_id=student_id, title='Exam grade published', message=f'Your grade for {exam.title} has been updated.', link=f'/student/courses/{course_id}'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    return jsonify({"status": "success", "message": "Exam grade updated"})
+
+
+def generate_signature_image(teacher_name, signature_id):
+    sig_dir = os.path.join(UPLOAD_FOLDER, "signatures") if os.environ.get('VERCEL') else os.path.join("app", "static", "signatures")
+    try:
+        os.makedirs(sig_dir, exist_ok=True)
+    except Exception:
+        pass
+
+    filename = f"signature_{signature_id}.png"
+    filepath = os.path.join(sig_dir, filename)
+
+    if os.path.exists(filepath):
+        return filename
+
+    try:
+        width, height = 400, 80
+        img = Image.new('RGBA', (width, height), (255, 255, 255, 0))
+        draw = ImageDraw.Draw(img)
+
+        try:
+            font = ImageFont.truetype("app/static/fonts/DancingScript-Bold.ttf", 48)
+        except Exception:
+            font = ImageFont.load_default()
+
+        draw.text((10, 10), teacher_name, fill=(0, 0, 0, 255), font=font)
+        img.save(filepath)
+    except Exception:
+        pass
+    return filename
+
+
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/certificate")
+@login_required
+def generate_certificate(teacher_id, course_id, student_id):
+    teacher = User.query.get_or_404(teacher_id)
+    course = Course.query.get_or_404(course_id)
+    student = User.query.get_or_404(student_id)
+
+    quizzes = []
+    for quiz in course.quizzes:
+        submissions = Submission.query.filter_by(student_id=student.id, assignment_id=quiz.assignment_id).all()
+        total_score = sum(sub.grade for sub in submissions) if submissions else 0
+        quizzes.append({"completed": bool(submissions), "score": total_score})
+
+    exams = []
+    for exam in course.exams:
+        grade = Grade.query.filter_by(student_id=student.id, exam_id=exam.id).first()
+        exams.append({
+            "completed": bool(grade),
+            "score": grade.score if grade else 0
+        })
+
+    activity = Activity.query.filter_by(student_id=student.id, course_id=course.id).first()
+    activity_score = activity.score if activity else None
+
+    can_print = (
+        all(q["completed"] and q["score"] >= 0 for q in quizzes) and
+        all(e["completed"] and e["score"] >= 0 for e in exams) and
+        activity_score is not None
+    )
+
+    if not can_print:
+        flash("لا يمكن إصدار الشهادة — الطالب لم ينهِ جميع المهام.", "warning")
+        return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
+
+    total_quizzes_score = sum(q["score"] for q in quizzes)
+    total_quizzes_possible = sum(sum(qq.score for qq in quiz.questions) for quiz in course.quizzes)
+    total_exams_score = sum(e["score"] for e in exams)
+    total_exams_possible = sum(exam.total_score for exam in course.exams)
+    total_score = total_quizzes_score + total_exams_score + activity_score
+    total_possible = total_quizzes_possible + total_exams_possible + 100
+
+    percentage = round((total_score / total_possible) * 100, 2) if total_possible > 0 else 0
+    signature_filename = generate_signature_image(teacher.username, teacher.id)
+
+    return render_template(
+        "teacher/certificate.html",
+        teacher=teacher,
+        course=course,
+        student=student,
+        total_score=round(total_score, 2),
+        total_possible=total_possible,
+        percentage=percentage,
+        quizzes=quizzes,
+        exams=exams,
+        activity_score=activity_score,
+        today=datetime.now(),
+        signature_url=url_for('static', filename=f'signatures/{signature_filename}')
+    )
+
+
+@teachers_bp.route('/<int:teacher_id>/certificates')
+@login_required
+def certificates(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role.lower() != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    rows = []
+    for course in Course.query.filter_by(teacher_id=teacher.id).all():
+        students = []
+        for enrollment in course.enrollments:
+            student = enrollment.student
+            students.append({
+                'student': student,
+                'progress': course_progress(student, course),
+                'grade': final_grade(student, course),
+                'certificate': Certificate.query.filter_by(student_id=student.id, course_id=course.id).first()
+            })
+        rows.append({'course': course, 'students': students})
+    count = Certificate.query.join(Course).filter(Course.teacher_id == teacher.id).count()
+    return render_template('teacher/certificates.html', teacher=teacher, rows=rows, certificate_count=count, active_page='certificates', **_teacher_nav_context(teacher))
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/issue-certificate')
+@login_required
+def issue_student_certificate(teacher_id, course_id, student_id):
+    teacher = User.query.get_or_404(teacher_id)
+    course = Course.query.get_or_404(course_id)
+    student = User.query.get_or_404(student_id)
+    if current_user.id != teacher.id or course.teacher_id != teacher.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    certificate, progress, grade = issue_certificate(student, course)
+    if certificate:
+        flash('Certificate issued successfully.', 'success')
+    else:
+        flash(f'Student is not eligible yet. Progress: {progress["percent"]}%, grade: {grade}%.', 'warning')
+    return redirect(url_for('teachers.certificates', teacher_id=teacher.id))
+
+
+@teachers_bp.route('/<int:teacher_id>/submissions')
+@login_required
+def submissions(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id:
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    items = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id).order_by(Submission.submitted_at.desc()).all()
+    return render_template('teacher/submissions.html', teacher=teacher, submissions=items, **_teacher_nav_context(teacher))
+
+
+@teachers_bp.route('/<int:teacher_id>/submission/<int:submission_id>/grade', methods=['POST'])
+@login_required
+def grade_submission(teacher_id, submission_id):
+    submission = Submission.query.get_or_404(submission_id)
+    if current_user.id != teacher_id or submission.assignment.course.teacher_id != teacher_id:
+        return jsonify({'status': 'error', 'message': 'Access denied'}), 403
+    score = request.form.get('grade', type=float)
+    feedback = request.form.get('feedback', '').strip()
+    if score is None or score < 0 or score > 100:
+        flash('Grade must be between 0 and 100.', 'danger')
+    else:
+        submission.grade = score
+        submission.feedback = feedback
+        try:
+            db.session.add(Notification(user_id=submission.student_id, title='Assignment graded', message=f'Your submission for {submission.assignment.title} received {score}/100.', link=f'/student/courses/{submission.assignment.course_id}'))
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+        flash('Submission graded successfully.', 'success')
+    return redirect(url_for('teachers.submissions', teacher_id=teacher_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/evaluations')
+@login_required
+def evaluations(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    submissions = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id).all()
+    exam_grades = Grade.query.join(Exam).join(Course).filter(Course.teacher_id == teacher.id).all()
+    graded = [x for x in submissions if x.grade is not None]
+    scores = [x.grade for x in graded] + [g.score for g in exam_grades if g.score is not None]
+    rows = []
+    for x in sorted(graded, key=lambda z: z.submitted_at or datetime.min, reverse=True):
+        rows.append({'student': x.student.name_person or x.student.username, 'course': x.assignment.course.code, 'title': x.assignment.title, 'type': 'Assignment', 'score': f'{x.grade:.1f}/100'})
+    for g in exam_grades:
+        rows.append({'student': g.student.name_person or g.student.username, 'course': g.exam.course.code, 'title': g.exam.title, 'type': 'Exam', 'score': f'{g.score:.1f}/{g.exam.total_score:g}'})
+    average = round(sum(scores)/len(scores), 1) if scores else 0
+    return render_template('teacher/evaluations.html', teacher=teacher, graded_submissions=len(graded), pending_submissions=len(submissions)-len(graded), exam_grades=exam_grades, average_score=average, evaluation_rows=rows[:100], **_teacher_nav_context(teacher))
+
+
+@teachers_bp.route('/<int:teacher_id>/reports')
+@login_required
+def reports(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    courses = Course.query.filter_by(teacher_id=teacher.id).all()
+    student_ids = {e.student_id for c in courses for e in c.enrollments}
+    submissions = Submission.query.join(Assignment).join(Course).filter(Course.teacher_id == teacher.id).all()
+    report = {'courses': len(courses), 'students': len(student_ids), 'submissions': len(submissions), 'ungraded': sum(1 for s in submissions if s.grade is None)}
+    course_reports = []
+    for c in courses:
+        scores = [s.grade for a in c.assignments for s in a.submissions if s.grade is not None]
+        scores += [g.score for e in c.exams for g in e.grades if g.score is not None]
+        avg = round(sum(scores)/len(scores), 1) if scores else 0
+        course_reports.append({'code': c.code, 'name': c.name, 'students': len(c.enrollments), 'assignments': len(c.assignments), 'quizzes': len(c.quizzes), 'exams': len(c.exams), 'average': avg})
+    return render_template('teacher/reports.html', teacher=teacher, report=report, course_reports=course_reports, **_teacher_nav_context(teacher))
+
+
+@teachers_bp.route('/<int:teacher_id>/profile', methods=['GET', 'POST'])
+@login_required
+def profile(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        duplicate = User.query.filter(User.email == email, User.id != teacher.id).first()
+        if duplicate:
+            flash('This email is already used by another account.', 'danger')
+        else:
+            teacher.name_person = request.form.get('name_person', '').strip()
+            teacher.email = email
+            teacher.phone = request.form.get('phone', '').strip()
+            teacher.department = request.form.get('department', '').strip()
+            teacher.academic_rank = request.form.get('academic_rank', '').strip()
+            teacher.office_number = request.form.get('office_number', '').strip()
+            db.session.commit()
+            flash('Profile updated successfully.', 'success')
+            return redirect(url_for('teachers.profile', teacher_id=teacher.id))
+    return render_template('teacher/profile.html', teacher=teacher, **_teacher_nav_context(teacher))
+
+
+# ------------------------- Notifications System -------------------------
+@teachers_bp.route('/<int:teacher_id>/notifications')
+@login_required
+def notifications(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+
+    # فحص وتوليد إشعارات تلقائية فورية لتسليمات الطلاب والمهام المعلقة
+    try:
+        for course in teacher.courses:
+            for assignment in course.assignments:
+                for sub in assignment.submissions:
+                    sub_title = f"New Submission: {assignment.title}"
+                    existing = Notification.query.filter_by(
+                        user_id=teacher.id,
+                        title=sub_title,
+                        link=f"/teacher/{teacher.id}/submissions"
+                    ).first()
+                    
+                    if not existing:
+                        st_name = sub.student.name_person or sub.student.username
+                        status_note = "Requires grading." if sub.grade is None else f"Graded ({sub.grade}/100)."
+                        db.session.add(Notification(
+                            user_id=teacher.id,
+                            title=sub_title,
+                            message=f"Student {st_name} submitted task for '{assignment.title}' in {course.name}. {status_note}",
+                            link=f"/teacher/{teacher.id}/submissions",
+                            is_read=False,
+                            created_at=sub.submitted_at or datetime.now(timezone.utc)
+                        ))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+
+    items = Notification.query.filter_by(user_id=teacher.id).order_by(Notification.created_at.desc()).all()
+    return render_template('teacher/notifications.html', teacher=teacher, notifications=items, **_teacher_nav_context(teacher))
+
+
+@teachers_bp.route('/<int:teacher_id>/notifications/read', methods=['POST'])
+@login_required
+def mark_notifications_read(teacher_id):
+    if current_user.id != teacher_id or current_user.role != 'teacher':
+        return jsonify({'status': 'error'}), 403
+    Notification.query.filter_by(user_id=teacher_id, is_read=False).update({'is_read': True})
+    db.session.commit()
+    flash('All notifications marked as read.', 'success')
+    return redirect(url_for('teachers.notifications', teacher_id=teacher_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/notifications/delete/<int:notif_id>', methods=['POST'])
+@login_required
+def delete_notification(teacher_id, notif_id):
+    if current_user.id != teacher_id or current_user.role != 'teacher':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('teachers.login'))
+    
+    notif = Notification.query.filter_by(id=notif_id, user_id=teacher_id).first_or_404()
+    try:
+        db.session.delete(notif)
+        db.session.commit()
+        flash('Notification removed.', 'success')
+    except Exception:
+        db.session.rollback()
+    return redirect(url_for('teachers.notifications', teacher_id=teacher_id))
+
+
+def _owns_course(teacher_id, course):
+    return current_user.is_authenticated and current_user.role == 'teacher' and current_user.id == teacher_id and course.teacher_id == teacher_id
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/units/<int:unit_id>/delete', methods=['POST'])
+@login_required
+def delete_unit(teacher_id, course_id, unit_id):
+    course = Course.query.get_or_404(course_id)
+    unit = Unit.query.get_or_404(unit_id)
+    if not _owns_course(teacher_id, course) or unit.course_id != course.id:
+        flash('Access denied.', 'danger')
+    else:
+        if unit.file_path:
+            path = os.path.join(UPLOAD_FOLDER, unit.file_path)
+            if os.path.isfile(path):
+                os.remove(path)
+        db.session.delete(unit)
+        db.session.commit()
+        flash('Unit deleted successfully.', 'success')
+    return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/delete', methods=['POST'])
+@login_required
+def delete_assignment(teacher_id, course_id, assignment_id):
+    course = Course.query.get_or_404(course_id)
+    item = Assignment.query.get_or_404(assignment_id)
+    if not _owns_course(teacher_id, course) or item.course_id != course.id:
+        flash('Access denied.', 'danger')
+    else:
+        db.session.delete(item)
+        db.session.commit()
+        flash('Assignment deleted successfully.', 'success')
+    return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/delete', methods=['POST'])
+@login_required
+def delete_quiz(teacher_id, course_id, quiz_id):
+    course = Course.query.get_or_404(course_id)
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if not _owns_course(teacher_id, course) or quiz.course_id != course.id:
+        flash('Access denied.', 'danger')
+    else:
+        assignment = quiz.assignment
+        db.session.delete(assignment if assignment else quiz)
+        db.session.commit()
+        flash('Quiz deleted successfully.', 'success')
+    return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/delete', methods=['POST'])
+@login_required
+def delete_exam(teacher_id, course_id, exam_id):
+    course = Course.query.get_or_404(course_id)
+    exam = Exam.query.get_or_404(exam_id)
+    if not _owns_course(teacher_id, course) or exam.course_id != course.id:
+        flash('Access denied.', 'danger')
+    else:
+        db.session.delete(exam)
+        db.session.commit()
+        flash('Exam deleted successfully.', 'success')
+    return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+
+@teachers_bp.route('/<int:teacher_id>/courses/<int:course_id>/students/<int:student_id>/activity/delete', methods=['POST'])
+@login_required
+def delete_activity(teacher_id, course_id, student_id):
+    course = Course.query.get_or_404(course_id)
+    if not _owns_course(teacher_id, course):
+        flash('Access denied.', 'danger')
+    else:
+        Activity.query.filter_by(student_id=student_id, course_id=course_id).delete()
+        db.session.commit()
+        flash('Activity score removed.', 'success')
+    return redirect(url_for('teachers.view_course', teacher_id=teacher_id, course_id=course_id))
+
+
+# ------------------------- Edit Quiz -------------------------
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_quiz(teacher_id, course_id, quiz_id):
+    teacher = User.query.get_or_404(teacher_id)
+    course = Course.query.get_or_404(course_id)
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if request.method == "POST":
+        quiz.title = request.form.get("title")
+        quiz.description = request.form.get("description")
+        start_date_str = request.form.get("start_date")
+        end_date_str = request.form.get("end_date")
+
+        if start_date_str:
+            quiz.start_date = datetime.fromisoformat(start_date_str)
+        if end_date_str:
+            quiz.end_date = datetime.fromisoformat(end_date_str)
+
+        db.session.commit()
+        flash("Quiz updated successfully!", "success")
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+
+    return render_template(
+        "teacher/edit_quiz.html",
+        teacher=teacher,
+        course=course,
+        quiz=quiz,
+        **_teacher_nav_context(teacher)
+    )
