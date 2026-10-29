@@ -1,4 +1,379 @@
-{% extends 'teacher/base.html' %}{% set active_page='notifications' %}{% block title %}Notifications | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">UPDATES</span><h1>Notifications</h1><p>Stay informed about courses, grading, and student activity.</p></div>{% if notifications %}<form method="post" action="{{ url_for('teachers.mark_notifications_read',teacher_id=teacher.id) }}"><button class="secondary-btn"><i class="fa-solid fa-check-double"></i>Mark All Read</button></form>{% endif %}</div>
-<div class="notification-list">{% for n in notifications %}<a href="{{ n.link or '#' }}" class="notification-card {{ '' if n.is_read else 'unread' }}" data-searchable><div class="notification-symbol"><i class="fa-solid fa-bell"></i></div><div><h3>{{ n.title }}</h3><p>{{ n.message }}</p><small>{{ n.created_at.strftime('%d %b %Y, %H:%M') if n.created_at else '' }}</small></div>{% if not n.is_read %}<span class="unread-dot"></span>{% endif %}</a>{% else %}<div class="empty-state">You have no notifications yet.</div>{% endfor %}</div>
+{% extends "teacher/base.html" %}
+{% block title %}Notifications | Learnova LMS{% endblock %}
+
+{% block content %}
+{% set unread_count = notifications | selectattr('is_read', 'equalto', False) | list | length %}
+
+<style>
+  :root {
+    --ln-brand: #4f46e5;
+    --ln-brand-hover: #4338ca;
+    --ln-surface: #ffffff;
+    --ln-title: #0f172a;
+    --ln-body: #334155;
+    --ln-muted: #64748b;
+    --ln-border: #e2e8f0;
+    --ln-subtle: #f8fafc;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --soft-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --hover-shadow: 0 8px 24px -4px rgba(79, 70, 229, 0.08);
+  }
+
+  .notifs-page-shell {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 10px 20px 80px;
+    box-sizing: border-box;
+  }
+
+  /* ---------------- ترويسة الصفحة ---------------- */
+  .notifs-top-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .tag-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--ln-brand);
+    letter-spacing: 0.8px;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .page-main-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--ln-title);
+    margin: 0 0 6px;
+    letter-spacing: -0.4px;
+  }
+  .page-sub-title {
+    font-size: 13.5px;
+    color: var(--ln-muted);
+    margin: 0;
+  }
+  .header-actions-tray {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn-mark-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    color: var(--ln-body);
+    border: 1.5px solid var(--ln-border);
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-mark-all:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--ln-brand);
+  }
+
+  /* ---------------- شريط التبويبات الفوري ---------------- */
+  .filter-tabs-container {
+    background: var(--ln-surface);
+    border: 1px solid var(--ln-border);
+    border-radius: var(--radius-xl);
+    padding: 6px;
+    display: inline-flex;
+    gap: 6px;
+    margin-bottom: 24px;
+    box-shadow: var(--soft-shadow);
+  }
+  .tab-filter-btn {
+    padding: 8px 18px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ln-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .tab-filter-btn.active {
+    background: var(--ln-brand);
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  }
+  .tab-badge-num {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-left: 6px;
+  }
+  .tab-filter-btn.active .tab-badge-num {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  /* ---------------- قائمة الإشعارات ---------------- */
+  .notifs-feed-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .notif-card-item {
+    background: var(--ln-surface);
+    border: 1px solid var(--ln-border);
+    border-radius: var(--radius-xl);
+    padding: 18px 22px;
+    box-shadow: var(--soft-shadow);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .notif-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--hover-shadow);
+    border-color: #cbd5e1;
+  }
+  .notif-card-item.unread {
+    border-left: 4px solid var(--ln-brand);
+    background: #fafbff;
+  }
+
+  .notif-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .icon-submission { background: #e0e7ff; color: #4f46e5; }
+  .icon-grading { background: #fef3c7; color: #d97706; }
+  .icon-security { background: #ecfdf5; color: #059669; }
+  .icon-general { background: #f1f5f9; color: #64748b; }
+
+  .notif-content-col {
+    flex: 1;
+    min-width: 0;
+  }
+  .notif-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .notif-headline {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ln-title);
+    margin: 0;
+  }
+  .notif-timestamp {
+    font-size: 11.5px;
+    color: var(--ln-muted);
+    font-weight: 600;
+  }
+  .notif-desc-text {
+    font-size: 13.5px;
+    color: var(--ln-body);
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+  .notif-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .link-inspect {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--ln-brand);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .link-inspect:hover {
+    text-decoration: underline;
+  }
+  .btn-remove-notif {
+    background: none;
+    border: none;
+    color: var(--ln-muted);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+  }
+  .btn-remove-notif:hover {
+    color: #ef4444;
+  }
+
+  /* ---------------- حالة عدم وجود إشعارات ---------------- */
+  .empty-state-canvas {
+    background: var(--ln-surface);
+    border: 1px solid var(--ln-border);
+    border-radius: var(--radius-xl);
+    padding: 60px 20px;
+    text-align: center;
+    box-shadow: var(--soft-shadow);
+  }
+  .empty-icon-shield {
+    font-size: 46px;
+    color: #cbd5e1;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  /* ---------------- التجاوب مع الهواتف ---------------- */
+  @media (max-width: 640px) {
+    .notifs-page-shell {
+      padding: 10px 10px 50px;
+    }
+    .notifs-top-banner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .btn-mark-all {
+      width: 100%;
+      justify-content: center;
+    }
+    .filter-tabs-container {
+      width: 100%;
+      display: flex;
+    }
+    .tab-filter-btn {
+      flex: 1;
+      text-align: center;
+      padding: 8px 10px;
+    }
+    .notif-card-item {
+      padding: 16px;
+      gap: 12px;
+    }
+  }
+</style>
+
+<div class="notifs-page-shell">
+
+  <!-- Header Banner -->
+  <div class="notifs-top-banner">
+    <div>
+      <span class="tag-label">Updates & Alerts</span>
+      <h1 class="page-main-title">Notifications</h1>
+      <p class="page-sub-title">Stay informed about submissions, grading workload, and student activity in real time.</p>
+    </div>
+    
+    {% if unread_count > 0 %}
+    <div class="header-actions-tray">
+      <form method="POST" action="{{ url_for('teacher.mark_all_notifications_read') }}">
+        <button type="submit" class="btn-mark-all">
+          <i class="fa-solid fa-check-double"></i> Mark All as Read
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs-container">
+    <button type="button" class="tab-filter-btn active" onclick="filterNotifs('all', this)">
+      All Alerts <span class="tab-badge-num">{{ notifications|length }}</span>
+    </button>
+    <button type="button" class="tab-filter-btn" onclick="filterNotifs('unread', this)">
+      Unread <span class="tab-badge-num">{{ unread_count }}</span>
+    </button>
+    <button type="button" class="tab-filter-btn" onclick="filterNotifs('submissions', this)">
+      Submissions
+    </button>
+  </div>
+
+  <!-- Notifications Feed -->
+  <div class="notifs-feed-stack" id="notifsContainer">
+    {% for notif in notifications %}
+      {% set is_sub = 'Submission' in notif.title %}
+      {% set is_sec = 'Login' in notif.title %}
+      
+      <div class="notif-card-item {% if not notif.is_read %}unread{% endif %}" 
+           data-status="{% if not notif.is_read %}unread{% else %}read{% endif %}"
+           data-type="{% if is_sub %}submissions{% elif is_sec %}security{% else %}general{% endif %}">
+        
+        <div class="notif-icon-circle {% if is_sub %}icon-submission{% elif is_sec %}icon-security{% else %}icon-general{% endif %}">
+          {% if is_sub %}
+            <i class="fa-solid fa-file-arrow-up"></i>
+          {% elif is_sec %}
+            <i class="fa-solid fa-shield-halved"></i>
+          {% else %}
+            <i class="fa-regular fa-bell"></i>
+          {% endif %}
+        </div>
+
+        <div class="notif-content-col">
+          <div class="notif-title-row">
+            <h3 class="notif-headline">{{ notif.title }}</h3>
+            <span class="notif-timestamp">{{ notif.created_at.strftime('%d %b %Y, %I:%M %p') if notif.created_at else 'Just now' }}</span>
+          </div>
+
+          <p class="notif-desc-text">{{ notif.message }}</p>
+
+          <div class="notif-card-actions">
+            {% if notif.link %}
+            <a href="{{ notif.link }}" class="link-inspect">
+              View Details <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('teacher.delete_notification', notif_id=notif.id) }}" style="display:inline;">
+              <button type="submit" class="btn-remove-notif" title="Dismiss">
+                Dismiss
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    {% else %}
+      <div class="empty-state-canvas">
+        <i class="fa-regular fa-bell-slash empty-icon-shield"></i>
+        <h3 style="font-size: 18px; font-weight: 800; color: var(--ln-title); margin: 0 0 6px;">You have no notifications yet</h3>
+        <p style="font-size: 13.5px; color: var(--ln-muted); margin: 0;">We'll notify you as soon as students submit tasks or relevant updates occur.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+
+<script>
+  function filterNotifs(type, btnElement) {
+    document.querySelectorAll('.tab-filter-btn').forEach(b => b.classList.remove('active'));
+    btnElement.classList.add('active');
+
+    const cards = document.querySelectorAll('.notif-card-item');
+    cards.forEach(card => {
+      if (type === 'all') {
+        card.style.display = 'flex';
+      } else if (type === 'unread') {
+        card.style.display = card.getAttribute('data-status') === 'unread' ? 'flex' : 'none';
+      } else if (type === 'submissions') {
+        card.style.display = card.getAttribute('data-type') === 'submissions' ? 'flex' : 'none';
+      }
+    });
+  }
+</script>
 {% endblock %}
