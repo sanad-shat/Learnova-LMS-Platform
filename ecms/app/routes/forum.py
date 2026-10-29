@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
-from app.models import Course, User, Discussion
+from app.models import Course, Discussion
 from datetime import datetime, timezone
 
 forum_bp = Blueprint("forum", __name__, url_prefix="/forum")
@@ -13,14 +13,20 @@ def index():
     course_id = request.args.get("course")
     topic_type = request.args.get("type")
 
-    # مساقات المدرس أو الطالب
-    if getattr(current_user, 'role', '').lower() == 'teacher':
-        courses = Course.query.filter_by(teacher_id=current_user.id).all()
-    else:
-        courses = [e.course for e in getattr(current_user, 'enrollments', []) if getattr(e, 'course', None)]
+    # جلب الكورسات بأمان
+    courses = []
+    try:
+        if getattr(current_user, 'role', '').lower() == 'teacher':
+            courses = Course.query.filter_by(teacher_id=current_user.id).all()
+        else:
+            courses = [e.course for e in getattr(current_user, 'enrollments', []) if getattr(e, 'course', None)]
+    except Exception:
+        courses = []
 
+    # التأكد من إنشاء الجدول وجلب المناقشات
     topics = []
     try:
+        db.create_all()
         q = Discussion.query
         if course_id and str(course_id).isdigit():
             q = q.filter_by(course_id=int(course_id))
@@ -51,10 +57,11 @@ def new_topic():
         category = request.form.get("category") or "Discussion"
 
         if not title or not content:
-            flash("Please provide both a title and details for your discussion.", "danger")
+            flash("يرجى إدخال عنوان وتفاصيل المناقشة.", "danger")
             return redirect(url_for("forum.index"))
 
         try:
+            db.create_all()
             new_item = Discussion(
                 title=title,
                 content=content,
@@ -65,10 +72,10 @@ def new_topic():
             )
             db.session.add(new_item)
             db.session.commit()
-            flash("Discussion topic published successfully!", "success")
+            flash("تم نشر المناقشة بنجاح!", "success")
         except Exception as exc:
             db.session.rollback()
-            flash(f"Error saving discussion: {str(exc)}", "danger")
+            flash(f"حدث خطأ أثناء النشر: {str(exc)}", "danger")
 
         return redirect(url_for("forum.index"))
 
