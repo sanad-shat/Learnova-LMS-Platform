@@ -21,9 +21,10 @@
     --warning-bg: #fffbeb;
     --warning-text: #d97706;
     --warning-border: #fde68a;
+    --purple-bg: #f5f3ff;
+    --purple-text: #7c3aed;
   }
 
-  /* إلغاء حصر العرض واستغلال كامل المساحة */
   .notifs-page-shell {
     width: 100% !important;
     max-width: 100% !important;
@@ -137,7 +138,7 @@
     border-color: #cbd5e1;
   }
 
-  /* Left Status Strip */
+  /* Left Status Indicator Strip */
   .notif-card-modern::before {
     content: '';
     position: absolute;
@@ -146,12 +147,6 @@
     bottom: 14px;
     width: 4px;
     border-radius: 0 4px 4px 0;
-  }
-
-  .notif-card-modern[data-category="submission"]::before {
-    background: #3b82f6;
-  }
-  .notif-card-modern[data-category="system"]::before {
     background: var(--primary);
   }
 
@@ -166,9 +161,8 @@
     flex-shrink: 0;
   }
 
+  .type-quiz { background: var(--purple-bg); color: var(--purple-text); }
   .type-submission { background: #eff6ff; color: #2563eb; }
-  .type-grade { background: var(--success-bg); color: var(--success-text); }
-  .type-system { background: var(--primary-soft); color: var(--primary); }
 
   .notif-content-area {
     flex: 1;
@@ -303,7 +297,7 @@
         Notifications
         <span class="notifs-count-pill">{{ notifications|length if notifications else 0 }}</span>
       </h1>
-      <p class="notifs-subtitle">Track student assignment submissions, grading queues, and system logs.</p>
+      <p class="notifs-subtitle">Track student assignment submissions, quiz results, and grading queues.</p>
     </div>
   </div>
 
@@ -314,25 +308,22 @@
     <button class="filter-tab-btn" onclick="filterNotifs('submission', this)">
       <i class="fa-solid fa-file-signature"></i> Submissions
     </button>
-    <button class="filter-tab-btn" onclick="filterNotifs('system', this)">
-      <i class="fa-solid fa-shield-halved"></i> System & Security
-    </button>
   </div>
 
   <div class="notifs-container">
     {% if notifications and notifications|length > 0 %}
       {% for notif in notifications %}
-        {% set is_sub = 'Submission' in notif.title %}
-        {% set is_grade = 'Graded' in notif.message or 'grade published' in notif.title|lower %}
+        {% set title_lower = notif.title|lower %}
+        {% set msg_lower = notif.message|lower %}
+        {% set is_quiz = 'quiz' in title_lower or 'quiz' in msg_lower %}
+        {% set is_graded = 'graded' in msg_lower or 'grade published' in title_lower %}
         
-        <div class="notif-card-modern" data-category="{{ 'submission' if is_sub else 'system' }}">
-          <div class="notif-avatar-circle {{ 'type-grade' if is_grade else ('type-submission' if is_sub else 'type-system') }}">
-            {% if is_grade %}
-              <i class="fa-solid fa-check-circle"></i>
-            {% elif is_sub %}
-              <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        <div class="notif-card-modern" data-category="submission">
+          <div class="notif-avatar-circle {{ 'type-quiz' if is_quiz else 'type-submission' }}">
+            {% if is_quiz %}
+              <i class="fa-solid fa-clipboard-question"></i>
             {% else %}
-              <i class="fa-solid fa-shield-halved"></i>
+              <i class="fa-solid fa-file-arrow-up"></i>
             {% endif %}
           </div>
 
@@ -340,9 +331,9 @@
             <div class="notif-headline-row">
               <h3 class="notif-title-text">{{ notif.title }}</h3>
               
-              {% if 'Requires grading' in notif.message %}
+              {% if 'requires grading' in msg_lower %}
                 <span class="notif-badge-pill badge-requires-grading">Needs Grading</span>
-              {% elif is_grade %}
+              {% elif is_graded %}
                 <span class="notif-badge-pill badge-completed">Graded</span>
               {% endif %}
             </div>
@@ -380,7 +371,7 @@
 </div>
 
 <script>
-  // تحويل التوقيت تلقائياً وبدقة عالية حسب توقيت جهاز المستخدم
+  // تحويل التوقيت تلقائياً حسب توقيت جهاز المستخدم المحلي
   document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".dynamic-time").forEach(el => {
       const isoStr = el.getAttribute("datetime");
