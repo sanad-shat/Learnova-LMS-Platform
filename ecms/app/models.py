@@ -385,20 +385,3 @@ class Discussion(db.Model):
     course = db.relationship('Course', foreign_keys=[course_id], lazy=True)
     author = db.relationship('User', foreign_keys=[user_id], lazy=True)
 
-
-class Discussion(db.Model):
-    __tablename__ = 'discussions'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    category = db.Column(db.String(50), default='Discussion')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # استخدام المفرد هنا هو الحل
-    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
-    # العلاقات
-    course = db.relationship('Course', backref=db.backref('discussions', lazy=True))
-    author = db.relationship('User', backref=db.backref('discussions', lazy=True))
