@@ -4,7 +4,7 @@ from app import db
 from app.models import Course, User
 from datetime import datetime
 
-# استيراد موديل النقاشات المعتمد في المشروع تلقائياً
+# استيراد الموديلات المحتملة للنقاشات
 DiscussionModel = None
 try:
     from app.models import Discussion as DiscussionModel
@@ -26,6 +26,7 @@ def index():
     course_id = request.args.get("course")
     topic_type = request.args.get("type")
 
+    # جلب الكورسات
     if getattr(current_user, 'role', '').lower() == 'teacher':
         courses = Course.query.filter_by(teacher_id=current_user.id).all()
     else:
@@ -35,10 +36,13 @@ def index():
     if DiscussionModel:
         try:
             q = DiscussionModel.query
-            if course_id:
+            if course_id and hasattr(DiscussionModel, 'course_id'):
                 q = q.filter_by(course_id=int(course_id))
-            if topic_type and hasattr(DiscussionModel, 'category'):
-                q = q.filter_by(category=topic_type)
+            if topic_type:
+                if hasattr(DiscussionModel, 'category'):
+                    q = q.filter_by(category=topic_type)
+                elif hasattr(DiscussionModel, 'type'):
+                    q = q.filter_by(type=topic_type)
             if query:
                 q = q.filter(DiscussionModel.title.ilike(f"%{query}%"))
             topics = q.order_by(DiscussionModel.id.desc()).all()
@@ -67,38 +71,43 @@ def new_topic():
             flash("Please provide both a title and details.", "danger")
             return redirect(url_for("forum.index"))
 
-        if not DiscussionModel:
-            flash("Discussion model is not configured yet in app/models.py", "warning")
-            return redirect(url_for("forum.index"))
+        if DiscussionModel:
+            try:
+                item_kwargs = {"title": title}
+                if hasattr(DiscussionModel, 'content'):
+                    item_kwargs['content'] = content
+                elif hasattr(DiscussionModel, 'body'):
+                    item_kwargs['body'] = content
+                elif hasattr(DiscussionModel, 'message'):
+                    item_kwargs['message'] = content
 
-        try:
-            # مطابقة الحقول بناءً على خصائص الموديل المعرف في قاعدة البيانات
-            item_kwargs = {"title": title, "content": content}
-            
-            if hasattr(DiscussionModel, 'course_id'):
-                item_kwargs['course_id'] = course_id
-            if hasattr(DiscussionModel, 'category'):
-                item_kwargs['category'] = category
-            if hasattr(DiscussionModel, 'type'):
-                item_kwargs['type'] = category
-            if hasattr(DiscussionModel, 'user_id'):
-                item_kwargs['user_id'] = current_user.id
-            elif hasattr(DiscussionModel, 'author_id'):
-                item_kwargs['author_id'] = current_user.id
-            elif hasattr(DiscussionModel, 'teacher_id'):
-                item_kwargs['teacher_id'] = current_user.id
-            if hasattr(DiscussionModel, 'created_at'):
-                item_kwargs['created_at'] = datetime.utcnow()
+                if hasattr(DiscussionModel, 'course_id'):
+                    item_kwargs['course_id'] = course_id
+                if hasattr(DiscussionModel, 'category'):
+                    item_kwargs['category'] = category
+                elif hasattr(DiscussionModel, 'type'):
+                    item_kwargs['type'] = category
 
-            new_item = DiscussionModel(**item_kwargs)
-            db.session.add(new_item)
-            db.session.commit()
-            flash("Discussion topic published successfully!", "success")
-        except Exception as exc:
-            db.session.rollback()
-            flash(f"Could not publish topic: {exc}", "danger")
+                if hasattr(DiscussionModel, 'user_id'):
+                    item_kwargs['user_id'] = current_user.id
+                elif hasattr(DiscussionModel, 'author_id'):
+                    item_kwargs['author_id'] = current_user.id
+                elif hasattr(DiscussionModel, 'teacher_id'):
+                    item_kwargs['teacher_id'] = current_user.id
+
+                if hasattr(DiscussionModel, 'created_at'):
+                    item_kwargs['created_at'] = datetime.utcnow()
+
+                new_item = DiscussionModel(**item_kwargs)
+                db.session.add(new_item)
+                db.session.commit()
+                flash("Discussion topic published successfully!", "success")
+            except Exception as exc:
+                db.session.rollback()
+                flash(f"Error publishing: {exc}", "danger")
+        else:
+            flash("Discussion model not defined in app/models.py", "warning")
 
         return redirect(url_for("forum.index"))
 
-    courses = Course.query.all()
-    return render_template("forum/new_topic.html", courses=courses)
+    return redirect(url_for("forum.index"))
