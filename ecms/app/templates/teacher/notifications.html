@@ -1,106 +1,381 @@
 {% extends "teacher/base.html" %}
-{% block title %}Notifications | Learnova LMS{% endblock %}
+{% block title %}Notifications & Activity | Learnova LMS{% endblock %}
 
 {% block content %}
 <style>
-  .notifs-shell {
-    max-width: 1000px;
-    margin: 20px auto;
-    padding: 0 16px;
-    font-family: inherit;
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --success-bg: #ecfdf5;
+    --success-text: #059669;
+    --warning-bg: #fffbeb;
+    --warning-text: #d97706;
   }
-  .notifs-header {
+
+  .notifs-page-shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  /* Header Section */
+  .notifs-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
     margin-bottom: 24px;
   }
-  .notifs-header h1 {
-    font-size: 24px;
+
+  .notifs-title-group h1 {
+    font-size: 1.55rem;
     font-weight: 800;
-    color: #0f172a;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
     margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
-  .notifs-header p {
-    font-size: 13.5px;
-    color: #64748b;
+
+  .notifs-count-pill {
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--primary-light);
+    color: var(--primary);
+    padding: 2px 10px;
+    border-radius: 999px;
+  }
+
+  .notifs-subtitle {
+    font-size: 0.88rem;
+    color: var(--slate-500);
     margin: 0;
   }
-  .notif-card {
+
+  /* Filter Tabs */
+  .notif-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--slate-200);
+    padding-bottom: 12px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .notif-filter-bar::-webkit-scrollbar { display: none; }
+
+  .filter-tab-btn {
+    background: transparent;
+    border: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .filter-tab-btn.active {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  /* Notifications Cards */
+  .notif-card-modern {
     background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
     padding: 18px 20px;
     margin-bottom: 12px;
     display: flex;
     align-items: flex-start;
-    gap: 14px;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    gap: 16px;
+    position: relative;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   }
-  .notif-icon {
-    width: 40px;
-    height: 40px;
-    background: #e0e7ff;
-    color: #4f46e5;
-    border-radius: 10px;
+
+  .notif-card-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    border-color: #cbd5e1;
+  }
+
+  .notif-avatar-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 1.15rem;
     flex-shrink: 0;
   }
-  .notif-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0 0 4px;
+
+  /* Dynamic Variants */
+  .type-submission { background: #eff6ff; color: #2563eb; }
+  .type-grade { background: var(--success-bg); color: var(--success-text); }
+  .type-system { background: var(--primary-light); color: var(--primary); }
+
+  .notif-content-area {
+    flex: 1;
+    min-width: 0;
   }
-  .notif-msg {
-    font-size: 13px;
-    color: #334155;
-    margin: 0 0 8px;
+
+  .notif-headline-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .notif-title-text {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0;
     line-height: 1.4;
   }
-  .notif-time {
-    font-size: 11.5px;
-    color: #94a3b8;
-    font-weight: 600;
+
+  .notif-badge-pill {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
-  .empty-box {
-    background: #ffffff;
-    border: 1px dashed #cbd5e1;
-    border-radius: 12px;
-    padding: 40px 20px;
+
+  .badge-requires-grading {
+    background: var(--warning-bg);
+    color: var(--warning-text);
+  }
+
+  .badge-completed {
+    background: var(--success-bg);
+    color: var(--success-text);
+  }
+
+  .notif-description {
+    font-size: 0.88rem;
+    color: var(--slate-700);
+    line-height: 1.5;
+    margin: 0 0 10px;
+    word-break: break-word;
+  }
+
+  .notif-meta-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.78rem;
+    color: var(--slate-400);
+    font-weight: 500;
+  }
+
+  .notif-time-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .action-nav-btn {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: gap 0.2s;
+  }
+  .action-nav-btn:hover {
+    gap: 7px;
+    text-decoration: underline;
+  }
+
+  /* Empty State */
+  .empty-state-card {
     text-align: center;
-    color: #64748b;
-    font-size: 14px;
+    padding: 64px 20px;
+    background: #ffffff;
+    border: 1.5px dashed var(--slate-200);
+    border-radius: 16px;
+    margin-top: 10px;
+  }
+  .empty-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--slate-100);
+    color: var(--slate-400);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 16px;
+  }
+
+  /* Mobile Tweaks */
+  @media (max-width: 640px) {
+    .notif-card-modern {
+      padding: 14px 16px;
+      gap: 12px;
+    }
+    .notif-headline-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .notif-avatar-circle {
+      width: 38px;
+      height: 38px;
+      font-size: 1rem;
+    }
   }
 </style>
 
-<div class="notifs-shell">
-  <div class="notifs-header">
-    <h1>System Notifications</h1>
-    <p>Account activity and system login sessions.</p>
+<div class="notifs-page-shell">
+  <div class="notifs-header-row">
+    <div class="notifs-title-group">
+      <h1>
+        Notifications
+        <span class="notifs-count-pill">{{ notifications|length if notifications else 0 }}</span>
+      </h1>
+      <p class="notifs-subtitle">Track course submissions, student activity, and secure session logs.</p>
+    </div>
   </div>
 
-  <div class="notifs-list">
+  <div class="notif-filter-bar">
+    <button class="filter-tab-btn active" onclick="filterNotifs('all', this)">All Activity</button>
+    <button class="filter-tab-btn" onclick="filterNotifs('submission', this)">Submissions</button>
+    <button class="filter-tab-btn" onclick="filterNotifs('system', this)">System & Logins</button>
+  </div>
+
+  <div class="notifs-container">
     {% if notifications and notifications|length > 0 %}
       {% for notif in notifications %}
-      <div class="notif-card">
-        <div class="notif-icon">
-          <i class="fa-solid fa-shield-halved"></i>
+        {% set is_sub = 'Submission' in notif.title %}
+        {% set is_grade = 'Graded' in notif.message or 'grade published' in notif.title|lower %}
+        
+        <div class="notif-card-modern" data-category="{{ 'submission' if is_sub else 'system' }}">
+          <div class="notif-avatar-circle {{ 'type-grade' if is_grade else ('type-submission' if is_sub else 'type-system') }}">
+            {% if is_grade %}
+              <i class="fa-solid fa-circle-check"></i>
+            {% elif is_sub %}
+              <i class="fa-solid fa-file-arrow-up"></i>
+            {% else %}
+              <i class="fa-solid fa-shield-halved"></i>
+            {% endif %}
+          </div>
+
+          <div class="notif-content-area">
+            <div class="notif-headline-row">
+              <h3 class="notif-title-text">{{ notif.title }}</h3>
+              
+              {% if 'Requires grading' in notif.message %}
+                <span class="notif-badge-pill badge-requires-grading">Needs Grading</span>
+              {% elif is_grade %}
+                <span class="notif-badge-pill badge-completed">Graded</span>
+              {% endif %}
+            </div>
+
+            <p class="notif-description">{{ notif.message }}</p>
+
+            <div class="notif-meta-bar">
+              <span class="notif-time-tag">
+                <i class="fa-regular fa-clock"></i>
+                <time class="dynamic-time" 
+                      datetime="{{ notif.created_at.isoformat() if notif.created_at else '' }}">
+                  {{ notif.created_at.strftime('%d %b %Y, %I:%M %p') if notif.created_at else 'Recent' }}
+                </time>
+              </span>
+
+              {% if notif.link %}
+                <a href="{{ notif.link }}" class="action-nav-btn">
+                  View Details <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+                </a>
+              {% endif %}
+            </div>
+          </div>
         </div>
-        <div style="flex: 1;">
-          <h3 class="notif-title">{{ notif.title }}</h3>
-          <p class="notif-msg">{{ notif.message }}</p>
-          <span class="notif-time">
-            {{ notif.created_at.strftime('%d %b %Y, %I:%M %p') if notif.created_at else 'Recent' }}
-          </span>
-        </div>
-      </div>
       {% endfor %}
     {% else %}
-      <div class="empty-box">
-        <p>No login activity notifications recorded yet.</p>
+      <div class="empty-state-card">
+        <div class="empty-icon-wrap">
+          <i class="fa-regular fa-bell-slash"></i>
+        </div>
+        <h3 style="font-size: 1.1rem; color: var(--slate-900); margin: 0 0 6px;">No Notifications Yet</h3>
+        <p style="font-size: 0.88rem; color: var(--slate-500); margin: 0;">Everything is caught up. New course updates and logins will show here.</p>
       </div>
     {% endif %}
   </div>
 </div>
+
+<script>
+  // Dynamic Local Time & Relative Format (Smart Auto-Update)
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".dynamic-time").forEach(el => {
+      const isoStr = el.getAttribute("datetime");
+      if (!isoStr) return;
+      
+      const notifDate = new Date(isoStr);
+      if (isNaN(notifDate.getTime())) return;
+
+      const now = new Date();
+      const diffSecs = Math.floor((now - notifDate) / 1000);
+
+      // صيغة التاريخ والوقت بتوقيت جهاز المستخدم الفعلي الدقيق
+      const fullTimeStr = notifDate.toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
+      }) + ', ' + notifDate.toLocaleTimeString(undefined, {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      });
+
+      // إظهار التوقيت النسبي الحديث إذا كان الحدث اليوم
+      let relativeStr = fullTimeStr;
+      if (diffSecs < 60) {
+        relativeStr = "Just now";
+      } else if (diffSecs < 3600) {
+        relativeStr = `${Math.floor(diffSecs / 60)}m ago`;
+      } else if (diffSecs < 86400) {
+        relativeStr = `${Math.floor(diffSecs / 3600)}h ago`;
+      }
+
+      el.textContent = relativeStr;
+      el.title = fullTimeStr; // يظهر التوقيت الكامل بدقة عند تمرير الفأرة
+    });
+  });
+
+  // Client-Side Tab Filters
+  function filterNotifs(type, btn) {
+    document.querySelectorAll('.filter-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.notif-card-modern');
+    cards.forEach(card => {
+      if (type === 'all' || card.getAttribute('data-category') === type) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
 {% endblock %}
