@@ -393,3 +393,19 @@ class DiscussionLike(db.Model):
     __table_args__ = (db.UniqueConstraint('topic_id', 'user_id', name='uq_topic_user_like'),)
     topic = db.relationship('DiscussionTopic', backref=db.backref('likes', lazy=True, cascade='all, delete-orphan'))
     user = db.relationship('User', backref=db.backref('discussion_likes', lazy=True, cascade='all, delete-orphan'))
+
+class Discussion(db.Model):
+    __tablename__ = 'discussions'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), default='Discussion')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    
+    # العلاقات
+    course = db.relationship('Course', backref=db.backref('discussions', lazy=True))
+    author = db.relationship('User', backref=db.backref('discussions', lazy=True))
