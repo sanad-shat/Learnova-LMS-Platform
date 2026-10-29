@@ -1,4 +1,461 @@
-<div class="topics-feed">
+{% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
+{% block title %}Discussion Forum | Course Community{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+    --card-bg: #ffffff;
+    --page-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-normal: #e2e8f0;
+    --border-subtle: #f1f5f9;
+    --radius-xl: 20px;
+    --radius-lg: 14px;
+    --radius-md: 10px;
+    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
+  }
+
+  .forum-page-wrapper {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 28px 60px;
+  }
+
+  /* ---------------- Header Section ---------------- */
+  .forum-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-titles h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    letter-spacing: -0.4px;
+  }
+  .header-titles p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+  .btn-new-topic {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 22px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    border: none;
+    cursor: pointer;
+  }
+  .btn-new-topic:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  }
+
+  /* ---------------- Filter & Search Bar ---------------- */
+  .filter-panel-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .filter-form-grid {
+    display: grid;
+    grid-template-columns: 2fr 1.2fr 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-field-box {
+    position: relative;
+  }
+  .search-field-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .filter-input {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px 10px 38px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .filter-select {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text-primary);
+    background: #ffffff;
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .filter-input:focus, .filter-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .btn-filter-apply {
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .btn-filter-apply:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* ---------------- Discussions Feed ---------------- */
+  .topics-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .topic-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    padding: 22px 26px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    text-decoration: none;
+  }
+  .topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: #bfdbfe;
+  }
+
+  .vote-box {
+    min-width: 58px;
+    background: #f8fafc;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .vote-box i {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  .vote-count {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+
+  .topic-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .topic-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #eff6ff;
+    color: var(--primary);
+    border: 1px solid #bfdbfe;
+  }
+  .topic-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px;
+    text-decoration: none;
+    display: block;
+    line-height: 1.4;
+  }
+  .topic-snippet {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+    line-height: 1.5;
+  }
+
+  .topic-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+  .meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .meta-course {
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .meta-author {
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .empty-forum-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-normal);
+    border-radius: var(--radius-xl);
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  /* ---------------- New Topic Modal ---------------- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-container {
+    background: #ffffff;
+    border-radius: var(--radius-xl);
+    max-width: 620px;
+    width: 100%;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: modalSlideUp 0.25s ease-out;
+  }
+  @keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+  .modal-close-btn:hover {
+    color: var(--text-primary);
+  }
+  .modal-form-group {
+    margin-bottom: 16px;
+  }
+  .modal-form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .modal-input, .modal-textarea, .modal-select {
+    width: 100%;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .modal-input:focus, .modal-textarea:focus, .modal-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+  }
+  .btn-modal-cancel {
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-modal-submit {
+    padding: 10px 24px;
+    border-radius: var(--radius-md);
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+
+  @media (max-width: 900px) {
+    .filter-form-grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .btn-filter-apply {
+      grid-column: span 2;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .forum-page-wrapper {
+      padding: 16px 14px 40px;
+    }
+    .forum-header-bar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .btn-new-topic {
+      width: 100%;
+      justify-content: center;
+    }
+    .filter-form-grid {
+      grid-template-columns: 1fr;
+    }
+    .btn-filter-apply {
+      grid-column: span 1;
+    }
+    .topic-card {
+      padding: 16px;
+      gap: 14px;
+    }
+  }
+</style>
+
+<div class="forum-page-wrapper">
+
+  <!-- Header Banner -->
+  <div class="forum-header-bar">
+    <div class="header-titles">
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Course Community</span>
+      <h1>Discussion Forum</h1>
+      <p>Ask questions, share ideas, and collaborate with your learning community.</p>
+    </div>
+    <button type="button" class="btn-new-topic" onclick="openTopicModal()">
+      <i class="fa-solid fa-plus"></i> New Topic
+    </button>
+  </div>
+
+  <!-- Filter & Search Panel -->
+  <div class="filter-panel-card">
+    <form method="GET" class="filter-form-grid">
+      <div class="search-field-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input 
+          type="text" 
+          name="q" 
+          value="{{ request.args.get('q', '') }}" 
+          class="filter-input" 
+          placeholder="Search discussions, questions, or keywords..."
+        >
+      </div>
+
+      <div>
+        <select name="course" class="filter-select">
+          <option value="">All courses</option>
+          {% if courses %}
+            {% for c in courses %}
+            <option value="{{ c.id }}" {% if request.args.get('course') == c.id|string %}selected{% endif %}>
+              {{ c.name }}
+            </option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+
+      <div>
+        <select name="type" class="filter-select">
+          <option value="">All types</option>
+          <option value="discussion" {% if request.args.get('type') == 'discussion' %}selected{% endif %}>Discussion</option>
+          <option value="question" {% if request.args.get('type') == 'question' %}selected{% endif %}>Question</option>
+          <option value="announcement" {% if request.args.get('type') == 'announcement' %}selected{% endif %}>Announcement</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-filter-apply">
+        <i class="fa-solid fa-filter"></i> Filter
+      </button>
+    </form>
+  </div>
+
+  <!-- Discussions Feed -->
+  <div class="topics-feed">
     {% for topic in topics %}
     <div class="topic-card">
       <div class="vote-box">
@@ -16,7 +473,7 @@
         </a>
 
         <p class="topic-snippet">
-          {{ topic.content }}
+          {{ topic.content if hasattr(topic, 'content') else (topic.body if hasattr(topic, 'body') else '') }}
         </p>
 
         <div class="topic-meta-row">
@@ -30,7 +487,7 @@
             {% elif getattr(topic, 'user', None) %}
               {{ topic.user.name_person or topic.user.username }}
             {% else %}
-              {{ current_user.name_person or current_user.username }}
+              Learner
             {% endif %}
           </span>
           <span class="meta-item">
@@ -50,3 +507,73 @@
     </div>
     {% endfor %}
   </div>
+
+</div>
+
+<!-- Modal Create Topic -->
+<div class="modal-overlay" id="topicModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>Start a New Discussion</h3>
+      <button type="button" class="modal-close-btn" onclick="closeTopicModal()">&times;</button>
+    </div>
+    <form method="POST" action="{{ url_for('forum.new_topic') }}">
+      <div class="modal-form-group">
+        <label class="modal-form-label" for="topicTitle">Title / Question</label>
+        <input type="text" id="topicTitle" name="title" class="modal-input" placeholder="What would you like to discuss?" required>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+        <div>
+          <label class="modal-form-label" for="topicCourse">Course</label>
+          <select id="topicCourse" name="course_id" class="modal-select">
+            <option value="">General Community</option>
+            {% if courses %}
+              {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.name }}</option>
+              {% endfor %}
+            {% endif %}
+          </select>
+        </div>
+        <div>
+          <label class="modal-form-label" for="topicCategory">Category</label>
+          <select id="topicCategory" name="category" class="modal-select">
+            <option value="Discussion">Discussion</option>
+            <option value="Question">Question</option>
+            <option value="Announcement">Announcement</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="modal-form-group">
+        <label class="modal-form-label" for="topicContent">Details & Context</label>
+        <textarea id="topicContent" name="content" rows="4" class="modal-textarea" placeholder="Explain your question or topic in detail..." required></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="closeTopicModal()">Cancel</button>
+        <button type="submit" class="btn-modal-submit">Post Discussion</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openTopicModal() {
+    const modal = document.getElementById('topicModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeTopicModal() {
+    const modal = document.getElementById('topicModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  window.addEventListener('click', function(e) {
+    const modal = document.getElementById('topicModal');
+    if (e.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
+</script>
+{% endblock %}
