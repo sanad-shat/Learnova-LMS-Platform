@@ -31,87 +31,84 @@
     --ln-brand: #4f46e5;
     --ln-brand-dark: #4338ca;
     --ln-card-bg: #ffffff;
-    --ln-page-bg: #f4f6fa;
+    --ln-page-bg: #f1f5f9;
     --ln-title: #0f172a;
     --ln-body: #334155;
     --ln-muted: #64748b;
     --ln-border: #e2e8f0;
     --radius-xl: 18px;
-    --radius-lg: 14px;
-    --radius-md: 10px;
-    --shadow-card: 0 4px 18px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --radius-lg: 12px;
+    --radius-md: 8px;
+    --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.05);
   }
 
   .reports-wrapper {
     width: 100%;
-    max-width: 1440px;
+    max-width: 1360px;
     margin: 0 auto;
     padding: 10px 20px 80px;
     box-sizing: border-box;
-    background: transparent;
   }
 
-  /* ---------------- ترويسة التقرير الرسمية داخل الـ PDF ---------------- */
+  /* ---------------- ترويسة الـ PDF الرسمية ---------------- */
   .pdf-official-banner {
     display: none;
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
     border-radius: var(--radius-xl);
-    padding: 24px 30px;
-    margin-bottom: 24px;
+    padding: 22px 28px;
+    margin-bottom: 20px;
     color: #ffffff;
-    box-shadow: 0 8px 24px rgba(30, 27, 75, 0.15);
     justify-content: space-between;
     align-items: center;
+    box-sizing: border-box;
   }
   .pdf-brand-identity {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
   }
   .pdf-brand-icon {
-    width: 52px;
-    height: 52px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 22px;
     color: #ffffff;
   }
   .pdf-brand-title {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: #ffffff;
-    margin: 0 0 4px;
-    letter-spacing: -0.5px;
+    margin: 0 0 3px;
+    letter-spacing: -0.4px;
   }
   .pdf-brand-subtitle {
-    font-size: 12px;
+    font-size: 11px;
     color: #c7d2fe;
     margin: 0;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px;
     font-weight: 600;
   }
   .pdf-meta-badge-box {
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius-md);
-    padding: 12px 18px;
+    padding: 10px 16px;
     text-align: right;
-    font-size: 12px;
+    font-size: 11.5px;
     color: #e0e7ff;
-    line-height: 1.6;
+    line-height: 1.5;
   }
   .pdf-meta-badge-box strong {
     color: #ffffff;
   }
 
-  /* ---------------- الترويسة العادية على الشاشة ---------------- */
+  /* ---------------- الترويسة العادية على المتصفح ---------------- */
   .reports-header-section {
     display: flex;
     justify-content: space-between;
@@ -191,27 +188,30 @@
   .stats-banner-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .stat-card-box {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 20px 22px;
+    padding: 18px 20px;
     box-shadow: var(--shadow-card);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 14px;
+    box-sizing: border-box;
   }
   .stat-badge-icon {
-    width: 48px;
-    height: 48px;
+    width: 46px;
+    height: 46px;
     border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 19px;
     color: #ffffff;
     flex-shrink: 0;
   }
@@ -227,10 +227,10 @@
     margin: 0 0 3px;
   }
   .stat-value-num {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--ln-title);
-    margin: 0 0 3px;
+    margin: 0 0 2px;
     line-height: 1;
   }
   .stat-status-tag {
@@ -242,28 +242,32 @@
   .tag-blue { color: #0284c7; }
   .tag-amber { color: #d97706; }
 
-  /* ---------------- الرسوم البيانية التفاعلية ---------------- */
+  /* ---------------- الرسوم البيانية ---------------- */
   .charts-double-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 18px;
-    margin-bottom: 24px;
+    grid-template-columns: 1.8fr 1.2fr;
+    gap: 16px;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .chart-card-panel {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 20px 24px;
+    padding: 18px 20px;
     box-shadow: var(--shadow-card);
+    box-sizing: border-box;
+    overflow: hidden;
   }
   .chart-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .chart-card-title {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0;
@@ -273,24 +277,29 @@
   .courses-report-stack {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    margin-bottom: 24px;
+    gap: 16px;
+    margin-bottom: 20px;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .course-performance-card {
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 22px 26px;
+    padding: 20px 24px;
     box-shadow: var(--shadow-card);
+    box-sizing: border-box;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .course-card-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .course-code-name {
-    font-size: 16.5px;
+    font-size: 16px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0;
@@ -309,12 +318,14 @@
   .metrics-mini-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 12px;
+    gap: 10px;
     background: #f8fafc;
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-lg);
-    padding: 14px;
-    margin-bottom: 16px;
+    padding: 12px;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .metric-mini-item {
     text-align: center;
@@ -330,7 +341,7 @@
     margin: 0 0 4px;
   }
   .metric-mini-val {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 800;
     color: var(--ln-title);
     margin: 0;
@@ -353,14 +364,17 @@
     background: var(--ln-card-bg);
     border: 1px solid var(--ln-border);
     border-radius: var(--radius-xl);
-    padding: 22px 24px;
+    padding: 20px 24px;
     box-shadow: var(--shadow-card);
+    box-sizing: border-box;
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   .table-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   .table-responsive-wrapper {
     overflow-x: auto;
@@ -369,20 +383,20 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 13px;
+    font-size: 12.5px;
   }
   .students-data-table th {
     background: #f8fafc;
     color: var(--ln-muted);
     font-weight: 700;
-    padding: 10px 14px;
+    padding: 10px 12px;
     border-bottom: 1.5px solid var(--ln-border);
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 10.5px;
     letter-spacing: 0.5px;
   }
   .students-data-table td {
-    padding: 12px 14px;
+    padding: 11px 12px;
     border-bottom: 1px solid #f1f5f9;
     color: var(--ln-body);
   }
@@ -392,8 +406,8 @@
     gap: 10px;
   }
   .user-avatar-circle {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: #e0e7ff;
     color: var(--ln-brand);
@@ -404,38 +418,41 @@
     font-size: 12px;
   }
   .badge-grade-pass {
-    padding: 3px 8px;
+    padding: 2px 7px;
     border-radius: 6px;
     background: #ecfdf5;
     color: #059669;
     font-weight: 700;
-    font-size: 11.5px;
+    font-size: 11px;
   }
   .badge-grade-pending {
-    padding: 3px 8px;
+    padding: 2px 7px;
     border-radius: 6px;
     background: #fffbeb;
     color: #b45309;
     font-weight: 700;
-    font-size: 11.5px;
+    font-size: 11px;
   }
 
-  /* ---------------- تذييل الـ PDF الرسمي ---------------- */
+  /* ---------------- تذييل الـ PDF ---------------- */
   .pdf-official-footer {
     display: none;
     justify-content: space-between;
     align-items: center;
     border-top: 1.5px solid #cbd5e1;
-    padding-top: 14px;
-    margin-top: 24px;
-    font-size: 11px;
+    padding-top: 12px;
+    margin-top: 20px;
+    font-size: 10.5px;
     color: var(--ln-muted);
   }
 
-  /* تنسيق مستند الـ PDF أثناء التصدير */
-  .exporting-pdf-mode {
+  /* تنسيق خاص وثابت لتوليد ملف الـ PDF لمنع انقطاع الحواف */
+  .pdf-render-canvas {
+    width: 1080px !important;
+    max-width: 1080px !important;
     background-color: var(--ln-page-bg) !important;
-    padding: 24px !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
     border-radius: 0 !important;
   }
 
@@ -448,7 +465,7 @@
 
 <div class="reports-wrapper" id="printableReportArea">
 
-  <!-- شريط هوية الـ PDF الأكاديمي المتدرج الفاخر -->
+  <!-- الترويسة الأكاديمية الفاخرة للتقرير (تظهر فقط في ملف الـ PDF) -->
   <div class="pdf-official-banner" id="pdfOfficialBanner">
     <div class="pdf-brand-identity">
       <div class="pdf-brand-icon">
@@ -462,7 +479,7 @@
     <div class="pdf-meta-badge-box">
       <div><strong>Instructor:</strong> {{ current_user.name_person or current_user.username }}</div>
       <div><strong>Email:</strong> {{ current_user.email }}</div>
-      <div><strong>Generated Date:</strong> <span id="reportPrintDate"></span></div>
+      <div><strong>Date:</strong> <span id="reportPrintDate"></span></div>
       <div><strong>Ref Number:</strong> LN-REP-{{ current_user.id }}-2026</div>
     </div>
   </div>
@@ -546,24 +563,24 @@
   <div class="charts-double-grid">
     <div class="chart-card-panel">
       <div class="chart-card-header">
-        <h3 class="chart-card-title"><i class="fa-solid fa-chart-column" style="color: var(--ln-brand); margin-right: 8px;"></i> Submissions & Evaluations Trend</h3>
+        <h3 class="chart-card-title"><i class="fa-solid fa-chart-column" style="color: var(--ln-brand); margin-right: 6px;"></i> Submissions & Evaluations Trend</h3>
       </div>
-      <div style="height: 220px;">
+      <div style="height: 200px;">
         <canvas id="performanceTrendChart"></canvas>
       </div>
     </div>
 
     <div class="chart-card-panel">
       <div class="chart-card-header">
-        <h3 class="chart-card-title"><i class="fa-solid fa-chart-pie" style="color: #0ea5e9; margin-right: 8px;"></i> Grading Progress</h3>
+        <h3 class="chart-card-title"><i class="fa-solid fa-chart-pie" style="color: #0ea5e9; margin-right: 6px;"></i> Grading Progress</h3>
       </div>
-      <div style="height: 220px;">
+      <div style="height: 200px;">
         <canvas id="gradingDoughnutChart"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- تفاصيل المقررات -->
+  <!-- تفاصيل المقررات (كاملة ومحمية من التجزئة) -->
   <div class="courses-report-stack">
     {% for c in teacher_courses %}
     <div class="course-performance-card">
@@ -606,10 +623,10 @@
   <div class="table-card-panel">
     <div class="table-top-bar">
       <div>
-        <h3 style="margin: 0 0 4px; font-size: 15px; font-weight: 800; color: var(--ln-title);">
+        <h3 style="margin: 0 0 3px; font-size: 14.5px; font-weight: 800; color: var(--ln-title);">
           <i class="fa-solid fa-users-viewfinder" style="color: var(--ln-brand); margin-right: 6px;"></i> Students Performance Overview
         </h3>
-        <p style="margin: 0; font-size: 12.5px; color: var(--ln-muted);">Roster of all enrolled students, their completed tasks, and current standing.</p>
+        <p style="margin: 0; font-size: 12px; color: var(--ln-muted);">Roster of all enrolled students, their completed tasks, and current standing.</p>
       </div>
     </div>
 
@@ -634,7 +651,7 @@
                 </div>
                 <div>
                   <strong style="color: var(--ln-title); display: block;">{{ student.name_person or student.username }}</strong>
-                  <span style="font-size: 11.5px; color: var(--ln-muted);">{{ student.email }}</span>
+                  <span style="font-size: 11px; color: var(--ln-muted);">{{ student.email }}</span>
                 </div>
               </div>
             </td>
@@ -659,7 +676,7 @@
           </tr>
           {% else %}
           <tr>
-            <td colspan="5" style="text-align: center; padding: 24px; color: var(--ln-muted);">
+            <td colspan="5" style="text-align: center; padding: 20px; color: var(--ln-muted);">
               No enrolled students found.
             </td>
           </tr>
@@ -677,7 +694,7 @@
 
 </div>
 
-<!-- دوال JavaScript للتحكم بالرسوم والتصدير -->
+<!-- دوال JavaScript للتحكم بالرسوم والتصدير مع ضبط العرض -->
 <script>
   let trendChart, doughnutChart;
 
@@ -701,7 +718,7 @@
             backgroundColor: 'rgba(79, 70, 229, 0.08)',
             fill: true,
             tension: 0.35,
-            borderWidth: 2.5
+            borderWidth: 2.2
           },
           {
             label: 'Evaluated Tasks',
@@ -710,7 +727,7 @@
             backgroundColor: 'transparent',
             borderDash: [5, 5],
             tension: 0.35,
-            borderWidth: 2
+            borderWidth: 1.8
           }
         ]
       },
@@ -740,18 +757,18 @@
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '72%',
+        cutout: '70%',
         plugins: { legend: { position: 'bottom' } }
       }
     });
   });
 
-  // ميزة تنزيل التقرير الأكاديمي الرسمي كـ PDF مع الخلفية والشريط الملون
+  // ميزة تنزيل التقرير الأكاديمي الرسمي كـ PDF بدقة أبعاد A4
   function downloadReportPDF() {
     const btn = document.getElementById('btnDownloadPdf');
     const originalHtml = btn.innerHTML;
     
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Report...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
     btn.disabled = true;
 
     const element = document.getElementById('printableReportArea');
@@ -759,43 +776,53 @@
     const pdfBanner = document.getElementById('pdfOfficialBanner');
     const pdfFooter = document.getElementById('pdfOfficialFooter');
 
-    // تفعيل وضع التصدير (خلفية رمادية + إظهار الهيدر والفوتر الرسميين)
-    element.classList.add('exporting-pdf-mode');
+    // إعداد الصفحة لتناسب مقاس A4 Landscape بالضبط
+    element.classList.add('pdf-render-canvas');
     webHeader.style.display = 'none';
     pdfBanner.style.display = 'flex';
     pdfFooter.style.display = 'flex';
 
+    // إعادة تحجيم المخططات فوراً لتطابق العرض الثابت الجديد
+    if (trendChart) trendChart.resize();
+    if (doughnutChart) doughnutChart.resize();
+
     const opt = {
-      margin:       [8, 8, 8, 8],
+      margin:       [6, 6, 6, 6],
       filename:     'Learnova_Instructor_Report_{{ current_user.username }}.pdf',
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { 
         scale: 2, 
         useCORS: true, 
         logging: false,
-        backgroundColor: '#f4f6fa'
+        backgroundColor: '#f1f5f9',
+        windowWidth: 1120
       },
       jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
     };
 
-    html2pdf().set(opt).from(element).save().then(() => {
-      // إعادة الصفحة إلى حالتها الطبيعية للويب
-      element.classList.remove('exporting-pdf-mode');
-      webHeader.style.display = 'flex';
-      pdfBanner.style.display = 'none';
-      pdfFooter.style.display = 'none';
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-    }).catch((err) => {
-      console.error('PDF Export Error:', err);
-      element.classList.remove('exporting-pdf-mode');
-      webHeader.style.display = 'flex';
-      pdfBanner.style.display = 'none';
-      pdfFooter.style.display = 'none';
-      btn.innerHTML = originalHtml;
-      btn.disabled = false;
-      window.print();
-    });
+    // مهلة زمنية قصيرة (150ms) للتأكد من اكتمال رندرة الرسوم قبل أخذ اللقطة
+    setTimeout(() => {
+      html2pdf().set(opt).from(element).save().then(() => {
+        // استعادة العرض الطبيعي للمتصفح
+        element.classList.remove('pdf-render-canvas');
+        webHeader.style.display = 'flex';
+        pdfBanner.style.display = 'none';
+        pdfFooter.style.display = 'none';
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        if (trendChart) trendChart.resize();
+        if (doughnutChart) doughnutChart.resize();
+      }).catch((err) => {
+        console.error('PDF Export Error:', err);
+        element.classList.remove('pdf-render-canvas');
+        webHeader.style.display = 'flex';
+        pdfBanner.style.display = 'none';
+        pdfFooter.style.display = 'none';
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+        window.print();
+      });
+    }, 150);
   }
 
   // تصدير جدول الطلاب إلى CSV
