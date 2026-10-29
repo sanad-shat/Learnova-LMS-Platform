@@ -184,7 +184,7 @@ def login():
                             Notification(
                                 user_id=demo_teacher.id,
                                 title="System Login",
-                                message=f"Logged in successfully via Demo Instructor on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                                message=f"Logged in successfully via Demo Account on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
                                 link=f"/teacher/{demo_teacher.id}/dashboard",
                                 is_read=False,
                                 created_at=datetime.now(timezone.utc),
@@ -217,7 +217,7 @@ def login():
                         Notification(
                             user_id=user.id,
                             title="System Login",
-                            message=f"Logged in successfully from Learnova Portal on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                            message=f"Logged in successfully on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
                             link=f"/teacher/{user.id}/dashboard",
                             is_read=False,
                             created_at=datetime.now(timezone.utc),
@@ -1445,7 +1445,7 @@ def profile(teacher_id):
     return render_template("teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher))
 
 
-# ------------------------- Notifications: سجل تسجيل الدخول فقط وبأمان تام -------------------------
+# ------------------------- Notifications System (عرض آمن لسجلات تسجيل الدخول فقط) -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
 def notifications(teacher_id):
@@ -1454,7 +1454,6 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    # استرجاع إشعارات تسجيل الدخول فقط للحساب
     items = []
     try:
         items = (
