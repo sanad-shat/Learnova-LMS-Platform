@@ -1445,7 +1445,7 @@ def profile(teacher_id):
     return render_template("teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher))
 
 
-# ------------------------- Notifications System (عرض آمن لسجلات تسجيل الدخول فقط) -------------------------
+# ------------------------- Notifications System (عرض آمن وبسيط) -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
 def notifications(teacher_id):
