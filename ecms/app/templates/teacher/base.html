@@ -6,29 +6,47 @@
   <title>{% block title %}Instructor Portal | Learnova LMS{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=11">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=13">
   <style>
-    /* تنسيق دقيق وثابت لشارة الإشعارات في الهيدر العلوي لمنع التداخل */
-    .header-icon-wrapper {
+    /* تنسيق فائق النقاء لأيقونة الجرس بدون مربعات خلفية وبدون فراغات */
+    .clean-bell-container {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      color: #334155;
+      text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
+      margin-right: 8px;
     }
-    .header-icon-wrapper .icon-badge {
+    .clean-bell-container:hover {
+      background: #f1f5f9;
+      color: #4f46e5;
+    }
+    .clean-bell-container i {
+      font-size: 18px;
+    }
+    .clean-bell-badge {
       position: absolute;
-      top: -4px;
-      right: -4px;
+      top: 4px;
+      right: 4px;
       background: #4f46e5;
       color: #ffffff;
       font-size: 10px;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 0 4px;
+      height: 16px;
+      min-width: 16px;
       border-radius: 999px;
       border: 2px solid #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       line-height: 1;
-      min-width: 16px;
-      text-align: center;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   </style>
@@ -63,13 +81,22 @@
   </aside>
   <section class="app-main">
     <header class="top-header">
-      <div class="header-left"><button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="teacherGlobalSearch" placeholder="Search this page..."></div></div>
-      <div class="header-right">
-        <!-- تم ضبط الحاوية هنا لمنع أي تداخل لشارة الرقم فوق الجرس -->
-        <div class="header-icon-wrapper">
-          <a class="header-icon" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-regular fa-bell"></i></a>
-          {% if nav_notifications %}<span class="icon-badge">{{ nav_notifications }}</span>{% endif %}
+      <div class="header-left">
+        <button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button>
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input id="teacherGlobalSearch" placeholder="Search this page...">
         </div>
+      </div>
+      <div class="header-right">
+        <!-- أيقونة الجرس الاحترافية الجديدة بدون فراغات أو مربعات -->
+        <a class="clean-bell-container" href="{{ url_for('teachers.notifications', teacher_id=teacher.id) }}" title="Notifications">
+          <i class="fa-regular fa-bell"></i>
+          {% if nav_notifications %}
+            <span class="clean-bell-badge">{{ nav_notifications }}</span>
+          {% endif %}
+        </a>
+
         <div class="profile-chip">
           {% if session.get('is_demo') %}
             <div class="profile-avatar">D</div>
@@ -92,4 +119,5 @@
 const gs=document.getElementById('teacherGlobalSearch'); if(gs){gs.addEventListener('input',()=>{const q=gs.value.toLowerCase();document.querySelectorAll('[data-searchable]').forEach(el=>el.style.display=el.textContent.toLowerCase().includes(q)?'':'none')})}
 </script>
 {% block scripts %}{% endblock %}
-</body></html>
+</body>
+</html>
