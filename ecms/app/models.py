@@ -122,7 +122,6 @@ class Enrollment(db.Model):
 
 
 # ---------------- Assignment Table ----------------
-# ---------------- Assignment Table ----------------
 class Assignment(db.Model):
     """Represents a homework, quiz, or project assigned in a course."""
     __tablename__ = 'assignment'
@@ -132,7 +131,6 @@ class Assignment(db.Model):
     description = db.Column(db.Text)
     assignment_type = db.Column(db.String(50), nullable=False, default='homework')
 
-    # إضافة start_date و due_date لدعم الفورم
     start_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     due_date = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
@@ -152,10 +150,10 @@ class Assignment(db.Model):
         cascade='all, delete-orphan'
     )
 
-def is_quiz(self):
+    def is_quiz(self):
         return self.assignment_type == 'quiz'
 
-# ---------------- Submission Table ----------------
+
 # ---------------- Submission Table ----------------
 class Submission(db.Model):
     """Represents a student's submission for an assignment."""
@@ -168,7 +166,7 @@ class Submission(db.Model):
     submission_file = db.Column(db.String(200))
     grade = db.Column(db.Float)
     feedback = db.Column(db.Text)
-    submitted_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))  # <-- ✅ أضف هذا السطر
+    submitted_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Relationships
     assignment = db.relationship('Assignment', back_populates='submissions')
@@ -242,7 +240,6 @@ class Grade(db.Model):
 
 
 # ---------------- Quiz Table ----------------
-# ---------------- Quiz Table ----------------
 class Quiz(db.Model):
     """Represents a quiz linked to an assignment."""
     __tablename__ = 'quiz'
@@ -275,22 +272,22 @@ class Quiz(db.Model):
 
 
 # ---------------- Quiz Question Table ----------------
-
 class QuizQuestion(db.Model):
     """Represents a single question in a quiz."""
     __tablename__ = 'quiz_question'
 
     id = db.Column(db.Integer, primary_key=True)
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
-    # حذف assignment_id لأنه زائد
     question_text = db.Column(db.Text, nullable=False)
     question_type = db.Column(db.String(50), nullable=False)
-    options = db.Column(db.Text)  # JSON or stringified list
+    options = db.Column(db.Text)
     answer = db.Column(db.Text, nullable=False)
     score = db.Column(db.Integer, nullable=False, default=1)
 
     # Relationships
     quiz = db.relationship('Quiz', back_populates='questions')
+
+
 # ---------------- Activity Table ----------------
 class Activity(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -298,24 +295,21 @@ class Activity(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     score = db.Column(db.Float, default=0)
 
+
 def get_question_answer(question_id, question_type):
     """
-Fetch the correct answer for a question by its ID and type.
-
-Parameters:
-question_id (int): The ID of the question.
-question_type (str): Either 'exam' or 'quiz'.
-Returns:
-str or None: The correct answer if found, else None.
+    Fetch the correct answer for a question by its ID and type.
     """
     if question_type == 'exam':
         question = ExamQuestion.query.get(question_id)
     elif question_type == 'quiz':
         question = QuizQuestion.query.get(question_id)
     else:
-        return None  # Invalid question type
+        return None
 
     return question.answer if question else None
+
+
 # ---------------- Platform Enhancements ----------------
 class UnitCompletion(db.Model):
     __tablename__ = 'unit_completion'
@@ -353,6 +347,7 @@ class Certificate(db.Model):
     course = db.relationship('Course', backref=db.backref('certificates', lazy=True, cascade='all, delete-orphan'))
 
 
+# ---------------- Discussion / Community Table ----------------
 class Discussion(db.Model):
     __tablename__ = 'discussions'
     __table_args__ = {'extend_existing': True}
@@ -361,10 +356,13 @@ class Discussion(db.Model):
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     category = db.Column(db.String(50), default='Discussion')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    course_id = db.Column(db.Integer, nullable=True)
-    user_id = db.Column(db.Integer, nullable=False)
-    
-    course = db.relationship('Course', foreign_keys=[course_id], lazy=True)
-    author = db.relationship('User', foreign_keys=[user_id], lazy=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    course = db.relationship('Course', backref=db.backref('discussions', lazy=True))
+    author = db.relationship('User', backref=db.backref('discussions', lazy=True))
+
+
+# تفعيل اسم DiscussionTopic ليتوافق مع استيرادات لوحة الإدارة admin.py وباقي الملفات
+DiscussionTopic = Discussion
