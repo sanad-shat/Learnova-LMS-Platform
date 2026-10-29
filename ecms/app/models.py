@@ -370,18 +370,20 @@ class DiscussionTopic(db.Model):
     author = db.relationship('User', backref=db.backref('discussion_topics', lazy=True, cascade='all, delete-orphan'))
     posts = db.relationship('DiscussionPost', back_populates='topic', lazy=True, cascade='all, delete-orphan')
 
-
-class DiscussionPost(db.Model):
-    __tablename__ = 'discussion_post'
+class Discussion(db.Model):
+    __tablename__ = 'discussions'
+    
     id = db.Column(db.Integer, primary_key=True)
-    topic_id = db.Column(db.Integer, db.ForeignKey('discussion_topic.id'), nullable=False, index=True)
-    author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, index=True)
-    body = db.Column(db.Text, nullable=False)
-    attachment_path = db.Column(db.String(255), nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
-    topic = db.relationship('DiscussionTopic', back_populates='posts')
-    author = db.relationship('User', backref=db.backref('discussion_posts', lazy=True, cascade='all, delete-orphan'))
+    title = db.Column(db.String(255), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    category = db.Column(db.String(50), default='Discussion')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    course = db.relationship('Course', foreign_keys=[course_id], lazy=True)
+    author = db.relationship('User', foreign_keys=[user_id], lazy=True)
 
 
 class Discussion(db.Model):
