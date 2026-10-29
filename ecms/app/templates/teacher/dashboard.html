@@ -20,9 +20,11 @@
   }
 
   .dashboard-wrapper {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 24px 28px 60px;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 32px 36px 70px !important;
+    box-sizing: border-box;
+    font-family: inherit;
   }
 
   /* ---------------- Hero Banner ---------------- */
@@ -301,6 +303,7 @@
     display: flex;
     align-items: center;
     gap: 16px;
+    min-width: 0;
   }
   .course-icon-badge {
     width: 48px;
@@ -319,6 +322,9 @@
     font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .course-metadata {
     display: flex;
@@ -326,6 +332,7 @@
     gap: 16px;
     font-size: 13px;
     color: var(--text-muted);
+    flex-wrap: wrap;
   }
   .course-metadata span {
     display: inline-flex;
@@ -407,11 +414,12 @@
   }
   .empty-text-sub {
     font-size: 13px;
+    font-weight: 500;
     color: var(--text-muted);
     margin: 0;
   }
 
-  /* Responsive Rules */
+  /* Responsive Rules for Mobile & Tablet */
   @media (max-width: 1200px) {
     .stats-matrix {
       grid-template-columns: repeat(2, 1fr);
@@ -423,10 +431,17 @@
 
   @media (max-width: 768px) {
     .dashboard-wrapper {
-      padding: 16px 16px 40px;
+      padding: 18px 16px 50px !important;
     }
     .hero-glass-banner {
-      padding: 26px 22px;
+      padding: 26px 20px;
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-size: 22px;
+    }
+    .hero-subtitle {
+      font-size: 13.5px;
     }
     .hero-content {
       flex-direction: column;
@@ -435,6 +450,7 @@
     .hero-actions {
       width: 100%;
       flex-direction: column;
+      gap: 10px;
     }
     .hero-btn {
       width: 100%;
@@ -443,11 +459,26 @@
     .stats-matrix {
       grid-template-columns: 1fr;
       gap: 14px;
+      margin-bottom: 24px;
+    }
+    .panel-card {
+      padding: 20px 16px;
     }
     .course-row-item {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 14px;
+      padding: 16px;
+    }
+    .course-main-info {
+      width: 100%;
+    }
+    .course-title-text {
+      white-space: normal;
+    }
+    .course-metadata {
+      gap: 10px;
+      font-size: 12px;
     }
     .btn-course-open {
       width: 100%;
@@ -560,7 +591,7 @@
             <div class="course-icon-badge">
               <i class="fa-solid fa-laptop-code"></i>
             </div>
-            <div>
+            <div style="min-width: 0; flex: 1;">
               <h3 class="course-title-text">{{ course.name }}</h3>
               <div class="course-metadata">
                 <span><i class="fa-solid fa-hashtag" style="color: #94a3b8;"></i> {{ course.code }}</span>
