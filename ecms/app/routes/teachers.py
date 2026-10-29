@@ -57,18 +57,7 @@ else:
     )
 
 ALLOWED_EXTENSIONS = {
-    "pdf",
-    "doc",
-    "docx",
-    "ppt",
-    "pptx",
-    "xls",
-    "xlsx",
-    "txt",
-    "jpg",
-    "jpeg",
-    "png",
-    "zip",
+    "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx", "txt", "jpg", "jpeg", "png", "zip"
 }
 try:
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -128,9 +117,7 @@ def _question_payload(form, number):
         if not answer:
             raise ValueError(f"Question {number} needs a correct answer.")
         if answer not in choices:
-            raise ValueError(
-                f"Question {number} correct answer must match one listed choice."
-            )
+            raise ValueError(f"Question {number} correct answer must match one listed choice.")
         options = ",".join(choices)
     elif question_type == "true_false":
         options = "True,False"
@@ -177,32 +164,17 @@ def _teacher_nav_context(teacher):
 # ------------------------- Authentication -------------------------
 @teachers_bp.route("/login", methods=["GET", "POST"])
 def login():
-    if (
-        current_user.is_authenticated
-        and getattr(current_user, "role", "").lower() == "teacher"
-    ):
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+    if current_user.is_authenticated and getattr(current_user, "role", "").lower() == "teacher":
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
 
-        if (
-            email
-            in [
-                "instructor@learnova.edu",
-                "demo_instructor",
-                "teacher@learnova.edu",
-                "demo@learnova.edu",
-            ]
-        ) and password == "demo123":
+        if (email in ["instructor@learnova.edu", "demo_instructor", "teacher@learnova.edu", "demo@learnova.edu"]) and password == "demo123":
             try:
                 db.session.rollback()
-                demo_teacher = User.query.filter(
-                    User.role.ilike("teacher")
-                ).first()
+                demo_teacher = User.query.filter(User.role.ilike("teacher")).first()
                 if demo_teacher:
                     session["is_demo"] = True
                     login_user(demo_teacher)
@@ -211,8 +183,8 @@ def login():
                         db.session.add(
                             Notification(
                                 user_id=demo_teacher.id,
-                                title="Instructor Login Session",
-                                message=f"Logged in successfully via Demo Account on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                                title="System Login",
+                                message=f"Logged in successfully via Demo Instructor on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
                                 link=f"/teacher/{demo_teacher.id}/dashboard",
                                 is_read=False,
                                 created_at=datetime.now(timezone.utc),
@@ -222,43 +194,30 @@ def login():
                     except Exception:
                         db.session.rollback()
 
-                    flash(
-                        "Signed in successfully with Demo Instructor Account.",
-                        "success",
-                    )
-                    return redirect(
-                        url_for(
-                            "teachers.dashboard", teacher_id=demo_teacher.id
-                        )
-                    )
+                    flash("Signed in successfully with Demo Instructor Account.", "success")
+                    return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
             except Exception:
                 db.session.rollback()
 
         session.pop("is_demo", None)
         try:
-            user = User.query.filter(
-                (User.email == email) | (User.username == email)
-            ).first()
+            user = User.query.filter((User.email == email) | (User.username == email)).first()
             is_valid = False
             if user:
                 if hasattr(user, "check_password"):
                     is_valid = user.check_password(password)
                 else:
-                    is_valid = user.password == password
+                    is_valid = (user.password == password)
 
-            if (
-                user
-                and is_valid
-                and getattr(user, "role", "").lower() == "teacher"
-            ):
+            if user and is_valid and getattr(user, "role", "").lower() == "teacher":
                 login_user(user)
 
                 try:
                     db.session.add(
                         Notification(
                             user_id=user.id,
-                            title="Instructor Login Session",
-                            message=f"Successful sign-in detected on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                            title="System Login",
+                            message=f"Logged in successfully from Learnova Portal on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
                             link=f"/teacher/{user.id}/dashboard",
                             is_read=False,
                             created_at=datetime.now(timezone.utc),
@@ -268,15 +227,11 @@ def login():
                 except Exception:
                     db.session.rollback()
 
-                return redirect(
-                    url_for("teachers.dashboard", teacher_id=user.id)
-                )
+                return redirect(url_for("teachers.dashboard", teacher_id=user.id))
         except Exception:
             db.session.rollback()
 
-        flash(
-            "Invalid credentials or not authorized as an instructor.", "danger"
-        )
+        flash("Invalid credentials or not authorized as an instructor.", "danger")
     return render_template("teacher/login.html")
 
 
@@ -298,9 +253,7 @@ def dashboard(teacher_id):
         return redirect(url_for("teachers.login"))
 
     courses = Course.query.filter_by(teacher_id=teacher.id).all()
-    student_ids = {
-        e.student_id for c in courses for e in getattr(c, "enrollments", [])
-    }
+    student_ids = {e.student_id for c in courses for e in getattr(c, "enrollments", [])}
     assignment_count = sum(len(getattr(c, "assignments", [])) for c in courses)
     quiz_count = sum(len(getattr(c, "quizzes", [])) for c in courses)
     ungraded = (
@@ -310,12 +263,7 @@ def dashboard(teacher_id):
         .count()
     )
     upcoming = sorted(
-        [
-            a
-            for c in courses
-            for a in getattr(c, "assignments", [])
-            if a.due_date and a.due_date >= datetime.now()
-        ],
+        [a for c in courses for a in getattr(c, "assignments", []) if a.due_date and a.due_date >= datetime.now()],
         key=lambda a: a.due_date,
     )[:5]
     stats = {
@@ -421,9 +369,7 @@ def view_course(teacher_id, course_id):
 
 
 # ------------------------- Add Unit -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/add_unit", methods=["GET", "POST"]
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_unit", methods=["GET", "POST"])
 @login_required
 def add_unit(teacher_id, course_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -435,12 +381,7 @@ def add_unit(teacher_id, course_id):
 
         if not title:
             flash("Unit title is required.", "danger")
-            return render_template(
-                "teacher/add_unit.html",
-                teacher=teacher,
-                course=course,
-                course_id=course_id,
-            )
+            return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
         filename = None
         if file and file.filename and file.filename.strip() != "":
@@ -448,11 +389,7 @@ def add_unit(teacher_id, course_id):
                 try:
                     original = secure_filename(file.filename)
                     filename = f"{uuid.uuid4().hex}_{original}"
-                    upload_target = (
-                        "/tmp/uploads"
-                        if os.environ.get("VERCEL")
-                        else UPLOAD_FOLDER
-                    )
+                    upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                     os.makedirs(upload_target, exist_ok=True)
                     file.save(os.path.join(upload_target, filename))
                 except Exception:
@@ -475,37 +412,18 @@ def add_unit(teacher_id, course_id):
             except Exception:
                 db.session.rollback()
 
-            return redirect(
-                url_for(
-                    "teachers.view_course",
-                    teacher_id=teacher_id,
-                    course_id=course_id,
-                )
-            )
+            return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
         except Exception as exc:
             db.session.rollback()
             flash(f"Could not add unit: {exc}", "danger")
-            return render_template(
-                "teacher/add_unit.html",
-                teacher=teacher,
-                course=course,
-                course_id=course_id,
-            )
+            return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
-    return render_template(
-        "teacher/add_unit.html",
-        teacher=teacher,
-        course=course,
-        course_id=course_id,
-    )
+    return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
 
 # ------------------------- Add Assignment -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/add_assignment",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_assignment", methods=["GET", "POST"])
 @login_required
 def add_assignment(teacher_id, course_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -513,9 +431,7 @@ def add_assignment(teacher_id, course_id):
 
     if current_user.id != teacher.id and current_user.role.lower() != "admin":
         flash("Access denied.", "danger")
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if course.teacher_id != teacher.id and current_user.role.lower() != "admin":
         flash("You do not have permission to modify this course.", "danger")
@@ -524,58 +440,29 @@ def add_assignment(teacher_id, course_id):
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
         description = (request.form.get("description") or "").strip()
-        assignment_type = (
-            request.form.get("assignment_type") or "homework"
-        ).strip()
+        assignment_type = (request.form.get("assignment_type") or "homework").strip()
 
         if assignment_type not in {"homework", "project"}:
             flash("Please use the Quiz Builder to create quizzes.", "warning")
-            return redirect(
-                url_for(
-                    "teachers.add_quiz",
-                    teacher_id=teacher.id,
-                    course_id=course.id,
-                )
-            )
+            return redirect(url_for("teachers.add_quiz", teacher_id=teacher.id, course_id=course.id))
 
         if not title:
             flash("Assignment title is required.", "danger")
-            return render_template(
-                "teacher/add_assignment.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
-            start_date = _parse_datetime(
-                request.form.get("start_date"), "Start date"
-            )
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
             due_date = _parse_datetime(request.form.get("due_date"), "Due date")
             if due_date <= start_date:
                 raise ValueError("Due date must be after the start date.")
         except ValueError as exc:
             flash(str(exc), "danger")
-            return render_template(
-                "teacher/add_assignment.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         assignment_file = request.files.get("assignment_file")
-        if (
-            assignment_file
-            and assignment_file.filename
-            and not allowed_file(assignment_file.filename)
-        ):
+        if assignment_file and assignment_file.filename and not allowed_file(assignment_file.filename):
             flash("Unsupported assignment file type.", "danger")
-            return render_template(
-                "teacher/add_assignment.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
             assignment = Assignment(
@@ -593,15 +480,9 @@ def add_assignment(teacher_id, course_id):
                 try:
                     original_name = secure_filename(assignment_file.filename)
                     stored_name = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-                    upload_target = (
-                        "/tmp/uploads"
-                        if os.environ.get("VERCEL")
-                        else UPLOAD_FOLDER
-                    )
+                    upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                     os.makedirs(upload_target, exist_ok=True)
-                    assignment_file.save(
-                        os.path.join(upload_target, stored_name)
-                    )
+                    assignment_file.save(os.path.join(upload_target, stored_name))
                 except Exception:
                     pass
 
@@ -619,29 +500,13 @@ def add_assignment(teacher_id, course_id):
             except Exception:
                 db.session.rollback()
 
-            return redirect(
-                url_for(
-                    "teachers.view_course",
-                    teacher_id=teacher.id,
-                    course_id=course.id,
-                )
-            )
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Could not create assignment: {exc}", "danger")
-            return render_template(
-                "teacher/add_assignment.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-    return render_template(
-        "teacher/add_assignment.html",
-        teacher=teacher,
-        course=course,
-        **_teacher_nav_context(teacher),
-    )
+    return render_template("teacher/add_assignment.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
 
 @teachers_bp.route("/assignments/<int:assignment_id>/attachment")
@@ -650,16 +515,10 @@ def assignment_attachment(assignment_id):
     assignment = Assignment.query.get_or_404(assignment_id)
     course = assignment.course
 
-    is_teacher_owner = (
-        current_user.role.lower() == "teacher"
-        and course.teacher_id == current_user.id
-    )
+    is_teacher_owner = (current_user.role.lower() == "teacher" and course.teacher_id == current_user.id)
     is_enrolled_student = (
         current_user.role.lower() == "student"
-        and Enrollment.query.filter_by(
-            student_id=current_user.id, course_id=course.id
-        ).first()
-        is not None
+        and Enrollment.query.filter_by(student_id=current_user.id, course_id=course.id).first() is not None
     )
     is_admin = current_user.role.lower() == "admin"
 
@@ -670,37 +529,19 @@ def assignment_attachment(assignment_id):
     prefix = f"assignment_{assignment.id}_"
     matches = []
     if os.path.exists(UPLOAD_FOLDER):
-        matches = sorted(
-            filename
-            for filename in os.listdir(UPLOAD_FOLDER)
-            if filename.startswith(prefix)
-        )
+        matches = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(prefix))
 
     if not matches:
         flash("No attachment was uploaded for this assignment.", "warning")
         if current_user.role.lower() == "teacher":
-            return redirect(
-                url_for(
-                    "teachers.view_course",
-                    teacher_id=current_user.id,
-                    course_id=course.id,
-                )
-            )
+            return redirect(url_for("teachers.view_course", teacher_id=current_user.id, course_id=course.id))
         return redirect(url_for("students.view_course", course_id=course.id))
 
-    return send_from_directory(
-        UPLOAD_FOLDER,
-        matches[-1],
-        as_attachment=True,
-        download_name=matches[-1].split("_", 3)[-1],
-    )
+    return send_from_directory(UPLOAD_FOLDER, matches[-1], as_attachment=True, download_name=matches[-1].split("_", 3)[-1])
 
 
 # ------------------------- Add Quiz -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/add_quiz",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_quiz", methods=["GET", "POST"])
 @login_required
 def add_quiz(teacher_id, course_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -708,43 +549,27 @@ def add_quiz(teacher_id, course_id):
 
     if current_user.id != teacher.id and current_user.role.lower() != "admin":
         flash("Access denied.", "danger")
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
         description = (request.form.get("description") or "").strip()
         if not title:
             flash("Quiz title is required.", "danger")
-            return render_template(
-                "teacher/add_quiz.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
-            start_date = _parse_datetime(
-                request.form.get("start_date"), "Start date"
-            )
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
             end_date = _parse_datetime(request.form.get("end_date"), "End date")
             if end_date <= start_date:
                 raise ValueError("End date must be after the start date.")
             numbers = _question_numbers(request.form)
             if not numbers:
                 raise ValueError("Add at least one quiz question.")
-            questions = [
-                _question_payload(request.form, number) for number in numbers
-            ]
+            questions = [_question_payload(request.form, number) for number in numbers]
         except ValueError as exc:
             flash(str(exc), "danger")
-            return render_template(
-                "teacher/add_quiz.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
             assignment = Assignment(
@@ -773,10 +598,7 @@ def add_quiz(teacher_id, course_id):
                 db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
 
             db.session.commit()
-            flash(
-                f"Quiz created successfully with {len(questions)} questions.",
-                "success",
-            )
+            flash(f"Quiz created successfully with {len(questions)} questions.", "success")
 
             try:
                 notify_course_students(
@@ -789,29 +611,13 @@ def add_quiz(teacher_id, course_id):
             except Exception:
                 db.session.rollback()
 
-            return redirect(
-                url_for(
-                    "teachers.view_course",
-                    teacher_id=teacher.id,
-                    course_id=course.id,
-                )
-            )
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Error creating quiz: {exc}", "danger")
-            return render_template(
-                "teacher/add_quiz.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-    return render_template(
-        "teacher/add_quiz.html",
-        teacher=teacher,
-        course=course,
-        **_teacher_nav_context(teacher),
-    )
+    return render_template("teacher/add_quiz.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
 
 # ------------------------- Add More Quiz Questions -------------------------
@@ -824,55 +630,32 @@ def add_quiz_questions(quiz_id):
 
     if current_user.id != teacher.id and current_user.role.lower() != "admin":
         flash("Access denied.", "danger")
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
         try:
             numbers = _question_numbers(request.form)
             if not numbers:
                 raise ValueError("Add at least one question.")
-            questions = [
-                _question_payload(request.form, number) for number in numbers
-            ]
+            questions = [_question_payload(request.form, number) for number in numbers]
         except ValueError as exc:
             flash(str(exc), "danger")
-            return render_template(
-                "teacher/quiz_questions.html",
-                quiz=quiz,
-                course=course,
-                teacher=teacher,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/quiz_questions.html", quiz=quiz, course=course, teacher=teacher, **_teacher_nav_context(teacher))
 
         try:
             for payload in questions:
                 db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
             db.session.commit()
-            flash(
-                f"Added {len(questions)} question(s) successfully.", "success"
-            )
-            return redirect(
-                url_for("teachers.add_quiz_questions", quiz_id=quiz.id)
-            )
+            flash(f"Added {len(questions)} question(s) successfully.", "success")
+            return redirect(url_for("teachers.add_quiz_questions", quiz_id=quiz.id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Failed to add questions: {exc}", "danger")
 
-    return render_template(
-        "teacher/quiz_questions.html",
-        quiz=quiz,
-        course=course,
-        teacher=teacher,
-        **_teacher_nav_context(teacher),
-    )
+    return render_template("teacher/quiz_questions.html", quiz=quiz, course=course, teacher=teacher, **_teacher_nav_context(teacher))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/add_exam",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/add_exam", methods=["GET", "POST"])
 @login_required
 def add_exam(teacher_id, course_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -880,52 +663,30 @@ def add_exam(teacher_id, course_id):
 
     if current_user.id != teacher.id and current_user.role.lower() != "admin":
         flash("Access denied.", "danger")
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
         description = (request.form.get("description") or "").strip()
         if not title:
             flash("Exam title is required.", "danger")
-            return render_template(
-                "teacher/add_exam.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
-            start_date = _parse_datetime(
-                request.form.get("start_date"), "Start date"
-            )
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
             end_date = _parse_datetime(request.form.get("end_date"), "End date")
             if end_date <= start_date:
                 raise ValueError("End date must be after the start date.")
             numbers = _question_numbers(request.form)
             if not numbers:
                 raise ValueError("Add at least one exam question.")
-            questions = [
-                _question_payload(request.form, number) for number in numbers
-            ]
+            questions = [_question_payload(request.form, number) for number in numbers]
             calculated_total = sum(item["score"] for item in questions)
-            requested_total = float(
-                request.form.get("total_score") or calculated_total
-            )
-            total_score = (
-                calculated_total
-                if requested_total != calculated_total
-                else requested_total
-            )
+            requested_total = float(request.form.get("total_score") or calculated_total)
+            total_score = calculated_total if requested_total != calculated_total else requested_total
         except ValueError as exc:
             flash(str(exc), "danger")
-            return render_template(
-                "teacher/add_exam.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
         try:
             exam = Exam(
@@ -943,10 +704,7 @@ def add_exam(teacher_id, course_id):
                 db.session.add(ExamQuestion(exam_id=exam.id, **payload))
 
             db.session.commit()
-            flash(
-                f"Exam created successfully with {len(questions)} questions.",
-                "success",
-            )
+            flash(f"Exam created successfully with {len(questions)} questions.", "success")
 
             try:
                 notify_course_students(
@@ -959,35 +717,17 @@ def add_exam(teacher_id, course_id):
             except Exception:
                 db.session.rollback()
 
-            return redirect(
-                url_for(
-                    "teachers.view_course",
-                    teacher_id=teacher.id,
-                    course_id=course.id,
-                )
-            )
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
         except Exception as exc:
             db.session.rollback()
             flash(f"Failed to create exam: {exc}", "danger")
-            return render_template(
-                "teacher/add_exam.html",
-                teacher=teacher,
-                course=course,
-                **_teacher_nav_context(teacher),
-            )
+            return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
-    return render_template(
-        "teacher/add_exam.html",
-        teacher=teacher,
-        course=course,
-        **_teacher_nav_context(teacher),
-    )
+    return render_template("teacher/add_exam.html", teacher=teacher, course=course, **_teacher_nav_context(teacher))
 
 
 # ------------------------- Student Details (Modal) -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/students/<int:student_id>/details"
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/students/<int:student_id>/details")
 @login_required
 def student_details(teacher_id, course_id, student_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -999,92 +739,61 @@ def student_details(teacher_id, course_id, student_id):
     ).get_or_404(course_id)
     student = User.query.get_or_404(student_id)
 
-    if (
-        current_user.id != teacher.id
-        or current_user.role.lower() != "teacher"
-        or course.teacher_id != teacher.id
-    ):
+    if current_user.id != teacher.id or current_user.role.lower() != "teacher" or course.teacher_id != teacher.id:
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    enrollment = Enrollment.query.filter_by(
-        student_id=student.id, course_id=course.id
-    ).first()
+    enrollment = Enrollment.query.filter_by(student_id=student.id, course_id=course.id).first()
     if not enrollment:
         flash("This student is not enrolled in the selected course.", "warning")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
     assignments_data = []
     for assignment in course.assignments:
         if assignment.assignment_type == "quiz":
             continue
-        submission = Submission.query.filter_by(
-            student_id=student.id, assignment_id=assignment.id
-        ).first()
-        assignments_data.append(
-            {
-                "id": assignment.id,
-                "title": assignment.title,
-                "submitted": submission is not None,
-                "score": submission.grade if submission else None,
-                "feedback": submission.feedback if submission else None,
-                "due_date": assignment.due_date,
-            }
-        )
+        submission = Submission.query.filter_by(student_id=student.id, assignment_id=assignment.id).first()
+        assignments_data.append({
+            "id": assignment.id,
+            "title": assignment.title,
+            "submitted": submission is not None,
+            "score": submission.grade if submission else None,
+            "feedback": submission.feedback if submission else None,
+            "due_date": assignment.due_date,
+        })
 
     quizzes_data = []
     for quiz in course.quizzes:
         submission = (
-            Submission.query.filter_by(
-                student_id=student.id, assignment_id=quiz.assignment_id
-            )
+            Submission.query.filter_by(student_id=student.id, assignment_id=quiz.assignment_id)
             .order_by(Submission.submitted_at.desc())
             .first()
         )
-        total_possible = (
-            sum(float(question.score or 0) for question in quiz.questions) or 1
-        )
-        quizzes_data.append(
-            {
-                "id": quiz.id,
-                "title": quiz.title,
-                "score": submission.grade if submission else None,
-                "total": total_possible,
-                "completed": submission is not None,
-            }
-        )
+        total_possible = sum(float(question.score or 0) for question in quiz.questions) or 1
+        quizzes_data.append({
+            "id": quiz.id,
+            "title": quiz.title,
+            "score": submission.grade if submission else None,
+            "total": total_possible,
+            "completed": submission is not None,
+        })
 
     exams_data = []
     for exam in course.exams:
-        grade_row = Grade.query.filter_by(
-            student_id=student.id, exam_id=exam.id
-        ).first()
-        exams_data.append(
-            {
-                "id": exam.id,
-                "title": exam.title,
-                "score": grade_row.score if grade_row else None,
-                "total": exam.total_score or 1,
-                "completed": grade_row is not None,
-            }
-        )
+        grade_row = Grade.query.filter_by(student_id=student.id, exam_id=exam.id).first()
+        exams_data.append({
+            "id": exam.id,
+            "title": exam.title,
+            "score": grade_row.score if grade_row else None,
+            "total": exam.total_score or 1,
+            "completed": grade_row is not None,
+        })
 
-    activity_record = Activity.query.filter_by(
-        student_id=student.id, course_id=course.id
-    ).first()
+    activity_record = Activity.query.filter_by(student_id=student.id, course_id=course.id).first()
     activity_score = activity_record.score if activity_record else 0
     progress = course_progress(student, course)
     overall_grade = final_grade(student, course)
-
-    certificate = Certificate.query.filter_by(
-        student_id=student.id, course_id=course.id
-    ).first()
+    certificate = Certificate.query.filter_by(student_id=student.id, course_id=course.id).first()
 
     return render_template(
         "teacher/student_progress.html",
@@ -1133,13 +842,9 @@ def update_activity(student_id):
     if course_id is None:
         return jsonify({"status": "error", "message": "Course ID required"}), 400
 
-    activity = Activity.query.filter_by(
-        student_id=student_id, course_id=course_id
-    ).first()
+    activity = Activity.query.filter_by(student_id=student_id, course_id=course_id).first()
     if not activity:
-        activity = Activity(
-            student_id=student_id, course_id=course_id, score=score
-        )
+        activity = Activity(student_id=student_id, course_id=course_id, score=score)
         db.session.add(activity)
     else:
         activity.score = score
@@ -1149,10 +854,7 @@ def update_activity(student_id):
 
 
 # ------------------------- Edit Unit -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/units/<int:unit_id>/edit",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/units/<int:unit_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_unit_page(teacher_id, course_id, unit_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -1167,11 +869,7 @@ def edit_unit_page(teacher_id, course_id, unit_id):
         if file and file.filename and allowed_file(file.filename):
             try:
                 filename = secure_filename(file.filename)
-                upload_target = (
-                    "/tmp/uploads"
-                    if os.environ.get("VERCEL")
-                    else UPLOAD_FOLDER
-                )
+                upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                 os.makedirs(upload_target, exist_ok=True)
                 file.save(os.path.join(upload_target, filename))
                 unit.file_path = filename
@@ -1180,23 +878,12 @@ def edit_unit_page(teacher_id, course_id, unit_id):
 
         db.session.commit()
         flash("Unit updated successfully.", "success")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
-    return render_template(
-        "teacher/edit_unit.html", teacher=teacher, course=course, unit=unit
-    )
+    return render_template("teacher/edit_unit.html", teacher=teacher, course=course, unit=unit)
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/edit",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_assignment_page(teacher_id, course_id, assignment_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -1205,58 +892,33 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
 
     if current_user.id != teacher.id and current_user.role.lower() != "admin":
         flash("Access denied.", "danger")
-        return redirect(
-            url_for("teachers.dashboard", teacher_id=current_user.id)
-        )
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if course.teacher_id != teacher.id and current_user.role.lower() != "admin":
         flash("You do not have permission to modify this course.", "danger")
         return redirect(url_for("teachers.courses", teacher_id=teacher.id))
 
     if assignment.course_id != course.id:
-        flash(
-            "This assignment does not belong to the selected course.", "danger"
-        )
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        flash("This assignment does not belong to the selected course.", "danger")
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
     if assignment.assignment_type == "quiz":
-        flash(
-            "Quiz questions must be edited from the Quiz Questions page.",
-            "warning",
-        )
+        flash("Quiz questions must be edited from the Quiz Questions page.", "warning")
         quiz = Quiz.query.filter_by(assignment_id=assignment.id).first()
         if quiz:
-            return redirect(
-                url_for("teachers.add_quiz_questions", quiz_id=quiz.id)
-            )
+            return redirect(url_for("teachers.add_quiz_questions", quiz_id=quiz.id))
 
     attachment_prefix = f"assignment_{assignment.id}_"
     current_attachments = []
     if os.path.exists(UPLOAD_FOLDER):
-        current_attachments = sorted(
-            filename
-            for filename in os.listdir(UPLOAD_FOLDER)
-            if filename.startswith(attachment_prefix)
-        )
-    current_attachment = (
-        current_attachments[-1] if current_attachments else None
-    )
-    current_attachment_name = (
-        current_attachment.split("_", 3)[-1] if current_attachment else None
-    )
+        current_attachments = sorted(filename for filename in os.listdir(UPLOAD_FOLDER) if filename.startswith(attachment_prefix))
+    current_attachment = current_attachments[-1] if current_attachments else None
+    current_attachment_name = current_attachment.split("_", 3)[-1] if current_attachment else None
 
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()
         description = (request.form.get("description") or "").strip()
-        assignment_type = (
-            request.form.get("assignment_type") or assignment.assignment_type
-        ).strip()
+        assignment_type = (request.form.get("assignment_type") or assignment.assignment_type).strip()
 
         if assignment_type not in {"homework", "project"}:
             flash("Only homework and project types are allowed here.", "danger")
@@ -1283,9 +945,7 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
             )
 
         try:
-            start_date = _parse_datetime(
-                request.form.get("start_date"), "Start date"
-            )
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
             due_date = _parse_datetime(request.form.get("due_date"), "Due date")
             if due_date <= start_date:
                 raise ValueError("Due date must be after the start date.")
@@ -1321,11 +981,7 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
             try:
                 original_name = secure_filename(assignment_file.filename)
                 saved_new_file = f"assignment_{assignment.id}_{uuid.uuid4().hex}_{original_name}"
-                upload_target = (
-                    "/tmp/uploads"
-                    if os.environ.get("VERCEL")
-                    else UPLOAD_FOLDER
-                )
+                upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                 os.makedirs(upload_target, exist_ok=True)
                 assignment_file.save(os.path.join(upload_target, saved_new_file))
             except Exception:
@@ -1374,13 +1030,7 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
             )
 
         flash("Assignment updated successfully.", "success")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
     return render_template(
         "teacher/edit_assignment.html",
@@ -1394,24 +1044,17 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
 
 
 # ------------------------- Preview Exam -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/preview"
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/preview")
 @login_required
 def preview_exam(teacher_id, course_id, exam_id):
     teacher = User.query.get_or_404(teacher_id)
     course = Course.query.get_or_404(course_id)
     exam = Exam.query.get_or_404(exam_id)
-    return render_template(
-        "teacher/preview_exam.html", teacher=teacher, course=course, exam=exam
-    )
+    return render_template("teacher/preview_exam.html", teacher=teacher, course=course, exam=exam)
 
 
 # ------------------------- Edit Exam -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/edit",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_exam_page(teacher_id, course_id, exam_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -1427,40 +1070,25 @@ def edit_exam_page(teacher_id, course_id, exam_id):
 
         db.session.commit()
         flash("Exam updated successfully.", "success")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
-    return render_template(
-        "teacher/edit_exam.html", teacher=teacher, course=course, exam=exam
-    )
+    return render_template("teacher/edit_exam.html", teacher=teacher, course=course, exam=exam)
 
 
 # ------------------------- Update Student Quiz Score -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/quiz/<int:quiz_id>/student/<int:student_id>/update",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quiz/<int:quiz_id>/student/<int:student_id>/update", methods=["POST"])
 @login_required
 def update_student_quiz_score(teacher_id, course_id, quiz_id, student_id):
     quiz = Quiz.query.get_or_404(quiz_id)
     assignment_id = quiz.assignment_id
 
-    submission = Submission.query.filter_by(
-        student_id=student_id, assignment_id=assignment_id
-    ).first()
+    submission = Submission.query.filter_by(student_id=student_id, assignment_id=assignment_id).first()
     new_grade = request.form.get("score", type=float)
 
     if submission:
         submission.grade = new_grade
     else:
-        submission = Submission(
-            student_id=student_id, assignment_id=assignment_id, grade=new_grade
-        )
+        submission = Submission(student_id=student_id, assignment_id=assignment_id, grade=new_grade)
         db.session.add(submission)
 
     try:
@@ -1479,18 +1107,13 @@ def update_student_quiz_score(teacher_id, course_id, quiz_id, student_id):
     return jsonify({"status": "success", "message": "Grade updated"})
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/exam/<int:exam_id>/student/<int:student_id>/update",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exam/<int:exam_id>/student/<int:student_id>/update", methods=["POST"])
 @login_required
 def update_student_exam_score(teacher_id, course_id, exam_id, student_id):
     exam = Exam.query.get_or_404(exam_id)
     new_score = request.form.get("score", type=float)
 
-    grade = Grade.query.filter_by(
-        exam_id=exam.id, student_id=student_id
-    ).first()
+    grade = Grade.query.filter_by(exam_id=exam.id, student_id=student_id).first()
     if grade:
         grade.score = new_score
     else:
@@ -1536,9 +1159,7 @@ def generate_signature_image(teacher_name, signature_id):
         draw = ImageDraw.Draw(img)
 
         try:
-            font = ImageFont.truetype(
-                "app/static/fonts/DancingScript-Bold.ttf", 48
-            )
+            font = ImageFont.truetype("app/static/fonts/DancingScript-Bold.ttf", 48)
         except Exception:
             font = ImageFont.load_default()
 
@@ -1549,9 +1170,7 @@ def generate_signature_image(teacher_name, signature_id):
     return filename
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/certificate"
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/certificate")
 @login_required
 def generate_certificate(teacher_id, course_id, student_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -1560,26 +1179,16 @@ def generate_certificate(teacher_id, course_id, student_id):
 
     quizzes = []
     for quiz in course.quizzes:
-        submissions = Submission.query.filter_by(
-            student_id=student.id, assignment_id=quiz.assignment_id
-        ).all()
-        total_score = (
-            sum(sub.grade for sub in submissions) if submissions else 0
-        )
+        submissions = Submission.query.filter_by(student_id=student.id, assignment_id=quiz.assignment_id).all()
+        total_score = sum(sub.grade for sub in submissions) if submissions else 0
         quizzes.append({"completed": bool(submissions), "score": total_score})
 
     exams = []
     for exam in course.exams:
-        grade = Grade.query.filter_by(
-            student_id=student.id, exam_id=exam.id
-        ).first()
-        exams.append(
-            {"completed": bool(grade), "score": grade.score if grade else 0}
-        )
+        grade = Grade.query.filter_by(student_id=student.id, exam_id=exam.id).first()
+        exams.append({"completed": bool(grade), "score": grade.score if grade else 0})
 
-    activity = Activity.query.filter_by(
-        student_id=student.id, course_id=course.id
-    ).first()
+    activity = Activity.query.filter_by(student_id=student.id, course_id=course.id).first()
     activity_score = activity.score if activity else None
 
     can_print = (
@@ -1590,28 +1199,16 @@ def generate_certificate(teacher_id, course_id, student_id):
 
     if not can_print:
         flash("لا يمكن إصدار الشهادة — الطالب لم ينهِ جميع المهام.", "warning")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher_id,
-                course_id=course_id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
     total_quizzes_score = sum(q["score"] for q in quizzes)
-    total_quizzes_possible = sum(
-        sum(qq.score for qq in quiz.questions) for quiz in course.quizzes
-    )
+    total_quizzes_possible = sum(sum(qq.score for qq in quiz.questions) for quiz in course.quizzes)
     total_exams_score = sum(e["score"] for e in exams)
     total_exams_possible = sum(exam.total_score for exam in course.exams)
     total_score = total_quizzes_score + total_exams_score + activity_score
     total_possible = total_quizzes_possible + total_exams_possible + 100
 
-    percentage = (
-        round((total_score / total_possible) * 100, 2)
-        if total_possible > 0
-        else 0
-    )
+    percentage = round((total_score / total_possible) * 100, 2) if total_possible > 0 else 0
     signature_filename = generate_signature_image(teacher.username, teacher.id)
 
     return render_template(
@@ -1626,9 +1223,7 @@ def generate_certificate(teacher_id, course_id, student_id):
         exams=exams,
         activity_score=activity_score,
         today=datetime.now(),
-        signature_url=url_for(
-            "static", filename=f"signatures/{signature_filename}"
-        ),
+        signature_url=url_for("static", filename=f"signatures/{signature_filename}"),
     )
 
 
@@ -1644,22 +1239,14 @@ def certificates(teacher_id):
         students = []
         for enrollment in course.enrollments:
             student = enrollment.student
-            students.append(
-                {
-                    "student": student,
-                    "progress": course_progress(student, course),
-                    "grade": final_grade(student, course),
-                    "certificate": Certificate.query.filter_by(
-                        student_id=student.id, course_id=course.id
-                    ).first(),
-                }
-            )
+            students.append({
+                "student": student,
+                "progress": course_progress(student, course),
+                "grade": final_grade(student, course),
+                "certificate": Certificate.query.filter_by(student_id=student.id, course_id=course.id).first(),
+            })
         rows.append({"course": course, "students": students})
-    count = (
-        Certificate.query.join(Course)
-        .filter(Course.teacher_id == teacher.id)
-        .count()
-    )
+    count = Certificate.query.join(Course).filter(Course.teacher_id == teacher.id).count()
     return render_template(
         "teacher/certificates.html",
         teacher=teacher,
@@ -1670,9 +1257,7 @@ def certificates(teacher_id):
     )
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/issue-certificate"
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/student/<int:student_id>/issue-certificate")
 @login_required
 def issue_student_certificate(teacher_id, course_id, student_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -1685,10 +1270,7 @@ def issue_student_certificate(teacher_id, course_id, student_id):
     if certificate:
         flash("Certificate issued successfully.", "success")
     else:
-        flash(
-            f"Student is not eligible yet. Progress: {progress['percent']}%, grade: {grade}%.",
-            "warning",
-        )
+        flash(f"Student is not eligible yet. Progress: {progress['percent']}%, grade: {grade}%.", "warning")
     return redirect(url_for("teachers.certificates", teacher_id=teacher.id))
 
 
@@ -1714,16 +1296,11 @@ def submissions(teacher_id):
     )
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/submission/<int:submission_id>/grade", methods=["POST"]
-)
+@teachers_bp.route("/<int:teacher_id>/submission/<int:submission_id>/grade", methods=["POST"])
 @login_required
 def grade_submission(teacher_id, submission_id):
     submission = Submission.query.get_or_404(submission_id)
-    if (
-        current_user.id != teacher_id
-        or submission.assignment.course.teacher_id != teacher_id
-    ):
+    if current_user.id != teacher_id or submission.assignment.course.teacher_id != teacher_id:
         return jsonify({"status": "error", "message": "Access denied"}), 403
     score = request.form.get("grade", type=float)
     feedback = request.form.get("feedback", "").strip()
@@ -1768,32 +1345,24 @@ def evaluations(teacher_id):
         .all()
     )
     graded = [x for x in submissions if x.grade is not None]
-    scores = [x.grade for x in graded] + [
-        g.score for g in exam_grades if g.score is not None
-    ]
+    scores = [x.grade for x in graded] + [g.score for g in exam_grades if g.score is not None]
     rows = []
-    for x in sorted(
-        graded, key=lambda z: z.submitted_at or datetime.min, reverse=True
-    ):
-        rows.append(
-            {
-                "student": x.student.name_person or x.student.username,
-                "course": x.assignment.course.code,
-                "title": x.assignment.title,
-                "type": "Assignment",
-                "score": f"{x.grade:.1f}/100",
-            }
-        )
+    for x in sorted(graded, key=lambda z: z.submitted_at or datetime.min, reverse=True):
+        rows.append({
+            "student": x.student.name_person or x.student.username,
+            "course": x.assignment.course.code,
+            "title": x.assignment.title,
+            "type": "Assignment",
+            "score": f"{x.grade:.1f}/100",
+        })
     for g in exam_grades:
-        rows.append(
-            {
-                "student": g.student.name_person or g.student.username,
-                "course": g.exam.course.code,
-                "title": g.exam.title,
-                "type": "Exam",
-                "score": f"{g.score:.1f}/{g.exam.total_score:g}",
-            }
-        )
+        rows.append({
+            "student": g.student.name_person or g.student.username,
+            "course": g.exam.course.code,
+            "title": g.exam.title,
+            "type": "Exam",
+            "score": f"{g.score:.1f}/{g.exam.total_score:g}",
+        })
     average = round(sum(scores) / len(scores), 1) if scores else 0
     return render_template(
         "teacher/evaluations.html",
@@ -1830,27 +1399,18 @@ def reports(teacher_id):
     }
     course_reports = []
     for c in courses:
-        scores = [
-            s.grade
-            for a in c.assignments
-            for s in a.submissions
-            if s.grade is not None
-        ]
-        scores += [
-            g.score for e in c.exams for g in e.grades if g.score is not None
-        ]
+        scores = [s.grade for a in c.assignments for s in a.submissions if s.grade is not None]
+        scores += [g.score for e in c.exams for g in e.grades if g.score is not None]
         avg = round(sum(scores) / len(scores), 1) if scores else 0
-        course_reports.append(
-            {
-                "code": c.code,
-                "name": c.name,
-                "students": len(c.enrollments),
-                "assignments": len(c.assignments),
-                "quizzes": len(c.quizzes),
-                "exams": len(c.exams),
-                "average": avg,
-            }
-        )
+        course_reports.append({
+            "code": c.code,
+            "name": c.name,
+            "students": len(c.enrollments),
+            "assignments": len(c.assignments),
+            "quizzes": len(c.quizzes),
+            "exams": len(c.exams),
+            "average": avg,
+        })
     return render_template(
         "teacher/reports.html",
         teacher=teacher,
@@ -1869,9 +1429,7 @@ def profile(teacher_id):
         return redirect(url_for("teachers.login"))
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
-        duplicate = User.query.filter(
-            User.email == email, User.id != teacher.id
-        ).first()
+        duplicate = User.query.filter(User.email == email, User.id != teacher.id).first()
         if duplicate:
             flash("This email is already used by another account.", "danger")
         else:
@@ -1884,12 +1442,10 @@ def profile(teacher_id):
             db.session.commit()
             flash("Profile updated successfully.", "success")
             return redirect(url_for("teachers.profile", teacher_id=teacher.id))
-    return render_template(
-        "teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher)
-    )
+    return render_template("teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher))
 
 
-# ------------------------- Notifications System (Safe & Isolated) -------------------------
+# ------------------------- Notifications: سجل تسجيل الدخول فقط وبأمان تام -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
 def notifications(teacher_id):
@@ -1898,42 +1454,8 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    # فحص وتسجيل إشعارات التسليمات بأمان دون إيقاف السيرفر
-    try:
-        if hasattr(teacher, "courses") and teacher.courses:
-            for course in teacher.courses:
-                for assignment in getattr(course, "assignments", []):
-                    for sub in getattr(assignment, "submissions", []):
-                        sub_title = f"New Submission: {assignment.title}"
-                        existing = Notification.query.filter_by(
-                            user_id=teacher.id, title=sub_title
-                        ).first()
-
-                        if not existing:
-                            st_name = (
-                                getattr(sub.student, "name_person", None)
-                                or getattr(sub.student, "username", "Student")
-                            )
-                            status_note = (
-                                "Requires grading."
-                                if sub.grade is None
-                                else f"Graded ({sub.grade}/100)."
-                            )
-                            new_alert = Notification(
-                                user_id=teacher.id,
-                                title=sub_title,
-                                message=f"Student {st_name} submitted task for '{assignment.title}' in {course.name}. {status_note}",
-                                link=f"/teacher/{teacher.id}/submissions",
-                                is_read=False,
-                                created_at=getattr(sub, "submitted_at", None)
-                                or datetime.now(timezone.utc),
-                            )
-                            db.session.add(new_alert)
-            db.session.commit()
-    except Exception:
-        db.session.rollback()
-
-    # جلب الإشعارات بأمان تام مع سياق التنقل
+    # استرجاع إشعارات تسجيل الدخول فقط للحساب
+    items = []
     try:
         items = (
             Notification.query.filter_by(user_id=teacher.id)
@@ -1965,9 +1487,7 @@ def mark_notifications_read(teacher_id):
     if current_user.id != teacher_id or current_user.role.lower() != "teacher":
         return jsonify({"status": "error"}), 403
     try:
-        Notification.query.filter_by(
-            user_id=teacher_id, is_read=False
-        ).update({"is_read": True})
+        Notification.query.filter_by(user_id=teacher_id, is_read=False).update({"is_read": True})
         db.session.commit()
         flash("All notifications marked as read.", "success")
     except Exception:
@@ -1975,9 +1495,7 @@ def mark_notifications_read(teacher_id):
     return redirect(url_for("teachers.notifications", teacher_id=teacher_id))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/notifications/delete/<int:notif_id>", methods=["POST"]
-)
+@teachers_bp.route("/<int:teacher_id>/notifications/delete/<int:notif_id>", methods=["POST"])
 @login_required
 def delete_notification(teacher_id, notif_id):
     if current_user.id != teacher_id or current_user.role.lower() != "teacher":
@@ -1985,9 +1503,7 @@ def delete_notification(teacher_id, notif_id):
         return redirect(url_for("teachers.login"))
 
     try:
-        notif = Notification.query.filter_by(
-            id=notif_id, user_id=teacher_id
-        ).first()
+        notif = Notification.query.filter_by(id=notif_id, user_id=teacher_id).first()
         if notif:
             db.session.delete(notif)
             db.session.commit()
@@ -2006,10 +1522,7 @@ def _owns_course(teacher_id, course):
     )
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/units/<int:unit_id>/delete",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/units/<int:unit_id>/delete", methods=["POST"])
 @login_required
 def delete_unit(teacher_id, course_id, unit_id):
     course = Course.query.get_or_404(course_id)
@@ -2024,17 +1537,10 @@ def delete_unit(teacher_id, course_id, unit_id):
         db.session.delete(unit)
         db.session.commit()
         flash("Unit deleted successfully.", "success")
-    return redirect(
-        url_for(
-            "teachers.view_course", teacher_id=teacher_id, course_id=course_id
-        )
-    )
+    return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/delete",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/delete", methods=["POST"])
 @login_required
 def delete_assignment(teacher_id, course_id, assignment_id):
     course = Course.query.get_or_404(course_id)
@@ -2045,17 +1551,10 @@ def delete_assignment(teacher_id, course_id, assignment_id):
         db.session.delete(item)
         db.session.commit()
         flash("Assignment deleted successfully.", "success")
-    return redirect(
-        url_for(
-            "teachers.view_course", teacher_id=teacher_id, course_id=course_id
-        )
-    )
+    return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/delete",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/delete", methods=["POST"])
 @login_required
 def delete_quiz(teacher_id, course_id, quiz_id):
     course = Course.query.get_or_404(course_id)
@@ -2067,17 +1566,10 @@ def delete_quiz(teacher_id, course_id, quiz_id):
         db.session.delete(assignment if assignment else quiz)
         db.session.commit()
         flash("Quiz deleted successfully.", "success")
-    return redirect(
-        url_for(
-            "teachers.view_course", teacher_id=teacher_id, course_id=course_id
-        )
-    )
+    return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/delete",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/delete", methods=["POST"])
 @login_required
 def delete_exam(teacher_id, course_id, exam_id):
     course = Course.query.get_or_404(course_id)
@@ -2088,40 +1580,24 @@ def delete_exam(teacher_id, course_id, exam_id):
         db.session.delete(exam)
         db.session.commit()
         flash("Exam deleted successfully.", "success")
-    return redirect(
-        url_for(
-            "teachers.view_course", teacher_id=teacher_id, course_id=course_id
-        )
-    )
+    return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
 
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/students/<int:student_id>/activity/delete",
-    methods=["POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/students/<int:student_id>/activity/delete", methods=["POST"])
 @login_required
 def delete_activity(teacher_id, course_id, student_id):
     course = Course.query.get_or_404(course_id)
     if not _owns_course(teacher_id, course):
         flash("Access denied.", "danger")
     else:
-        Activity.query.filter_by(
-            student_id=student_id, course_id=course_id
-        ).delete()
+        Activity.query.filter_by(student_id=student_id, course_id=course_id).delete()
         db.session.commit()
         flash("Activity score removed.", "success")
-    return redirect(
-        url_for(
-            "teachers.view_course", teacher_id=teacher_id, course_id=course_id
-        )
-    )
+    return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
 
 
 # ------------------------- Edit Quiz -------------------------
-@teachers_bp.route(
-    "/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit",
-    methods=["GET", "POST"],
-)
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_quiz(teacher_id, course_id, quiz_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -2141,13 +1617,7 @@ def edit_quiz(teacher_id, course_id, quiz_id):
 
         db.session.commit()
         flash("Quiz updated successfully!", "success")
-        return redirect(
-            url_for(
-                "teachers.view_course",
-                teacher_id=teacher.id,
-                course_id=course.id,
-            )
-        )
+        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
 
     return render_template(
         "teacher/edit_quiz.html",
