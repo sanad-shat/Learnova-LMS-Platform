@@ -6,7 +6,32 @@
   <title>{% block title %}Instructor Portal | Learnova LMS{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=10">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=11">
+  <style>
+    /* تنسيق دقيق وثابت لشارة الإشعارات في الهيدر العلوي لمنع التداخل */
+    .header-icon-wrapper {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .header-icon-wrapper .icon-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: #4f46e5;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 999px;
+      border: 2px solid #ffffff;
+      line-height: 1;
+      min-width: 16px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
 <div class="mobile-overlay"></div>
@@ -40,7 +65,11 @@
     <header class="top-header">
       <div class="header-left"><button class="menu-toggle" data-menu-toggle><i class="fa-solid fa-bars"></i></button><div class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="teacherGlobalSearch" placeholder="Search this page..."></div></div>
       <div class="header-right">
-        <a class="header-icon" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-regular fa-bell"></i>{% if nav_notifications %}<span class="icon-badge">{{ nav_notifications }}</span>{% endif %}</a>
+        <!-- تم ضبط الحاوية هنا لمنع أي تداخل لشارة الرقم فوق الجرس -->
+        <div class="header-icon-wrapper">
+          <a class="header-icon" href="{{ url_for('teachers.notifications',teacher_id=teacher.id) }}"><i class="fa-regular fa-bell"></i></a>
+          {% if nav_notifications %}<span class="icon-badge">{{ nav_notifications }}</span>{% endif %}
+        </div>
         <div class="profile-chip">
           {% if session.get('is_demo') %}
             <div class="profile-avatar">D</div>
