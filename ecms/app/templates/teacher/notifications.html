@@ -28,31 +28,41 @@
   .notifs-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 24px 32px 60px !important;
+    padding: 32px 32px 60px !important;
     box-sizing: border-box;
   }
 
-  /* Header Section */
+  /* Header Section مع مسافة آمنة تمنع أي تداخل */
   .notifs-header-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     flex-wrap: wrap;
     gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 18px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--slate-200);
   }
 
-  .notifs-title-group h1 {
-    font-size: 1.65rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.025em;
-    margin: 0 0 6px;
+  .notifs-title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .notifs-title-line {
     display: flex;
     align-items: center;
     gap: 12px;
+  }
+
+  .notifs-title-group h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0;
+    line-height: 1.2;
   }
 
   .notifs-count-pill {
@@ -66,7 +76,7 @@
   }
 
   .notifs-subtitle {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
     color: var(--slate-500);
     margin: 0;
   }
@@ -87,7 +97,7 @@
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--slate-700);
-    padding: 8px 18px;
+    padding: 9px 18px;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -263,7 +273,7 @@
   /* Responsive for Tablets & Mobile */
   @media (max-width: 900px) {
     .notifs-page-shell {
-      padding: 18px 16px 40px !important;
+      padding: 20px 16px 40px !important;
     }
   }
 
@@ -293,10 +303,10 @@
 <div class="notifs-page-shell">
   <div class="notifs-header-row">
     <div class="notifs-title-group">
-      <h1>
-        Notifications
+      <div class="notifs-title-line">
+        <h1>Notifications</h1>
         <span class="notifs-count-pill">{{ notifications|length if notifications else 0 }}</span>
-      </h1>
+      </div>
       <p class="notifs-subtitle">Track student assignment submissions, quiz results, and grading queues.</p>
     </div>
   </div>
