@@ -21,13 +21,13 @@ except ImportError:
 
 teachers_bp = Blueprint("teachers", __name__, url_prefix="/teacher")
 
-# إعدادات رفع الملفات لبيئة سيرفرليس
+# إعدادات مجلد الرفع بما يتوافق مع بيئة سيرفرليس
 if os.environ.get('VERCEL'):
     UPLOAD_FOLDER = '/tmp/uploads'
 else:
     UPLOAD_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', 'uploads'))
 
-ALLOWED_EXTENSIONS = {'pdf','doc','docx','ppt','pptx','xls','xlsx','txt','jpg','jpeg','png','zip'}
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'jpg', 'jpeg', 'png', 'zip'}
 try:
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 except Exception:
@@ -1187,7 +1187,7 @@ def notifications(teacher_id):
         flash('Access denied.', 'danger')
         return redirect(url_for('teachers.login'))
 
-    # فحص وتوليد إشعارات تلقائية فورية لتسليمات الطلاب
+    # فحص وتوليد إشعارات تلقائية فورية لتسليمات الطلاب بأمان
     try:
         for course in teacher.courses:
             for assignment in course.assignments:
