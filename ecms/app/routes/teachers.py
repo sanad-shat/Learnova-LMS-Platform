@@ -1898,7 +1898,7 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    # فحص وتسجيل إشعارات التسليمات المعلقة بأمان ودون إيقاف السيرفر
+    # فحص وتسجيل إشعارات التسليمات بأمان دون إيقاف السيرفر
     try:
         if hasattr(teacher, "courses") and teacher.courses:
             for course in teacher.courses:
