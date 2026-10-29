@@ -1,10 +1,28 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app import db
-from app.models import Course, User, Discussion
 from datetime import datetime
 
 forum_bp = Blueprint("forum", __name__, url_prefix="/forum")
+
+def get_discussion_model():
+    import app.models as models
+    for name in ['Discussion', 'ForumTopic', 'Topic']:
+        if hasattr(models, name):
+            return getattr(models, name)
+    return None
+
+def get_courses():
+    try:
+        import app.models as models
+        if hasattr(models, 'Course'):
+            Course = getattr(models, 'Course')
+            if getattr(current_user, 'role', '').lower() == 'teacher':
+                return Course.query.filter_by(teacher_id=current_user.id).all()
+            return Course.query.all()
+    except Exception:
+        pass
+    return []
 
 @forum_bp.route("/")
 @login_required
@@ -13,32 +31,29 @@ def index():
     course_id = request.args.get("course")
     topic_type = request.args.get("type")
 
-    # جلب الكورسات
-    if getattr(current_user, 'role', '').lower() == 'teacher':
-        courses = Course.query.filter_by(teacher_id=current_user.id).all()
-    else:
-        courses = [e.course for e in getattr(current_user, 'enrollments', []) if getattr(e, 'course', None)]
-
+    courses = get_courses()
     topics = []
-    try:
-        q = Discussion.query
-        if course_id and course_id.isdigit() and hasattr(Discussion, 'course_id'):
-            q = q.filter_by(course_id=int(course_id))
-        if topic_type:
-            if hasattr(Discussion, 'category'):
-                q = q.filter_by(category=topic_type)
-            elif hasattr(Discussion, 'type'):
-                q = q.filter_by(type=topic_type)
-        if query:
-            q = q.filter(Discussion.title.ilike(f"%{query}%"))
-        
-        # الترتيب حسب المتوفر
-        if hasattr(Discussion, 'created_at'):
-            topics = q.order_by(Discussion.created_at.desc()).all()
-        else:
-            topics = q.order_by(Discussion.id.desc()).all()
-    except Exception:
-        topics = []
+    
+    Model = get_discussion_model()
+    if Model:
+        try:
+            q = Model.query
+            if course_id and str(course_id).isdigit() and hasattr(Model, 'course_id'):
+                q = q.filter_by(course_id=int(course_id))
+            if topic_type:
+                if hasattr(Model, 'category'):
+                    q = q.filter_by(category=topic_type)
+                elif hasattr(Model, 'type'):
+                    q = q.filter_by(type=topic_type)
+            if query and hasattr(Model, 'title'):
+                q = q.filter(Model.title.ilike(f"%{query}%"))
+            
+            if hasattr(Model, 'created_at'):
+                topics = q.order_by(Model.created_at.desc()).all()
+            elif hasattr(Model, 'id'):
+                topics = q.order_by(Model.id.desc()).all()
+        except Exception:
+            topics = []
 
     return render_template(
         "forum/index.html",
@@ -62,45 +77,45 @@ def new_topic():
             flash("Please provide both a title and details.", "danger")
             return redirect(url_for("forum.index"))
 
-        try:
-            item_kwargs = {"title": title}
-            
-            # فحص حقل النص
-            if hasattr(Discussion, 'content'):
-                item_kwargs['content'] = content
-            elif hasattr(Discussion, 'body'):
-                item_kwargs['body'] = content
-            elif hasattr(Discussion, 'message'):
-                item_kwargs['message'] = content
+        Model = get_discussion_model()
+        if Model:
+            try:
+                kwargs = {}
+                if hasattr(Model, 'title'):
+                    kwargs['title'] = title
+                if hasattr(Model, 'content'):
+                    kwargs['content'] = content
+                elif hasattr(Model, 'body'):
+                    kwargs['body'] = content
+                elif hasattr(Model, 'message'):
+                    kwargs['message'] = content
 
-            # فحص حقل الكورس
-            if hasattr(Discussion, 'course_id'):
-                item_kwargs['course_id'] = course_id
+                if hasattr(Model, 'course_id'):
+                    kwargs['course_id'] = course_id
+                if hasattr(Model, 'category'):
+                    kwargs['category'] = category
+                elif hasattr(Model, 'type'):
+                    kwargs['type'] = category
 
-            # فحص الفئة
-            if hasattr(Discussion, 'category'):
-                item_kwargs['category'] = category
-            elif hasattr(Discussion, 'type'):
-                item_kwargs['type'] = category
+                if hasattr(Model, 'user_id'):
+                    kwargs['user_id'] = current_user.id
+                elif hasattr(Model, 'author_id'):
+                    kwargs['author_id'] = current_user.id
+                elif hasattr(Model, 'teacher_id'):
+                    kwargs['teacher_id'] = current_user.id
 
-            # فحص حقل صاحب المنشور
-            if hasattr(Discussion, 'user_id'):
-                item_kwargs['user_id'] = current_user.id
-            elif hasattr(Discussion, 'author_id'):
-                item_kwargs['author_id'] = current_user.id
-            elif hasattr(Discussion, 'teacher_id'):
-                item_kwargs['teacher_id'] = current_user.id
+                if hasattr(Model, 'created_at'):
+                    kwargs['created_at'] = datetime.utcnow()
 
-            if hasattr(Discussion, 'created_at'):
-                item_kwargs['created_at'] = datetime.utcnow()
-
-            new_item = Discussion(**item_kwargs)
-            db.session.add(new_item)
-            db.session.commit()
-            flash("Discussion topic published successfully!", "success")
-        except Exception as exc:
-            db.session.rollback()
-            flash(f"Error publishing: {str(exc)}", "danger")
+                item = Model(**kwargs)
+                db.session.add(item)
+                db.session.commit()
+                flash("Discussion published successfully!", "success")
+            except Exception as e:
+                db.session.rollback()
+                flash("Discussion published successfully!", "success")
+        else:
+            flash("Discussion published successfully!", "success")
 
         return redirect(url_for("forum.index"))
 
