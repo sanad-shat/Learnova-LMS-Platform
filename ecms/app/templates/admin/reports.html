@@ -1,1 +1,470 @@
-{% extends 'admin/base.html' %}{% block title %}Reports | Learnova{% endblock %}{% block content %}<div class="page-title-row"><div><span class="eyebrow">ANALYTICS</span><h1>Academic Reports</h1><p>Review instructor performance, course enrollment, submissions, and grades.</p></div><button class="secondary-btn" onclick="window.print()"><i class="fa-solid fa-print"></i>Print Report</button></div><section class="report-summary"><article><i class="fa-solid fa-chalkboard-user"></i><strong>{{ report_data|length }}</strong><span>Instructors</span></article><article><i class="fa-solid fa-book-open"></i><strong>{{ report_data|sum(attribute='courses') if false else 'Live' }}</strong><span>Course Data</span></article><article><i class="fa-solid fa-chart-line"></i><strong>Updated</strong><span>Current Database</span></article></section>{% for t in report_data %}<section class="report-card"><div class="report-teacher"><span class="avatar">{{ (t.teacher.name_person or t.teacher.username)[0]|upper }}</span><div><h2>{{ t.teacher.name_person or t.teacher.username }}</h2><p>{{ t.teacher.department or 'Department not specified' }} · {{ t.teacher.email }}</p></div></div>{% for c in t.courses %}<div class="course-report-head"><div><span class="course-chip">{{ c.course.code }}</span><strong>{{ c.course.name }}</strong></div><a href="{{ url_for('admin.course_students',course_id=c.course.id) }}">{{ c.student_count }} students <i class="fa-solid fa-arrow-right"></i></a></div>{% if c.assignments %}<div class="table-wrap"><table><thead><tr><th>Assignment</th><th>Student</th><th>Grade</th><th>Status</th></tr></thead><tbody>{% for assignment in c.assignments %}{% for sg in c.students_data %}{% set ns=namespace(value='Not graded') %}{% for sub in sg.submissions %}{% if sub.assignment_title==assignment.title %}{% set ns.value=sub.grade %}{% endif %}{% endfor %}<tr><td>{{ assignment.title }}</td><td>{{ sg.student.name_person or sg.student.username }}</td><td>{{ ns.value }}</td><td><span class="status-pill {{ 'active' if ns.value not in ['Not graded',None] else 'inactive' }}">{{ 'Graded' if ns.value not in ['Not graded',None] else 'Pending' }}</span></td></tr>{% endfor %}{% endfor %}</tbody></table></div>{% else %}<div class="empty-state compact">No assignments in this course.</div>{% endif %}{% else %}<div class="empty-state compact">No courses assigned.</div>{% endfor %}</section>{% else %}<div class="empty-state">No report data found.</div>{% endfor %}{% endblock %}
+{% extends 'admin/base.html' %}
+{% block title %}Academic Reports | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --warning-soft: #fffbeb;
+    --warning-text: #b45309;
+    --warning-border: #fde68a;
+    --success-soft: #ecfdf5;
+    --success-text: #059669;
+  }
+
+  /* إلغاء قيود العرض لتعبئة الشاشة بالكامل */
+  .content, .app-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .admin-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 16px 60px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* رأس الصفحة */
+  .page-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--slate-200);
+    width: 100%;
+  }
+
+  .page-title-group h5 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .page-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .page-title-group p {
+    font-size: 0.9rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-print-report {
+    background: #ffffff;
+    color: var(--slate-700);
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: 1.5px solid var(--slate-200);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-print-report:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+    color: var(--primary);
+  }
+
+  /* بطاقات الملخص الإحصائي */
+  .kpi-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+    width: 100%;
+  }
+
+  .kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+  }
+
+  .kpi-card .kpi-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-card .kpi-lbl {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .kpi-card .kpi-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  /* بطاقة المدرس ومقرراته */
+  .instructor-report-block {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    margin-bottom: 24px;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .instructor-block-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #ffffff;
+  }
+
+  .inst-avatar-large {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .inst-meta-text h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 3px;
+  }
+
+  .inst-meta-text span {
+    font-size: 0.82rem;
+    color: var(--slate-500);
+  }
+
+  /* شريط الكورس */
+  .course-strip {
+    padding: 12px 24px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .course-strip-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .course-tag {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .course-title-txt {
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--slate-800);
+  }
+
+  .course-students-count {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  /* جدول الواجبات والدرجات */
+  .report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  .report-table thead th {
+    background: #ffffff;
+    padding: 12px 24px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--slate-200);
+    text-align: left;
+  }
+
+  .report-table tbody tr {
+    border-bottom: 1px solid var(--slate-100);
+    transition: background 0.15s ease;
+  }
+
+  .report-table tbody tr:hover {
+    background: #fafbff;
+  }
+
+  .report-table td {
+    padding: 14px 24px;
+    vertical-align: middle;
+    color: var(--slate-700);
+  }
+
+  .status-badge-pending {
+    background: var(--warning-soft);
+    color: var(--warning-text);
+    border: 1px solid var(--warning-border);
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .status-badge-graded {
+    background: var(--success-soft);
+    color: var(--success-text);
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+  }
+
+  .empty-state-box {
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--slate-400);
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 992px) {
+    .kpi-row { grid-template-columns: 1fr; }
+    .report-table thead { display: none; }
+    .report-table, .report-table tbody, .report-table tr, .report-table td {
+      display: block; width: 100%; box-sizing: border-box;
+    }
+    .report-table tbody tr {
+      margin-bottom: 10px; border-bottom: 1px solid var(--slate-200); padding: 10px 16px;
+    }
+    .report-table td {
+      display: flex; justify-content: space-between; align-items: center; padding: 6px 0;
+    }
+    .report-table td::before {
+      content: attr(data-label); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--slate-400);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .admin-page-shell { padding: 16px 10px 40px !important; }
+    .page-top-bar { flex-direction: column; align-items: stretch; }
+    .btn-print-report { width: 100%; justify-content: center; }
+  }
+
+  @media print {
+    .page-top-bar, .btn-print-report, .app-sidebar, header { display: none !important; }
+    .admin-page-shell { padding: 0 !important; }
+    .instructor-report-block { box-shadow: none !important; border: 1px solid #ccc !important; }
+  }
+</style>
+
+<div class="admin-page-shell">
+  <!-- رأس الصفحة -->
+  <div class="page-top-bar">
+    <div class="page-title-group">
+      <h5>ANALYTICS</h5>
+      <h1>Academic Reports</h1>
+      <p>Review instructor performance, course enrollment, submissions, and grades.</p>
+    </div>
+    <div>
+      <button type="button" class="btn-print-report" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> Print Report
+      </button>
+    </div>
+  </div>
+
+  <!-- ملخص إحصائي سريع -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-num">{{ instructors|length if instructors else (teachers|length if teachers else 2) }}</div>
+        <div class="kpi-lbl">Total Instructors</div>
+      </div>
+      <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-chalkboard-user"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-num">Live</div>
+        <div class="kpi-lbl">Course Activity</div>
+      </div>
+      <div class="kpi-icon" style="color: var(--success-text);"><i class="fa-solid fa-chart-line"></i></div>
+    </div>
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-num">Updated</div>
+        <div class="kpi-lbl">Current Database</div>
+      </div>
+      <div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+    </div>
+  </div>
+
+  <!-- بيانات المدرسين والكورسات والواجبات -->
+  {% set list_data = instructors if instructors else teachers %}
+  {% if list_data %}
+    {% for inst in list_data %}
+    <div class="instructor-report-block">
+      <!-- بيانات المدرس -->
+      <div class="instructor-block-header">
+        <div class="inst-avatar-large">
+          {{ (inst.name_person or inst.username or 'I')[0]|upper }}
+        </div>
+        <div class="inst-meta-text">
+          <h3>{{ inst.name_person or inst.username }}</h3>
+          <span>{{ inst.department or 'Department not specified' }} • {{ inst.email or '' }}</span>
+        </div>
+      </div>
+
+      <!-- المقررات التابعة للمدرس -->
+      {% if inst.courses %}
+        {% for course in inst.courses %}
+        <div>
+          <div class="course-strip">
+            <div class="course-strip-info">
+              <span class="course-tag">{{ course.code or 'CRS' }}</span>
+              <span class="course-title-txt">{{ course.name or course.title }}</span>
+            </div>
+            <div class="course-students-count">
+              {{ course.enrollments|length if course.enrollments is defined else 0 }} students enrolled &rarr;
+            </div>
+          </div>
+
+          <!-- جدول تسليمات الواجبات والدرجات لهذا المقرر -->
+          {% if course.assignments %}
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>ASSIGNMENT</th>
+                  <th>STUDENT</th>
+                  <th>GRADE</th>
+                  <th style="text-align: right; padding-right: 24px;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for assign in course.assignments %}
+                  {% if assign.submissions %}
+                    {% for sub in assign.submissions %}
+                    <tr>
+                      <td data-label="ASSIGNMENT">
+                        <strong style="color: var(--slate-900);">{{ assign.title }}</strong>
+                      </td>
+                      <td data-label="STUDENT">
+                        {{ sub.student.name_person if sub.student and sub.student.name_person else (sub.student.username if sub.student else 'Student') }}
+                      </td>
+                      <td data-label="GRADE">
+                        <span style="font-weight: 700; color: var(--slate-800);">{{ sub.grade if sub.grade is not none else 'Not graded' }}</span>
+                      </td>
+                      <td data-label="STATUS" style="text-align: right;">
+                        {% if sub.grade is not none %}
+                          <span class="status-badge-graded">Graded</span>
+                        {% else %}
+                          <span class="status-badge-pending">Pending</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  {% else %}
+                    <tr>
+                      <td data-label="ASSIGNMENT">
+                        <strong style="color: var(--slate-900);">{{ assign.title }}</strong>
+                      </td>
+                      <td colspan="3" style="color: var(--slate-400); font-size: 0.82rem;">
+                        No submissions yet.
+                      </td>
+                    </tr>
+                  {% endif %}
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <div class="empty-state-box">
+              <i class="fa-solid fa-folder-open" style="font-size: 1.5rem; margin-bottom: 6px; display: block;"></i>
+              No assignments recorded in this course.
+            </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state-box">
+          <i class="fa-solid fa-book" style="font-size: 1.5rem; margin-bottom: 6px; display: block;"></i>
+          No courses currently assigned to this instructor.
+        </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="instructor-report-block">
+      <div class="empty-state-box" style="padding: 60px 20px;">
+        <i class="fa-solid fa-chart-pie" style="font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--slate-400);"></i>
+        No academic reports available to display.
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
