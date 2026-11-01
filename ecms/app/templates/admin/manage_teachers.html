@@ -1,3 +1,575 @@
-{% extends 'admin/base.html' %}{% block title %}Instructors | Learnova{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">ACADEMIC STAFF</span><h1>Instructors</h1><p>Manage instructor accounts, departments, ranks, and assigned courses.</p></div><a href="{{ url_for('admin.add_teacher') }}" class="primary-btn"><i class="fa-solid fa-plus"></i>Add Instructor</a></div>
-<section class="data-card"><div class="table-toolbar"><div class="toolbar-title"><i class="fa-solid fa-user-graduate"></i><div><strong>Instructor Directory</strong><small>{{ teachers|length }} registered instructors</small></div></div><input class="table-search" placeholder="Search instructors..." data-table-search></div><div class="table-wrap"><table data-search-table><thead><tr><th>Employee ID</th><th>Instructor</th><th>Department</th><th>Rank</th><th>Office</th><th>Status</th><th>Password</th><th>Courses</th><th>Actions</th></tr></thead><tbody>{% for teacher in teachers %}<tr><td><strong>{{ teacher.employee_id or '—' }}</strong></td><td><div class="person-cell"><span class="avatar">{{ (teacher.name_person or teacher.username)[0]|upper }}</span><div><strong>{{ teacher.name_person or teacher.username }}</strong><small>@{{ teacher.username }}</small></div></div></td><td>{{ teacher.department or '—' }}</td><td>{{ teacher.academic_rank or '—' }}</td><td><strong>{{ teacher.office_number or '—' }}</strong><small>{{ teacher.email }}</small></td><td><span class="status-pill {{ (teacher.status or 'Active')|lower }}">{{ teacher.status or 'Active' }}</span></td><td><div class="password-cell"><span class="pw-value" data-password="{{ teacher.visible_password or 'Encrypted' }}">••••••</span><button type="button" class="action-btn reset" data-show-password>Show</button></div></td><td><div class="chip-list">{% for enrollment in teacher.courses %}<span class="course-chip">{{ enrollment.code }}</span>{% else %}<span class="muted">None</span>{% endfor %}</div></td><td><div class="row-actions"><a href="{{ url_for('admin.edit_teacher',teacher_id=teacher.id) }}" class="action-btn edit"><i class="fa-solid fa-pen"></i>Edit</a><a href="{{ url_for('admin.assign_courses',teacher_id=teacher.id) }}" class="action-btn enroll"><i class="fa-solid fa-book-medical"></i>Assign</a><a href="{{ url_for('admin.reset_teacher_password',teacher_id=teacher.id) }}" class="action-btn reset"><i class="fa-solid fa-key"></i>Password</a><form method="post" action="{{ url_for('admin.delete_teacher',teacher_id=teacher.id) }}" onsubmit="return confirm('Delete this instructor?')"><button class="action-btn delete"><i class="fa-solid fa-trash"></i>Delete</button></form></div></td></tr>{% else %}<tr><td colspan="9"><div class="empty-state">No instructors yet.</div></td></tr>{% endfor %}</tbody></table></div></section>{% endblock %}
+{% extends 'admin/base.html' %}
+{% block title %}Instructors | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success-bg: #ecfdf5;
+    --success-text: #059669;
+    --success-border: #a7f3d0;
+    --danger-soft: #fef2f2;
+    --danger-text: #dc2626;
+  }
+
+  .admin-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 32px 36px 70px !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* Header Section */
+  .page-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--slate-200);
+  }
+
+  .page-title-group h5 {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .page-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 6px;
+    line-height: 1.2;
+  }
+
+  .page-title-group p {
+    font-size: 0.94rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-add-primary {
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 0.92rem;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: 12px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-add-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.38);
+  }
+
+  /* Table Container Card */
+  .directory-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Directory Card Header & Controls */
+  .directory-toolbar {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-bottom: 1px solid var(--slate-200);
+    background: #ffffff;
+  }
+
+  .directory-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .directory-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+
+  .directory-meta h3 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0;
+  }
+
+  .directory-meta span {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--slate-500);
+  }
+
+  .search-input-box {
+    position: relative;
+    width: 280px;
+    max-width: 100%;
+  }
+
+  .search-input-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.85rem;
+  }
+
+  .search-input-box input {
+    width: 100%;
+    padding: 9px 14px 9px 38px;
+    font-size: 0.88rem;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    background: var(--slate-50);
+    color: var(--slate-900);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .search-input-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  /* Full Width Modern Table */
+  .table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .modern-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.88rem;
+  }
+
+  .modern-data-table thead th {
+    background: var(--slate-50);
+    padding: 14px 20px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--slate-200);
+    white-space: nowrap;
+  }
+
+  .modern-data-table tbody tr {
+    border-bottom: 1px solid var(--slate-100);
+    transition: background 0.15s ease;
+  }
+
+  .modern-data-table tbody tr:hover {
+    background: #fafbff;
+  }
+
+  .modern-data-table td {
+    padding: 16px 20px;
+    vertical-align: middle;
+    color: var(--slate-700);
+  }
+
+  /* Table Cells Details */
+  .instructor-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .instructor-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .instructor-name-col strong {
+    display: block;
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--slate-900);
+  }
+
+  .instructor-name-col small {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--slate-400);
+  }
+
+  .badge-dept {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-block;
+  }
+
+  .badge-status-active {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .badge-status-active::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success-text);
+  }
+
+  /* Courses Tag */
+  .course-pill {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: inline-block;
+    margin: 2px;
+  }
+
+  /* Action Buttons Clean Group */
+  .actions-cell-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .action-btn-sm {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .btn-act-edit { background: #eff6ff; color: #2563eb; }
+  .btn-act-edit:hover { background: #2563eb; color: #ffffff; }
+
+  .btn-act-assign { background: #ecfdf5; color: #059669; }
+  .btn-act-assign:hover { background: #059669; color: #ffffff; }
+
+  .btn-act-pass { background: #fffbeb; color: #d97706; }
+  .btn-act-pass:hover { background: #d97706; color: #ffffff; }
+
+  .btn-act-delete { background: var(--danger-soft); color: var(--danger-text); }
+  .btn-act-delete:hover { background: var(--danger-text); color: #ffffff; }
+
+  /* Mobile Responsive Transformation */
+  @media (max-width: 992px) {
+    .modern-data-table thead {
+      display: none;
+    }
+    .modern-data-table, 
+    .modern-data-table tbody, 
+    .modern-data-table tr, 
+    .modern-data-table td {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .modern-data-table tbody tr {
+      margin-bottom: 16px;
+      border: 1px solid var(--slate-200);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    }
+    .modern-data-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--slate-100);
+    }
+    .modern-data-table td:last-child {
+      border-bottom: none;
+      padding-top: 14px;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+    .modern-data-table td::before {
+      content: attr(data-label);
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--slate-400);
+    }
+    .actions-cell-wrap {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .action-btn-sm {
+      justify-content: center;
+      padding: 9px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .admin-page-shell {
+      padding: 20px 16px 50px !important;
+    }
+    .page-top-bar {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+    }
+    .btn-add-primary {
+      width: 100%;
+      justify-content: center;
+    }
+    .directory-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .search-input-box {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="admin-page-shell">
+  <!-- رأس الصفحة -->
+  <div class="page-top-bar">
+    <div class="page-title-group">
+      <h5>Academic Staff</h5>
+      <h1>Instructors</h1>
+      <p>Manage instructor accounts, academic departments, rank levels, and assigned courses.</p>
+    </div>
+    <div>
+      <a href="{{ url_for('admin.add_instructor') }}" class="btn-add-primary">
+        <i class="fa-solid fa-plus"></i> Add Instructor
+      </a>
+    </div>
+  </div>
+
+  <!-- بطاقة الدليل الرئيسية بالعرض الكامل -->
+  <div class="directory-card">
+    <div class="directory-toolbar">
+      <div class="directory-meta">
+        <div class="directory-icon-box">
+          <i class="fa-solid fa-chalkboard-user"></i>
+        </div>
+        <div>
+          <h3>Instructor Directory</h3>
+          <span>{{ teachers|length if teachers else 0 }} registered instructors</span>
+        </div>
+      </div>
+
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="instructorSearchInput" placeholder="Search instructors..." onkeyup="filterInstructorTable()">
+      </div>
+    </div>
+
+    <!-- جدول البيانات -->
+    <div class="table-responsive-wrapper">
+      <table class="modern-data-table" id="instructorsTable">
+        <thead>
+          <tr>
+            <th>Employee ID</th>
+            <th>Instructor</th>
+            <th>Department</th>
+            <th>Rank</th>
+            <th>Office & Email</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Courses</th>
+            <th style="text-align: right; padding-right: 28px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if teachers %}
+            {% for inst in teachers %}
+            <tr>
+              <td data-label="Employee ID">
+                <span style="font-weight: 700; color: var(--slate-900);">{{ inst.employee_id or inst.id or '—' }}</span>
+              </td>
+
+              <td data-label="Instructor">
+                <div class="instructor-profile-cell">
+                  <div class="instructor-avatar">
+                    {{ (inst.name_person or inst.username or 'I')[0]|upper }}
+                  </div>
+                  <div class="instructor-name-col">
+                    <strong>{{ inst.name_person or inst.username }}</strong>
+                    <small>{{ inst.username }}</small>
+                  </div>
+                </div>
+              </td>
+
+              <td data-label="Department">
+                <span class="badge-dept">{{ inst.department or 'Unassigned' }}</span>
+              </td>
+
+              <td data-label="Rank">
+                <span style="font-weight: 600; color: var(--slate-700);">{{ inst.academic_rank or 'Instructor' }}</span>
+              </td>
+
+              <td data-label="Office & Email">
+                <div>
+                  <div style="font-weight: 600; color: var(--slate-800);">{{ inst.office_number or 'None' }}</div>
+                  <small style="color: var(--slate-400);">{{ inst.email }}</small>
+                </div>
+              </td>
+
+              <td data-label="Status">
+                <span class="badge-status-active">Active</span>
+              </td>
+
+              <td data-label="Password">
+                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span id="pwd-mask-{{ inst.id }}" style="letter-spacing: 2px;">••••••</span>
+                  <button type="button" class="action-btn-sm btn-act-pass" style="padding: 3px 8px; font-size: 0.7rem;" 
+                          onclick="toggleInstructorPwd('{{ inst.id }}', '{{ inst.plain_password if inst.plain_password else 'Learnova@2026' }}')">
+                    Show
+                  </button>
+                </div>
+              </td>
+
+              <td data-label="Courses">
+                {% if inst.courses %}
+                  {% for c in inst.courses %}
+                    <span class="course-pill">{{ c.code if c.code else c.name }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span style="color: var(--slate-400); font-size: 0.8rem;">None</span>
+                {% endif %}
+              </td>
+
+              <td data-label="Actions" style="text-align: right;">
+                <div class="actions-cell-wrap">
+                  <a href="{{ url_for('admin.edit_instructor', instructor_id=inst.id) }}" class="action-btn-sm btn-act-edit" title="Edit">
+                    <i class="fa-solid fa-pen"></i> Edit
+                  </a>
+                  <a href="{{ url_for('admin.assign_courses', instructor_id=inst.id) }}" class="action-btn-sm btn-act-assign" title="Assign Courses">
+                    <i class="fa-solid fa-book"></i> Assign
+                  </a>
+                  <a href="{{ url_for('admin.reset_password', user_id=inst.id) }}" class="action-btn-sm btn-act-pass" title="Change Password">
+                    <i class="fa-solid fa-key"></i> Pass
+                  </a>
+                  <form method="POST" action="{{ url_for('admin.delete_instructor', instructor_id=inst.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this instructor?');">
+                    <button type="submit" class="action-btn-sm btn-act-delete" title="Delete">
+                      <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="9" style="text-align: center; padding: 48px 20px; color: var(--slate-400);">
+                <i class="fa-solid fa-user-slash" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                No instructors registered yet.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function filterInstructorTable() {
+    const input = document.getElementById('instructorSearchInput');
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll('#instructorsTable tbody tr');
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  }
+
+  function toggleInstructorPwd(id, val) {
+    const el = document.getElementById('pwd-mask-' + id);
+    if (!el) return;
+    if (el.textContent === '••••••') {
+      el.textContent = val;
+    } else {
+      el.textContent = '••••••';
+    }
+  }
+</script>
+{% endblock %}
