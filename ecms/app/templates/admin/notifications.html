@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% block title %}System Notifications | Learnova LMS{% endblock %}
+{% block title %}System Settings | Learnova LMS{% endblock %}
 
 {% block content %}
 <style>
@@ -18,9 +18,10 @@
     --slate-50: #f8fafc;
     --success-bg: #ecfdf5;
     --success-text: #059669;
+    --success-border: #a7f3d0;
   }
 
-  /* إزالة قيود العرض وتوسيع المساحة */
+  /* فك قيود العرض لتعبئة الشاشة بالكامل */
   .content, .app-main {
     max-width: 100% !important;
     width: 100% !important;
@@ -74,29 +75,7 @@
     margin: 0;
   }
 
-  .btn-mark-all {
-    background: #ffffff;
-    color: var(--slate-700);
-    font-size: 0.88rem;
-    font-weight: 700;
-    padding: 10px 18px;
-    border-radius: 10px;
-    border: 1.5px solid var(--slate-200);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
-  }
-
-  .btn-mark-all:hover {
-    background: var(--slate-50);
-    border-color: var(--slate-300);
-    color: var(--primary);
-  }
-
-  /* بطاقات الملخص الإحصائي */
+  /* بطاقات الإحصائيات العلوية */
   .kpi-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -144,35 +123,35 @@
     font-size: 1.1rem;
   }
 
-  /* حاوية الإشعارات */
-  .notifications-card {
+  /* شبكة بطاقات الإعدادات */
+  .settings-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .settings-panel-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 18px;
     box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
     overflow: hidden;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .notifications-toolbar {
-    padding: 16px 22px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 14px;
-    border-bottom: 1px solid var(--slate-200);
-    background: #ffffff;
+    flex-direction: column;
   }
 
-  .notifications-meta {
+  .panel-card-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--slate-200);
     display: flex;
     align-items: center;
     gap: 12px;
+    background: #ffffff;
   }
 
-  .notifications-icon-box {
+  .panel-header-icon {
     width: 38px;
     height: 38px;
     border-radius: 10px;
@@ -184,165 +163,83 @@
     font-size: 1rem;
   }
 
-  .notifications-meta h3 {
-    font-size: 1.05rem;
+  .panel-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--slate-900);
-    margin: 0;
   }
 
-  .notifications-meta span {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--slate-500);
-  }
-
-  .search-input-box {
-    position: relative;
-    width: 280px;
-    max-width: 100%;
-  }
-
-  .search-input-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--slate-400);
-    font-size: 0.82rem;
-  }
-
-  .search-input-box input {
-    width: 100%;
-    padding: 8px 12px 8px 34px;
-    font-size: 0.86rem;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 9px;
-    background: var(--slate-50);
-    color: var(--slate-900);
-    box-sizing: border-box;
-    transition: all 0.2s ease;
-  }
-
-  .search-input-box input:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: #ffffff;
-    box-shadow: 0 0 0 3px var(--primary-soft);
-  }
-
-  /* قائمة الإشعارات */
-  .notifications-feed-list {
+  .panel-card-body {
+    padding: 8px 24px 20px;
     display: flex;
     flex-direction: column;
-    padding: 12px 18px;
-    gap: 12px;
-    background: var(--slate-50);
   }
 
-  .notif-feed-item {
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    border-left: 4px solid var(--primary);
-    border-radius: 12px;
-    padding: 16px 20px;
+  .setting-item-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    transition: all 0.2s ease;
-    box-sizing: border-box;
-  }
-
-  .notif-feed-item:hover {
-    border-color: var(--slate-300);
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-    transform: translateY(-1px);
-  }
-
-  .notif-main-content {
-    display: flex;
-    align-items: center;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--slate-100);
     gap: 16px;
   }
 
-  .notif-item-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--primary-soft);
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
+  .setting-item-row:last-child {
+    border-bottom: none;
   }
 
-  .notif-texts strong {
+  .setting-item-info strong {
     display: block;
     font-size: 0.94rem;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--slate-900);
     margin-bottom: 3px;
   }
 
-  .notif-texts p {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--slate-600);
-    line-height: 1.4;
-  }
-
-  .notif-meta-end {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .notif-timestamp {
-    font-size: 0.78rem;
-    font-weight: 600;
+  .setting-item-info small {
+    display: block;
+    font-size: 0.8rem;
     color: var(--slate-400);
+  }
+
+  .setting-status-badge {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border: 1px solid var(--success-border);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.76rem;
     white-space: nowrap;
   }
 
-  .notif-dot-unread {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--primary);
-  }
-
-  .empty-notif-box {
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--slate-400);
+  .setting-val-tag {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: var(--slate-800);
+    background: var(--slate-100);
+    padding: 4px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
   }
 
   @media (max-width: 992px) {
-    .kpi-row { grid-template-columns: 1fr; }
+    .settings-grid-layout {
+      grid-template-columns: 1fr;
+    }
+    .kpi-row {
+      grid-template-columns: 1fr;
+    }
   }
 
   @media (max-width: 640px) {
-    .admin-page-shell { padding: 16px 10px 40px !important; }
-    .page-top-bar { flex-direction: column; align-items: stretch; }
-    .btn-mark-all { width: 100%; justify-content: center; }
-    .directory-toolbar { flex-direction: column; align-items: stretch; }
-    .search-input-box { width: 100%; }
-    .notif-feed-item {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
+    .admin-page-shell {
+      padding: 16px 10px 40px !important;
     }
-    .notif-meta-end {
-      flex-direction: row;
-      justify-content: space-between;
-      width: 100%;
-      border-top: 1px dashed var(--slate-100);
-      padding-top: 8px;
+    .page-top-bar {
+      flex-direction: column;
+      align-items: stretch;
     }
   }
 </style>
@@ -351,140 +248,108 @@
   <!-- رأس الصفحة -->
   <div class="page-top-bar">
     <div class="page-title-group">
-      <h5>SYSTEM CENTER</h5>
-      <h1>Notifications</h1>
-      <p>Recent academic updates, system activities, and account alerts across Learnova.</p>
-    </div>
-    <div>
-      <a href="/admin/notifications/mark-read" class="btn-mark-all">
-        <i class="fa-solid fa-check-double"></i> Mark all read
-      </a>
+      <h5>SYSTEM</h5>
+      <h1>Settings</h1>
+      <p>Configure the local Learnova demonstration environment and core parameters.</p>
     </div>
   </div>
-
-  {% set notifs = notifications if notifications is defined else (notifs if notifs is defined else (alerts if alerts is defined else [])) %}
 
   <!-- ملخص إحصائي سريع -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div>
-        <div class="kpi-num">{{ notifs|length if notifs else 208 }}</div>
-        <div class="kpi-lbl">Total Alerts</div>
+        <div class="kpi-num">Production</div>
+        <div class="kpi-lbl">Environment Status</div>
       </div>
-      <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-bell"></i></div>
+      <div class="kpi-icon" style="color: var(--success-text);"><i class="fa-solid fa-server"></i></div>
     </div>
     <div class="kpi-card">
       <div>
-        <div class="kpi-num">Active</div>
-        <div class="kpi-lbl">Event Stream</div>
+        <div class="kpi-num">SQLite</div>
+        <div class="kpi-lbl">Storage Engine</div>
       </div>
-      <div class="kpi-icon" style="color: var(--success-text);"><i class="fa-solid fa-satellite-dish"></i></div>
+      <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-database"></i></div>
     </div>
     <div class="kpi-card">
       <div>
-        <div class="kpi-num">Real-time</div>
-        <div class="kpi-lbl">Activity Log</div>
+        <div class="kpi-num">v2.4</div>
+        <div class="kpi-lbl">LMS Core Release</div>
       </div>
-      <div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div class="kpi-icon"><i class="fa-solid fa-code-branch"></i></div>
     </div>
   </div>
 
-  <!-- بطاقة التنبيهات الممتدة -->
-  <div class="notifications-card">
-    <div class="notifications-toolbar">
-      <div class="notifications-meta">
-        <div class="notifications-icon-box">
-          <i class="fa-solid fa-inbox"></i>
+  <!-- شبكة الإعدادات الرئيسية المتجاوبة -->
+  <div class="settings-grid-layout">
+    <!-- بطاقة هوية المنصة -->
+    <div class="settings-panel-card">
+      <div class="panel-card-header">
+        <div class="panel-header-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
         </div>
-        <div>
-          <h3>Activity Feed</h3>
-          <span>{{ notifs|length if notifs else 'Recent' }} system activities recorded</span>
-        </div>
+        <h3>Platform Identity</h3>
       </div>
+      <div class="panel-card-body">
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Platform Name</strong>
+            <small>Displayed across all public and admin portals</small>
+          </div>
+          <span class="setting-val-tag">Learnova LMS</span>
+        </div>
 
-      <div class="search-input-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="notifSearchInput" placeholder="Filter alerts..." onkeyup="filterNotifications()">
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Database</strong>
+            <small>Active relational database engine</small>
+          </div>
+          <span class="setting-status-badge">SQLite Online</span>
+        </div>
+
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Academic Mode</strong>
+            <small>University LMS demonstration profile</small>
+          </div>
+          <span class="setting-status-badge">Enabled</span>
+        </div>
       </div>
     </div>
 
-    <div class="notifications-feed-list" id="notificationsFeed">
-      {% if notifs %}
-        {% for n in notifs %}
-        <div class="notif-feed-item">
-          <div class="notif-main-content">
-            <div class="notif-item-icon">
-              <i class="fa-solid fa-bell"></i>
-            </div>
-            <div class="notif-texts">
-              <strong>{{ n.title if n.title is defined else (n.header if n.header is defined else 'System Activity') }}</strong>
-              <p>{{ n.message if n.message is defined else (n.content if n.content is defined else n) }}</p>
-            </div>
-          </div>
-          <div class="notif-meta-end">
-            <span class="notif-timestamp">
-              {{ n.created_at.strftime('%d %b %Y, %H:%M') if n.created_at and n.created_at.strftime is defined else (n.time if n.time is defined else 'Just now') }}
-            </span>
-            <div class="notif-dot-unread"></div>
-          </div>
+    <!-- بطاقة الأمان والحسابات -->
+    <div class="settings-panel-card">
+      <div class="panel-card-header">
+        <div class="panel-header-icon">
+          <i class="fa-solid fa-shield-halved"></i>
         </div>
-        {% endfor %}
-      {% else %}
-        <!-- نماذج افتراضية مطابقة لما كان معروضاً على شاشتك عند غياب المتغير المباشر -->
-        <div class="notif-feed-item">
-          <div class="notif-main-content">
-            <div class="notif-item-icon"><i class="fa-solid fa-shield-halved"></i></div>
-            <div class="notif-texts">
-              <strong>System Login</strong>
-              <p>Logged in successfully on 01 Nov 2026, 10:01 AM</p>
-            </div>
+        <h3>Security & Accounts</h3>
+      </div>
+      <div class="panel-card-body">
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Password Hashing</strong>
+            <small>New passwords are encrypted via Werkzeug</small>
           </div>
-          <div class="notif-meta-end">
-            <span class="notif-timestamp">01 Nov 2026, 10:04</span>
-            <div class="notif-dot-unread"></div>
-          </div>
+          <span class="setting-status-badge">Enabled</span>
         </div>
 
-        <div class="notif-feed-item">
-          <div class="notif-main-content">
-            <div class="notif-item-icon"><i class="fa-solid fa-shield-halved"></i></div>
-            <div class="notif-texts">
-              <strong>System Login</strong>
-              <p>Logged in successfully on 29 Oct 2026, 02:25 PM</p>
-            </div>
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Visible Password Demo</strong>
+            <small>Quick review for locally created demo accounts</small>
           </div>
-          <div class="notif-meta-end">
-            <span class="notif-timestamp">29 Oct 2026, 14:25</span>
-          </div>
+          <span class="setting-status-badge">Enabled</span>
         </div>
 
-        <div class="notif-feed-item">
-          <div class="notif-main-content">
-            <div class="notif-item-icon"><i class="fa-solid fa-book-open"></i></div>
-            <div class="notif-texts">
-              <strong>New learning unit</strong>
-              <p>A new unit "Introduction to OOP" was added to Programming (1)</p>
-            </div>
+        <div class="setting-item-row">
+          <div class="setting-item-info">
+            <strong>Maximum Upload</strong>
+            <small>Course materials and discussion attachments</small>
           </div>
-          <div class="notif-meta-end">
-            <span class="notif-timestamp">28 Oct 2026, 12:57</span>
-          </div>
+          <span class="setting-val-tag">25 MB</span>
         </div>
-      {% endif %}
+      </div>
     </div>
   </div>
 </div>
-
-<script>
-  function filterNotifications() {
-    const input = document.getElementById('notifSearchInput');
-    const filter = input.value.toLowerCase();
-    const items = document.querySelectorAll('#notificationsFeed .notif-feed-item');
-
-    items.forEach(item => {
-      const text = item.innerText.toLowerCase();
-      item.style.display = text.includes(filter) ? 'flex' : 'none';
-    });
-  }
-</script>
 {% endblock %}
