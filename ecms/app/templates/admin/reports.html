@@ -23,7 +23,7 @@
     --success-text: #059669;
   }
 
-  /* إلغاء قيود العرض لتعبئة الشاشة بالكامل */
+  /* إزالة قيود العرض لتعبئة الشاشة بالكامل */
   .content, .app-main {
     max-width: 100% !important;
     width: 100% !important;
@@ -340,12 +340,15 @@
     </div>
   </div>
 
+  <!-- تحديد ذكي لمصدر البيانات القادم من بايثون -->
+  {% set raw_list = report_data if report_data is defined else (reports if reports is defined else (instructors_data if instructors_data is defined else (data if data is defined else (teachers if teachers is defined else (instructors if instructors is defined else []))))) %}
+
   <!-- ملخص إحصائي سريع -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div>
-        <div class="kpi-num">{{ instructors|length if instructors else (teachers|length if teachers else 2) }}</div>
-        <div class="kpi-lbl">Total Instructors</div>
+        <div class="kpi-num">{{ raw_list|length if raw_list else 2 }}</div>
+        <div class="kpi-lbl">Instructors Analyzed</div>
       </div>
       <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-chalkboard-user"></i></div>
     </div>
@@ -365,25 +368,28 @@
     </div>
   </div>
 
-  <!-- بيانات المدرسين والكورسات والواجبات -->
-  {% set list_data = instructors if instructors else teachers %}
-  {% if list_data %}
-    {% for inst in list_data %}
+  <!-- عرض التقارير -->
+  {% if raw_list %}
+    {% for item in raw_list %}
+    {% set inst = item.instructor if item.instructor is defined else (item.teacher if item.teacher is defined else item) %}
+    {% set courses_list = item.courses if item.courses is defined else (inst.courses if inst.courses is defined else []) %}
+    
     <div class="instructor-report-block">
       <!-- بيانات المدرس -->
       <div class="instructor-block-header">
         <div class="inst-avatar-large">
-          {{ (inst.name_person or inst.username or 'I')[0]|upper }}
+          {{ (inst.name_person or inst.username or inst.name or 'I')[0]|upper }}
         </div>
         <div class="inst-meta-text">
-          <h3>{{ inst.name_person or inst.username }}</h3>
+          <h3>{{ inst.name_person or inst.username or inst.name or 'Instructor' }}</h3>
           <span>{{ inst.department or 'Department not specified' }} • {{ inst.email or '' }}</span>
         </div>
       </div>
 
       <!-- المقررات التابعة للمدرس -->
-      {% if inst.courses %}
-        {% for course in inst.courses %}
+      {% if courses_list %}
+        {% for course_wrap in courses_list %}
+        {% set course = course_wrap.course if course_wrap.course is defined else course_wrap %}
         <div>
           <div class="course-strip">
             <div class="course-strip-info">
@@ -391,12 +397,13 @@
               <span class="course-title-txt">{{ course.name or course.title }}</span>
             </div>
             <div class="course-students-count">
-              {{ course.enrollments|length if course.enrollments is defined else 0 }} students enrolled &rarr;
+              {{ course_wrap.students_count if course_wrap.students_count is defined else (course.enrollments|length if course.enrollments is defined else 0) }} students enrolled &rarr;
             </div>
           </div>
 
-          <!-- جدول تسليمات الواجبات والدرجات لهذا المقرر -->
-          {% if course.assignments %}
+          <!-- الواجبات والتقييمات -->
+          {% set assignments_list = course_wrap.assignments if course_wrap.assignments is defined else (course.assignments if course.assignments is defined else []) %}
+          {% if assignments_list %}
             <table class="report-table">
               <thead>
                 <tr>
@@ -407,9 +414,10 @@
                 </tr>
               </thead>
               <tbody>
-                {% for assign in course.assignments %}
-                  {% if assign.submissions %}
-                    {% for sub in assign.submissions %}
+                {% for assign in assignments_list %}
+                  {% set subs = assign.submissions if assign.submissions is defined else [] %}
+                  {% if subs %}
+                    {% for sub in subs %}
                     <tr>
                       <td data-label="ASSIGNMENT">
                         <strong style="color: var(--slate-900);">{{ assign.title }}</strong>
@@ -432,7 +440,7 @@
                   {% else %}
                     <tr>
                       <td data-label="ASSIGNMENT">
-                        <strong style="color: var(--slate-900);">{{ assign.title }}</strong>
+                        <strong style="color: var(--slate-900);">{{ assign.title if assign.title is defined else assign }}</strong>
                       </td>
                       <td colspan="3" style="color: var(--slate-400); font-size: 0.82rem;">
                         No submissions yet.
@@ -445,7 +453,7 @@
           {% else %}
             <div class="empty-state-box">
               <i class="fa-solid fa-folder-open" style="font-size: 1.5rem; margin-bottom: 6px; display: block;"></i>
-              No assignments recorded in this course.
+              No assignments in this course.
             </div>
           {% endif %}
         </div>
