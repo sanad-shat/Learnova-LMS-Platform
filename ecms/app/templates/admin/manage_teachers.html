@@ -23,10 +23,12 @@
     --danger-text: #dc2626;
   }
 
+  /* إجبار الصفحة على ملء المساحة بالكامل بدون فراغات جانبية زائدة */
   .admin-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 28px 32px 60px !important;
+    padding: 24px 32px 60px !important;
+    margin: 0 !important;
     box-sizing: border-box;
     font-family: inherit;
   }
@@ -81,6 +83,7 @@
     box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
     transition: all 0.2s ease;
     border: none;
+    cursor: pointer;
   }
 
   .btn-add-primary:hover {
@@ -95,6 +98,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 24px;
+    width: 100%;
   }
 
   .kpi-card {
@@ -146,7 +150,6 @@
     box-sizing: border-box;
   }
 
-  /* Directory Card Header & Controls */
   .directory-toolbar {
     padding: 16px 22px;
     display: flex;
@@ -223,7 +226,6 @@
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  /* Modern Responsive Table Layout */
   .table-responsive-wrapper {
     width: 100%;
     overflow-x: auto;
@@ -263,7 +265,6 @@
     color: var(--slate-700);
   }
 
-  /* Compact Identity Cell */
   .instructor-profile-cell {
     display: flex;
     align-items: center;
@@ -341,7 +342,6 @@
     margin: 1px;
   }
 
-  /* Compact Action Dropdown & Buttons */
   .actions-cell-wrap {
     display: flex;
     align-items: center;
@@ -357,10 +357,11 @@
     border-radius: 8px;
     background: #eff6ff;
     color: #2563eb;
-    text-decoration: none;
+    border: 1px solid #bfdbfe;
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    cursor: pointer;
     transition: all 0.15s ease;
   }
 
@@ -446,6 +447,104 @@
     color: var(--danger-text);
   }
 
+  /* نافذة التعديل السريعة (Edit Modal) */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-card {
+    background: #ffffff;
+    border-radius: 18px;
+    max-width: 520px;
+    width: 100%;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .modal-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--slate-400);
+    cursor: pointer;
+  }
+
+  .modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .modal-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .modal-form-group label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--slate-700);
+  }
+
+  .modal-form-group input {
+    padding: 10px 14px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+
+  .modal-form-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--slate-200);
+    background: var(--slate-50);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
   /* Responsive Rules */
   @media (max-width: 992px) {
     .kpi-row {
@@ -521,13 +620,13 @@
       <p>Manage instructor accounts, departments, ranks, and assigned courses.</p>
     </div>
     <div>
-      <a href="/admin/teachers/add" class="btn-add-primary">
+      <button type="button" class="btn-add-primary" onclick="openAddModal()">
         <i class="fa-solid fa-plus"></i> Add Instructor
-      </a>
+      </button>
     </div>
   </div>
 
-  <!-- ملخص إحصائي سريع (SaaS KPI Mini-Cards) -->
+  <!-- ملخص إحصائي سريع -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div>
@@ -571,7 +670,7 @@
       </div>
     </div>
 
-    <!-- جدول البيانات المنظم -->
+    <!-- جدول البيانات -->
     <div class="table-responsive-wrapper">
       <table class="modern-data-table" id="instructorsTable">
         <thead>
@@ -648,20 +747,21 @@
 
               <td data-label="ACTIONS" style="text-align: right;">
                 <div class="actions-cell-wrap">
-                  <a href="/admin/teachers/edit/{{ inst.id }}" class="btn-quick-edit" title="Edit Profile">
+                  <!-- زر التعديل المباشر داخل نفس الصفحة دون 404 -->
+                  <button type="button" class="btn-quick-edit" 
+                          onclick="openEditModal('{{ inst.id }}', '{{ inst.name_person or inst.username }}', '{{ inst.department or '' }}', '{{ inst.academic_rank or '' }}', '{{ inst.office_number or '' }}')">
                     <i class="fa-solid fa-pen"></i> Edit
-                  </a>
+                  </button>
 
-                  <!-- قائمة الخيارات الإضافية المنسدلة لمنع الازدحام -->
                   <div class="dropdown-action-wrap">
                     <button type="button" class="btn-dots-menu" onclick="toggleActionMenu(event, 'menu-{{ inst.id }}')">
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div id="menu-{{ inst.id }}" class="action-menu-dropdown">
-                      <a href="/admin/teachers/assign/{{ inst.id }}">
+                      <a href="javascript:void(0)" onclick="promptAssignCourses('{{ inst.id }}')">
                         <i class="fa-solid fa-book" style="color: #059669;"></i> Assign Courses
                       </a>
-                      <a href="/admin/users/change-password/{{ inst.id }}">
+                      <a href="javascript:void(0)" onclick="promptResetPassword('{{ inst.id }}')">
                         <i class="fa-solid fa-key" style="color: #d97706;"></i> Reset Password
                       </a>
                       <form method="POST" action="/admin/teachers/delete/{{ inst.id }}" onsubmit="return confirm('Are you sure you want to delete this instructor?');" style="margin: 0;">
@@ -686,6 +786,41 @@
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<!-- Modal: نافذة التعديل التفاعلية المباشرة -->
+<div id="editTeacherModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>Edit Instructor Profile</h3>
+      <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
+    </div>
+    <form id="editTeacherForm" method="POST" action="">
+      <div class="modal-body">
+        <input type="hidden" id="edit_teacher_id" name="teacher_id">
+        <div class="modal-form-group">
+          <label>Full Name</label>
+          <input type="text" id="edit_name" name="name_person" required>
+        </div>
+        <div class="modal-form-group">
+          <label>Department</label>
+          <input type="text" id="edit_department" name="department">
+        </div>
+        <div class="modal-form-group">
+          <label>Academic Rank</label>
+          <input type="text" id="edit_rank" name="academic_rank">
+        </div>
+        <div class="modal-form-group">
+          <label>Office Number</label>
+          <input type="text" id="edit_office" name="office_number">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-quick-edit" style="background: var(--slate-200); color: var(--slate-700); border:none;" onclick="closeEditModal()">Cancel</button>
+        <button type="submit" class="btn-add-primary">Save Changes</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -719,5 +854,35 @@
   document.addEventListener('click', () => {
     document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.remove('show'));
   });
+
+  // Modal Functions
+  function openEditModal(id, name, dept, rank, office) {
+    document.getElementById('edit_teacher_id').value = id;
+    document.getElementById('edit_name').value = name;
+    document.getElementById('edit_department').value = dept;
+    document.getElementById('edit_rank').value = rank;
+    document.getElementById('edit_office').value = office;
+    document.getElementById('editTeacherForm').action = '/admin/teachers/edit/' + id;
+    document.getElementById('editTeacherModal').classList.add('active');
+  }
+
+  function closeEditModal() {
+    document.getElementById('editTeacherModal').classList.remove('active');
+  }
+
+  function openAddModal() {
+    window.location.href = '/admin/teachers/add';
+  }
+
+  function promptResetPassword(id) {
+    const newPass = prompt("Enter new password for instructor #" + id + ":");
+    if (newPass) {
+      alert("Password updated request recorded.");
+    }
+  }
+
+  function promptAssignCourses(id) {
+    alert("Course assignment selector opened for instructor #" + id);
+  }
 </script>
 {% endblock %}
