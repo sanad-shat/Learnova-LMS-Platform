@@ -734,15 +734,16 @@
                 <span class="badge-status-active">Active</span>
               </td>
 
-              <td data-label="PASSWORD">
-                <div style="display: inline-flex; align-items: center; gap: 6px;">
-                  <span id="pwd-mask-std-{{ std.id }}" style="letter-spacing: 2px;">••••••</span>
-                  <button type="button" class="btn-quick-edit" style="padding: 2px 7px; font-size: 0.68rem;" 
-                          onclick="toggleStudentPwd('{{ std.id }}', '{{ std.plain_password if std.plain_password is defined and std.plain_password else 'Learnova@2026' }}')">
-                    Show
-                  </button>
-                </div>
-              </td>
+          <td data-label="PASSWORD">
+  {% set current_pwd = std.plain_password if std.plain_password is defined and std.plain_password else (std.user.plain_password if std.user and std.user.plain_password is defined else (std.password if std.password is defined and not std.password.startswith('scrypt:') and not std.password.startswith('pbkdf2:') else '••••••')) %}
+  <div style="display: inline-flex; align-items: center; gap: 8px;">
+    <span id="pwd-mask-std-{{ std.id }}" style="font-family: monospace; font-size: 0.88rem; font-weight: 600; color: var(--slate-800);">••••••</span>
+    <button type="button" class="btn-quick-edit" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
+            onclick="toggleStudentPwd('{{ std.id }}', '{{ current_pwd }}')">
+      Show
+    </button>
+  </div>
+</td>
 
               <td data-label="COURSES">
                 {% if std.enrollments is defined and std.enrollments %}
