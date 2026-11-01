@@ -663,15 +663,15 @@
               </td>
 
               <!-- PASSWORD CELL -->
-              <td data-label="PASSWORD">
-                <div style="display: inline-flex; align-items: center; gap: 8px;">
-                  <span id="pwd-val-std-{{ std.id }}" data-pwd="{{ std.plain_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
-                  <button type="button" class="btn-pwd-pill" id="pwd-btn-std-{{ std.id }}" 
-                          onclick="togglePasswordDirect('pwd-val-std-{{ std.id }}', 'pwd-btn-std-{{ std.id }}')">
-                    Show
-                  </button>
-                </div>
-              </td>
+             <td data-label="PASSWORD">
+  <div style="display: inline-flex; align-items: center; gap: 8px;">
+    <span id="pwd-val-std-{{ std.id }}" data-pwd="{{ std.visible_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
+    <button type="button" class="btn-pwd-pill" id="pwd-btn-std-{{ std.id }}" 
+            onclick="togglePasswordDirect('pwd-val-std-{{ std.id }}', 'pwd-btn-std-{{ std.id }}')">
+      Show
+    </button>
+  </div>
+</td>
 
               <td data-label="COURSES">
                 {% if std.enrollments is defined and std.enrollments %}
