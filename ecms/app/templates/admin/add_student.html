@@ -1,1 +1,514 @@
-{% extends 'admin/base.html' %}{% block title %}Add Student | Learnova{% endblock %}{% block content %}<div class="page-title-row"><div><span class="eyebrow">STUDENT MANAGEMENT</span><h1>Create Student Account</h1><p>Enter academic, contact, and login information for the new learner.</p></div><a class="secondary-btn" href="{{ url_for('admin.manage_students') }}"><i class="fa-solid fa-arrow-left"></i>Back to Students</a></div><section class="form-card"><div class="form-intro"><span class="form-icon"><i class="fa-solid fa-user-graduate"></i></span><div><h2>Student Profile</h2><p>Required fields are marked with an asterisk.</p></div></div><form method="post"><div class="form-grid"><div class="field full"><label>Full Name <span>*</span></label><input name="name_person" value="{{ student.name_person if student else '' }}" placeholder="Enter student's full name" required></div><div class="field"><label>University ID <span>*</span></label><input name="university_id" value="{{ student.university_id if student else '' }}" placeholder="e.g. 202610245" required></div><div class="field"><label>Username <span>*</span></label><input name="username" value="{{ student.username if student else '' }}" placeholder="Choose a unique username" required></div><div class="field"><label>Email Address <span>*</span></label><input type="email" name="email" value="{{ student.email if student else '' }}" placeholder="student@university.edu" required></div><div class="field"><label>Password <span>*</span></label><div class="input-icon"><i class="fa-solid fa-lock"></i><input id="studentPassword" type="password" name="password" placeholder="Minimum 6 characters" required><button type="button" class="password-toggle" data-password-toggle="#studentPassword"><i class="fa-regular fa-eye"></i></button></div></div><div class="field"><label>Phone Number</label><input name="phone" value="{{ student.phone if student else '' }}" placeholder="+971 50 000 0000"></div><div class="field"><label>Department</label><select name="department"><option value="">Select department</option>{% for item in ['Software Engineering','Computer Science','Artificial Intelligence','Cyber Security','Information Technology','Data Science','Business'] %}<option value="{{ item }}" {% if student and student.department==item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div><div class="field"><label>Academic Level</label><select name="level"><option value="">Select level</option>{% for item in ['Year 1','Year 2','Year 3','Year 4','Graduate'] %}<option value="{{ item }}" {% if student and student.level==item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div><div class="field"><label>Gender</label><select name="gender"><option value="">Select gender</option><option>Male</option><option>Female</option></select></div><div class="field"><label>Account Status</label><select name="status"><option selected>Active</option><option>Inactive</option></select></div></div><div class="form-actions"><a class="secondary-btn" href="{{ url_for('admin.manage_students') }}">Cancel</a><button type="submit"><i class="fa-solid fa-user-plus"></i>Create Student Account</button></div></form></section>{% endblock %}
+{% extends 'admin/base.html' %}
+{% block title %}Create Student Account | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+  }
+
+  /* كسر قيود العرض الموروثة لملء الشاشة بدون فراغات زائدة */
+  .content, .app-main {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .admin-form-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 32px 60px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* Header Section */
+  .form-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--slate-200);
+    width: 100%;
+  }
+
+  .form-title-group h5 {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .form-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .form-title-group p {
+    font-size: 0.92rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #ffffff;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 12px;
+    color: var(--slate-700);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-back-link:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+    color: var(--primary);
+  }
+
+  /* Full Width Responsive Grid: عمود إرشادي + نموذج عريض */
+  .form-layout-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Left Guide Card */
+  .side-guide-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 30px 26px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+    box-sizing: border-box;
+  }
+
+  .guide-icon-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+  }
+
+  .side-guide-card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 8px;
+  }
+
+  .side-guide-card p {
+    font-size: 0.88rem;
+    color: var(--slate-500);
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .guide-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 22px;
+  }
+
+  .guide-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--slate-600);
+  }
+
+  .guide-step-item i {
+    color: var(--primary);
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Main Form Card */
+  .main-form-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 34px 38px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .form-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-section-title i {
+    color: var(--primary);
+    font-size: 1rem;
+  }
+
+  .form-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .input-group.full-width {
+    grid-column: span 2;
+  }
+
+  .input-group label {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .input-group label .req-star {
+    color: #ef4444;
+    font-size: 0.85rem;
+  }
+
+  .form-control-input,
+  .form-control-select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.94rem;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--slate-900);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .form-control-input:focus,
+  .form-control-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+  }
+
+  .pwd-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  .pwd-input-wrap input {
+    padding-right: 44px;
+  }
+
+  .pwd-toggle-btn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    color: var(--slate-400);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pwd-toggle-btn:hover {
+    color: var(--primary);
+  }
+
+  /* Form Actions Footer */
+  .form-actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--slate-200);
+  }
+
+  .btn-cancel {
+    padding: 12px 24px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .btn-cancel:hover {
+    background: var(--slate-200);
+    color: var(--slate-900);
+  }
+
+  .btn-submit-create {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .btn-submit-create:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  }
+
+  /* التجاوب */
+  @media (max-width: 1100px) {
+    .form-layout-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .admin-form-shell {
+      padding: 16px 14px 40px !important;
+    }
+    .form-inputs-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .input-group.full-width {
+      grid-column: span 1;
+    }
+    .main-form-card {
+      padding: 22px 18px;
+    }
+    .form-actions-footer {
+      flex-direction: column-reverse;
+      width: 100%;
+    }
+    .btn-submit-create, .btn-cancel {
+      width: 100%;
+      text-align: center;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="admin-form-shell">
+  <!-- رأس الصفحة -->
+  <div class="form-header-bar">
+    <div class="form-title-group">
+      <h5>STUDENT MANAGEMENT</h5>
+      <h1>Create Student Account</h1>
+      <p>Enter academic, contact, and login information for the new learner.</p>
+    </div>
+    <a href="/admin/students" class="btn-back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Students
+    </a>
+  </div>
+
+  <div class="form-layout-grid">
+    <!-- العمود الإرشادي الجانبي -->
+    <div class="side-guide-card">
+      <div class="guide-icon-badge">
+        <i class="fa-solid fa-graduation-cap"></i>
+      </div>
+      <h3>Student Profile</h3>
+      <p>Provision a new learner account. Course enrollments and semester schedules can be assigned directly after registration.</p>
+
+      <div class="guide-steps-list">
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>University ID acts as the permanent academic identifier.</span>
+        </div>
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Official email receives assignment submissions and grade releases.</span>
+        </div>
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Department and level determine automatic prerequisite eligibility.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- بطاقة النموذج الرئيسية -->
+    <div class="main-form-card">
+      <form method="POST" action="">
+        
+        <!-- القسم الأول: الهوية وبيانات الدخول -->
+        <div class="form-section-title">
+          <i class="fa-solid fa-id-badge"></i> Account Credentials
+        </div>
+
+        <div class="form-inputs-grid">
+          <div class="input-group full-width">
+            <label for="name_person">Full Name <span class="req-star">*</span></label>
+            <input type="text" id="name_person" name="name_person" class="form-control-input" placeholder="Enter student's full name" required>
+          </div>
+
+          <div class="input-group">
+            <label for="student_id">University ID <span class="req-star">*</span></label>
+            <input type="text" id="student_id" name="student_id" class="form-control-input" placeholder="e.g. 202610245" required>
+          </div>
+
+          <div class="input-group">
+            <label for="username">Username <span class="req-star">*</span></label>
+            <input type="text" id="username" name="username" class="form-control-input" placeholder="Choose a unique username" required>
+          </div>
+
+          <div class="input-group">
+            <label for="email">Email Address <span class="req-star">*</span></label>
+            <input type="email" id="email" name="email" class="form-control-input" placeholder="student@university.edu" required>
+          </div>
+
+          <div class="input-group">
+            <label for="password">Password <span class="req-star">*</span></label>
+            <div class="pwd-input-wrap">
+              <input type="password" id="password" name="password" class="form-control-input" placeholder="Minimum 6 characters" required>
+              <button type="button" class="pwd-toggle-btn" onclick="togglePasswordVisibility()">
+                <i class="fa-regular fa-eye" id="pwdToggleIcon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- القسم الثاني: البيانات الأكاديمية والشخصية -->
+        <div class="form-section-title">
+          <i class="fa-solid fa-book-bookmark"></i> Academic & Contact Details
+        </div>
+
+        <div class="form-inputs-grid">
+          <div class="input-group">
+            <label for="phone">Phone Number</label>
+            <input type="text" id="phone" name="phone" class="form-control-input" placeholder="+971 50 000 0000">
+          </div>
+
+          <div class="input-group">
+            <label for="department">Department</label>
+            <select id="department" name="department" class="form-control-select">
+              <option value="" selected disabled>Select department</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="Software Engineering">Software Engineering</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Information Technology">Information Technology</option>
+              <option value="Cyber Security">Cyber Security</option>
+              <option value="Business">Business</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="academic_level">Academic Level</label>
+            <select id="academic_level" name="academic_level" class="form-control-select">
+              <option value="" selected disabled>Select level</option>
+              <option value="Year 1">Year 1</option>
+              <option value="Year 2">Year 2</option>
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4">Year 4</option>
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label for="gender">Gender</label>
+            <select id="gender" name="gender" class="form-control-select">
+              <option value="" selected disabled>Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <div class="input-group full-width">
+            <label for="status">Account Status</label>
+            <select id="status" name="status" class="form-control-select">
+              <option value="Active" selected>Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Suspended">Suspended</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- أزرار الحفظ والإلغاء -->
+        <div class="form-actions-footer">
+          <a href="/admin/students" class="btn-cancel">Cancel</a>
+          <button type="submit" class="btn-submit-create">
+            <i class="fa-solid fa-user-plus"></i> Create Student Account
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePasswordVisibility() {
+    const pwd = document.getElementById('password');
+    const icon = document.getElementById('pwdToggleIcon');
+    if (pwd.type === 'password') {
+      pwd.type = 'text';
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    } else {
+      pwd.type = 'password';
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+</script>
+{% endblock %}
