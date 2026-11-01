@@ -734,15 +734,16 @@
                 <span class="badge-status-active">Active</span>
               </td>
 
-              <td data-label="PASSWORD">
-                <div style="display: inline-flex; align-items: center; gap: 6px;">
-                  <span id="pwd-mask-{{ inst.id }}" style="letter-spacing: 2px;">••••••</span>
-                  <button type="button" class="btn-quick-edit" style="padding: 2px 7px; font-size: 0.68rem;" 
-                          onclick="toggleInstructorPwd('{{ inst.id }}', '{{ inst.plain_password if inst.plain_password is defined and inst.plain_password else 'Learnova@2026' }}')">
-                    Show
-                  </button>
-                </div>
-              </td>
+             <td data-label="PASSWORD">
+  {% set current_inst_pwd = inst.plain_password if inst.plain_password is defined and inst.plain_password else (inst.user.plain_password if inst.user and inst.user.plain_password is defined else (inst.password if inst.password is defined and not inst.password.startswith('scrypt:') and not inst.password.startswith('pbkdf2:') else '••••••')) %}
+  <div style="display: inline-flex; align-items: center; gap: 8px;">
+    <span id="pwd-mask-{{ inst.id }}" style="font-family: monospace; font-size: 0.88rem; font-weight: 600; color: var(--slate-800);">••••••</span>
+    <button type="button" class="btn-quick-edit" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
+            onclick="toggleInstructorPwd('{{ inst.id }}', '{{ current_inst_pwd }}')">
+      Show
+    </button>
+  </div>
+</td>
 
               <td data-label="COURSES">
                 {% if inst.courses is defined and inst.courses %}
