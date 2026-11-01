@@ -1,1 +1,402 @@
-{% extends 'admin/base.html' %}{% block title %}Add Course | Learnova{% endblock %}{% block content %}<div class="page-title-row"><div><span class="eyebrow">COURSE MANAGEMENT</span><h1>Create New Course</h1><p>Build a new academic learning space and assign its instructor.</p></div><a class="secondary-btn" href="{{ url_for('admin.manage_courses') }}"><i class="fa-solid fa-arrow-left"></i>Back to Courses</a></div><section class="form-card"><div class="form-intro"><span class="form-icon"><i class="fa-solid fa-book-open"></i></span><div><h2>Course Information</h2><p>Use a unique course code and identifier.</p></div></div><form method="post"><div class="form-grid"><div class="field"><label>Course Code <span>*</span></label><input name="code" placeholder="e.g. SE301" required></div><div class="field"><label>Course Identifier <span>*</span></label><input name="course_identifier" placeholder="e.g. SE301-2026" required></div><div class="field full"><label>Course Name <span>*</span></label><input name="name" placeholder="e.g. Advanced Software Engineering" required></div><div class="field full"><label>Description</label><textarea name="description" rows="5" placeholder="Describe course goals, topics, and learning outcomes..."></textarea></div><div class="field full"><label>Assigned Instructor <span>*</span></label><select name="teacher_id" required><option value="">Select instructor</option>{% for teacher in teachers %}<option value="{{ teacher.id }}">{{ teacher.name_person or teacher.username }} — {{ teacher.department or teacher.email }}</option>{% endfor %}</select></div></div><div class="form-actions"><a class="secondary-btn" href="{{ url_for('admin.manage_courses') }}">Cancel</a><button type="submit"><i class="fa-solid fa-plus"></i>Create Course</button></div></form></section>{% endblock %}
+{% extends 'admin/base.html' %}
+{% block title %}Create New Course | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+  }
+
+  /* فك قيود العرض لتعبئة الشاشة بالكامل */
+  .content, .app-main {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .admin-form-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 32px 60px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* Header Section */
+  .form-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--slate-200);
+    width: 100%;
+  }
+
+  .form-title-group h5 {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .form-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .form-title-group p {
+    font-size: 0.92rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #ffffff;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 12px;
+    color: var(--slate-700);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .btn-back-link:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+    color: var(--primary);
+  }
+
+  /* Full Width Responsive Grid: عمود إرشادي + نموذج عريض */
+  .form-layout-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 28px;
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Left Guide Card */
+  .side-guide-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 30px 26px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+    box-sizing: border-box;
+  }
+
+  .guide-icon-badge {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+  }
+
+  .side-guide-card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 8px;
+  }
+
+  .side-guide-card p {
+    font-size: 0.88rem;
+    color: var(--slate-500);
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .guide-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 22px;
+  }
+
+  .guide-step-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--slate-600);
+  }
+
+  .guide-step-item i {
+    color: var(--primary);
+    font-size: 1rem;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Main Form Card */
+  .main-form-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 34px 38px;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.03);
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .form-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 22px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .form-section-title i {
+    color: var(--primary);
+    font-size: 1rem;
+  }
+
+  .form-inputs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+    margin-bottom: 30px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .input-group.full-width {
+    grid-column: span 2;
+  }
+
+  .input-group label {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .input-group label .req-star {
+    color: #ef4444;
+    font-size: 0.85rem;
+  }
+
+  .form-control-input,
+  .form-control-select,
+  .form-control-textarea {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.94rem;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--slate-900);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .form-control-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.5;
+  }
+
+  .form-control-input:focus,
+  .form-control-select:focus,
+  .form-control-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-soft);
+  }
+
+  /* Form Actions Footer */
+  .form-actions-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding-top: 24px;
+    border-top: 1px solid var(--slate-200);
+  }
+
+  .btn-cancel {
+    padding: 12px 24px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+  }
+
+  .btn-cancel:hover {
+    background: var(--slate-200);
+    color: var(--slate-900);
+  }
+
+  .btn-submit-create {
+    padding: 12px 30px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    transition: all 0.2s ease;
+  }
+
+  .btn-submit-create:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+  }
+
+  @media (max-width: 1100px) {
+    .form-layout-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 640px) {
+    .admin-form-shell { padding: 16px 14px 40px !important; }
+    .form-inputs-grid { grid-template-columns: 1fr; gap: 16px; }
+    .input-group.full-width { grid-column: span 1; }
+    .main-form-card { padding: 22px 18px; }
+    .form-actions-footer { flex-direction: column-reverse; width: 100%; }
+    .btn-submit-create, .btn-cancel { width: 100%; text-align: center; justify-content: center; }
+  }
+</style>
+
+<div class="admin-form-shell">
+  <div class="form-header-bar">
+    <div class="form-title-group">
+      <h5>COURSE MANAGEMENT</h5>
+      <h1>Create New Course</h1>
+      <p>Build a new academic learning space and assign its instructor.</p>
+    </div>
+    <a href="/admin/courses" class="btn-back-link">
+      <i class="fa-solid fa-arrow-left"></i> Back to Courses
+    </a>
+  </div>
+
+  <div class="form-layout-grid">
+    <div class="side-guide-card">
+      <div class="guide-icon-badge">
+        <i class="fa-solid fa-book"></i>
+      </div>
+      <h3>Course Information</h3>
+      <p>Use a unique course code and identifier to register the module into the curriculum catalog.</p>
+
+      <div class="guide-steps-list">
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Course code represents the catalog code (e.g., CS101, SE301).</span>
+        </div>
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Course identifier specifies the section or academic term.</span>
+        </div>
+        <div class="guide-step-item">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Assigned instructors can manage lessons and grading immediately.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-form-card">
+      <form method="POST" action="">
+        
+        <div class="form-section-title">
+          <i class="fa-solid fa-sliders"></i> Course Details
+        </div>
+
+        <div class="form-inputs-grid">
+          <div class="input-group">
+            <label for="code">Course Code <span class="req-star">*</span></label>
+            <input type="text" id="code" name="code" class="form-control-input" placeholder="e.g. SE301" required>
+          </div>
+
+          <div class="input-group">
+            <label for="identifier">Course Identifier <span class="req-star">*</span></label>
+            <input type="text" id="identifier" name="identifier" class="form-control-input" placeholder="e.g. SE301-2026" required>
+          </div>
+
+          <div class="input-group full-width">
+            <label for="name">Course Name <span class="req-star">*</span></label>
+            <input type="text" id="name" name="name" class="form-control-input" placeholder="e.g. Advanced Software Engineering" required>
+          </div>
+
+          <div class="input-group full-width">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" class="form-control-textarea" placeholder="Describe course goals, topics, and learning outcomes..."></textarea>
+          </div>
+
+          <div class="input-group full-width">
+            <label for="instructor_id">Assigned Instructor <span class="req-star">*</span></label>
+            <select id="instructor_id" name="instructor_id" class="form-control-select" required>
+              <option value="" selected disabled>Select instructor</option>
+              {% if teachers %}
+                {% for t in teachers %}
+                  <option value="{{ t.id }}">{{ t.name_person or t.username }} ({{ t.department or 'General' }})</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions-footer">
+          <a href="/admin/courses" class="btn-cancel">Cancel</a>
+          <button type="submit" class="btn-submit-create">
+            <i class="fa-solid fa-plus"></i> Create Course
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
