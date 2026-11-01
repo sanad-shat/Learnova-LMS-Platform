@@ -487,7 +487,7 @@ def clear_notifications():
 @admin_bp.route('/messages')
 @admin_required
 def messages():
-    topics = DiscussionTopic.query.order_by(DiscussionTopic.updated_at.desc()).limit(50).all()
+    topics = DiscussionTopic.query.order_by(DiscussionTopic.created_at.desc()).limit(50).all()
     return render_template('admin/messages.html', topics=topics)
 
 
