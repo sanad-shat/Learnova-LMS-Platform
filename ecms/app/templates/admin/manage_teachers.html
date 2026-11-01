@@ -665,15 +665,14 @@
 
               <!-- PASSWORD CELL -->
               <td data-label="PASSWORD">
-                {% set current_inst_pwd = inst.plain_password if inst.plain_password is defined and inst.plain_password else (inst.user.plain_password if inst.user and inst.user.plain_password is defined else (inst.password if inst.password is defined and not inst.password.startswith('scrypt:') and not inst.password.startswith('pbkdf2:') else 'Learnova@2026')) %}
-                <div style="display: inline-flex; align-items: center; gap: 8px;">
-                  <span id="pwd-val-inst-{{ inst.id }}" data-pwd="{{ current_inst_pwd }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
-                  <button type="button" class="btn-quick-edit" id="pwd-btn-inst-{{ inst.id }}" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
-                          onclick="togglePasswordDirect('pwd-val-inst-{{ inst.id }}', 'pwd-btn-inst-{{ inst.id }}')">
-                    Show
-                  </button>
-                </div>
-              </td>
+  <div style="display: inline-flex; align-items: center; gap: 8px;">
+    <span id="pwd-val-inst-{{ inst.id }}" data-pwd="{{ inst.visible_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
+    <button type="button" class="btn-quick-edit" id="pwd-btn-inst-{{ inst.id }}" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
+            onclick="togglePasswordDirect('pwd-val-inst-{{ inst.id }}', 'pwd-btn-inst-{{ inst.id }}')">
+      Show
+    </button>
+  </div>
+</td>
 
               <td data-label="COURSES">
                 {% if inst.courses is defined and inst.courses %}
