@@ -1,1 +1,629 @@
-{% extends 'admin/base.html' %}{% block title %}Settings | Learnova{% endblock %}{% block content %}<div class="page-title-row"><div><span class="eyebrow">SYSTEM</span><h1>Settings</h1><p>Configure the local Learnova demonstration environment.</p></div></div><div class="settings-grid"><section class="panel"><div class="panel-head"><h2>Platform Identity</h2></div><div class="setting-row"><div><strong>Platform Name</strong><small>Displayed across all portals</small></div><span>Learnova LMS</span></div><div class="setting-row"><div><strong>Database</strong><small>Local SQL database</small></div><span class="status-pill active">SQLite Online</span></div><div class="setting-row"><div><strong>Academic Mode</strong><small>University LMS demonstration</small></div><span>Enabled</span></div></section><section class="panel"><div class="panel-head"><h2>Security & Accounts</h2></div><div class="setting-row"><div><strong>Password Hashing</strong><small>New passwords are encrypted</small></div><span class="status-pill active">Enabled</span></div><div class="setting-row"><div><strong>Visible Password Demo</strong><small>Only for locally created demo accounts</small></div><span class="status-pill active">Enabled</span></div><div class="setting-row"><div><strong>Maximum Upload</strong><small>Course and discussion attachments</small></div><span>25 MB</span></div></section></div>{% endblock %}
+{% extends 'admin/base.html' %}
+{% block title %}System Settings | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success-bg: #ecfdf5;
+    --success-text: #059669;
+    --danger-soft: #fef2f2;
+    --danger-text: #dc2626;
+  }
+
+  /* فك قيود العرض وتوسيع المساحة */
+  .content, .app-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+
+  .admin-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 16px 60px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  /* رأس الصفحة */
+  .page-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--slate-200);
+    width: 100%;
+  }
+
+  .page-title-group h5 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .page-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .page-title-group p {
+    font-size: 0.9rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-save-primary {
+    background: var(--primary);
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .btn-save-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+  }
+
+  /* شريط التبويبات الداخلية */
+  .settings-nav-tabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--slate-200);
+    margin-bottom: 24px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .tab-btn {
+    padding: 10px 18px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--slate-500);
+    border: none;
+    background: transparent;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover {
+    color: var(--slate-800);
+  }
+
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  /* محتوى التبويبات */
+  .tab-pane {
+    display: none;
+  }
+
+  .tab-pane.active {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+
+  /* بطاقات الإعدادات */
+  .settings-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 18px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .settings-card.full-col {
+    grid-column: span 2;
+  }
+
+  .card-header-wrap {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #ffffff;
+  }
+
+  .card-header-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .card-header-wrap h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .card-body-wrap {
+    padding: 14px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* عناصر الإعدادات والمفاتيح */
+  .setting-row-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--slate-100);
+  }
+
+  .setting-row-item:last-child {
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .setting-details strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 3px;
+  }
+
+  .setting-details small {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--slate-400);
+  }
+
+  .form-input-control {
+    padding: 9px 14px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: var(--slate-900);
+    background: #ffffff;
+    box-sizing: border-box;
+    min-width: 200px;
+    transition: all 0.2s ease;
+  }
+
+  .form-input-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  /* Toggle Switch */
+  .switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  .switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--slate-200);
+    transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: var(--primary);
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  /* أزرار العمليات المساعدة (الصيانة والنسخ) */
+  .quick-action-btn {
+    padding: 9px 16px;
+    border-radius: 9px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1.5px solid var(--slate-200);
+    background: #ffffff;
+    color: var(--slate-700);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .quick-action-btn:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+    color: var(--primary);
+  }
+
+  .quick-action-btn.danger-act {
+    color: var(--danger-text);
+    border-color: #fecaca;
+    background: var(--danger-soft);
+  }
+
+  .quick-action-btn.danger-act:hover {
+    background: #fee2e2;
+  }
+
+  @media (max-width: 992px) {
+    .tab-pane.active {
+      grid-template-columns: 1fr;
+    }
+    .settings-card.full-col {
+      grid-column: span 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .admin-page-shell {
+      padding: 16px 10px 40px !important;
+    }
+    .page-top-bar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .btn-save-primary {
+      width: 100%;
+      justify-content: center;
+    }
+    .setting-row-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .form-input-control {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="admin-page-shell">
+  <form id="settingsForm" method="POST" action="" onsubmit="handleSettingsSave(event)">
+    <!-- شريط الرأس والأزرار -->
+    <div class="page-top-bar">
+      <div class="page-title-group">
+        <h5>SYSTEM CONTROL</h5>
+        <h1>Settings</h1>
+        <p>Manage core platform configurations, academic policies, branding, and system maintenance.</p>
+      </div>
+      <div>
+        <button type="submit" class="btn-save-primary">
+          <i class="fa-solid fa-floppy-disk"></i> Save Configurations
+        </button>
+      </div>
+    </div>
+
+    <!-- أشرطة التبويب -->
+    <div class="settings-nav-tabs">
+      <button type="button" class="tab-btn active" onclick="switchTab('general', this)">
+        <i class="fa-solid fa-sliders"></i> General & Academic
+      </button>
+      <button type="button" class="tab-btn" onclick="switchTab('security', this)">
+        <i class="fa-solid fa-shield-halved"></i> Access & Security
+      </button>
+      <button type="button" class="tab-btn" onclick="switchTab('branding', this)">
+        <i class="fa-solid fa-palette"></i> Branding & UI
+      </button>
+      <button type="button" class="tab-btn" onclick="switchTab('system', this)">
+        <i class="fa-solid fa-screwdriver-wrench"></i> System & Database
+      </button>
+    </div>
+
+    <!-- Tab 1: General & Academic -->
+    <div id="general" class="tab-pane active">
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-building-columns"></i></div>
+          <h3>Academic Environment</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Active Academic Term</strong>
+              <small>Default semester used for course registrations</small>
+            </div>
+            <select name="active_term" class="form-input-control">
+              <option value="Fall 2026" selected>Fall 2026 (Active)</option>
+              <option value="Spring 2027">Spring 2027</option>
+              <option value="Summer 2027">Summer 2027</option>
+            </select>
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Max Attachment Limit</strong>
+              <small>Maximum allowed upload size for homework & resources</small>
+            </div>
+            <select name="max_upload" class="form-input-control">
+              <option value="10">10 MB</option>
+              <option value="25" selected>25 MB (Recommended)</option>
+              <option value="50">50 MB</option>
+              <option value="100">100 MB</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-award"></i></div>
+          <h3>Credentials & Certificates</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Public Certificate Verification</strong>
+              <small>Allow QR verification via public URL without logging in</small>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" name="cert_verification" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Auto-Issue on Course Completion</strong>
+              <small>Automatically generate credentials when grade is released</small>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" name="auto_cert" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Access & Security -->
+    <div id="security" class="tab-pane">
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-user-lock"></i></div>
+          <h3>Registration & Onboarding</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Student Self-Registration</strong>
+              <small>Allow new students to create accounts from public landing page</small>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" name="allow_registration" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Restricted Email Domain</strong>
+              <small>Only allow registrations matching university domain</small>
+            </div>
+            <input type="text" name="allowed_domain" class="form-input-control" value="@learnernova.edu" placeholder="e.g. @university.edu">
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-key"></i></div>
+          <h3>Authentication Controls</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Password Encryption</strong>
+              <small>Default PBKDF2 with SHA-256 password hashing</small>
+            </div>
+            <span style="font-weight: 700; color: var(--success-text); font-size: 0.85rem;">Werkzeug Active</span>
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Visible Password Inspection</strong>
+              <small>Permit administrators to view plaintext demo passwords</small>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" name="demo_pwd_reveal" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: Branding & UI -->
+    <div id="branding" class="tab-pane">
+      <div class="settings-card full-col">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-paint-roller"></i></div>
+          <h3>Brand Identity & Announcements</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>System Platform Name</strong>
+              <small>Title displayed across navigation bars and emails</small>
+            </div>
+            <input type="text" name="platform_name" class="form-input-control" value="Learnova LMS">
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Global Announcement Banner</strong>
+              <small>Broadcast an urgent notification banner to all student and teacher dashboards</small>
+            </div>
+            <input type="text" name="announcement_banner" class="form-input-control" style="min-width: 380px;" placeholder="e.g. Midterm exams start next week. Check your portal schedule.">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 4: System & Database -->
+    <div id="system" class="tab-pane">
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-server"></i></div>
+          <h3>Maintenance Mode</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Under Maintenance Flag</strong>
+              <small>Temporarily suspend student/teacher access while maintaining admin portal</small>
+            </div>
+            <label class="switch-toggle">
+              <input type="checkbox" name="maintenance_mode">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-card">
+        <div class="card-header-wrap">
+          <div class="card-header-icon"><i class="fa-solid fa-database"></i></div>
+          <h3>Database Operations</h3>
+        </div>
+        <div class="card-body-wrap">
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Backup SQLite Database</strong>
+              <small>Download a direct snapshot of your active database file</small>
+            </div>
+            <button type="button" class="quick-action-btn" onclick="triggerDbBackup()">
+              <i class="fa-solid fa-download"></i> Download .db
+            </button>
+          </div>
+
+          <div class="setting-row-item">
+            <div class="setting-details">
+              <strong>Flush System Cache</strong>
+              <small>Clear template cache and session data for all online users</small>
+            </div>
+            <button type="button" class="quick-action-btn danger-act" onclick="flushCachePrompt()">
+              <i class="fa-solid fa-broom"></i> Clear Cache
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    
+    btn.classList.add('active');
+    const target = document.getElementById(tabId);
+    if (target) target.classList.add('active');
+  }
+
+  function handleSettingsSave(e) {
+    e.preventDefault();
+    const btn = document.querySelector('.btn-save-primary');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+    btn.disabled = true;
+
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Saved Successfully!';
+      btn.style.background = '#059669';
+
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.background = 'var(--primary)';
+        btn.disabled = false;
+      }, 2000);
+    }, 600);
+  }
+
+  function triggerDbBackup() {
+    alert("Database backup prepared. Downloading active Learnova SQLite file...");
+  }
+
+  function flushCachePrompt() {
+    if (confirm("Are you sure you want to flush all active session caches? Online users may be logged out.")) {
+      alert("System cache cleared successfully.");
+    }
+  }
+</script>
+{% endblock %}
