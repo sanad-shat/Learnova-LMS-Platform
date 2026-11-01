@@ -23,7 +23,7 @@
     --danger-text: #dc2626;
   }
 
-  /* فك قيود العرض والحشو الجانبي المفروض من القالب الأب */
+  /* فك قيود العرض وتوسيع المساحة */
   .content, .app-main {
     max-width: 100% !important;
     width: 100% !important;
@@ -148,7 +148,7 @@
     font-size: 1.1rem;
   }
 
-  /* Table Container Card */
+  /* Table Card */
   .directory-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -456,14 +456,11 @@
     color: var(--danger-text);
   }
 
-  /* نافذة التعديل التفاعلية */
+  /* Modal */
   .modal-overlay {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(4px);
     z-index: 1000;
@@ -483,12 +480,6 @@
     width: 100%;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     overflow: hidden;
-    animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  @keyframes modalPop {
-    from { opacity: 0; transform: scale(0.96); }
-    to { opacity: 1; transform: scale(1); }
   }
 
   .modal-header {
@@ -540,11 +531,6 @@
     font-size: 0.9rem;
   }
 
-  .modal-form-group input:focus {
-    outline: none;
-    border-color: var(--primary);
-  }
-
   .modal-footer {
     padding: 16px 24px;
     border-top: 1px solid var(--slate-200);
@@ -554,74 +540,20 @@
     gap: 10px;
   }
 
-  /* Responsive Rules */
   @media (max-width: 992px) {
-    .kpi-row {
-      grid-template-columns: 1fr;
-    }
-    .modern-data-table thead {
-      display: none;
-    }
-    .modern-data-table, 
-    .modern-data-table tbody, 
-    .modern-data-table tr, 
-    .modern-data-table td {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-    }
-    .modern-data-table tbody tr {
-      margin-bottom: 14px;
-      border: 1px solid var(--slate-200);
-      border-radius: 14px;
-      padding: 14px 16px;
-      background: #ffffff;
-    }
-    .modern-data-table td {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px dashed var(--slate-100);
-    }
-    .modern-data-table td:last-child {
-      border-bottom: none;
-      padding-top: 12px;
-      justify-content: flex-end;
-    }
-    .modern-data-table td::before {
-      content: attr(data-label);
-      font-size: 0.72rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      color: var(--slate-400);
-    }
+    .kpi-row { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 640px) {
-    .admin-page-shell {
-      padding: 16px 10px 40px !important;
-    }
-    .page-top-bar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .btn-add-primary {
-      width: 100%;
-      justify-content: center;
-    }
-    .directory-toolbar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .search-input-box {
-      width: 100%;
-    }
+    .admin-page-shell { padding: 16px 10px 40px !important; }
+    .page-top-bar { flex-direction: column; align-items: stretch; }
+    .btn-add-primary { width: 100%; justify-content: center; }
+    .directory-toolbar { flex-direction: column; align-items: stretch; }
+    .search-input-box { width: 100%; }
   }
 </style>
 
 <div class="admin-page-shell">
-  <!-- رأس الصفحة -->
   <div class="page-top-bar">
     <div class="page-title-group">
       <h5>ACADEMIC STAFF</h5>
@@ -635,7 +567,6 @@
     </div>
   </div>
 
-  <!-- ملخص إحصائي سريع -->
   <div class="kpi-row">
     <div class="kpi-card">
       <div>
@@ -660,7 +591,6 @@
     </div>
   </div>
 
-  <!-- بطاقة الدليل الرئيسية -->
   <div class="directory-card">
     <div class="directory-toolbar">
       <div class="directory-meta">
@@ -679,7 +609,6 @@
       </div>
     </div>
 
-    <!-- جدول البيانات -->
     <div class="table-responsive-wrapper">
       <table class="modern-data-table" id="instructorsTable">
         <thead>
@@ -734,16 +663,17 @@
                 <span class="badge-status-active">Active</span>
               </td>
 
-             <td data-label="PASSWORD">
-  {% set current_inst_pwd = inst.plain_password if inst.plain_password is defined and inst.plain_password else (inst.user.plain_password if inst.user and inst.user.plain_password is defined else (inst.password if inst.password is defined and not inst.password.startswith('scrypt:') and not inst.password.startswith('pbkdf2:') else '••••••')) %}
-  <div style="display: inline-flex; align-items: center; gap: 8px;">
-    <span id="pwd-mask-{{ inst.id }}" style="font-family: monospace; font-size: 0.88rem; font-weight: 600; color: var(--slate-800);">••••••</span>
-    <button type="button" class="btn-quick-edit" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
-            onclick="toggleInstructorPwd('{{ inst.id }}', '{{ current_inst_pwd }}')">
-      Show
-    </button>
-  </div>
-</td>
+              <!-- PASSWORD CELL -->
+              <td data-label="PASSWORD">
+                {% set current_inst_pwd = inst.plain_password if inst.plain_password is defined and inst.plain_password else (inst.user.plain_password if inst.user and inst.user.plain_password is defined else (inst.password if inst.password is defined and not inst.password.startswith('scrypt:') and not inst.password.startswith('pbkdf2:') else 'Learnova@2026')) %}
+                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span id="pwd-val-inst-{{ inst.id }}" data-pwd="{{ current_inst_pwd }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
+                  <button type="button" class="btn-quick-edit" id="pwd-btn-inst-{{ inst.id }}" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
+                          onclick="togglePasswordDirect('pwd-val-inst-{{ inst.id }}', 'pwd-btn-inst-{{ inst.id }}')">
+                    Show
+                  </button>
+                </div>
+              </td>
 
               <td data-label="COURSES">
                 {% if inst.courses is defined and inst.courses %}
@@ -767,12 +697,6 @@
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div id="menu-{{ inst.id }}" class="action-menu-dropdown">
-                      <a href="javascript:void(0)" onclick="promptAssignCourses('{{ inst.id }}')">
-                        <i class="fa-solid fa-book" style="color: #059669;"></i> Assign Courses
-                      </a>
-                      <a href="javascript:void(0)" onclick="promptResetPassword('{{ inst.id }}')">
-                        <i class="fa-solid fa-key" style="color: #d97706;"></i> Reset Password
-                      </a>
                       <form method="POST" action="/admin/teachers/delete/{{ inst.id }}" onsubmit="return confirm('Are you sure you want to delete this instructor?');" style="margin: 0;">
                         <button type="submit" class="item-danger">
                           <i class="fa-solid fa-trash"></i> Delete Instructor
@@ -798,7 +722,7 @@
   </div>
 </div>
 
-<!-- Modal: نافذة التعديل -->
+<!-- Modal -->
 <div id="editTeacherModal" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
@@ -834,6 +758,31 @@
 </div>
 
 <script>
+  function togglePasswordDirect(spanId, btnId) {
+    const span = document.getElementById(spanId);
+    const btn = document.getElementById(btnId);
+    if (!span || !btn) return;
+
+    const realPwd = span.getAttribute('data-pwd');
+    const isShown = span.getAttribute('data-shown') === 'true';
+
+    if (isShown) {
+      span.textContent = '••••••';
+      span.setAttribute('data-shown', 'false');
+      btn.textContent = 'Show';
+      btn.style.background = '#fef3c7';
+      btn.style.color = '#b45309';
+      btn.style.borderColor = '#fde68a';
+    } else {
+      span.textContent = realPwd;
+      span.setAttribute('data-shown', 'true');
+      btn.textContent = 'Hide';
+      btn.style.background = '#e2e8f0';
+      btn.style.color = '#475569';
+      btn.style.borderColor = '#cbd5e1';
+    }
+  }
+
   function filterInstructorTable() {
     const input = document.getElementById('instructorSearchInput');
     const filter = input.value.toLowerCase();
@@ -843,12 +792,6 @@
       const text = row.innerText.toLowerCase();
       row.style.display = text.includes(filter) ? '' : 'none';
     });
-  }
-
-  function toggleInstructorPwd(id, val) {
-    const el = document.getElementById('pwd-mask-' + id);
-    if (!el) return;
-    el.textContent = (el.textContent === '••••••') ? val : '••••••';
   }
 
   function toggleActionMenu(event, menuId) {
@@ -876,17 +819,6 @@
 
   function closeEditModal() {
     document.getElementById('editTeacherModal').classList.remove('active');
-  }
-
-  function promptResetPassword(id) {
-    const newPass = prompt("Enter new password for instructor #" + id + ":");
-    if (newPass) {
-      alert("Password updated request recorded.");
-    }
-  }
-
-  function promptAssignCourses(id) {
-    alert("Course assignment selector opened for instructor #" + id);
   }
 </script>
 {% endblock %}
