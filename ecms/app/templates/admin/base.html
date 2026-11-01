@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <title>{% block title %}Learnova LMS Admin{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -55,7 +55,7 @@
       left: 0;
       z-index: 100;
       padding: 24px 16px;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .sidebar-brand {
@@ -225,10 +225,11 @@
       display: none;
       background: none;
       border: none;
-      font-size: 18px;
+      font-size: 20px;
       color: var(--slate);
       cursor: pointer;
       padding: 6px;
+      border-radius: 8px;
     }
 
     .search-box {
@@ -403,10 +404,14 @@
       flex: 1;
     }
 
-    /* Responsive */
+    /* =========================================================
+       تحسينات الهاتف المخصصة (تعمل فقط عندما يكون العرض <= 768px)
+       وتترك وضع سطح المكتب والويب كما هو دون أدنى تأثير
+       ========================================================= */
     @media (max-width: 992px) {
       .sidebar {
         transform: translateX(-100%);
+        box-shadow: 10px 0 30px rgba(15, 23, 42, 0.15);
       }
       .sidebar.open {
         transform: translateX(0);
@@ -422,10 +427,128 @@
         position: fixed;
         inset: 0;
         background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
         z-index: 95;
       }
       .mobile-overlay.show {
         display: block;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        font-size: 14px;
+      }
+
+      /* الشريط العلوي على الهاتف */
+      .top-header {
+        height: 60px;
+        padding: 0 16px;
+      }
+      .header-left {
+        max-width: none;
+        gap: 10px;
+      }
+      .search-box {
+        display: none; /* إخفاء البحث الثابت من الهيدر لتوفير المساحة */
+      }
+      .profile-copy {
+        display: none; /* إخفاء اسم الأدمن الفرعي لإبقاء الهيدر نظيفاً */
+      }
+      .profile-chip {
+        padding: 3px;
+        border-radius: 50%;
+      }
+      .profile-chip i {
+        display: none;
+      }
+
+      /* منطقة المحتوى الداخلية */
+      .content {
+        padding: 14px 12px 40px !important;
+      }
+
+      .admin-page-shell {
+        padding: 8px 4px 30px !important;
+      }
+
+      /* تنظيم الرؤوس والأزرار عمودياً */
+      .page-top-bar, .form-header-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+        padding-bottom: 14px !important;
+      }
+
+      .page-title-group h1, .form-title-group h1 {
+        font-size: 1.45rem !important;
+      }
+
+      .btn-add-primary, .btn-back-link, .btn-save-primary, .btn-print-report, .btn-mark-all {
+        width: 100% !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+
+      /* ملخص الإحصائيات (KPI Cards) عمود واحد */
+      .kpi-row {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+      }
+
+      /* أدوات البحث وشريط الجدول */
+      .directory-toolbar, .notifications-toolbar, .messages-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 14px 16px !important;
+      }
+
+      .search-input-box {
+        width: 100% !important;
+      }
+
+      /* الجداول: شريط تمرير لمسي مريح وتفادي تكسر النصوص */
+      .table-responsive-wrapper {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .modern-data-table th, .modern-data-table td {
+        white-space: nowrap !important;
+      }
+
+      /* النماذج والإعدادات */
+      .form-layout-grid, .settings-grid-layout, .tab-pane.active {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .form-inputs-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+      }
+
+      .input-group.full-width {
+        grid-column: span 1 !important;
+      }
+
+      .main-form-card, .side-guide-card {
+        padding: 18px 16px !important;
+      }
+
+      .form-actions-footer {
+        flex-direction: column-reverse !important;
+        width: 100% !important;
+      }
+
+      .btn-submit-create, .btn-cancel {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
       }
     }
   </style>
@@ -493,7 +616,7 @@
     <section class="app-main">
       <header class="top-header">
         <div class="header-left">
-          <button class="menu-toggle" id="menuToggle" type="button">
+          <button class="menu-toggle" id="menuToggle" type="button" aria-label="Toggle navigation">
             <i class="fa-solid fa-bars"></i>
           </button>
           <div class="search-box">
@@ -562,9 +685,10 @@
         });
       }
 
-      // Mobile Menu
+      // Mobile Menu Slide-in
       if (menuBtn && sidebar && overlay) {
-        menuBtn.addEventListener('click', function () {
+        menuBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
           sidebar.classList.toggle('open');
           overlay.classList.toggle('show');
         });
@@ -572,6 +696,16 @@
         overlay.addEventListener('click', function () {
           sidebar.classList.remove('open');
           overlay.classList.remove('show');
+        });
+
+        // إغلاق القائمة تلقائياً عند النقر على أي رابط داخلها على الهاتف
+        sidebar.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            if (window.innerWidth <= 992) {
+              sidebar.classList.remove('open');
+              overlay.classList.remove('show');
+            }
+          });
         });
       }
     });
