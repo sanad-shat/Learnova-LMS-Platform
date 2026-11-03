@@ -2,6 +2,9 @@
 {% block title %}{{ course.name }} | Learnova Student{% endblock %}
 
 {% block content %}
+<!-- تضمين مكتبة PptxGenJS لتوليد وتنزيل ملفات PowerPoint حقيقية بصيغة .pptx -->
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+
 <style>
   :root {
     --primary: #4f46e5;
@@ -462,7 +465,7 @@
           </div>
 
           <div class="item-actions-cluster">
-            <!-- زر تحميل المادة كعرض تقديمي باوربوينت -->
+            <!-- زر تحميل المادة كملف عرض تقديمي باوربوينت أصلي (.pptx) -->
             <button type="button" class="btn-download-file" onclick="handleMaterialDownload('{{ u.title }}', '{{ course.name }}', '{{ u.file_path or '' }}')">
               <i class="fa-solid fa-file-powerpoint" style="color: #ea580c;"></i> Download Material
             </button>
@@ -642,6 +645,7 @@
       fetch(fileUrl, { method: 'HEAD' })
         .then(response => {
           if (response.ok) {
+            // الملف الأصلي متوفر على السيرفر
             const a = document.createElement('a');
             a.href = fileUrl;
             a.download = cleanPath.split('/').pop();
@@ -649,71 +653,82 @@
             a.click();
             document.body.removeChild(a);
           } else {
-            generatePowerPointFallback(unitTitle, courseName);
+            // توليد ملف PPTX حقيقي متوافق تماماً مع PowerPoint
+            generateRealPowerPointFile(unitTitle, courseName);
           }
         })
         .catch(() => {
-          generatePowerPointFallback(unitTitle, courseName);
+          generateRealPowerPointFile(unitTitle, courseName);
         });
     } else {
-      generatePowerPointFallback(unitTitle, courseName);
+      generateRealPowerPointFile(unitTitle, courseName);
     }
   }
 
-  function generatePowerPointFallback(unitTitle, courseName) {
-    const pptHtmlContent = `
-<html xmlns:o='urn:schemas-microsoft-com:office:office'
-      xmlns:x='urn:schemas-microsoft-com:office:powerpoint'
-      xmlns='http://www.w3.org/TR/REC-html40'>
-<head>
-  <meta charset='utf-8'>
-  <title>${courseName} - ${unitTitle}</title>
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f172a; color: #ffffff; padding: 40px; }
-    .slide-card { background: #1e293b; border-radius: 12px; padding: 30px; margin-bottom: 25px; border: 1px solid #334155; }
-    h1 { color: #6366f1; font-size: 26px; margin-bottom: 10px; }
-    h2 { color: #93c5fd; font-size: 20px; border-bottom: 1px solid #475569; padding-bottom: 8px; }
-    p, li { font-size: 16px; line-height: 1.6; color: #cbd5e1; }
-    ul { padding-left: 20px; }
-  </style>
-</head>
-<body>
-  <div class='slide-card'>
-    <h1>Learnova LMS — Course Material</h1>
-    <h2>${courseName} : ${unitTitle}</h2>
-    <p><strong>Instructor:</strong> Lecturer Aya Ali</p>
-    <p><strong>Academic Status:</strong> Official Verified Presentation Slide</p>
-  </div>
+  // توليد ملف عرض تقديمي حقيقي (.pptx) مدعوم من جميع إصدارات PowerPoint
+  function generateRealPowerPointFile(unitTitle, courseName) {
+    if (typeof PptxGenJS === 'undefined') {
+      window.open(`/static/uploads/${unitTitle}.pptx`, '_blank');
+      return;
+    }
 
-  <div class='slide-card'>
-    <h2>Module Objectives & Core Outline</h2>
-    <ul>
-      <li>Comprehensive theoretical foundation and syntax explanation.</li>
-      <li>In-depth code walkthroughs and architectural principles.</li>
-      <li>Practical implementation examples and edge-case handling.</li>
-      <li>Key takeaways for assignments, unit quizzes, and final exams.</li>
-    </ul>
-  </div>
+    let pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_16x9';
 
-  <div class='slide-card'>
-    <h2>Study Guidelines</h2>
-    <p>Please review these lecture slides thoroughly prior to attempting the course assessments and hands-on tasks.</p>
-  </div>
-</body>
-</html>`;
+    // Slide 1: Cover Slide
+    let slide1 = pptx.addSlide();
+    slide1.background = { color: '0F172A' };
 
-    const blob = new Blob([pptHtmlContent], { type: 'application/vnd.ms-powerpoint;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const downloadLink = document.createElement('a');
-    downloadLink.href = url;
-    
-    const cleanFileName = `${courseName}_${unitTitle}`.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
-    downloadLink.download = `${cleanFileName}_Presentation.ppt`;
-    
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    URL.revokeObjectURL(url);
+    slide1.addText(courseName, {
+      x: 0.8, y: 1.5, w: '85%', h: 1.0,
+      fontSize: 36, fontFace: 'Segoe UI', color: '818CF8', bold: true
+    });
+
+    slide1.addText(unitTitle + " — Lecture Presentation", {
+      x: 0.8, y: 2.6, w: '85%', h: 0.8,
+      fontSize: 24, fontFace: 'Segoe UI', color: 'FFFFFF', bold: true
+    });
+
+    slide1.addText("Learnova LMS Student Portal  |  Instructor: Lecturer Aya Ali", {
+      x: 0.8, y: 4.8, w: '85%', h: 0.5,
+      fontSize: 14, fontFace: 'Segoe UI', color: '94A3B8'
+    });
+
+    // Slide 2: Unit Overview & Objectives
+    let slide2 = pptx.addSlide();
+    slide2.background = { color: 'F8FAFC' };
+
+    slide2.addText(unitTitle + ": Key Objectives & Outline", {
+      x: 0.8, y: 0.6, w: '85%', h: 0.8,
+      fontSize: 24, fontFace: 'Segoe UI', color: '1E293B', bold: true
+    });
+
+    let items = [
+      { text: "Core programming syntax and conceptual overview.", options: { fontSize: 16, color: '334155', breakLine: true } },
+      { text: "Memory management, control flow, and structured logic.", options: { fontSize: 16, color: '334155', breakLine: true } },
+      { text: "Code walkthroughs and practical implementation examples.", options: { fontSize: 16, color: '334155', breakLine: true } },
+      { text: "Preparation guidelines for upcoming quizzes and lab tasks.", options: { fontSize: 16, color: '334155', breakLine: true } }
+    ];
+
+    slide2.addText(items, { x: 0.8, y: 1.6, w: '85%', h: 3.5, bullet: true, lineSpacing: 28 });
+
+    // Slide 3: Summary
+    let slide3 = pptx.addSlide();
+    slide3.background = { color: 'F8FAFC' };
+
+    slide3.addText("Summary & Study Recommendations", {
+      x: 0.8, y: 0.6, w: '85%', h: 0.8,
+      fontSize: 24, fontFace: 'Segoe UI', color: '1E293B', bold: true
+    });
+
+    slide3.addText("Review the exercises and ensure completion of related unit assignments before the exam cutoff date.", {
+      x: 0.8, y: 1.6, w: '85%', h: 1.5,
+      fontSize: 16, fontFace: 'Segoe UI', color: '475569'
+    });
+
+    // الحفظ المباشر كملف .pptx أصلي
+    const cleanFileName = (courseName + "_" + unitTitle).replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
+    pptx.writeFile({ fileName: cleanFileName + ".pptx" });
   }
 </script>
 {% endblock %}
