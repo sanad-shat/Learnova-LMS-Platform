@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from datetime import datetime, timezone
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import deferred
 
 
 # ---------------- User Table ----------------
@@ -183,7 +184,7 @@ class Unit(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text)
     file_path = db.Column(db.String(255))
-    file_data = db.Column(db.LargeBinary, nullable=True)
+    file_data = deferred(db.Column(db.LargeBinary, nullable=True))
     file_mimetype = db.Column(db.String(100), nullable=True)
 
     # Relationship
@@ -366,5 +367,4 @@ class Discussion(db.Model):
     author = db.relationship('User', backref=db.backref('discussions', lazy=True))
 
 
-# تفعيل اسم DiscussionTopic ليتوافق مع استيرادات لوحة الإدارة admin.py وباقي الملفات
 DiscussionTopic = Discussion
