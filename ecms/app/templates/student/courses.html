@@ -32,7 +32,7 @@
     gap: 24px;
   }
 
-  /* 1. Header Banner */
+  /* 1. Hero Header */
   .courses-hero-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
     border-radius: 20px;
@@ -83,7 +83,7 @@
     letter-spacing: 0.05em;
   }
 
-  /* 2. Search Toolbar */
+  /* 2. Toolbar */
   .courses-toolbar {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -98,7 +98,7 @@
 
   .courses-search-wrapper {
     position: relative;
-    flex: 1;
+    width: 100%;
     max-width: 420px;
   }
 
@@ -130,11 +130,11 @@
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  /* 3. Cards Grid */
+  /* 3. Grid Layout */
   .courses-grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 24px;
     width: 100%;
   }
 
@@ -210,13 +210,6 @@
     gap: 14px;
   }
 
-  .course-title-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-  }
-
   .course-title-row h3 {
     margin: 0;
     font-size: 1.1rem;
@@ -232,10 +225,6 @@
     font-size: 0.82rem;
     color: var(--slate-500);
     font-weight: 600;
-  }
-
-  .course-instructor i {
-    color: var(--slate-400);
   }
 
   .course-desc-text {
@@ -255,14 +244,14 @@
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
     border-radius: 10px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     text-align: center;
     gap: 4px;
   }
 
   .metric-item strong {
     display: block;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     font-weight: 800;
     color: var(--slate-900);
   }
@@ -331,7 +320,7 @@
   }
 
   .btn-course-cert {
-    padding: 10px 14px;
+    padding: 10px 16px;
     border-radius: 10px;
     background: #fef3c7;
     color: #b45309;
@@ -362,24 +351,6 @@
 
   .empty-courses-state.show {
     display: block;
-  }
-
-  .empty-courses-state i {
-    font-size: 2.5rem;
-    color: var(--slate-300);
-    margin-bottom: 12px;
-    display: block;
-  }
-
-  .empty-courses-state h3 {
-    margin: 0 0 6px;
-    font-size: 1.15rem;
-    color: var(--slate-700);
-  }
-
-  .empty-courses-state p {
-    margin: 0;
-    font-size: 0.88rem;
   }
 
   @media (max-width: 768px) {
@@ -464,7 +435,7 @@
             </div>
             <div class="metric-item">
               <strong>{{ c.completed_count if c.completed_count is defined else '0/14' }}</strong>
-              <small>Completed</small>
+              <small>Tasks</small>
             </div>
             <div class="metric-item">
               <strong>0%</strong>
@@ -486,8 +457,8 @@
             <a href="/student/courses" class="btn-course-continue">
               <i class="fa-solid fa-play"></i> Continue Course
             </a>
-            <a href="/student/certificates" class="btn-course-cert" title="View Certificate">
-              <i class="fa-solid fa-award"></i>
+            <a href="/student/certificates" class="btn-course-cert">
+              <i class="fa-solid fa-award"></i> Certificate
             </a>
           </div>
         </div>
@@ -556,8 +527,8 @@
 
     <div class="empty-courses-state" id="noCoursesFoundBox">
       <i class="fa-solid fa-book-bookmark"></i>
-      <h3>No courses found</h3>
-      <p>Try searching with another keyword or course code.</p>
+      <h3 style="margin: 0 0 6px; font-size: 1.15rem; color: var(--slate-700);">No courses found</h3>
+      <p style="margin: 0; font-size: 0.88rem;">Try searching with another keyword or course code.</p>
     </div>
   </div>
 
