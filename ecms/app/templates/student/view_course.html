@@ -2,7 +2,7 @@
 {% block title %}{{ course.name }} | Learnova Student{% endblock %}
 
 {% block content %}
-<!-- تضمين مكتبة PptxGenJS لتوليد وتنزيل ملفات PowerPoint حقيقية بصيغة .pptx -->
+<!-- تضمين مكتبة PptxGenJS لتوليد وتنزيل ملفات PowerPoint كاحتياط -->
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
 
 <style>
@@ -465,10 +465,10 @@
           </div>
 
           <div class="item-actions-cluster">
-            <!-- زر تحميل المادة كملف عرض تقديمي باوربوينت أصلي (.pptx) -->
-            <button type="button" class="btn-download-file" onclick="handleMaterialDownload('{{ u.title }}', '{{ course.name }}', '{{ u.file_path or '' }}')">
+            <!-- رابط التحميل المباشر لملف السلايدات الأصلي من قاعدة بيانات Neon -->
+            <a href="{{ url_for('students.download_unit_file', unit_id=u.id) }}" class="btn-download-file">
               <i class="fa-solid fa-file-powerpoint" style="color: #ea580c;"></i> Download Material
-            </button>
+            </a>
 
             <!-- زر التبديل بين مكتمل وغير مكتمل -->
             <form method="POST" action="{{ url_for('students.toggle_unit', unit_id=u.id) }}" style="margin:0;">
@@ -637,45 +637,13 @@
 </div>
 
 <script>
-  function handleMaterialDownload(unitTitle, courseName, filePath) {
-    if (filePath && filePath.trim() !== '') {
-      let cleanPath = filePath.replace(/^\/?(static\/)?/, '');
-      const fileUrl = `/static/${cleanPath}`;
-
-      fetch(fileUrl, { method: 'HEAD' })
-        .then(response => {
-          if (response.ok) {
-            // الملف الأصلي متوفر على السيرفر
-            const a = document.createElement('a');
-            a.href = fileUrl;
-            a.download = cleanPath.split('/').pop();
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          } else {
-            // توليد ملف PPTX حقيقي متوافق تماماً مع PowerPoint
-            generateRealPowerPointFile(unitTitle, courseName);
-          }
-        })
-        .catch(() => {
-          generateRealPowerPointFile(unitTitle, courseName);
-        });
-    } else {
-      generateRealPowerPointFile(unitTitle, courseName);
-    }
-  }
-
-  // توليد ملف عرض تقديمي حقيقي (.pptx) مدعوم من جميع إصدارات PowerPoint
+  // دالة احتياطية لتوليد ملف Presentation في حال طُلب تنزيل تجريبي محلياً
   function generateRealPowerPointFile(unitTitle, courseName) {
-    if (typeof PptxGenJS === 'undefined') {
-      window.open(`/static/uploads/${unitTitle}.pptx`, '_blank');
-      return;
-    }
+    if (typeof PptxGenJS === 'undefined') return;
 
     let pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_16x9';
 
-    // Slide 1: Cover Slide
     let slide1 = pptx.addSlide();
     slide1.background = { color: '0F172A' };
 
@@ -694,39 +662,6 @@
       fontSize: 14, fontFace: 'Segoe UI', color: '94A3B8'
     });
 
-    // Slide 2: Unit Overview & Objectives
-    let slide2 = pptx.addSlide();
-    slide2.background = { color: 'F8FAFC' };
-
-    slide2.addText(unitTitle + ": Key Objectives & Outline", {
-      x: 0.8, y: 0.6, w: '85%', h: 0.8,
-      fontSize: 24, fontFace: 'Segoe UI', color: '1E293B', bold: true
-    });
-
-    let items = [
-      { text: "Core programming syntax and conceptual overview.", options: { fontSize: 16, color: '334155', breakLine: true } },
-      { text: "Memory management, control flow, and structured logic.", options: { fontSize: 16, color: '334155', breakLine: true } },
-      { text: "Code walkthroughs and practical implementation examples.", options: { fontSize: 16, color: '334155', breakLine: true } },
-      { text: "Preparation guidelines for upcoming quizzes and lab tasks.", options: { fontSize: 16, color: '334155', breakLine: true } }
-    ];
-
-    slide2.addText(items, { x: 0.8, y: 1.6, w: '85%', h: 3.5, bullet: true, lineSpacing: 28 });
-
-    // Slide 3: Summary
-    let slide3 = pptx.addSlide();
-    slide3.background = { color: 'F8FAFC' };
-
-    slide3.addText("Summary & Study Recommendations", {
-      x: 0.8, y: 0.6, w: '85%', h: 0.8,
-      fontSize: 24, fontFace: 'Segoe UI', color: '1E293B', bold: true
-    });
-
-    slide3.addText("Review the exercises and ensure completion of related unit assignments before the exam cutoff date.", {
-      x: 0.8, y: 1.6, w: '85%', h: 1.5,
-      fontSize: 16, fontFace: 'Segoe UI', color: '475569'
-    });
-
-    // الحفظ المباشر كملف .pptx أصلي
     const cleanFileName = (courseName + "_" + unitTitle).replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
     pptx.writeFile({ fileName: cleanFileName + ".pptx" });
   }
