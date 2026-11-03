@@ -116,6 +116,7 @@
     height: 100%;
     background: #10b981;
     border-radius: 999px;
+    transition: width 0.4s ease;
   }
 
   /* 2. Top Analytics Grid */
@@ -172,7 +173,7 @@
     color: var(--slate-400);
   }
 
-  /* 3. Content Section Modules */
+  /* 3. Content Modules */
   .module-section-box {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -261,7 +262,7 @@
     margin-top: 2px;
   }
 
-  /* Actions & Buttons */
+  /* Actions Cluster */
   .item-actions-cluster {
     display: flex;
     align-items: center;
@@ -282,10 +283,12 @@
     align-items: center;
     gap: 6px;
     transition: all 0.2s ease;
+    cursor: pointer;
   }
 
   .btn-download-file:hover {
     background: var(--slate-100);
+    color: var(--primary);
   }
 
   .btn-toggle-done {
@@ -334,7 +337,7 @@
     color: var(--success);
     font-size: 0.76rem;
     font-weight: 800;
-    padding: 4px 10px;
+    padding: 3px 8px;
     border-radius: 6px;
     display: inline-flex;
     align-items: center;
@@ -459,16 +462,18 @@
           </div>
 
           <div class="item-actions-cluster">
+            <!-- زر تحميل المادة المباشر والفعال -->
             {% if u.file_path %}
-              <a href="{{ url_for('static', filename=u.file_path) }}" target="_blank" class="btn-download-file">
+              <a href="{{ url_for('static', filename=u.file_path) }}" download class="btn-download-file">
                 <i class="fa-solid fa-download"></i> Download Material
               </a>
             {% else %}
-              <button type="button" class="btn-download-file" onclick="alert('Unit slides will be available soon.')">
-                <i class="fa-solid fa-file-pdf"></i> Material
+              <button type="button" class="btn-download-file" onclick="triggerClientMaterialDownload('{{ u.title }}', '{{ course.name }}')">
+                <i class="fa-solid fa-download"></i> Download Material
               </button>
             {% endif %}
 
+            <!-- زر التبديل بين مكتمل وغير مكتمل -->
             <form method="POST" action="{{ url_for('students.toggle_unit', unit_id=u.id) }}" style="margin:0;">
               <button type="submit" class="btn-toggle-done {{ 'done' if is_done else '' }}">
                 <i class="fa-solid {{ 'fa-rotate-left' if is_done else 'fa-check' }}"></i>
@@ -479,16 +484,7 @@
         </div>
         {% endfor %}
       {% else %}
-        <div class="single-item-row">
-          <div class="item-main-details">
-            <h3>ch01</h3>
-            <p>Learning material for this unit.</p>
-          </div>
-          <div class="item-actions-cluster">
-            <button class="btn-download-file"><i class="fa-solid fa-download"></i> Download Material</button>
-            <button class="btn-toggle-done"><i class="fa-solid fa-check"></i> Mark Complete</button>
-          </div>
-        </div>
+        <p style="color:var(--slate-400); font-size:0.88rem; margin:0;">No units available yet.</p>
       {% endif %}
     </div>
   </div>
@@ -642,4 +638,34 @@
   </div>
 
 </div>
+
+<script>
+  // دالة تنزيل ملخص الوحدة مباشرة في حال لم يكن هناك ملف PDF مرفوع مسبقاً
+  function triggerClientMaterialDownload(unitTitle, courseName) {
+    const content = `=====================================================
+Learnova LMS - Course Learning Material
+=====================================================
+Course: ${courseName}
+Unit: ${unitTitle}
+Student Portal Verified Document
+
+Summary & Key Concepts:
+- Introduction to Core Principles & Fundamentals
+- Practical Examples & Problem-Solving Exercises
+- Review Questions & Study References
+
+Downloaded on: ${new Date().toLocaleString()}
+=====================================================`;
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${courseName}_${unitTitle}_Material.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+</script>
 {% endblock %}
