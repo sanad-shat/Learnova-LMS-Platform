@@ -1,499 +1,645 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-
-    <title>{{ course.name }} | Learnova</title>
-
-    <link rel="icon"
-          href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
-
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='professional.css') }}">
-</head>
-
-<body>
-
-<div class="course-workspace">
-
-    <aside class="workspace-side">
-
-        <a class="sidebar-brand"
-           href="{{ url_for('students.dashboard') }}">
-
-            <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
-
-            <span class="brand-copy">
-                <strong>Learnova <b>LMS</b></strong>
-                <small>STUDENT PORTAL</small>
-            </span>
-        </a>
-
-        <div class="nav-section">Course Menu</div>
-
-        <nav class="side-nav">
-
-            <a href="{{ url_for('students.dashboard') }}">
-                <i class="fa-solid fa-house"></i>
-                Dashboard
-            </a>
-
-            <a class="active" href="#overview">
-                <i class="fa-solid fa-book-open"></i>
-                Overview
-            </a>
-
-            <a href="#units">
-                <i class="fa-solid fa-layer-group"></i>
-                Units
-            </a>
-
-            <a href="#assignments">
-                <i class="fa-solid fa-list-check"></i>
-                Assignments
-            </a>
-
-            <a href="#quizzes">
-                <i class="fa-solid fa-circle-question"></i>
-                Quizzes
-            </a>
-
-            <a href="#exams">
-                <i class="fa-solid fa-file-circle-check"></i>
-                Exams & Grades
-            </a>
-
-            <a href="{{ url_for('forum.index', course_id=course.id) }}">
-                <i class="fa-solid fa-comments"></i>
-                Discussions
-            </a>
-
-            <a href="{{ url_for('students.logout') }}">
-                <i class="fa-solid fa-right-from-bracket"></i>
-                Logout
-            </a>
-
-        </nav>
-
-    </aside>
-
-    <main class="workspace-main">
-
-        <div class="workspace-content">
-
-            <section class="workspace-hero" id="overview">
-
-                <div>
-                    <span class="course-chip">{{ course.code }}</span>
-
-                    <h1>{{ course.name }}</h1>
-
-                    <p>
-                        {{ course.description or 'Course learning space' }}
-                    </p>
-
-                    <small>
-                        Instructor:
-                        {{ teacher.name_person or teacher.username }}
-                    </small>
-                </div>
-
-                <div class="grade-ring">
-                    <strong>{{ progress.percent }}%</strong>
-                    <span>Progress</span>
-                </div>
-
-            </section>
-
-            <section class="stats-grid">
-
-                <article class="metric-card">
-
-                    <div class="metric-icon purple">
-                        <i class="fa-solid fa-layer-group"></i>
-                    </div>
-
-                    <div>
-                        <small>Units</small>
-                        <strong>
-                            {{ progress.unit_done }}/{{ progress.unit_total }}
-                        </strong>
-                        <em>Completed</em>
-                    </div>
-
-                </article>
-
-                <article class="metric-card">
-
-                    <div class="metric-icon blue">
-                        <i class="fa-solid fa-list-check"></i>
-                    </div>
-
-                    <div>
-                        <small>Assignments</small>
-                        <strong>
-                            {{ progress.assignment_done }}/{{ progress.assignment_total }}
-                        </strong>
-                        <em>Submitted</em>
-                    </div>
-
-                </article>
-
-                <article class="metric-card">
-
-                    <div class="metric-icon green">
-                        <i class="fa-solid fa-circle-question"></i>
-                    </div>
-
-                    <div>
-                        <small>Quizzes</small>
-                        <strong>
-                            {{ progress.quiz_done }}/{{ progress.quiz_total }}
-                        </strong>
-                        <em>Attempted</em>
-                    </div>
-
-                </article>
-
-                <article class="metric-card">
-
-                    <div class="metric-icon amber">
-                        <i class="fa-solid fa-chart-line"></i>
-                    </div>
-
-                    <div>
-                        <small>Final Grade</small>
-                        <strong>{{ final_grade }}%</strong>
-                        <em>Current result</em>
-                    </div>
-
-                </article>
-
-            </section>
-
-            <section class="workspace-section" id="units">
-
-                <div class="workspace-section-head">
-                    <h2>Learning Units</h2>
-                </div>
-
-                {% for unit in course.units %}
-
-                <article class="resource-card">
-
-                    <div>
-
-                        <h3>{{ unit.title }}</h3>
-
-                        <p>
-                            {{ unit.content or 'Learning material for this unit.' }}
-                        </p>
-
-                        {% if unit.file_path %}
-
-                        <a class="secondary-btn"
-                           href="{{ url_for('teachers.uploaded_file', filename=unit.file_path) }}">
-
-                            <i class="fa-solid fa-download"></i>
-                            Download Material
-
-                        </a>
-
-                        {% endif %}
-
-                    </div>
-
-                    <form method="post"
-                          action="{{ url_for('students.toggle_unit', unit_id=unit.id) }}">
-
-                        <button class="{% if unit.id in completed_unit_ids %}secondary-btn{% else %}primary-btn{% endif %}">
-
-                            {{ '✓ Completed' if unit.id in completed_unit_ids else 'Mark Complete' }}
-
-                        </button>
-
-                    </form>
-
-                </article>
-
-                {% else %}
-
-                <div class="empty-state compact">
-                    No units yet.
-                </div>
-
-                {% endfor %}
-
-            </section>
-
-            <section class="workspace-section" id="assignments">
-
-                <div class="workspace-section-head">
-                    <h2>Assignments</h2>
-                </div>
-
-                {% for item in assignments %}
-
-                <article class="resource-card">
-
-                    <div>
-
-                        <h3>{{ item.assignment.title }}</h3>
-
-                        <p>{{ item.assignment.description }}</p>
-
-                        <small>
-                            Due
-                            {{ item.assignment.due_date.strftime('%d %b %Y, %H:%M') }}
-                        </small>
-
-                        {% if item.submitted %}
-
-                        <p>
-                            <span class="badge badge-success">
-                                Submitted
-                            </span>
-
-                            Grade:
-                            {{ item.grade if item.grade is not none else 'Pending' }}
-                        </p>
-
-                        {% endif %}
-
-                    </div>
-
-                    <div>
-
-                        {% if item.submitted %}
-
-                        <a class="secondary-btn"
-                           href="{{ url_for('students.edit_submission', submission_id=item.submission_id) }}">
-
-                            Edit Submission
-
-                        </a>
-
-                        {% else %}
-
-                        <a class="primary-btn"
-                           href="{{ url_for('students.submit_assignment', assignment_id=item.assignment.id) }}">
-
-                            Submit Assignment
-
-                        </a>
-
-                        {% endif %}
-
-                    </div>
-
-                </article>
-
-                {% else %}
-
-                <div class="empty-state compact">
-                    No assignments yet.
-                </div>
-
-                {% endfor %}
-
-            </section>
-
-            <section class="workspace-section" id="quizzes">
-
-                <div class="workspace-section-head">
-                    <h2>Quizzes</h2>
-                </div>
-
-                {% for item in quizzes %}
-
-                <article class="resource-card">
-
-                    <div>
-
-                        <h3>{{ item.quiz.title }}</h3>
-
-                        <p>{{ item.quiz.description }}</p>
-
-                        <small>
-                            Available until
-                            {{ item.quiz.end_date.strftime('%d %b %Y, %H:%M') }}
-                        </small>
-
-                    </div>
-
-                    {% if item.attempted %}
-
-                    <a class="secondary-btn"
-                       href="{{ url_for('students.quiz_results', quiz_id=item.quiz.id) }}">
-
-                        Results:
-                        {{ item.score }}/{{ item.total }}
-
-                    </a>
-
-                    {% else %}
-
-                    <a class="primary-btn"
-                       href="{{ url_for('students.take_quiz', quiz_id=item.quiz.id) }}">
-
-                        Take Quiz
-
-                    </a>
-
-                    {% endif %}
-
-                </article>
-
-                {% else %}
-
-                <div class="empty-state compact">
-                    No quizzes yet.
-                </div>
-
-                {% endfor %}
-
-            </section>
-
-            <section class="workspace-section" id="exams">
-
-                <div class="workspace-section-head">
-
-                    <div>
-                        <span class="eyebrow">ASSESSMENTS</span>
-                        <h2>Exams & Grades</h2>
-                    </div>
-
-                </div>
-
-                {% for item in exams %}
-
-                <article class="resource-card">
-
-                    <div>
-
-                        <h3>{{ item.exam.title }}</h3>
-
-                        <p>
-                            {{ item.exam.description or 'Course examination' }}
-                        </p>
-
-                        <small>
-
-                            {{ item.exam.start_date.strftime('%d %b %Y, %H:%M') }}
-
-                            —
-
-                            {{ item.exam.end_date.strftime('%d %b %Y, %H:%M') }}
-
-                        </small>
-
-                        <p class="muted">
-
-                            Total score:
-                            {{ item.exam.total_score }}
-
-                            &nbsp;•&nbsp;
-
-                            Questions:
-                            {{ item.exam.questions|length }}
-
-                        </p>
-
-                    </div>
-
-                    <div>
-
-                        {% if item.taken %}
-
-                        <a class="secondary-btn"
-                           href="{{ url_for('students.exam_results', exam_id=item.exam.id) }}">
-
-                            <i class="fa-solid fa-chart-column"></i>
-
-                            View Result:
-                            {{ item.score }}/{{ item.exam.total_score }}
-
-                        </a>
-
-                        {% else %}
-
-                        <a class="primary-btn"
-                           href="{{ url_for('students.take_exam', exam_id=item.exam.id) }}">
-
-                            <i class="fa-solid fa-pen-to-square"></i>
-                            Take Exam
-
-                        </a>
-
-                        {% endif %}
-
-                    </div>
-
-                </article>
-
-                {% else %}
-
-                <div class="empty-state compact">
-                    No exams yet.
-                </div>
-
-                {% endfor %}
-
-            </section>
-
-            <section class="workspace-section">
-
-                <div class="workspace-section-head">
-
-                    <div>
-
-                        <span class="eyebrow">
-                            COURSE ACHIEVEMENT
-                        </span>
-
-                        <h2>
-                            Certificate of Completion
-                        </h2>
-
-                    </div>
-
-                    {% if certificate %}
-
-                    <a class="primary-btn"
-                       href="{{ url_for('students.certificate', course_id=course.id) }}">
-
-                        View Certificate
-
-                    </a>
-
-                    {% else %}
-
-                    <a class="primary-btn {% if progress.percent < 100 or final_grade < 60 %}disabled{% endif %}"
-                       href="{{ url_for('students.generate_certificate', course_id=course.id) }}">
-
-                        Generate Certificate
-
-                    </a>
-
-                    {% endif %}
-
-                </div>
-
-                <p class="muted">
-                    Complete all course activities and achieve at least 60%.
-                </p>
-
-            </section>
-
+{% extends 'student/base.html' %}
+{% block title %}{{ course.name }} | Learnova Student{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --amber: #f59e0b;
+    --amber-soft: #fffbeb;
+    --purple: #8b5cf6;
+    --purple-soft: #f5f3ff;
+  }
+
+  .course-view-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Course Hero Banner */
+  .course-view-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 30px 34px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .banner-details-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .course-code-pill {
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 6px;
+    width: fit-content;
+  }
+
+  .course-view-banner h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin: 4px 0 2px;
+    letter-spacing: -0.02em;
+  }
+
+  .instructor-badge-banner {
+    color: #c7d2fe;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .banner-progress-box {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 22px;
+    border-radius: 16px;
+    width: 180px;
+    text-align: right;
+  }
+
+  .banner-progress-box .txt-num {
+    font-size: 1.7rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+  }
+
+  .banner-progress-box .txt-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #c7d2fe;
+    margin-bottom: 6px;
+  }
+
+  .banner-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+
+  .banner-progress-fill {
+    height: 100%;
+    background: #10b981;
+    border-radius: 999px;
+  }
+
+  /* 2. Top Analytics Grid */
+  .course-analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .analytic-stat-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+  }
+
+  .stat-icon-wrapper {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .stat-units { background: #ede9fe; color: var(--purple); }
+  .stat-assignments { background: #e0e7ff; color: var(--primary); }
+  .stat-quizzes { background: #ecfdf5; color: var(--success); }
+  .stat-grade { background: #fef3c7; color: var(--amber); }
+
+  .stat-info-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .stat-info-txt .val {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1.2;
+  }
+
+  .stat-info-txt .lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--slate-400);
+  }
+
+  /* 3. Content Section Modules */
+  .module-section-box {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 26px 30px;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .module-header-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--slate-100);
+    padding-bottom: 14px;
+  }
+
+  .module-header-title h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .items-stack-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .single-item-row {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .single-item-row:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  }
+
+  .single-item-row.is-completed {
+    border-left: 4px solid var(--success);
+  }
+
+  .item-main-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .item-main-details h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .item-main-details p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--slate-500);
+  }
+
+  .item-meta-sub {
+    font-size: 0.76rem;
+    color: var(--slate-400);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 2px;
+  }
+
+  /* Actions & Buttons */
+  .item-actions-cluster {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn-download-file {
+    background: #ffffff;
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-download-file:hover {
+    background: var(--slate-100);
+  }
+
+  .btn-toggle-done {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-toggle-done:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-toggle-done.done {
+    background: var(--success);
+  }
+
+  .btn-action-primary {
+    background: var(--primary);
+    color: #ffffff;
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-action-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  .badge-done-tag {
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  @media (max-width: 900px) {
+    .course-analytics-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .course-view-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .banner-progress-box {
+      width: 100%;
+      text-align: left;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .single-item-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .item-actions-cluster {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+</style>
+
+<div class="course-view-shell">
+
+  <!-- 1. Course Header Banner -->
+  <div class="course-view-banner">
+    <div class="banner-details-left">
+      <span class="course-code-pill">{{ course.code or 'BSAI 1211' }}</span>
+      <h1>{{ course.name or 'Programming (1)' }}</h1>
+      <div class="instructor-badge-banner">
+        <i class="fa-solid fa-chalkboard-user"></i>
+        <span>Instructor: {{ teacher.name_person or teacher.username if teacher else 'Lecturer: Aya Ali' }}</span>
+      </div>
+    </div>
+
+    <div class="banner-progress-box">
+      <div class="txt-lbl">Overall Progress</div>
+      <div class="txt-num">{{ progress.percent if progress is mapping else progress }}%</div>
+      <div class="banner-progress-bar">
+        <div class="banner-progress-fill" style="width: {{ progress.percent if progress is mapping else progress }}%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Course Analytics 4-Grid -->
+  <div class="course-analytics-grid">
+    <div class="analytic-stat-card">
+      <div class="stat-icon-wrapper stat-units">
+        <i class="fa-solid fa-layer-group"></i>
+      </div>
+      <div class="stat-info-txt">
+        <span class="val">{{ completed_unit_ids|length if completed_unit_ids else 0 }}/{{ course.units|length if course.units else 8 }}</span>
+        <span class="lbl">Units Completed</span>
+      </div>
+    </div>
+
+    <div class="analytic-stat-card">
+      <div class="stat-icon-wrapper stat-assignments">
+        <i class="fa-solid fa-clipboard-check"></i>
+      </div>
+      <div class="stat-info-txt">
+        {% set submitted_assigns = assignments|selectattr('submitted')|list|length if assignments else 0 %}
+        <span class="val">{{ submitted_assigns }}/{{ assignments|length if assignments else 2 }}</span>
+        <span class="lbl">Assignments</span>
+      </div>
+    </div>
+
+    <div class="analytic-stat-card">
+      <div class="stat-icon-wrapper stat-quizzes">
+        <i class="fa-solid fa-circle-question"></i>
+      </div>
+      <div class="stat-info-txt">
+        {% set attempted_quizzes = quizzes|selectattr('attempted')|list|length if quizzes else 0 %}
+        <span class="val">{{ attempted_quizzes }}/{{ quizzes|length if quizzes else 3 }}</span>
+        <span class="lbl">Quizzes Taken</span>
+      </div>
+    </div>
+
+    <div class="analytic-stat-card">
+      <div class="stat-icon-wrapper stat-grade">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div class="stat-info-txt">
+        <span class="val">{{ '%.1f'|format(final_grade or 0.0) }}%</span>
+        <span class="lbl">Final Result</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Learning Units Module -->
+  <div class="module-section-box">
+    <div class="module-header-title">
+      <h2><i class="fa-solid fa-book-open" style="color:var(--primary);"></i> Learning Units</h2>
+      <span style="font-size:0.8rem; color:var(--slate-400); font-weight:700;">{{ course.units|length if course.units else 0 }} Modules</span>
+    </div>
+
+    <div class="items-stack-list">
+      {% if course.units %}
+        {% for u in course.units %}
+        {% set is_done = u.id in completed_unit_ids %}
+        <div class="single-item-row {{ 'is-completed' if is_done else '' }}">
+          <div class="item-main-details">
+            <h3>
+              {{ u.title }}
+              {% if is_done %}
+                <span class="badge-done-tag"><i class="fa-solid fa-circle-check"></i> Completed</span>
+              {% endif %}
+            </h3>
+            <p>{{ u.description or 'Learning material for this unit.' }}</p>
+          </div>
+
+          <div class="item-actions-cluster">
+            {% if u.file_path %}
+              <a href="{{ url_for('static', filename=u.file_path) }}" target="_blank" class="btn-download-file">
+                <i class="fa-solid fa-download"></i> Download Material
+              </a>
+            {% else %}
+              <button type="button" class="btn-download-file" onclick="alert('Unit slides will be available soon.')">
+                <i class="fa-solid fa-file-pdf"></i> Material
+              </button>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('students.toggle_unit', unit_id=u.id) }}" style="margin:0;">
+              <button type="submit" class="btn-toggle-done {{ 'done' if is_done else '' }}">
+                <i class="fa-solid {{ 'fa-rotate-left' if is_done else 'fa-check' }}"></i>
+                {{ 'Mark Incomplete' if is_done else 'Mark Complete' }}
+              </button>
+            </form>
+          </div>
         </div>
+        {% endfor %}
+      {% else %}
+        <div class="single-item-row">
+          <div class="item-main-details">
+            <h3>ch01</h3>
+            <p>Learning material for this unit.</p>
+          </div>
+          <div class="item-actions-cluster">
+            <button class="btn-download-file"><i class="fa-solid fa-download"></i> Download Material</button>
+            <button class="btn-toggle-done"><i class="fa-solid fa-check"></i> Mark Complete</button>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
 
-    </main>
+  <!-- 4. Assignments Module -->
+  <div class="module-section-box">
+    <div class="module-header-title">
+      <h2><i class="fa-solid fa-list-check" style="color:var(--primary);"></i> Course Assignments</h2>
+      <span style="font-size:0.8rem; color:var(--slate-400); font-weight:700;">{{ assignments|length if assignments else 0 }} Tasks</span>
+    </div>
+
+    <div class="items-stack-list">
+      {% if assignments %}
+        {% for a_item in assignments %}
+        {% set a = a_item.assignment %}
+        <div class="single-item-row {{ 'is-completed' if a_item.submitted else '' }}">
+          <div class="item-main-details">
+            <h3>{{ a.title }}</h3>
+            <p>{{ a.description or 'Course assignment instructions and criteria.' }}</p>
+            <div class="item-meta-sub">
+              <span><i class="fa-regular fa-calendar"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date and a.due_date.strftime is defined else 'No Deadline' }}</span>
+              {% if a_item.submitted %}
+                <span class="badge-done-tag"><i class="fa-solid fa-check-double"></i> Submitted</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="item-actions-cluster">
+            {% if a_item.submitted %}
+              <a href="{{ url_for('students.edit_submission', submission_id=a_item.submission_id) }}" class="btn-download-file">
+                <i class="fa-solid fa-pen-to-square"></i> Edit Submission
+              </a>
+            {% else %}
+              <a href="{{ url_for('students.submit_assignment', assignment_id=a.id) }}" class="btn-action-primary">
+                <i class="fa-solid fa-upload"></i> Submit Assignment
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--slate-400); font-size:0.88rem; margin:0;">No assignments listed for this course yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 5. Quizzes Module -->
+  <div class="module-section-box">
+    <div class="module-header-title">
+      <h2><i class="fa-solid fa-clipboard-question" style="color:var(--primary);"></i> Quizzes</h2>
+      <span style="font-size:0.8rem; color:var(--slate-400); font-weight:700;">{{ quizzes|length if quizzes else 0 }} Assessments</span>
+    </div>
+
+    <div class="items-stack-list">
+      {% if quizzes %}
+        {% for q_item in quizzes %}
+        {% set q = q_item.quiz %}
+        <div class="single-item-row {{ 'is-completed' if q_item.attempted else '' }}">
+          <div class="item-main-details">
+            <h3>{{ q.title }}</h3>
+            <p>{{ q.description or 'Timed interactive quiz.' }}</p>
+            <div class="item-meta-sub">
+              <span><i class="fa-regular fa-clock"></i> Closes: {{ q.end_date.strftime('%d %b %Y, %H:%M') if q.end_date and q.end_date.strftime is defined else 'Open' }}</span>
+              {% if q_item.attempted %}
+                <span class="badge-done-tag"><i class="fa-solid fa-star"></i> Score: {{ q_item.score }}/{{ q_item.total }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="item-actions-cluster">
+            {% if q_item.attempted %}
+              <a href="{{ url_for('students.quiz_results', quiz_id=q.id) }}" class="btn-download-file">
+                <i class="fa-solid fa-chart-bar"></i> View Results
+              </a>
+            {% else %}
+              <a href="{{ url_for('students.take_quiz', quiz_id=q.id) }}" class="btn-action-primary">
+                <i class="fa-solid fa-play"></i> Take Quiz
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--slate-400); font-size:0.88rem; margin:0;">No quizzes published for this course yet.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 6. Exams & Assessments Module -->
+  <div class="module-section-box">
+    <div class="module-header-title">
+      <h2><i class="fa-solid fa-graduation-cap" style="color:var(--primary);"></i> Exams & Formal Assessments</h2>
+    </div>
+
+    <div class="items-stack-list">
+      {% if exams %}
+        {% for e_item in exams %}
+        {% set ex = e_item.exam %}
+        <div class="single-item-row {{ 'is-completed' if e_item.taken else '' }}">
+          <div class="item-main-details">
+            <h3>{{ ex.title }}</h3>
+            <p>{{ ex.description or 'Official course examination.' }}</p>
+            <div class="item-meta-sub">
+              <span><i class="fa-solid fa-calendar-check"></i> Available: {{ ex.start_date.strftime('%d %b, %H:%M') if ex.start_date and ex.start_date.strftime is defined else 'TBA' }}</span>
+              <span>Total Score: {{ ex.total_score }}</span>
+              {% if e_item.taken %}
+                <span class="badge-done-tag"><i class="fa-solid fa-check"></i> Graded: {{ e_item.score }}/{{ ex.total_score }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="item-actions-cluster">
+            {% if e_item.taken %}
+              <a href="{{ url_for('students.exam_results', exam_id=ex.id) }}" class="btn-download-file">
+                <i class="fa-solid fa-square-poll-vertical"></i> Exam Results
+              </a>
+            {% else %}
+              <a href="{{ url_for('students.take_exam', exam_id=ex.id) }}" class="btn-action-primary">
+                <i class="fa-solid fa-pen-nib"></i> Take Exam
+              </a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--slate-400); font-size:0.88rem; margin:0;">No formal exams scheduled at this time.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- 7. Certificate of Completion Box -->
+  <div class="module-section-box">
+    <div class="single-item-row" style="background:#ffffff; border:none; padding:0;">
+      <div class="item-main-details">
+        <h3 style="font-size:1.15rem;"><i class="fa-solid fa-award" style="color:var(--amber);"></i> Certificate of Completion</h3>
+        <p>Complete all course learning units, assignments, and achieve at least 60% in final grading to unlock your verified credential.</p>
+      </div>
+
+      <div class="item-actions-cluster">
+        {% if certificate %}
+          <a href="{{ url_for('students.certificate', course_id=course.id) }}" class="btn-action-primary" style="background:var(--success);">
+            <i class="fa-solid fa-award"></i> View Certificate
+          </a>
+        {% else %}
+          <a href="{{ url_for('students.generate_certificate', course_id=course.id) }}" class="btn-download-file">
+            <i class="fa-solid fa-lock"></i> Check Certificate
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
 
 </div>
-
-</body>
-</html>
+{% endblock %}
