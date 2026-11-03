@@ -767,7 +767,7 @@ def settings():
 
 
 # ------------------------- Student Discussions -------------------------
-@students_bp.route('/discussions', methods=['GET'])
+@students_bp.route('/discussions')
 @login_required
 def discussions():
     if current_user.role.lower() != 'student':
@@ -784,5 +784,6 @@ def discussions():
         'student/discussions.html',
         student=current_user,
         courses=courses_list,
-        active_page='discussions'
+        active_page='discussions',
+        **_student_nav_context(current_user)
     )
