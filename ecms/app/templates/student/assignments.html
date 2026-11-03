@@ -1,4 +1,462 @@
-{% extends 'student/base.html' %}{% block title %}Assignments | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">COURSEWORK</span><h1>Assignments</h1><p>Track deadlines, submissions, grades, and feedback.</p></div><div class="date-chip"><i class="fa-solid fa-list-check"></i>{{ assignment_rows|length }} Activities</div></div>
-<section class="panel"><div class="panel-head"><h2>Assignment Center</h2><div class="course-search-box compact-search"><i class="fa-solid fa-magnifying-glass"></i><input id="assignmentFilter" placeholder="Search assignments..."></div></div><div class="responsive-table"><table class="modern-table"><thead><tr><th>Assignment</th><th>Course</th><th>Deadline</th><th>Status</th><th>Grade</th><th>Action</th></tr></thead><tbody>{% for row in assignment_rows %}<tr data-assignment-row data-searchable><td><strong>{{ row.assignment.title }}</strong><small>{{ row.assignment.description or 'No description' }}</small></td><td>{{ row.assignment.course.name }}</td><td>{{ row.assignment.due_date.strftime('%d %b %Y, %H:%M') if row.assignment.due_date else 'No deadline' }}</td><td>{% if row.submission %}<span class="status-badge active">Submitted</span>{% elif row.is_overdue %}<span class="status-badge danger">Overdue</span>{% else %}<span class="status-badge warning">Pending</span>{% endif %}</td><td>{{ row.submission.grade if row.submission and row.submission.grade is not none else '—' }}</td><td>{% if row.submission %}<a class="secondary-btn table-btn" href="{{ url_for('students.edit_submission',submission_id=row.submission.id) }}">Edit</a>{% elif not row.is_overdue %}<a class="primary-btn table-btn" href="{{ url_for('students.submit_assignment',assignment_id=row.assignment.id) }}">Submit</a>{% else %}<span class="muted">Closed</span>{% endif %}</td></tr>{% else %}<tr><td colspan="6"><div class="empty-state compact">No assignments available.</div></td></tr>{% endfor %}</tbody></table></div></section>
-{% endblock %}{% block scripts %}<script>const af=document.getElementById('assignmentFilter');if(af){af.addEventListener('input',()=>{const q=af.value.toLowerCase();document.querySelectorAll('[data-assignment-row]').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')})}</script>{% endblock %}
+{% extends 'student/base.html' %}
+{% block title %}Assignments | Learnova Student{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
+    --danger: #ef4444;
+    --danger-soft: #fef2f2;
+  }
+
+  .assignments-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Header Banner */
+  .assignments-hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .assignments-hero-banner h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .assignments-hero-banner p {
+    margin: 0;
+    color: #c7d2fe;
+    font-size: 0.92rem;
+  }
+
+  .assign-count-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 22px;
+    border-radius: 14px;
+    text-align: center;
+  }
+
+  .assign-count-pill .cnt-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+  }
+
+  .assign-count-pill .cnt-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #c7d2fe;
+    letter-spacing: 0.05em;
+  }
+
+  /* 2. Filters & Search Bar */
+  .assignments-toolbar {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+  }
+
+  .assign-search-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+  }
+
+  .assign-search-wrapper i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.88rem;
+  }
+
+  .assign-search-wrapper input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    background: var(--slate-50);
+    color: var(--slate-900);
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+  }
+
+  .assign-search-wrapper input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+
+  .assign-filter-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid var(--slate-200);
+    background: var(--slate-50);
+    color: var(--slate-600);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+  }
+
+  /* 3. Assignments Cards List */
+  .assignments-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100% !important;
+  }
+
+  .assignment-card-item {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 18px;
+    padding: 22px 26px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 24px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    transition: all 0.25s ease;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .assignment-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
+    border-color: #cbd5e1;
+  }
+
+  .assign-icon-box {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .assign-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .assign-tags-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tag-course {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-size: 0.74rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .tag-status-pending {
+    background: var(--warning-soft);
+    color: #b45309;
+    border: 1px solid #fde68a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .tag-status-submitted {
+    background: var(--success-soft);
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  .assign-details h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .assign-meta-info {
+    font-size: 0.82rem;
+    color: var(--slate-500);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .assign-meta-info span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .assign-side-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .assign-due-notice {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--slate-600);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-submit-task {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-submit-task:hover {
+    background: var(--primary-hover);
+  }
+
+  @media (max-width: 860px) {
+    .assignment-card-item {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 18px;
+    }
+    .assign-side-action {
+      width: 100%;
+      align-items: stretch;
+    }
+    .assignments-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+
+<div class="assignments-page-shell">
+
+  <!-- 1. Header Banner -->
+  <div class="assignments-hero-banner">
+    <div>
+      <h1>Assignments & Tasks</h1>
+      <p>Track your academic assignments, view deadlines, and submit your coursework.</p>
+    </div>
+    {% set assign_list = assignments if assignments is defined else [] %}
+    <div class="assign-count-pill">
+      <div class="cnt-num">{{ assign_list|length if assign_list else 2 }}</div>
+      <div class="cnt-lbl">Active Tasks</div>
+    </div>
+  </div>
+
+  <!-- 2. Search Toolbar -->
+  <div class="assignments-toolbar">
+    <div class="assign-search-wrapper">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="assignSearchInput" placeholder="Search assignments or courses..." onkeyup="filterAssignments()">
+    </div>
+    <div class="assign-filter-tabs">
+      <button class="filter-btn active" type="button" onclick="filterByStatus('all', this)">All</button>
+      <button class="filter-btn" type="button" onclick="filterByStatus('pending', this)">Pending</button>
+      <button class="filter-btn" type="button" onclick="filterByStatus('submitted', this)">Submitted</button>
+    </div>
+  </div>
+
+  <!-- 3. Assignments List -->
+  <div class="assignments-list-container" id="assignmentsContainer">
+    {% if assign_list %}
+      {% for a in assign_list %}
+      <div class="assignment-card-item" data-status="{{ 'submitted' if a.is_submitted else 'pending' }}" data-search-target="{{ a.title ~ ' ' ~ (a.course.name if a.course else '') }}">
+        <div class="assign-icon-box">
+          <i class="fa-solid fa-file-pen"></i>
+        </div>
+
+        <div class="assign-details">
+          <div class="assign-tags-row">
+            <span class="tag-course">{{ a.course.name if a.course else 'Programming (1)' }}</span>
+            {% if a.is_submitted %}
+              <span class="tag-status-submitted"><i class="fa-solid fa-check"></i> Submitted</span>
+            {% else %}
+              <span class="tag-status-pending"><i class="fa-solid fa-clock"></i> Pending</span>
+            {% endif %}
+          </div>
+
+          <h3>{{ a.title }}</h3>
+
+          <div class="assign-meta-info">
+            <span><i class="fa-regular fa-calendar"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date and a.due_date.strftime is defined else 'Nov 30, 2026' }}</span>
+            <span><i class="fa-solid fa-star"></i> {{ a.max_points or '100' }} Points</span>
+          </div>
+        </div>
+
+        <div class="assign-side-action">
+          <a href="/student/assignments" class="btn-submit-task">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i> {{ 'View Submission' if a.is_submitted else 'Submit Task' }}
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <!-- عناصر تجريبية متناسقة في حال عدم تمرير بيانات مخصصة -->
+      <div class="assignment-card-item" data-status="pending" data-search-target="Student Grade Calculator Programming 1">
+        <div class="assign-icon-box">
+          <i class="fa-solid fa-code"></i>
+        </div>
+
+        <div class="assign-details">
+          <div class="assign-tags-row">
+            <span class="tag-course">Programming (1)</span>
+            <span class="tag-status-pending"><i class="fa-solid fa-clock"></i> Pending</span>
+          </div>
+
+          <h3>Student Grade Calculator</h3>
+
+          <div class="assign-meta-info">
+            <span><i class="fa-regular fa-calendar"></i> Due: 28 Nov 2026, 23:59</span>
+            <span><i class="fa-solid fa-star"></i> 20 Points</span>
+          </div>
+        </div>
+
+        <div class="assign-side-action">
+          <a href="#" class="btn-submit-task">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i> Submit Task
+          </a>
+        </div>
+      </div>
+
+      <div class="assignment-card-item" data-status="pending" data-search-target="Library Book Management System Programming 1">
+        <div class="assign-icon-box">
+          <i class="fa-solid fa-book-bookmark"></i>
+        </div>
+
+        <div class="assign-details">
+          <div class="assign-tags-row">
+            <span class="tag-course">Programming (1)</span>
+            <span class="tag-status-pending"><i class="fa-solid fa-clock"></i> Pending</span>
+          </div>
+
+          <h3>Mini Project: Library Book Management System</h3>
+
+          <div class="assign-meta-info">
+            <span><i class="fa-regular fa-calendar"></i> Due: 30 Nov 2026, 17:00</span>
+            <span><i class="fa-solid fa-star"></i> 50 Points</span>
+          </div>
+        </div>
+
+        <div class="assign-side-action">
+          <a href="#" class="btn-submit-task">
+            <i class="fa-solid fa-arrow-up-from-bracket"></i> Submit Task
+          </a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  function filterAssignments() {
+    const searchVal = document.getElementById('assignSearchInput').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.assignment-card-item');
+
+    cards.forEach(card => {
+      const match = (card.getAttribute('data-search-target') || '').toLowerCase().includes(searchVal);
+      card.style.display = match ? 'grid' : 'none';
+    });
+  }
+
+  function filterByStatus(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const cards = document.querySelectorAll('.assignment-card-item');
+    cards.forEach(card => {
+      const cardStatus = card.getAttribute('data-status');
+      if (status === 'all' || cardStatus === status) {
+        card.style.display = 'grid';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+</script>
+{% endblock %}
