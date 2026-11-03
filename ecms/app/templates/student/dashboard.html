@@ -114,7 +114,7 @@
     letter-spacing: 0.04em;
   }
 
-  /* 2. KPI Cards */
+  /* 2. KPI Cards Row */
   .dash-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -244,7 +244,7 @@
     padding: 20px 24px;
   }
 
-  /* Continue Learning Card */
+  /* Continue Learning Active Course Row */
   .active-course-row {
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
@@ -268,6 +268,7 @@
     align-items: center;
     gap: 16px;
     flex: 1;
+    min-width: 0;
   }
 
   .active-course-icon {
@@ -288,16 +289,20 @@
     font-size: 1rem;
     font-weight: 800;
     color: var(--slate-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .active-course-info span {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--slate-500);
+    white-space: nowrap;
   }
 
   .active-course-progress-wrap {
-    width: 180px;
+    width: 170px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -329,8 +334,8 @@
   .btn-continue-course {
     background: var(--primary);
     color: #ffffff;
-    padding: 8px 16px;
-    border-radius: 9px;
+    padding: 9px 18px;
+    border-radius: 10px;
     font-size: 0.84rem;
     font-weight: 700;
     text-decoration: none;
@@ -339,13 +344,14 @@
     gap: 6px;
     transition: all 0.15s ease;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .btn-continue-course:hover {
     background: var(--primary-hover);
   }
 
-  /* Assignments List */
+  /* Upcoming Assignments */
   .assignment-items-list {
     display: flex;
     flex-direction: column;
@@ -433,7 +439,7 @@
     color: #ffffff;
   }
 
-  /* Achievement Card */
+  /* Achievements */
   .achievement-box {
     text-align: center;
     padding: 10px 0;
@@ -532,7 +538,7 @@
 
 <div class="student-dash-shell">
 
-  <!-- 1. البانر الترحيبي -->
+  <!-- 1. Hero Welcome Banner -->
   <div class="hero-welcome-card">
     <div>
       <div class="hero-badge-tag">
@@ -547,7 +553,7 @@
     </div>
   </div>
 
-  <!-- 2. شبكة الإحصائيات -->
+  <!-- 2. KPI Cards Row -->
   <div class="dash-kpi-grid">
     <div class="stat-card">
       <div class="stat-card-info">
@@ -574,7 +580,13 @@
     <div class="stat-card">
       <div class="stat-card-info">
         <h4>Overall Progress</h4>
-        <div class="stat-number">{{ overall_progress if overall_progress is defined else '0%' }}</div>
+        <div class="stat-number">
+          {% if overall_progress is defined and overall_progress != None %}
+            {{ overall_progress }}{% if '%' not in overall_progress|string %}%{% endif %}
+          {% else %}
+            0%
+          {% endif %}
+        </div>
         <small>Across all subjects</small>
       </div>
       <div class="stat-icon-wrapper icon-green">
@@ -594,12 +606,12 @@
     </div>
   </div>
 
-  <!-- 3. المحتوى الرئيسي -->
+  <!-- 3. Main Dashboard Layout -->
   <div class="dash-main-grid">
     
     <div class="dash-col-left">
 
-      <!-- استكمال التعلم -->
+      <!-- Continue Learning -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-play-circle"></i> Continue Learning</h3>
@@ -635,7 +647,7 @@
 
               <div>
                 <a href="/student/courses" class="btn-continue-course">
-                  Open Space <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  Resume Course <i class="fa-solid fa-arrow-right"></i>
                 </a>
               </div>
             </div>
@@ -666,7 +678,7 @@
         </div>
       </div>
 
-      <!-- الواجبات القادمة -->
+      <!-- Upcoming Assignments -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-clock"></i> Upcoming Assignments</h3>
@@ -715,9 +727,9 @@
 
     </div>
 
+    <!-- Quick Actions & Achievements -->
     <div class="dash-col-right">
 
-      <!-- إجراءات سريعة -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
@@ -744,7 +756,6 @@
         </div>
       </div>
 
-      <!-- الإنجازات والشهادات -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-trophy"></i> Achievements</h3>
