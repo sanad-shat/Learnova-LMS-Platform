@@ -6,10 +6,10 @@
   <title>{% block title %}Student Portal | Learnova LMS{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=11">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=12">
 
   <style>
-    /* إصلاح استجابة النقر على روابط القائمة الجانبية */
+    /* إصلاح استجابة النقر على روابط القائمة الجانبية بالكامل */
     .side-nav a,
     .side-nav a.active {
       pointer-events: auto !important;
@@ -21,7 +21,6 @@
       z-index: 10 !important;
     }
 
-    /* منع حجب القائمة الجانبية بواسطة طبقة الموبايل على الشاشات العادية */
     @media (min-width: 992px) {
       .mobile-overlay {
         display: none !important;
@@ -60,21 +59,15 @@
         <i class="fa-solid fa-chart-simple"></i>Grades
       </a>
 
-      <a class="{{ 'active' if active_page=='certificates' else '' }}" href="{{ url_for('students.certificates') if 'students.certificates' in current_app.view_functions else url_for('students.courses') }}">
+      <a class="{{ 'active' if active_page=='certificates' else '' }}" href="{{ url_for('students.certificates') }}">
         <i class="fa-solid fa-award"></i>Certificates
       </a>
 
-      {% if 'forum.index' in current_app.view_functions %}
-      <a href="{{ url_for('forum.index') }}">
-        <i class="fa-solid fa-comments"></i>Discussions
-      </a>
-      {% endif %}
-
-      <a class="{{ 'active' if active_page=='reports' else '' }}" href="{{ url_for('students.reports') if 'students.reports' in current_app.view_functions else url_for('students.dashboard') }}">
+      <a class="{{ 'active' if active_page=='reports' else '' }}" href="{{ url_for('students.reports') }}">
         <i class="fa-solid fa-chart-column"></i>Progress Reports
       </a>
 
-      <a class="{{ 'active' if active_page=='notifications' else '' }}" href="{{ url_for('students.notifications') if 'students.notifications' in current_app.view_functions else url_for('students.dashboard') }}">
+      <a class="{{ 'active' if active_page=='notifications' else '' }}" href="{{ url_for('students.notifications') }}">
         <i class="fa-solid fa-bell"></i>Notifications
         {% if student_nav_unread %}<span class="nav-badge">{{ student_nav_unread }}</span>{% endif %}
       </a>
@@ -112,14 +105,14 @@
         </div>
       </div>
       <div class="header-right">
-        <a class="header-icon" href="{{ url_for('students.notifications') if 'students.notifications' in current_app.view_functions else '#' }}">
+        <a class="header-icon" href="{{ url_for('students.notifications') }}">
           <i class="fa-regular fa-bell"></i>
           {% if student_nav_unread %}<span class="icon-badge">{{ student_nav_unread }}</span>{% endif %}
         </a>
         <a class="profile-chip" href="{{ url_for('students.student_profile') }}">
-          <div class="profile-avatar">{{ (student.name_person or student.username if student else 'S')[0]|upper }}</div>
+          <div class="profile-avatar">{{ (student.name_person or student.username if student else (current_user.name_person or current_user.username if current_user.is_authenticated else 'S'))[0]|upper }}</div>
           <div class="profile-copy">
-            <strong>{{ student.name_person or student.username if student else 'Student' }}</strong>
+            <strong>{{ student.name_person or student.username if student else (current_user.name_person or current_user.username if current_user.is_authenticated else 'Student') }}</strong>
             <small>Student</small>
           </div>
         </a>
