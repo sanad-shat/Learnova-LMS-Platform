@@ -30,7 +30,6 @@
     box-sizing: border-box;
   }
 
-  /* 1. Header Banner */
   .profile-hero-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
     border-radius: 20px;
@@ -70,7 +69,6 @@
     gap: 8px;
   }
 
-  /* 2. Grid Layout */
   .profile-grid-layout {
     display: grid;
     grid-template-columns: 320px 1fr;
@@ -79,7 +77,6 @@
     box-sizing: border-box;
   }
 
-  /* Left Side: Identity Card */
   .profile-identity-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -159,7 +156,6 @@
     border-radius: 6px;
   }
 
-  /* Right Side: Edit Form Card */
   .profile-form-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -247,7 +243,6 @@
     box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
-  /* الحقول المحمية للإدارة فقط */
   .form-input-control.is-locked {
     background: var(--slate-50);
     color: var(--slate-500);
@@ -312,10 +307,10 @@
     <!-- Left Column: Identity Sidebar -->
     <div class="profile-identity-card">
       <div class="profile-avatar-large">
-        {{ (student.name_person or student.username or 'S')[:1]|upper }}
+        {{ ((student.name_person or student.username or 'S')|string)[:1]|upper }}
       </div>
-      <h3 class="profile-name-title">{{ student.name_person or student.username }}</h3>
-      <span class="profile-email-sub">{{ student.email }}</span>
+      <h3 class="profile-name-title">{{ student.name_person or student.username or 'Student' }}</h3>
+      <span class="profile-email-sub">{{ student.email or '' }}</span>
 
       <div class="identity-info-list">
         <div class="identity-item-row">
@@ -349,50 +344,45 @@
       <form method="POST" action="{{ url_for('students.student_profile') }}">
         <div class="form-fields-grid">
           
-          <!-- الاسم الكامل (مقفل للإدارة فقط) -->
           <div class="form-group-item">
             <label>
               Full Name
               <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
             </label>
-            <input type="text" class="form-input-control is-locked" value="{{ student.name_person or 'Ahmed Ali Hassan' }}" readonly>
+            <input type="text" class="form-input-control is-locked" value="{{ student.name_person or student.username or '' }}" readonly>
           </div>
 
-          <!-- اسم المستخدم (مقفل للإدارة فقط) -->
           <div class="form-group-item">
             <label>
               Username
               <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
             </label>
-            <input type="text" class="form-input-control is-locked" value="{{ student.username or 'ahmed.ali' }}" readonly>
+            <input type="text" class="form-input-control is-locked" value="{{ student.username or '' }}" readonly>
           </div>
 
-          <!-- البريد الجامعي (مقفل للإدارة فقط) -->
           <div class="form-group-item">
             <label>
               Academic Email
               <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
             </label>
-            <input type="email" class="form-input-control is-locked" value="{{ student.email }}" readonly>
+            <input type="email" class="form-input-control is-locked" value="{{ student.email or '' }}" readonly>
           </div>
 
-          <!-- رقم الهاتف (متاح للتعديل للطالب) -->
           <div class="form-group-item">
             <label for="phone">Phone Number <i class="fa-solid fa-pen" style="font-size:0.75rem; color:var(--primary);"></i></label>
-            <input type="text" id="phone" name="phone" class="form-input-control" value="{{ student.phone or '+972501234001' }}" placeholder="Enter your phone number">
+            <input type="text" id="phone" name="phone" class="form-input-control" value="{{ student.phone if 'phone' in student.__dict__ or student.phone is defined else '+972501234001' }}" placeholder="Enter phone number">
           </div>
 
-          <!-- الجنس (متاح للتعديل للطالب) -->
           <div class="form-group-item">
             <label for="gender">Gender <i class="fa-solid fa-pen" style="font-size:0.75rem; color:var(--primary);"></i></label>
+            {% set current_gender = student.gender if 'gender' in student.__dict__ or student.gender is defined else 'Male' %}
             <select id="gender" name="gender" class="form-input-control">
-              <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
-              <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
-              <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+              <option value="Male" {% if current_gender == 'Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if current_gender == 'Female' %}selected{% endif %}>Female</option>
+              <option value="Other" {% if current_gender == 'Other' %}selected{% endif %}>Other</option>
             </select>
           </div>
 
-          <!-- كلمة المرور الجديدة (متاحة للتعديل للطالب) -->
           <div class="form-group-item">
             <label for="new_password">New Password <i class="fa-solid fa-key" style="font-size:0.75rem; color:var(--primary);"></i></label>
             <input type="password" id="new_password" name="new_password" class="form-input-control" placeholder="Leave blank to keep current password">
