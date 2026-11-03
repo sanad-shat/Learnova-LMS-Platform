@@ -64,72 +64,22 @@ def dashboard():
         return redirect(url_for("students.login"))
 
     course_cards = []
-    try:
-        for enrollment in (current_user.enrollments or []):
-            course = enrollment.course
-            if not course:
-                continue
-            try:
-                progress = course_progress(current_user, course)
-            except Exception:
-                progress = {'percent': 0, 'total': 0, 'completed': 0}
-            try:
-                grade = final_grade(current_user, course)
-            except Exception:
-                grade = 0.0
-            cert = Certificate.query.filter_by(student_id=current_user.id, course_id=course.id).first()
-            course_cards.append({'course': course, 'progress': progress, 'grade': grade, 'certificate': cert})
-    except Exception as e:
-        current_app.logger.error(f"Dashboard enrollment loop error: {e}")
+    for enrollment in current_user.enrollments:
+        course = enrollment.course
+        progress = course_progress(current_user, course)
+        grade = final_grade(current_user, course)
+        cert = Certificate.query.filter_by(student_id=current_user.id, course_id=course.id).first()
+        course_cards.append({'course': course, 'progress': progress, 'grade': grade, 'certificate': cert})
 
-    # تفادي خطأ ZeroDivisionError
-    overall = 0
-    if course_cards:
-        try:
-            overall = round(sum(c.get('progress', {}).get('percent', 0) for c in course_cards) / len(course_cards))
-        except Exception:
-            overall = 0
-
-    pending = 0
-    try:
-        pending = sum(max(0, c.get('progress', {}).get('total', 0) - c.get('progress', {}).get('completed', 0)) for c in course_cards)
-    except Exception:
-        pending = 0
-
-    try:
-        notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(8).all()
-        unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-    except Exception:
-        notifications = []
-        unread_count = 0
-
-    try:
-        certificates = Certificate.query.filter_by(student_id=current_user.id).order_by(Certificate.issued_at.desc()).all()
-    except Exception:
-        certificates = []
-
-    nav_context = {}
-    try:
-        nav_context = _student_nav_context(current_user)
-    except Exception:
-        nav_context = {
-            'student_nav_unread': unread_count,
-            'student_nav_pending': pending,
-            'student_upcoming': []
-        }
-
-    return render_template(
-        'student/dashboard.html',
-        student=current_user,
-        course_cards=course_cards,
-        overall_progress=overall,
-        pending_items=pending,
-        notifications=notifications,
-        unread_count=unread_count,
-        certificates=certificates,
-        active_page='dashboard',
-        **nav_context
-    )
+    overall = round(sum(c['progress']['percent'] for c in course_cards) / len(course_cards)) if course_cards else 0
+    pending = sum(max(0, c['progress']['total'] - c['progress']['completed']) for c in course_cards)
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(8).all()
+    unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    certificates = Certificate.query.filter_by(student_id=current_user.id).order_by(Certificate.issued_at.desc()).all()
+    return render_template('student/dashboard.html', student=current_user, course_cards=course_cards,
+                           overall_progress=overall, pending_items=pending, notifications=notifications,
+                           unread_count=unread_count, certificates=certificates, active_page='dashboard',
+                           **_student_nav_context(current_user))
 
 
 # ------------------------- View Course Details -------------------------
@@ -802,39 +752,14 @@ def student_profile():
                            **_student_nav_context(current_user))
 
 
-# ------------------------- Student Discussions -------------------------
-@students_bp.route('/discussions')
+@students_bp.route('/settings', methods=['GET', 'POST'])
 @login_required
-def discussions():
+def settings():
     if current_user.role.lower() != 'student':
         flash('Access denied.', 'danger')
         return redirect(url_for('students.login'))
-
-    courses_list = []
-    try:
-        courses_list = [e.course for e in current_user.enrollments if e.course]
-    except Exception:
-        courses_list = []
-
-    nav_ctx = {}
-    try:
-        nav_ctx = _student_nav_context(current_user)
-    except Exception as e:
-        pass
-
-    # تجربة فتح مسارات القالب المحتملة تلقائياً لمنع TemplateNotFound
-    for tpl in ['student/discussions.html', 'discussions.html']:
-        try:
-            return render_template(
-                tpl,
-                student=current_user,
-                courses=courses_list,
-                active_page='discussions',
-                **nav_ctx
-            )
-        except Exception:
-            continue
-
-    # في حال وجود خطأ في ملف الـ HTML نفسه، سيطبع لك السبب الدقيق بدلاً من شاشة 500
-    import traceback
-    return f"<div style='padding:30px; font-family:sans-serif;'><h2>Error Details:</h2><pre>{traceback.format_exc()}</pre></div>", 200
+    if request.method == 'POST':
+        flash('Your display preferences have been saved for this browser.', 'success')
+        return redirect(url_for('students.settings'))
+    return render_template('student/settings.html', student=current_user, active_page='settings',
+                           **_student_nav_context(current_user))
