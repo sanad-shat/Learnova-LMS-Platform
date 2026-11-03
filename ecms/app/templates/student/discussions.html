@@ -1,5 +1,5 @@
 {% extends 'student/base.html' %}
-{% block title %}Discussions | Learnova Student{% endblock %}
+{% block title %}Academic Discussions | Learnova Student{% endblock %}
 
 {% block content %}
 <style>
@@ -18,7 +18,7 @@
     --slate-100: #f1f5f9;
     --slate-50: #f8fafc;
     --success: #10b981;
-    --success-soft: #ecfdf5;
+    --amber: #f59e0b;
   }
 
   .disc-page-shell {
@@ -30,7 +30,7 @@
     box-sizing: border-box;
   }
 
-  /* 1. Header Banner */
+  /* Header Banner */
   .disc-hero-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
     border-radius: 20px;
@@ -48,7 +48,6 @@
     font-size: 1.8rem;
     font-weight: 800;
     margin: 0 0 6px;
-    letter-spacing: -0.02em;
   }
 
   .disc-hero-banner p {
@@ -69,7 +68,6 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
   }
 
@@ -78,7 +76,7 @@
     transform: translateY(-2px);
   }
 
-  /* 2. Discussions List */
+  /* Feed Container */
   .disc-list-container {
     display: flex;
     flex-direction: column;
@@ -95,11 +93,7 @@
     flex-direction: column;
     gap: 16px;
     box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
-    transition: all 0.2s ease;
-  }
-
-  .disc-card-box:hover {
-    border-color: #cbd5e1;
+    box-sizing: border-box;
   }
 
   .disc-author-row {
@@ -179,14 +173,14 @@
 
   .disc-body-content h3 {
     margin: 0 0 8px;
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .disc-body-content p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.92rem;
     color: var(--slate-600);
     line-height: 1.55;
   }
@@ -210,8 +204,8 @@
   }
 
   .reply-avatar {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -226,23 +220,23 @@
 
   .reply-text-box h5 {
     margin: 0 0 2px;
-    font-size: 0.84rem;
+    font-size: 0.86rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .reply-text-box p {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.86rem;
     color: var(--slate-600);
     line-height: 1.4;
   }
 
-  /* Inline Quick Reply Input */
+  /* Reply Form */
   .quick-reply-form {
     display: flex;
     gap: 10px;
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
   .quick-reply-form input {
@@ -253,13 +247,12 @@
     padding: 10px 14px;
     font-size: 0.86rem;
     outline: none;
-    transition: all 0.2s;
+    box-sizing: border-box;
   }
 
   .quick-reply-form input:focus {
     background: #ffffff;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
   .quick-reply-form button {
@@ -271,14 +264,9 @@
     font-weight: 700;
     font-size: 0.86rem;
     cursor: pointer;
-    transition: all 0.2s;
   }
 
-  .quick-reply-form button:hover {
-    background: var(--primary-hover);
-  }
-
-  /* Modal Style */
+  /* Modal */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -299,7 +287,7 @@
     background: #ffffff;
     border-radius: 20px;
     width: 100%;
-    max-width: 560px;
+    max-width: 540px;
     overflow: hidden;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   }
@@ -375,19 +363,6 @@
     font-weight: 700;
     cursor: pointer;
   }
-
-  @media (max-width: 768px) {
-    .disc-hero-banner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-      padding: 20px;
-    }
-    .btn-new-disc {
-      width: 100%;
-      justify-content: center;
-    }
-  }
 </style>
 
 <div class="disc-page-shell">
@@ -403,78 +378,91 @@
     </button>
   </div>
 
-  <!-- 2. Discussions Feed -->
+  <!-- 2. Discussions List -->
   <div class="disc-list-container">
-    
-    <!-- منشور من الدكتور -->
-    <div class="disc-card-box">
-      <div class="disc-author-row">
-        <div class="author-info-group">
-          <div class="author-avatar instructor">
-            <i class="fa-solid fa-chalkboard-user"></i>
+    {% if discussions %}
+      {% for d in discussions %}
+      <div class="disc-card-box">
+        <div class="disc-author-row">
+          <div class="author-info-group">
+            <div class="author-avatar {{ 'instructor' if d.author_role in ['teacher', 'instructor', 'lecturer'] else '' }}">
+              <i class="fa-solid {{ 'fa-chalkboard-user' if d.author_role in ['teacher', 'instructor', 'lecturer'] else 'fa-user-graduate' }}"></i>
+            </div>
+            <div class="author-texts">
+              <h4>
+                {{ d.author_name }}
+                {% if d.author_role in ['teacher', 'instructor', 'lecturer'] %}
+                  <span class="badge-instructor"><i class="fa-solid fa-shield"></i> Lecturer</span>
+                {% else %}
+                  <span class="badge-student">Student</span>
+                {% endif %}
+              </h4>
+              <small><i class="fa-regular fa-clock"></i> {{ d.created_at }}</small>
+            </div>
           </div>
-          <div class="author-texts">
-            <h4>Aya Ali <span class="badge-instructor"><i class="fa-solid fa-shield"></i> Lecturer</span></h4>
-            <small><i class="fa-regular fa-clock"></i> Yesterday at 10:30 AM</small>
-          </div>
-        </div>
-        <span class="disc-course-pill">Programming (1) • BSAI 1211</span>
-      </div>
-
-      <div class="disc-body-content">
-        <h3>Instructions for Mini Project Submission</h3>
-        <p>Dear students, please note that the Library Book Management System project must be structured using object-oriented principles. Ensure your code is thoroughly commented and includes exception handling before the final deadline.</p>
-      </div>
-
-      <div class="disc-replies-tray">
-        <div class="reply-item">
-          <div class="reply-avatar">AH</div>
-          <div class="reply-text-box">
-            <h5>Ahmed Ali Hassan <span class="badge-student">Student</span></h5>
-            <p>Thank you Dr. Aya! Is it acceptable to submit the assignment as a single .zip file including test scripts?</p>
-          </div>
+          <span class="disc-course-pill">{{ d.course_name }} • {{ d.course_code }}</span>
         </div>
 
-        <form class="quick-reply-form" onsubmit="event.preventDefault(); appendMockReply(this);">
-          <input type="text" placeholder="Write a reply or ask Dr. Aya..." required>
-          <button type="submit"><i class="fa-solid fa-paper-plane"></i> Reply</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- منشور من طالب -->
-    <div class="disc-card-box">
-      <div class="disc-author-row">
-        <div class="author-info-group">
-          <div class="author-avatar">
-            <i class="fa-solid fa-user-graduate"></i>
-          </div>
-          <div class="author-texts">
-            <h4>Ahmed Ali Hassan <span class="badge-student">Student</span></h4>
-            <small><i class="fa-regular fa-clock"></i> 2 days ago</small>
-          </div>
+        <div class="disc-body-content">
+          <h3>{{ d.title }}</h3>
+          <p>{{ d.content }}</p>
         </div>
-        <span class="disc-course-pill">Programming (1) • BSAI 1211</span>
-      </div>
 
-      <div class="disc-body-content">
-        <h3>Question about OOP Inheritance Lab</h3>
-        <p>Does anyone have guidance on overriding the calculate_gpa method in the derived class? I keep getting an AttributeError on initialization.</p>
-      </div>
+        <div class="disc-replies-tray">
+          {% for r in d.replies %}
+          <div class="reply-item">
+            <div class="reply-avatar">
+              <i class="fa-solid {{ 'fa-user-tie' if r.author_role in ['teacher', 'instructor', 'lecturer'] else 'fa-user' }}"></i>
+            </div>
+            <div class="reply-text-box">
+              <h5>
+                {{ r.author_name }}
+                {% if r.author_role in ['teacher', 'instructor', 'lecturer'] %}
+                  <span class="badge-instructor">Lecturer</span>
+                {% else %}
+                  <span class="badge-student">Student</span>
+                {% endif %}
+              </h5>
+              <p>{{ r.text }}</p>
+            </div>
+          </div>
+          {% endfor %}
 
-      <div class="disc-replies-tray">
-        <form class="quick-reply-form" onsubmit="event.preventDefault(); appendMockReply(this);">
-          <input type="text" placeholder="Write a reply..." required>
-          <button type="submit"><i class="fa-solid fa-paper-plane"></i> Reply</button>
-        </form>
+          <!-- نموذج إرسال الرد المباشر -->
+          <form class="quick-reply-form" method="POST" action="/student/discussions/{{ d.id }}/reply">
+            <input type="text" name="reply_text" placeholder="Write a reply..." required>
+            <button type="submit"><i class="fa-solid fa-paper-plane"></i> Reply</button>
+          </form>
+        </div>
       </div>
-    </div>
+      {% endfor %}
+    {% else %}
+      <!-- مناقشة افتراضية من دكتور المادة إن لم تكن هناك مناقشات بعد -->
+      <div class="disc-card-box">
+        <div class="disc-author-row">
+          <div class="author-info-group">
+            <div class="author-avatar instructor">
+              <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+            <div class="author-texts">
+              <h4>Aya Ali <span class="badge-instructor"><i class="fa-solid fa-shield"></i> Lecturer</span></h4>
+              <small><i class="fa-regular fa-clock"></i> Course Forum</small>
+            </div>
+          </div>
+          <span class="disc-course-pill">Programming (1) • BSAI 1211</span>
+        </div>
 
+        <div class="disc-body-content">
+          <h3>Welcome to the Course Discussions!</h3>
+          <p>Feel free to ask any questions related to lectures, homework, or exam preparation here. All classmates and course instructors can participate.</p>
+        </div>
+      </div>
+    {% endif %}
   </div>
 
 </div>
 
-<!-- نافذة إنشاء مناقشة جديدة -->
+<!-- Modal نافذة إضافة موضوع جديد -->
 <div class="modal-overlay" id="newDiscModal">
   <div class="modal-box">
     <div class="modal-header">
@@ -482,23 +470,28 @@
       <button style="background:none; border:none; font-size:1.2rem; cursor:pointer;" onclick="closeNewDiscModal()">&times;</button>
     </div>
 
-    <form onsubmit="event.preventDefault(); createNewDiscussion(this);">
+    <form method="POST" action="/student/discussions/create">
       <div class="modal-body">
         <div class="form-group-field">
           <label>Course</label>
-          <select required>
-            <option value="BSAI 1211">Programming (1) - BSAI 1211</option>
+          <select name="course_id" required>
+            {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+            {% endfor %}
+            {% if not courses %}
+              <option value="1">Programming (1) (BSAI 1211)</option>
+            {% endif %}
           </select>
         </div>
 
         <div class="form-group-field">
           <label>Topic Title</label>
-          <input type="text" placeholder="e.g. Question regarding Unit 4 quiz" required>
+          <input type="text" name="title" placeholder="e.g. Question regarding Unit 4 quiz" required>
         </div>
 
         <div class="form-group-field">
           <label>Discussion Details</label>
-          <textarea rows="4" placeholder="Explain your question or idea clearly..." required></textarea>
+          <textarea name="content" rows="4" placeholder="Explain your question or idea clearly..." required></textarea>
         </div>
       </div>
 
@@ -517,60 +510,6 @@
 
   function closeNewDiscModal() {
     document.getElementById('newDiscModal').classList.remove('active');
-  }
-
-  function appendMockReply(form) {
-    const input = form.querySelector('input');
-    const val = input.value.trim();
-    if (!val) return;
-
-    const tray = form.parentElement;
-    const newReply = document.createElement('div');
-    newReply.className = 'reply-item';
-    newReply.innerHTML = `
-      <div class="reply-avatar">AH</div>
-      <div class="reply-text-box">
-        <h5>Ahmed Ali Hassan <span class="badge-student">Student</span></h5>
-        <p>${val}</p>
-      </div>
-    `;
-    tray.insertBefore(newReply, form);
-    input.value = '';
-  }
-
-  function createNewDiscussion(form) {
-    const title = form.querySelector('input').value;
-    const desc = form.querySelector('textarea').value;
-    const container = document.querySelector('.disc-list-container');
-
-    const card = document.createElement('div');
-    card.className = 'disc-card-box';
-    card.innerHTML = `
-      <div class="disc-author-row">
-        <div class="author-info-group">
-          <div class="author-avatar"><i class="fa-solid fa-user-graduate"></i></div>
-          <div class="author-texts">
-            <h4>Ahmed Ali Hassan <span class="badge-student">Student</span></h4>
-            <small><i class="fa-regular fa-clock"></i> Just now</small>
-          </div>
-        </div>
-        <span class="disc-course-pill">Programming (1) • BSAI 1211</span>
-      </div>
-      <div class="disc-body-content">
-        <h3>${title}</h3>
-        <p>${desc}</p>
-      </div>
-      <div class="disc-replies-tray">
-        <form class="quick-reply-form" onsubmit="event.preventDefault(); appendMockReply(this);">
-          <input type="text" placeholder="Write a reply..." required>
-          <button type="submit"><i class="fa-solid fa-paper-plane"></i> Reply</button>
-        </form>
-      </div>
-    `;
-
-    container.insertBefore(card, container.firstChild);
-    form.reset();
-    closeNewDiscModal();
   }
 </script>
 {% endblock %}
