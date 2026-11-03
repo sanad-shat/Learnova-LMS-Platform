@@ -173,7 +173,7 @@ class Submission(db.Model):
     student = db.relationship('User', back_populates='submissions')
 
 
-# ---------------- Unit Table ----------------
+# --------------- Unit Table ---------------
 class Unit(db.Model):
     """Represents a learning unit within a course (e.g., a lesson or module)."""
     __tablename__ = 'unit'
@@ -184,7 +184,7 @@ class Unit(db.Model):
     content = db.Column(db.Text)
     file_path = db.Column(db.String(255))
     file_data = db.Column(db.LargeBinary, nullable=True)
-file_mimetype = db.Column(db.String(100), nullable=True)
+    file_mimetype = db.Column(db.String(100), nullable=True)
 
     # Relationship
     course = db.relationship('Course', back_populates='units')
