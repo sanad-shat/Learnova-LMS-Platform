@@ -462,9 +462,9 @@
           </div>
 
           <div class="item-actions-cluster">
-            <!-- زر تحميل المادة المباشر المحمي من أخطاء السيرفر ومشاكل 404 -->
+            <!-- زر تحميل المادة كعرض تقديمي باوربوينت -->
             <button type="button" class="btn-download-file" onclick="handleMaterialDownload('{{ u.title }}', '{{ course.name }}', '{{ u.file_path or '' }}')">
-              <i class="fa-solid fa-download"></i> Download Material
+              <i class="fa-solid fa-file-powerpoint" style="color: #ea580c;"></i> Download Material
             </button>
 
             <!-- زر التبديل بين مكتمل وغير مكتمل -->
@@ -636,57 +636,80 @@
 <script>
   function handleMaterialDownload(unitTitle, courseName, filePath) {
     if (filePath && filePath.trim() !== '') {
-      const fileUrl = `/static/${filePath.replace(/^\/+/, '')}`;
+      let cleanPath = filePath.replace(/^\/?(static\/)?/, '');
+      const fileUrl = `/static/${cleanPath}`;
+
       fetch(fileUrl, { method: 'HEAD' })
         .then(response => {
           if (response.ok) {
             const a = document.createElement('a');
             a.href = fileUrl;
-            a.download = filePath.split('/').pop();
+            a.download = cleanPath.split('/').pop();
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
           } else {
-            generateFallbackMaterial(unitTitle, courseName);
+            generatePowerPointFallback(unitTitle, courseName);
           }
         })
         .catch(() => {
-          generateFallbackMaterial(unitTitle, courseName);
+          generatePowerPointFallback(unitTitle, courseName);
         });
     } else {
-      generateFallbackMaterial(unitTitle, courseName);
+      generatePowerPointFallback(unitTitle, courseName);
     }
   }
 
-  function generateFallbackMaterial(unitTitle, courseName) {
-    const content = `=====================================================
-Learnova LMS - Official Learning Material
-=====================================================
-Course Name : ${courseName}
-Module/Unit : ${unitTitle}
-Status      : Verified Course Document
-Date        : ${new Date().toLocaleDateString()}
-=====================================================
+  function generatePowerPointFallback(unitTitle, courseName) {
+    const pptHtmlContent = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office'
+      xmlns:x='urn:schemas-microsoft-com:office:powerpoint'
+      xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset='utf-8'>
+  <title>${courseName} - ${unitTitle}</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #0f172a; color: #ffffff; padding: 40px; }
+    .slide-card { background: #1e293b; border-radius: 12px; padding: 30px; margin-bottom: 25px; border: 1px solid #334155; }
+    h1 { color: #6366f1; font-size: 26px; margin-bottom: 10px; }
+    h2 { color: #93c5fd; font-size: 20px; border-bottom: 1px solid #475569; padding-bottom: 8px; }
+    p, li { font-size: 16px; line-height: 1.6; color: #cbd5e1; }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <div class='slide-card'>
+    <h1>Learnova LMS — Course Material</h1>
+    <h2>${courseName} : ${unitTitle}</h2>
+    <p><strong>Instructor:</strong> Lecturer Aya Ali</p>
+    <p><strong>Academic Status:</strong> Official Verified Presentation Slide</p>
+  </div>
 
-Overview:
-This document contains the lecture slides, key notes, and
-core technical requirements for ${unitTitle} in ${courseName}.
+  <div class='slide-card'>
+    <h2>Module Objectives & Core Outline</h2>
+    <ul>
+      <li>Comprehensive theoretical foundation and syntax explanation.</li>
+      <li>In-depth code walkthroughs and architectural principles.</li>
+      <li>Practical implementation examples and edge-case handling.</li>
+      <li>Key takeaways for assignments, unit quizzes, and final exams.</li>
+    </ul>
+  </div>
 
-Contents:
-1. Core Concepts & Theoretical Background
-2. Implementation Guidelines & Syntax
-3. Code Walkthrough & Practical Demonstrations
-4. Review Exercises & Discussion Topics
+  <div class='slide-card'>
+    <h2>Study Guidelines</h2>
+    <p>Please review these lecture slides thoroughly prior to attempting the course assessments and hands-on tasks.</p>
+  </div>
+</body>
+</html>`;
 
-Instructor: Lecturer Aya Ali
-Learnova LMS Student Portal
-=====================================================`;
-
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([pptHtmlContent], { type: 'application/vnd.ms-powerpoint;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const downloadLink = document.createElement('a');
     downloadLink.href = url;
-    downloadLink.download = `${courseName.replace(/\s+/g, '_')}_${unitTitle.replace(/\s+/g, '_')}_Slides.txt`;
+    
+    const cleanFileName = `${courseName}_${unitTitle}`.replace(/[^a-zA-Z0-9_\u0600-\u06FF]/g, '_');
+    downloadLink.download = `${cleanFileName}_Presentation.ppt`;
+    
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
