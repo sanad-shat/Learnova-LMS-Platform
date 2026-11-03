@@ -856,6 +856,96 @@ def create_discussion():
     return redirect(url_for('students.discussions'))
 
 
+# ------------------------- Student Settings -------------------------
+@students_bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    if current_user.role.lower() != 'student':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('students.login'))
+    if request.method == 'POST':
+        flash('Your display preferences have been saved for this browser.', 'success')
+        return redirect(url_for('students.settings'))
+    return render_template('student/settings.html', student=current_user, active_page='settings',
+                           **_student_nav_context(current_user))
+
+
+# ------------------------- Student Discussions -------------------------
+@students_bp.route('/discussions', methods=['GET', 'POST'])
+@login_required
+def discussions():
+    if current_user.role.lower() != 'student':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('students.login'))
+
+    discussion_activities = Activity.query.filter_by(action='discussion_post').order_by(Activity.timestamp.desc()).all()
+    
+    discussions_list = []
+    for act in discussion_activities:
+        try:
+            data = json.loads(act.details or '{}')
+        except:
+            data = {}
+        discussions_list.append({
+            'id': act.id,
+            'title': data.get('title', 'Course Discussion'),
+            'content': data.get('content', ''),
+            'course_code': data.get('course_code', 'BSAI 1211'),
+            'course_name': data.get('course_name', 'Programming (1)'),
+            'author_name': data.get('author_name', 'User'),
+            'author_role': data.get('author_role', 'student'),
+            'created_at': act.timestamp.strftime('%d %b %Y, %I:%M %p') if act.timestamp else 'Recently',
+            'replies': data.get('replies', [])
+        })
+
+    enrolled_courses = [e.course for e in current_user.enrollments]
+
+    return render_template(
+        'student/discussions.html',
+        student=current_user,
+        discussions=discussions_list,
+        courses=enrolled_courses,
+        active_page='discussions',
+        **_student_nav_context(current_user)
+    )
+
+
+@students_bp.route('/discussions/create', methods=['POST'])
+@login_required
+def create_discussion():
+    course_id = request.form.get('course_id')
+    title = request.form.get('title', '').strip()
+    content = request.form.get('content', '').strip()
+
+    course = Course.query.get(course_id) if course_id else None
+    course_name = course.name if course else 'General Course'
+    course_code = course.code if course else 'GEN'
+
+    if title and content:
+        payload = {
+            'title': title,
+            'content': content,
+            'course_code': course_code,
+            'course_name': course_name,
+            'author_name': current_user.name_person or current_user.username,
+            'author_role': current_user.role.lower(),
+            'replies': []
+        }
+        post_act = Activity(
+            user_id=current_user.id,
+            action='discussion_post',
+            details=json.dumps(payload, ensure_ascii=False),
+            timestamp=datetime.now(timezone.utc)
+        )
+        db.session.add(post_act)
+        db.session.commit()
+        flash('Discussion topic posted successfully!', 'success')
+    else:
+        flash('Please fill in both title and discussion details.', 'warning')
+
+    return redirect(url_for('students.discussions'))
+
+
 @students_bp.route('/discussions/<int:post_id>/reply', methods=['POST'])
 @login_required
 def reply_discussion(post_id):
@@ -883,7 +973,3 @@ def reply_discussion(post_id):
         flash('Reply sent successfully!', 'success')
 
     return redirect(url_for('students.discussions'))
-        flash('Your display preferences have been saved for this browser.', 'success')
-        return redirect(url_for('students.settings'))
-    return render_template('student/settings.html', student=current_user, active_page='settings',
-                           **_student_nav_context(current_user))
