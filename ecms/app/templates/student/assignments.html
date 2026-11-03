@@ -182,17 +182,19 @@
     border-color: #cbd5e1;
   }
 
+  /* الأيقونة الموحدة لرفع الملفات */
   .assign-icon-box {
     width: 58px;
     height: 58px;
-    border-radius: 14px;
+    border-radius: 16px;
     background: var(--primary-light);
     color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
+    border: 1px solid rgba(79, 70, 229, 0.15);
   }
 
   .assign-details {
@@ -476,8 +478,8 @@
       {% for a in assign_list %}
       {% set is_sub = a.is_submitted if a.is_submitted is defined else (true if a.submission or a.status == 'Submitted' else false) %}
       <div class="assignment-card-item" data-status="{{ 'submitted' if is_sub else 'pending' }}" data-search-target="{{ (a.title or a.name or '') ~ ' ' ~ (a.course.name if a.course else '') }}">
-        <div class="assign-icon-box">
-          <i class="fa-solid fa-file-code"></i>
+        <div class="assign-icon-box" title="File submission required">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
 
         <div class="assign-details">
@@ -516,10 +518,9 @@
       </div>
       {% endfor %}
     {% else %}
-      <!-- في حال لم تكن هناك بيانات مسجلة في قاعدة البيانات -->
       <div class="assignment-card-item" data-status="pending" data-search-target="Student Grade Calculator Programming 1">
-        <div class="assign-icon-box">
-          <i class="fa-solid fa-code"></i>
+        <div class="assign-icon-box" title="File submission required">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
 
         <div class="assign-details">
@@ -545,8 +546,8 @@
       </div>
 
       <div class="assignment-card-item" data-status="pending" data-search-target="Library Book Management System Programming 1">
-        <div class="assign-icon-box">
-          <i class="fa-solid fa-book-bookmark"></i>
+        <div class="assign-icon-box" title="File submission required">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
         </div>
 
         <div class="assign-details">
