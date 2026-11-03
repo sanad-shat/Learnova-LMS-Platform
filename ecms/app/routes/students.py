@@ -765,6 +765,7 @@ def settings():
     return render_template('student/settings.html', student=current_user, active_page='settings',
                            **_student_nav_context(current_user))
 
+
 # ------------------------- Student Discussions -------------------------
 @students_bp.route('/discussions', methods=['GET'])
 @login_required
@@ -777,7 +778,7 @@ def discussions():
     try:
         courses_list = [e.course for e in current_user.enrollments if e.course]
     except Exception:
-        pass
+        courses_list = []
 
     return render_template(
         'student/discussions.html',
@@ -785,6 +786,3 @@ def discussions():
         courses=courses_list,
         active_page='discussions'
     )
-        print(f"Error saving reply: {e}")
-
-    return redirect(url_for('students.discussions'))
