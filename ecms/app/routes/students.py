@@ -763,3 +763,31 @@ def settings():
         return redirect(url_for('students.settings'))
     return render_template('student/settings.html', student=current_user, active_page='settings',
                            **_student_nav_context(current_user))
+
+from flask import send_file
+import io
+
+@students_bp.route("/unit/<int:unit_id>/download")
+@login_required
+def download_unit_file(unit_id):
+    unit = Unit.query.get_or_404(unit_id)
+
+    # إذا كان الملف مخزناً داخل قاعدة البيانات
+    if unit.file_data:
+        filename = unit.file_path or f"{unit.title}.pptx"
+        mimetype = unit.file_mimetype or "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        return send_file(
+            io.BytesIO(unit.file_data),
+            download_name=filename,
+            as_attachment=True,
+            mimetype=mimetype
+        )
+
+    # في حال كان مساراً محلياً قديماً موجوداً على السيرفر
+    if unit.file_path:
+        local_path = os.path.join(current_app.root_path, 'static', unit.file_path.replace('static/', '').lstrip('/'))
+        if os.path.exists(local_path):
+            return send_file(local_path, as_attachment=True)
+
+    flash("ملف المادة غير متوفر حالياً.", "warning")
+    return redirect(url_for("students.view_course", course_id=unit.course_id))
