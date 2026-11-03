@@ -765,146 +765,26 @@ def settings():
     return render_template('student/settings.html', student=current_user, active_page='settings',
                            **_student_nav_context(current_user))
 
-
 # ------------------------- Student Discussions -------------------------
-@students_bp.route('/discussions', methods=['GET', 'POST'])
+@students_bp.route('/discussions', methods=['GET'])
 @login_required
 def discussions():
     if current_user.role.lower() != 'student':
         flash('Access denied.', 'danger')
         return redirect(url_for('students.login'))
 
-    discussions_list = []
-    enrolled_courses = []
-
-    # 1. جلب الكورسات بأمان
+    courses_list = []
     try:
-        if hasattr(current_user, 'enrollments') and current_user.enrollments:
-            for e in current_user.enrollments:
-                if hasattr(e, 'course') and e.course:
-                    enrolled_courses.append(e.course)
-    except Exception as e:
-        print(f"Error fetching enrollments: {e}")
-
-    # 2. جلب المناقشات بأمان
-    try:
-        acts = Activity.query.filter_by(action='discussion_post').all()
-        for act in acts:
-            try:
-                data = json.loads(act.details or '{}')
-            except Exception:
-                data = {}
-
-            discussions_list.append({
-                'id': act.id,
-                'title': data.get('title', 'Discussion Topic'),
-                'content': data.get('content', ''),
-                'course_code': data.get('course_code', 'BSAI 1211'),
-                'course_name': data.get('course_name', 'Programming (1)'),
-                'author_name': data.get('author_name', 'Lecturer Aya Ali'),
-                'author_role': data.get('author_role', 'teacher'),
-                'created_at': 'Recently',
-                'replies': data.get('replies', [])
-            })
-    except Exception as e:
-        print(f"Error fetching activities: {e}")
-
-    # 3. جلب الـ nav context بأمان تام لتفادي الانهيار
-    context_data = {
-        'student_nav_unread': 0,
-        'student_nav_pending': 0,
-        'student_upcoming': []
-    }
-    try:
-        context_data = _student_nav_context(current_user)
-    except Exception as e:
-        print(f"Error in nav context: {e}")
+        courses_list = [e.course for e in current_user.enrollments if e.course]
+    except Exception:
+        pass
 
     return render_template(
         'student/discussions.html',
         student=current_user,
-        discussions=discussions_list,
-        courses=enrolled_courses,
-        active_page='discussions',
-        **context_data
+        courses=courses_list,
+        active_page='discussions'
     )
-
-
-@students_bp.route('/discussions/create', methods=['POST'])
-@login_required
-def create_discussion():
-    course_id = request.form.get('course_id')
-    title = request.form.get('title', '').strip()
-    content = request.form.get('content', '').strip()
-
-    course_name = 'Programming (1)'
-    course_code = 'BSAI 1211'
-
-    if course_id:
-        try:
-            c = Course.query.get(int(course_id))
-            if c:
-                course_name = c.name
-                course_code = c.code
-        except Exception:
-            pass
-
-    if title and content:
-        payload = {
-            'title': title,
-            'content': content,
-            'course_code': course_code,
-            'course_name': course_name,
-            'author_name': current_user.name_person or current_user.username,
-            'author_role': current_user.role.lower(),
-            'replies': []
-        }
-        try:
-            post_act = Activity(
-                user_id=current_user.id,
-                action='discussion_post',
-                details=json.dumps(payload, ensure_ascii=False)
-            )
-            db.session.add(post_act)
-            db.session.commit()
-            flash('Discussion posted successfully!', 'success')
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error saving discussion: {e}")
-            flash('Could not save discussion.', 'danger')
-    else:
-        flash('Please fill all fields.', 'warning')
-
-    return redirect(url_for('students.discussions'))
-
-
-@students_bp.route('/discussions/<int:post_id>/reply', methods=['POST'])
-@login_required
-def reply_discussion(post_id):
-    reply_text = request.form.get('reply_text', '').strip()
-
-    try:
-        act = Activity.query.get(post_id)
-        if act and reply_text:
-            try:
-                data = json.loads(act.details or '{}')
-            except Exception:
-                data = {}
-
-            if 'replies' not in data:
-                data['replies'] = []
-
-            data['replies'].append({
-                'author_name': current_user.name_person or current_user.username,
-                'author_role': current_user.role.lower(),
-                'text': reply_text
-            })
-
-            act.details = json.dumps(data, ensure_ascii=False)
-            db.session.commit()
-            flash('Reply added!', 'success')
-    except Exception as e:
-        db.session.rollback()
         print(f"Error saving reply: {e}")
 
     return redirect(url_for('students.discussions'))
