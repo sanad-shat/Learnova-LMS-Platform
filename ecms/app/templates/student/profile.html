@@ -1,4 +1,414 @@
-{% extends 'student/base.html' %}{% block title %}Profile | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">ACCOUNT</span><h1>My Profile</h1><p>Review your academic identity and update personal information.</p></div><div class="date-chip"><i class="fa-solid fa-user-graduate"></i>{{ student.status }}</div></div>
-<section class="profile-layout"><article class="panel profile-summary"><div class="large-avatar">{{ (student.name_person or student.username)[0]|upper }}</div><h2>{{ student.name_person or student.username }}</h2><p>{{ student.email }}</p><div class="profile-facts"><div><span>University ID</span><b>{{ student.university_id or '—' }}</b></div><div><span>Department</span><b>{{ student.department or '—' }}</b></div><div><span>Level</span><b>{{ student.level or '—' }}</b></div><div><span>Status</span><b>{{ student.status }}</b></div></div></article><article class="panel"><div class="panel-head"><h2>Edit Profile</h2></div><form method="post" class="form-grid"><label>Full Name<input name="name_person" value="{{ student.name_person or '' }}" required></label><label>Username<input value="{{ student.username }}" disabled></label><label>Email<input value="{{ student.email }}" disabled></label><label>Phone Number<input name="phone" value="{{ student.phone or '' }}"></label><label>Gender<select name="gender"><option value="">Select</option><option value="Male" {{ 'selected' if student.gender=='Male' }}>Male</option><option value="Female" {{ 'selected' if student.gender=='Female' }}>Female</option></select></label><label>New Password<input type="password" name="new_password" placeholder="Leave blank to keep current password"></label><div class="form-actions full-span"><button class="primary-btn" type="submit"><i class="fa-solid fa-floppy-disk"></i>Save Changes</button></div></form></article></section>
+{% extends 'student/base.html' %}
+{% block title %}My Profile | Learnova Student{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+  }
+
+  .profile-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Header Banner */
+  .profile-hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .profile-hero-banner h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .profile-hero-banner p {
+    margin: 0;
+    color: #c7d2fe;
+    font-size: 0.92rem;
+  }
+
+  .profile-status-pill {
+    background: rgba(16, 185, 129, 0.18);
+    color: #a7f3d0;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 0.84rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* 2. Grid Layout */
+  .profile-grid-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Left Side: Identity Card */
+  .profile-identity-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 30px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+    height: fit-content;
+  }
+
+  .profile-avatar-large {
+    width: 90px;
+    height: 90px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    font-weight: 800;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.25);
+    margin-bottom: 16px;
+  }
+
+  .profile-name-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0 0 4px;
+    text-align: center;
+  }
+
+  .profile-email-sub {
+    font-size: 0.86rem;
+    color: var(--slate-500);
+    margin: 0 0 24px;
+    text-align: center;
+    word-break: break-all;
+  }
+
+  .identity-info-list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 20px;
+  }
+
+  .identity-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.86rem;
+    padding: 6px 0;
+  }
+
+  .identity-item-row .lbl {
+    color: var(--slate-500);
+    font-weight: 600;
+  }
+
+  .identity-item-row .val {
+    color: var(--slate-900);
+    font-weight: 800;
+  }
+
+  .identity-badge-active {
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 2px 10px;
+    border-radius: 6px;
+  }
+
+  /* Right Side: Edit Form Card */
+  .profile-form-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .card-section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--slate-100);
+    padding-bottom: 14px;
+  }
+
+  .card-section-title h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .admin-managed-hint {
+    font-size: 0.78rem;
+    color: var(--slate-400);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .form-fields-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .form-group-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group-item label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .lock-indicator {
+    color: var(--slate-400);
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .form-input-control {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 12px;
+    font-size: 0.88rem;
+    color: var(--slate-900);
+    background: #ffffff;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    outline: none;
+  }
+
+  .form-input-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  /* الحقول المحمية للإدارة فقط */
+  .form-input-control.is-locked {
+    background: var(--slate-50);
+    color: var(--slate-500);
+    cursor: not-allowed;
+    border-color: #e2e8f0;
+  }
+
+  .form-footer-action {
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 18px;
+  }
+
+  .btn-save-profile {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .btn-save-profile:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 900px) {
+    .profile-grid-layout {
+      grid-template-columns: 1fr;
+    }
+    .form-fields-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="profile-page-shell">
+
+  <!-- 1. Header Banner -->
+  <div class="profile-hero-banner">
+    <div>
+      <h1>Academic Identity & Profile</h1>
+      <p>Manage your account settings and review student credentials.</p>
+    </div>
+    <div class="profile-status-pill">
+      <i class="fa-solid fa-graduation-cap"></i> Student Account (Active)
+    </div>
+  </div>
+
+  <!-- 2. Profile Content Grid -->
+  <div class="profile-grid-layout">
+    
+    <!-- Left Column: Identity Sidebar -->
+    <div class="profile-identity-card">
+      <div class="profile-avatar-large">
+        {{ (student.name_person or student.username or 'S')[:1]|upper }}
+      </div>
+      <h3 class="profile-name-title">{{ student.name_person or student.username }}</h3>
+      <span class="profile-email-sub">{{ student.email }}</span>
+
+      <div class="identity-info-list">
+        <div class="identity-item-row">
+          <span class="lbl">University ID</span>
+          <span class="val">{{ student.id if student.id else '20261001' }}</span>
+        </div>
+        <div class="identity-item-row">
+          <span class="lbl">Department</span>
+          <span class="val">Computer Science</span>
+        </div>
+        <div class="identity-item-row">
+          <span class="lbl">Academic Level</span>
+          <span class="val">Year 1</span>
+        </div>
+        <div class="identity-item-row">
+          <span class="lbl">Status</span>
+          <span class="identity-badge-active">Active</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Settings & Editable Fields -->
+    <div class="profile-form-card">
+      <div class="card-section-title">
+        <h2>Edit Profile Information</h2>
+        <span class="admin-managed-hint">
+          <i class="fa-solid fa-shield-halved"></i> Official fields are locked by Admin
+        </span>
+      </div>
+
+      <form method="POST" action="{{ url_for('students.student_profile') }}">
+        <div class="form-fields-grid">
+          
+          <!-- الاسم الكامل (مقفل للإدارة فقط) -->
+          <div class="form-group-item">
+            <label>
+              Full Name
+              <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
+            </label>
+            <input type="text" class="form-input-control is-locked" value="{{ student.name_person or 'Ahmed Ali Hassan' }}" readonly>
+          </div>
+
+          <!-- اسم المستخدم (مقفل للإدارة فقط) -->
+          <div class="form-group-item">
+            <label>
+              Username
+              <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
+            </label>
+            <input type="text" class="form-input-control is-locked" value="{{ student.username or 'ahmed.ali' }}" readonly>
+          </div>
+
+          <!-- البريد الجامعي (مقفل للإدارة فقط) -->
+          <div class="form-group-item">
+            <label>
+              Academic Email
+              <span class="lock-indicator"><i class="fa-solid fa-lock"></i> Admin Only</span>
+            </label>
+            <input type="email" class="form-input-control is-locked" value="{{ student.email }}" readonly>
+          </div>
+
+          <!-- رقم الهاتف (متاح للتعديل للطالب) -->
+          <div class="form-group-item">
+            <label for="phone">Phone Number <i class="fa-solid fa-pen" style="font-size:0.75rem; color:var(--primary);"></i></label>
+            <input type="text" id="phone" name="phone" class="form-input-control" value="{{ student.phone or '+972501234001' }}" placeholder="Enter your phone number">
+          </div>
+
+          <!-- الجنس (متاح للتعديل للطالب) -->
+          <div class="form-group-item">
+            <label for="gender">Gender <i class="fa-solid fa-pen" style="font-size:0.75rem; color:var(--primary);"></i></label>
+            <select id="gender" name="gender" class="form-input-control">
+              <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+              <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+              <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+
+          <!-- كلمة المرور الجديدة (متاحة للتعديل للطالب) -->
+          <div class="form-group-item">
+            <label for="new_password">New Password <i class="fa-solid fa-key" style="font-size:0.75rem; color:var(--primary);"></i></label>
+            <input type="password" id="new_password" name="new_password" class="form-input-control" placeholder="Leave blank to keep current password">
+          </div>
+
+        </div>
+
+        <div class="form-footer-action">
+          <button type="submit" class="btn-save-profile">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+</div>
 {% endblock %}
