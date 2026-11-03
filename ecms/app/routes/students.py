@@ -81,6 +81,7 @@ def dashboard():
                            unread_count=unread_count, certificates=certificates, active_page='dashboard',
                            **_student_nav_context(current_user))
 
+
 # ------------------------- View Course Details -------------------------
 @students_bp.route("/courses/<int:course_id>")
 @login_required
@@ -122,6 +123,7 @@ def view_course(course_id):
     return render_template('student/view_course.html', student=current_user, course=course, teacher=course.teacher,
                            assignments=assignments, quizzes=quizzes, exams=exams, progress=progress,
                            final_grade=grade, certificate=certificate, completed_unit_ids=completed_unit_ids)
+
 
 # ------------------------- Take Quiz -------------------------
 @students_bp.route("/quiz/<int:quiz_id>/take", methods=["GET", "POST"])
@@ -184,25 +186,17 @@ def take_quiz(quiz_id):
     return render_template("student/take_quiz.html", quiz=quiz, student=current_user, active_page="courses", **_student_nav_context(current_user))
 
 
-# ------------------------- Quiz Results (محدثة بالكامل) -------------------------
+# ------------------------- Quiz Results -------------------------
 @students_bp.route('/quiz/results/<int:quiz_id>')
 @login_required
 def quiz_results(quiz_id):
-    """
-    عرض نتائج الكويز للطالب بعد التسليم.
-    يعتمد على جلب الإجابات من قاعدة البيانات (Submission) وليس من الجلسة.
-    يستخدم دالة get_question_answer لجلب الإجابات الصحيحة من قاعدة البيانات.
-    """
-    # 1. جلب الكويز
     quiz = Quiz.query.get_or_404(quiz_id)
 
-    # 2. التحقق من تسجيل الطالب في الكورس
     enrollment = next((e for e in current_user.enrollments if e.course_id == quiz.course_id), None)
     if not enrollment:
         flash("You are not enrolled in this course.", "warning")
         return redirect(url_for("students.dashboard"))
 
-    # 3. جلب آخر تسليم لهذا الكويز من هذا الطالب
     submission = Submission.query.filter_by(
         student_id=current_user.id,
         assignment_id=quiz.assignment_id
@@ -212,35 +206,30 @@ def quiz_results(quiz_id):
         flash("No submission found for this quiz.", "danger")
         return redirect(url_for("students.view_course", course_id=quiz.course_id))
 
-    # 4. فك ترميز إجابات الطالب من JSON
     try:
-        student_answers = json.loads(submission.submission_text)  # {"1": "باريس", "2": "True", ...}
-    except:
+        student_answers = json.loads(submission.submission_text)
+    except Exception:
         student_answers = {}
 
-    # 5. جلب الأسئلة
     questions = QuizQuestion.query.filter_by(quiz_id=quiz_id).all()
 
-    # 6. تحضير النتائج
     results = []
     obtained_score = 0
     total_score = sum(q.score for q in questions)
 
     for q in questions:
         correct_answer = get_question_answer(q.id, 'quiz') or ""
-        student_answer = student_answers.get(str(q.id), "")  # تخزين الأسئلة كـ string keys
+        student_answer = student_answers.get(str(q.id), "")
 
-        # تطبيع للعرض والمقارنة
         student_norm = str(student_answer).strip().lower().replace(' ', '')
         correct_norm = str(correct_answer).strip().lower().replace(' ', '')
 
-        # تحديد الصحة حسب نوع السؤال
         if q.question_type == 'multiple':
             try:
                 s_list = sorted([x.strip() for x in student_norm.split(',') if x.strip()])
                 c_list = sorted([x.strip() for x in correct_norm.split(',') if x.strip()])
                 is_correct = s_list == c_list
-            except:
+            except Exception:
                 is_correct = False
         else:
             is_correct = student_norm == correct_norm
@@ -258,16 +247,14 @@ def quiz_results(quiz_id):
             'is_correct': is_correct
         })
 
-    # 7. عرض القالب
     return render_template(
-        'student/quiz_results.html',  # ⚠️ تأكد من وجود الملف هنا
+        'student/quiz_results.html',
         quiz=quiz,
         results=results,
         obtained_score=submission.grade if submission.grade is not None else obtained_score,
         total_score=total_score,
         student=current_user, active_page='grades', **_student_nav_context(current_user)
     )
-
 
 
 # ------------------------- Take Exam -------------------------
@@ -305,7 +292,6 @@ def take_exam(exam_id):
         )
 
     now = datetime.now(timezone.utc)
-
     start_date = exam.start_date
     end_date = exam.end_date
 
@@ -414,13 +400,14 @@ def exam_results(exam_id):
         active_page="grades",
         **_student_nav_context(current_user)
     )
+
+
 # ------------------------- Edit Submission -------------------------
 @students_bp.route('/submission/edit/<int:submission_id>', methods=['GET', 'POST'])
 @login_required
 def edit_submission(submission_id):
     submission = Submission.query.get_or_404(submission_id)
 
-    # تأكد أن الطالب صاحب التسليم
     if submission.student_id != current_user.id:
         flash('لا يمكنك تعديل هذا التسليم.', 'danger')
         return redirect(url_for('students.dashboard'))
@@ -428,18 +415,16 @@ def edit_submission(submission_id):
     assignment = submission.assignment
     course = assignment.course
 
-    # تحقق من أن التسليم لازال ممكن (قبل تاريخ الاستحقاق مثلاً)
     if assignment.due_date and datetime.now(timezone.utc) > assignment.due_date:
         flash('انتهى وقت تسليم هذا الواجب، لا يمكن التعديل.', 'warning')
         return redirect(url_for('students.view_course', course_id=course.id))
 
     if request.method == 'POST':
-        # تحديث التسليم — مثلاً نص أو ملف
         submission_text = request.form.get('submission_text', '').strip()
         if submission_text:
             submission.submission_text = submission_text
             submission.submitted_at = datetime.now(timezone.utc)
-            submission.grade = None  # إعادة التصحيح لاحقًا
+            submission.grade = None
             db.session.commit()
             flash('تم تحديث التسليم بنجاح.', 'success')
             return redirect(url_for('students.view_course', course_id=course.id))
@@ -455,13 +440,11 @@ def submit_assignment(assignment_id):
     assignment = Assignment.query.get_or_404(assignment_id)
     course = assignment.course
 
-    # تحقق من تسجيل الطالب في الكورس
     enrollment = next((e for e in current_user.enrollments if e.course_id == course.id), None)
     if not enrollment:
         flash("You are not enrolled in this course.", "warning")
         return redirect(url_for("students.dashboard"))
 
-    # جلب التسليم الحالي إن وجد
     submission = Submission.query.filter_by(
         student_id=current_user.id,
         assignment_id=assignment_id
@@ -479,7 +462,6 @@ def submit_assignment(assignment_id):
         submission_text = request.form.get('submission_text', '').strip()
         submission_file = request.files.get('submission_file')
 
-        # إذا كان فيه تسليم سابق — نعدله
         if not submission:
             submission = Submission(
                 student_id=current_user.id,
@@ -489,7 +471,6 @@ def submit_assignment(assignment_id):
         submission.submission_text = submission_text
         submission.submitted_at = datetime.now(timezone.utc)
 
-        # معالجة رفع الملف (اختياري)
         if submission_file and submission_file.filename:
             original = secure_filename(submission_file.filename)
             filename = f'{uuid.uuid4().hex}_{original}'
@@ -506,6 +487,7 @@ def submit_assignment(assignment_id):
         return redirect(url_for('students.view_course', course_id=course.id))
 
     return render_template('student/submit_assignment.html', assignment=assignment, submission=submission, student=current_user, active_page='assignments', **_student_nav_context(current_user))
+
 
 @students_bp.route('/generate_certificate/<int:course_id>')
 @login_required
@@ -577,8 +559,6 @@ def certificates():
         flash('Access denied.', 'danger')
         return redirect(url_for('students.login'))
 
-    # Automatically create certificates for every enrolled course
-    # where the student's final grade is at least 60%.
     for enrollment in current_user.enrollments:
         issue_certificate(current_user, enrollment.course)
 
@@ -632,7 +612,6 @@ def certificate(course_id):
         today=certificate_row.issued_at,
         progress=progress,
     )
-
 
 
 def _student_nav_context(student):
@@ -773,8 +752,6 @@ def student_profile():
                            **_student_nav_context(current_user))
 
 
-
-
 # ------------------------- Student Settings -------------------------
 @students_bp.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -797,27 +774,47 @@ def discussions():
         flash('Access denied.', 'danger')
         return redirect(url_for('students.login'))
 
-    discussion_activities = Activity.query.filter_by(action='discussion_post').order_by(Activity.timestamp.desc()).all()
-    
     discussions_list = []
-    for act in discussion_activities:
-        try:
-            data = json.loads(act.details or '{}')
-        except:
-            data = {}
-        discussions_list.append({
-            'id': act.id,
-            'title': data.get('title', 'Course Discussion'),
-            'content': data.get('content', ''),
-            'course_code': data.get('course_code', 'BSAI 1211'),
-            'course_name': data.get('course_name', 'Programming (1)'),
-            'author_name': data.get('author_name', 'User'),
-            'author_role': data.get('author_role', 'student'),
-            'created_at': act.timestamp.strftime('%d %b %Y, %I:%M %p') if act.timestamp else 'Recently',
-            'replies': data.get('replies', [])
-        })
+    try:
+        discussion_activities = Activity.query.filter_by(action='discussion_post').all()
+        for act in sorted(discussion_activities, key=lambda x: getattr(x, 'timestamp', datetime.min) or datetime.min, reverse=True):
+            try:
+                data = json.loads(act.details or '{}')
+            except Exception:
+                data = {}
 
-    enrolled_courses = [e.course for e in current_user.enrollments]
+            created_str = 'Recently'
+            if hasattr(act, 'timestamp') and act.timestamp:
+                try:
+                    created_str = act.timestamp.strftime('%d %b %Y, %I:%M %p')
+                except Exception:
+                    created_str = str(act.timestamp)
+
+            discussions_list.append({
+                'id': act.id,
+                'title': data.get('title', 'Course Discussion'),
+                'content': data.get('content', ''),
+                'course_code': data.get('course_code', 'BSAI 1211'),
+                'course_name': data.get('course_name', 'Programming (1)'),
+                'author_name': data.get('author_name', 'User'),
+                'author_role': data.get('author_role', 'student'),
+                'created_at': created_str,
+                'replies': data.get('replies', [])
+            })
+    except Exception as e:
+        current_app.logger.error(f"Error fetching discussions: {e}")
+        discussions_list = []
+
+    try:
+        enrolled_courses = [e.course for e in current_user.enrollments if hasattr(e, 'course') and e.course]
+    except Exception:
+        enrolled_courses = []
+
+    nav_ctx = {}
+    try:
+        nav_ctx = _student_nav_context(current_user)
+    except Exception:
+        nav_ctx = {}
 
     return render_template(
         'student/discussions.html',
@@ -825,7 +822,7 @@ def discussions():
         discussions=discussions_list,
         courses=enrolled_courses,
         active_page='discussions',
-        **_student_nav_context(current_user)
+        **nav_ctx
     )
 
 
@@ -836,9 +833,15 @@ def create_discussion():
     title = request.form.get('title', '').strip()
     content = request.form.get('content', '').strip()
 
-    course = Course.query.get(course_id) if course_id else None
-    course_name = course.name if course else 'General Course'
-    course_code = course.code if course else 'GEN'
+    course = None
+    if course_id:
+        try:
+            course = Course.query.get(int(course_id))
+        except Exception:
+            course = None
+
+    course_name = course.name if course else 'Programming (1)'
+    course_code = course.code if course else 'BSAI 1211'
 
     if title and content:
         payload = {
@@ -850,15 +853,20 @@ def create_discussion():
             'author_role': current_user.role.lower(),
             'replies': []
         }
-        post_act = Activity(
-            user_id=current_user.id,
-            action='discussion_post',
-            details=json.dumps(payload, ensure_ascii=False),
-            timestamp=datetime.now(timezone.utc)
-        )
-        db.session.add(post_act)
-        db.session.commit()
-        flash('Discussion topic posted successfully!', 'success')
+        try:
+            post_act = Activity(
+                user_id=current_user.id,
+                action='discussion_post',
+                details=json.dumps(payload, ensure_ascii=False),
+                timestamp=datetime.now(timezone.utc)
+            )
+            db.session.add(post_act)
+            db.session.commit()
+            flash('Discussion topic posted successfully!', 'success')
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error creating discussion: {e}")
+            flash('Could not save discussion at this moment.', 'danger')
     else:
         flash('Please fill in both title and discussion details.', 'warning')
 
@@ -869,26 +877,31 @@ def create_discussion():
 @login_required
 def reply_discussion(post_id):
     reply_text = request.form.get('reply_text', '').strip()
-    act = Activity.query.get_or_404(post_id)
 
-    if reply_text:
-        try:
-            data = json.loads(act.details or '{}')
-        except:
-            data = {}
+    try:
+        act = Activity.query.get_or_404(post_id)
+        if reply_text:
+            try:
+                data = json.loads(act.details or '{}')
+            except Exception:
+                data = {}
 
-        if 'replies' not in data:
-            data['replies'] = []
+            if 'replies' not in data:
+                data['replies'] = []
 
-        data['replies'].append({
-            'author_name': current_user.name_person or current_user.username,
-            'author_role': current_user.role.lower(),
-            'text': reply_text,
-            'created_at': datetime.now(timezone.utc).strftime('%d %b, %I:%M %p')
-        })
+            data['replies'].append({
+                'author_name': current_user.name_person or current_user.username,
+                'author_role': current_user.role.lower(),
+                'text': reply_text,
+                'created_at': datetime.now(timezone.utc).strftime('%d %b, %I:%M %p')
+            })
 
-        act.details = json.dumps(data, ensure_ascii=False)
-        db.session.commit()
-        flash('Reply sent successfully!', 'success')
+            act.details = json.dumps(data, ensure_ascii=False)
+            db.session.commit()
+            flash('Reply sent successfully!', 'success')
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error posting reply: {e}")
+        flash('Could not send reply.', 'danger')
 
     return redirect(url_for('students.discussions'))
