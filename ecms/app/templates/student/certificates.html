@@ -3,78 +3,420 @@
 {% block title %}My Certificates | Learnova LMS{% endblock %}
 
 {% block content %}
-<div class="page-title-row">
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --amber: #f59e0b;
+    --amber-soft: #fffbeb;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+  }
+
+  .certs-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Hero Header Banner */
+  .certs-hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .certs-hero-banner h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .certs-hero-banner p {
+    margin: 0;
+    color: #c7d2fe;
+    font-size: 0.92rem;
+  }
+
+  .certs-count-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 22px;
+    border-radius: 14px;
+    text-align: center;
+  }
+
+  .certs-count-pill .cnt-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+  }
+
+  .certs-count-pill .cnt-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #c7d2fe;
+    letter-spacing: 0.05em;
+  }
+
+  /* 2. Notice Box */
+  .cert-requirement-alert {
+    background: #ffffff;
+    border: 1px solid #fed7aa;
+    border-left: 5px solid var(--amber);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.05);
+  }
+
+  .cert-requirement-alert i {
+    font-size: 1.4rem;
+    color: var(--amber);
+  }
+
+  .cert-requirement-alert div {
+    font-size: 0.88rem;
+    color: var(--slate-700);
+    line-height: 1.4;
+  }
+
+  .cert-requirement-alert strong {
+    color: var(--slate-900);
+  }
+
+  /* 3. Certificates List Container */
+  .certs-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 100% !important;
+  }
+
+  .cert-wide-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 26px;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    transition: all 0.25s ease;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .cert-wide-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
+    border-color: #cbd5e1;
+  }
+
+  .cert-icon-container {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    box-shadow: 0 8px 18px rgba(245, 158, 11, 0.25);
+    flex-shrink: 0;
+  }
+
+  .cert-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .cert-badge-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cert-code-tag {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.04em;
+  }
+
+  .cert-verified-pill {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .cert-content h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .cert-content p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--slate-600);
+    line-height: 1.4;
+  }
+
+  .cert-content p strong {
+    color: var(--slate-900);
+  }
+
+  .cert-meta-details {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.82rem;
+    color: var(--slate-500);
+    margin-top: 2px;
+  }
+
+  .cert-meta-details span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cert-actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .btn-view-action {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-view-action:hover {
+    background: var(--primary-hover);
+  }
+
+  .btn-print-action {
+    background: var(--slate-100);
+    border: 1px solid var(--slate-200);
+    color: var(--slate-700);
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .btn-print-action:hover {
+    background: #e2e8f0;
+  }
+
+  /* Empty State */
+  .empty-state-card {
+    background: #ffffff;
+    border: 1px dashed var(--slate-300);
+    border-radius: 20px;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--slate-500);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .empty-state-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--amber-soft);
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+  }
+
+  .empty-state-card h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--slate-800);
+  }
+
+  .empty-state-card p {
+    margin: 0 0 8px;
+    font-size: 0.9rem;
+    color: var(--slate-500);
+    max-width: 420px;
+  }
+
+  @media (max-width: 860px) {
+    .cert-wide-card {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+    }
+    .cert-actions-cell {
+      width: 100%;
+      flex-direction: column;
+    }
+    .btn-view-action, .btn-print-action {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .certs-hero-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+    }
+    .certs-count-pill {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+</style>
+
+<div class="certs-page-shell">
+
+  <!-- 1. Header Banner -->
+  <div class="certs-hero-banner">
     <div>
-        <span class="eyebrow">ACHIEVEMENTS</span>
-        <h1>My Certificates</h1>
-        <p>View, print, and save the certificates you have earned.</p>
+      <h1>My Certificates</h1>
+      <p>View, print, and save the verified credentials you have earned.</p>
     </div>
-    <div class="date-chip">
-        <i class="fa-solid fa-award"></i>
-        {{ certificates|length }} Issued
+    <div class="certs-count-pill">
+      <div class="cnt-num">{{ certificates|length }}</div>
+      <div class="cnt-lbl">Issued</div>
     </div>
-</div>
+  </div>
 
-{% if certificates %}
-<div class="certificate-grid">
+  <!-- 2. Notice Box -->
+  <div class="cert-requirement-alert">
+    <i class="fa-solid fa-circle-info"></i>
+    <div>
+      <strong>Certificate Milestone:</strong> Earn a final grade of at least <strong>60%</strong> in a course to automatically unlock and verify its credential.
+    </div>
+  </div>
+
+  <!-- 3. Certificates List -->
+  {% if certificates %}
+  <div class="certs-list-container">
     {% for certificate in certificates %}
-    <article class="certificate-list-card">
-        <div class="certificate-ribbon">
-            <i class="fa-solid fa-award"></i>
+    <article class="cert-wide-card">
+      <div class="cert-icon-container">
+        <i class="fa-solid fa-award"></i>
+      </div>
+
+      <div class="cert-content">
+        <div class="cert-badge-row">
+          <span class="cert-code-tag">{{ certificate.course.code }}</span>
+          <span class="cert-verified-pill"><i class="fa-solid fa-shield-check"></i> Verified Credential</span>
         </div>
 
-        <div class="certificate-card-content">
-            <span class="course-chip">{{ certificate.course.code }}</span>
-            <h2>{{ certificate.course.name }}</h2>
-            <p>
-                Successfully completed with a final grade of
-                <strong>{{ '%.2f'|format(certificate.final_grade or 0) }}%</strong>.
-            </p>
+        <h2>{{ certificate.course.name }}</h2>
+        <p>
+          Successfully completed with a final grade of
+          <strong>{{ '%.2f'|format(certificate.final_grade or 0) }}%</strong>.
+        </p>
 
-            <div class="certificate-meta">
-                <span>
-                    <i class="fa-regular fa-calendar"></i>
-                    {{ certificate.issued_at.strftime('%d %B %Y') }}
-                </span>
-                <span>
-                    <i class="fa-solid fa-fingerprint"></i>
-                    {{ certificate.certificate_code }}
-                </span>
-            </div>
-
-            <div class="certificate-card-actions">
-                <a
-                    class="primary-btn"
-                    href="{{ url_for('students.certificate', course_id=certificate.course_id) }}"
-                >
-                    <i class="fa-solid fa-eye"></i>
-                    View Certificate
-                </a>
-
-                <a
-                    class="secondary-btn"
-                    href="{{ url_for('students.certificate', course_id=certificate.course_id) }}"
-                    target="_blank"
-                    rel="noopener"
-                >
-                    <i class="fa-solid fa-print"></i>
-                    Print / PDF
-                </a>
-            </div>
+        <div class="cert-meta-details">
+          <span>
+            <i class="fa-regular fa-calendar"></i>
+            {{ certificate.issued_at.strftime('%d %B %Y') }}
+          </span>
+          <span>
+            <i class="fa-solid fa-fingerprint"></i>
+            {{ certificate.certificate_code }}
+          </span>
         </div>
+      </div>
+
+      <div class="cert-actions-cell">
+        <a class="btn-view-action" href="{{ url_for('students.certificate', course_id=certificate.course_id) }}">
+          <i class="fa-solid fa-eye"></i> View Certificate
+        </a>
+
+        <a class="btn-print-action" href="{{ url_for('students.certificate', course_id=certificate.course_id) }}" target="_blank" rel="noopener">
+          <i class="fa-solid fa-print"></i> Print / PDF
+        </a>
+      </div>
     </article>
     {% endfor %}
-</div>
-{% else %}
-<div class="empty-state-card">
+  </div>
+  {% else %}
+  <div class="empty-state-card">
     <div class="empty-state-icon">
-        <i class="fa-solid fa-award"></i>
+      <i class="fa-solid fa-award"></i>
     </div>
     <h2>No certificates yet</h2>
     <p>Earn a final grade of at least 60% in a course to unlock its certificate.</p>
-    <a class="primary-btn" href="{{ url_for('students.courses') }}">
-        View My Courses
+    <a class="btn-view-action" href="{{ url_for('students.courses') }}">
+      <i class="fa-solid fa-book-open"></i> View My Courses
     </a>
+  </div>
+  {% endif %}
+
 </div>
-{% endif %}
 {% endblock %}
