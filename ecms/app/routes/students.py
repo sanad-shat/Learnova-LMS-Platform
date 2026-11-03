@@ -775,46 +775,50 @@ def discussions():
         return redirect(url_for('students.login'))
 
     discussions_list = []
+    enrolled_courses = []
+
+    # 1. جلب الكورسات بأمان
     try:
-        discussion_activities = Activity.query.filter_by(action='discussion_post').all()
-        for act in sorted(discussion_activities, key=lambda x: getattr(x, 'timestamp', datetime.min) or datetime.min, reverse=True):
+        if hasattr(current_user, 'enrollments') and current_user.enrollments:
+            for e in current_user.enrollments:
+                if hasattr(e, 'course') and e.course:
+                    enrolled_courses.append(e.course)
+    except Exception as e:
+        print(f"Error fetching enrollments: {e}")
+
+    # 2. جلب المناقشات بأمان
+    try:
+        acts = Activity.query.filter_by(action='discussion_post').all()
+        for act in acts:
             try:
                 data = json.loads(act.details or '{}')
             except Exception:
                 data = {}
 
-            created_str = 'Recently'
-            if hasattr(act, 'timestamp') and act.timestamp:
-                try:
-                    created_str = act.timestamp.strftime('%d %b %Y, %I:%M %p')
-                except Exception:
-                    created_str = str(act.timestamp)
-
             discussions_list.append({
                 'id': act.id,
-                'title': data.get('title', 'Course Discussion'),
+                'title': data.get('title', 'Discussion Topic'),
                 'content': data.get('content', ''),
                 'course_code': data.get('course_code', 'BSAI 1211'),
                 'course_name': data.get('course_name', 'Programming (1)'),
-                'author_name': data.get('author_name', 'User'),
-                'author_role': data.get('author_role', 'student'),
-                'created_at': created_str,
+                'author_name': data.get('author_name', 'Lecturer Aya Ali'),
+                'author_role': data.get('author_role', 'teacher'),
+                'created_at': 'Recently',
                 'replies': data.get('replies', [])
             })
     except Exception as e:
-        current_app.logger.error(f"Error fetching discussions: {e}")
-        discussions_list = []
+        print(f"Error fetching activities: {e}")
 
+    # 3. جلب الـ nav context بأمان تام لتفادي الانهيار
+    context_data = {
+        'student_nav_unread': 0,
+        'student_nav_pending': 0,
+        'student_upcoming': []
+    }
     try:
-        enrolled_courses = [e.course for e in current_user.enrollments if hasattr(e, 'course') and e.course]
-    except Exception:
-        enrolled_courses = []
-
-    nav_ctx = {}
-    try:
-        nav_ctx = _student_nav_context(current_user)
-    except Exception:
-        nav_ctx = {}
+        context_data = _student_nav_context(current_user)
+    except Exception as e:
+        print(f"Error in nav context: {e}")
 
     return render_template(
         'student/discussions.html',
@@ -822,7 +826,7 @@ def discussions():
         discussions=discussions_list,
         courses=enrolled_courses,
         active_page='discussions',
-        **nav_ctx
+        **context_data
     )
 
 
@@ -833,15 +837,17 @@ def create_discussion():
     title = request.form.get('title', '').strip()
     content = request.form.get('content', '').strip()
 
-    course = None
+    course_name = 'Programming (1)'
+    course_code = 'BSAI 1211'
+
     if course_id:
         try:
-            course = Course.query.get(int(course_id))
+            c = Course.query.get(int(course_id))
+            if c:
+                course_name = c.name
+                course_code = c.code
         except Exception:
-            course = None
-
-    course_name = course.name if course else 'Programming (1)'
-    course_code = course.code if course else 'BSAI 1211'
+            pass
 
     if title and content:
         payload = {
@@ -857,18 +863,17 @@ def create_discussion():
             post_act = Activity(
                 user_id=current_user.id,
                 action='discussion_post',
-                details=json.dumps(payload, ensure_ascii=False),
-                timestamp=datetime.now(timezone.utc)
+                details=json.dumps(payload, ensure_ascii=False)
             )
             db.session.add(post_act)
             db.session.commit()
-            flash('Discussion topic posted successfully!', 'success')
+            flash('Discussion posted successfully!', 'success')
         except Exception as e:
             db.session.rollback()
-            current_app.logger.error(f"Error creating discussion: {e}")
-            flash('Could not save discussion at this moment.', 'danger')
+            print(f"Error saving discussion: {e}")
+            flash('Could not save discussion.', 'danger')
     else:
-        flash('Please fill in both title and discussion details.', 'warning')
+        flash('Please fill all fields.', 'warning')
 
     return redirect(url_for('students.discussions'))
 
@@ -879,8 +884,8 @@ def reply_discussion(post_id):
     reply_text = request.form.get('reply_text', '').strip()
 
     try:
-        act = Activity.query.get_or_404(post_id)
-        if reply_text:
+        act = Activity.query.get(post_id)
+        if act and reply_text:
             try:
                 data = json.loads(act.details or '{}')
             except Exception:
@@ -892,16 +897,14 @@ def reply_discussion(post_id):
             data['replies'].append({
                 'author_name': current_user.name_person or current_user.username,
                 'author_role': current_user.role.lower(),
-                'text': reply_text,
-                'created_at': datetime.now(timezone.utc).strftime('%d %b, %I:%M %p')
+                'text': reply_text
             })
 
             act.details = json.dumps(data, ensure_ascii=False)
             db.session.commit()
-            flash('Reply sent successfully!', 'success')
+            flash('Reply added!', 'success')
     except Exception as e:
         db.session.rollback()
-        current_app.logger.error(f"Error posting reply: {e}")
-        flash('Could not send reply.', 'danger')
+        print(f"Error saving reply: {e}")
 
     return redirect(url_for('students.discussions'))
