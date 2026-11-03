@@ -21,8 +21,6 @@
     --success-soft: #ecfdf5;
     --warning: #f59e0b;
     --warning-soft: #fffbeb;
-    --danger: #ef4444;
-    --danger-soft: #fef2f2;
   }
 
   .assignments-page-shell {
@@ -85,7 +83,7 @@
     letter-spacing: 0.05em;
   }
 
-  /* 2. Filters & Search Bar */
+  /* 2. Filters & Search */
   .assignments-toolbar {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -155,7 +153,7 @@
     border-color: var(--primary);
   }
 
-  /* 3. Assignments Cards List */
+  /* 3. Cards List */
   .assignments-list-container {
     display: flex;
     flex-direction: column;
@@ -246,6 +244,13 @@
     color: var(--slate-900);
   }
 
+  .assign-desc-brief {
+    font-size: 0.85rem;
+    color: var(--slate-600);
+    margin: 0;
+    line-height: 1.4;
+  }
+
   .assign-meta-info {
     font-size: 0.82rem;
     color: var(--slate-500);
@@ -268,15 +273,6 @@
     flex-shrink: 0;
   }
 
-  .assign-due-notice {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--slate-600);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
   .btn-submit-task {
     background: var(--primary);
     color: #ffffff;
@@ -284,7 +280,8 @@
     border-radius: 10px;
     font-size: 0.86rem;
     font-weight: 700;
-    text-decoration: none;
+    border: none;
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -293,6 +290,138 @@
 
   .btn-submit-task:hover {
     background: var(--primary-hover);
+  }
+
+  .btn-view-submission {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    border: 1px solid var(--slate-200);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  /* 4. Submission Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-overlay.active {
+    display: flex;
+  }
+
+  .modal-box {
+    background: #ffffff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalSlideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .btn-close-modal {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: var(--slate-400);
+    cursor: pointer;
+  }
+
+  .modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-group-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .form-group-field label {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--slate-700);
+  }
+
+  .file-dropzone {
+    border: 2px dashed var(--slate-300);
+    border-radius: 12px;
+    padding: 28px 20px;
+    text-align: center;
+    background: var(--slate-50);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .file-dropzone:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  .modal-footer {
+    padding: 16px 24px;
+    background: var(--slate-50);
+    border-top: 1px solid var(--slate-200);
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+
+  .btn-cancel {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    color: var(--slate-600);
+    padding: 9px 18px;
+    border-radius: 9px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-confirm-submit {
+    background: var(--primary);
+    color: #ffffff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 9px;
+    font-weight: 700;
+    cursor: pointer;
   }
 
   @media (max-width: 860px) {
@@ -321,7 +450,7 @@
       <h1>Assignments & Tasks</h1>
       <p>Track your academic assignments, view deadlines, and submit your coursework.</p>
     </div>
-    {% set assign_list = assignments if assignments is defined else [] %}
+    {% set assign_list = assignments if assignments is defined else (tasks if tasks is defined else (pending_assignments if pending_assignments is defined else [])) %}
     <div class="assign-count-pill">
       <div class="cnt-num">{{ assign_list|length if assign_list else 2 }}</div>
       <div class="cnt-lbl">Active Tasks</div>
@@ -345,38 +474,49 @@
   <div class="assignments-list-container" id="assignmentsContainer">
     {% if assign_list %}
       {% for a in assign_list %}
-      <div class="assignment-card-item" data-status="{{ 'submitted' if a.is_submitted else 'pending' }}" data-search-target="{{ a.title ~ ' ' ~ (a.course.name if a.course else '') }}">
+      {% set is_sub = a.is_submitted if a.is_submitted is defined else (true if a.submission or a.status == 'Submitted' else false) %}
+      <div class="assignment-card-item" data-status="{{ 'submitted' if is_sub else 'pending' }}" data-search-target="{{ (a.title or a.name or '') ~ ' ' ~ (a.course.name if a.course else '') }}">
         <div class="assign-icon-box">
-          <i class="fa-solid fa-file-pen"></i>
+          <i class="fa-solid fa-file-code"></i>
         </div>
 
         <div class="assign-details">
           <div class="assign-tags-row">
-            <span class="tag-course">{{ a.course.name if a.course else 'Programming (1)' }}</span>
-            {% if a.is_submitted %}
+            <span class="tag-course">{{ a.course.name if a.course else (a.course_name if a.course_name is defined else 'Programming (1)') }}</span>
+            {% if is_sub %}
               <span class="tag-status-submitted"><i class="fa-solid fa-check"></i> Submitted</span>
             {% else %}
               <span class="tag-status-pending"><i class="fa-solid fa-clock"></i> Pending</span>
             {% endif %}
           </div>
 
-          <h3>{{ a.title }}</h3>
+          <h3>{{ a.title or a.name or 'Assignment Task' }}</h3>
+
+          {% if a.description %}
+            <p class="assign-desc-brief">{{ a.description|truncate(120) }}</p>
+          {% endif %}
 
           <div class="assign-meta-info">
-            <span><i class="fa-regular fa-calendar"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date and a.due_date.strftime is defined else 'Nov 30, 2026' }}</span>
-            <span><i class="fa-solid fa-star"></i> {{ a.max_points or '100' }} Points</span>
+            <span><i class="fa-regular fa-calendar"></i> Due: {{ a.due_date.strftime('%d %b %Y, %H:%M') if a.due_date and a.due_date.strftime is defined else (a.due_date if a.due_date else 'Nov 30, 2026') }}</span>
+            <span><i class="fa-solid fa-star"></i> {{ a.max_points or a.points or '100' }} Points</span>
           </div>
         </div>
 
         <div class="assign-side-action">
-          <a href="/student/assignments" class="btn-submit-task">
-            <i class="fa-solid fa-arrow-up-from-bracket"></i> {{ 'View Submission' if a.is_submitted else 'Submit Task' }}
-          </a>
+          {% if is_sub %}
+            <a href="/student/assignments" class="btn-view-submission">
+              <i class="fa-solid fa-circle-check" style="color: var(--success);"></i> View Submission
+            </a>
+          {% else %}
+            <button type="button" class="btn-submit-task" onclick="openSubmissionModal('{{ a.id }}', '{{ a.title or a.name or 'Assignment' }}')">
+              <i class="fa-solid fa-arrow-up-from-bracket"></i> Submit Task
+            </button>
+          {% endif %}
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <!-- عناصر تجريبية متناسقة في حال عدم تمرير بيانات مخصصة -->
+      <!-- في حال لم تكن هناك بيانات مسجلة في قاعدة البيانات -->
       <div class="assignment-card-item" data-status="pending" data-search-target="Student Grade Calculator Programming 1">
         <div class="assign-icon-box">
           <i class="fa-solid fa-code"></i>
@@ -389,6 +529,7 @@
           </div>
 
           <h3>Student Grade Calculator</h3>
+          <p class="assign-desc-brief">Develop a Python script that calculates student GPAs from raw course grades and outputs formatted transcripts.</p>
 
           <div class="assign-meta-info">
             <span><i class="fa-regular fa-calendar"></i> Due: 28 Nov 2026, 23:59</span>
@@ -397,9 +538,9 @@
         </div>
 
         <div class="assign-side-action">
-          <a href="#" class="btn-submit-task">
+          <button type="button" class="btn-submit-task" onclick="openSubmissionModal('demo-1', 'Student Grade Calculator')">
             <i class="fa-solid fa-arrow-up-from-bracket"></i> Submit Task
-          </a>
+          </button>
         </div>
       </div>
 
@@ -415,6 +556,7 @@
           </div>
 
           <h3>Mini Project: Library Book Management System</h3>
+          <p class="assign-desc-brief">Create an object-oriented Python program to manage library inventory, borrow operations, and return dates.</p>
 
           <div class="assign-meta-info">
             <span><i class="fa-regular fa-calendar"></i> Due: 30 Nov 2026, 17:00</span>
@@ -423,9 +565,9 @@
         </div>
 
         <div class="assign-side-action">
-          <a href="#" class="btn-submit-task">
+          <button type="button" class="btn-submit-task" onclick="openSubmissionModal('demo-2', 'Library Book Management System')">
             <i class="fa-solid fa-arrow-up-from-bracket"></i> Submit Task
-          </a>
+          </button>
         </div>
       </div>
     {% endif %}
@@ -433,7 +575,60 @@
 
 </div>
 
+<!-- نافذة رفع وتسليم الواجب (Submission Modal) -->
+<div class="modal-overlay" id="submissionModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="modalTaskTitle">Submit Assignment</h3>
+      <button class="btn-close-modal" onclick="closeSubmissionModal()">&times;</button>
+    </div>
+
+    <form id="submissionForm" method="POST" action="/student/submit_assignment" enctype="multipart/form-data">
+      <input type="hidden" name="assignment_id" id="modalAssignmentId">
+      
+      <div class="modal-body">
+        <div class="form-group-field">
+          <label>Attach Project File (ZIP, PDF, DOCX, PY)</label>
+          <div class="file-dropzone" onclick="document.getElementById('taskFileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2rem; color: var(--primary); margin-bottom: 8px; display: block;"></i>
+            <span id="fileChosenLabel" style="font-size: 0.88rem; font-weight: 700; color: var(--slate-700);">Click to browse and upload file</span>
+            <input type="file" id="taskFileInput" name="submission_file" style="display: none;" onchange="updateFileLabel(this)">
+          </div>
+        </div>
+
+        <div class="form-group-field">
+          <label>Submission Comments (Optional)</label>
+          <textarea name="comments" rows="3" placeholder="Add any notes or explanations for your instructor..." style="width: 100%; border: 1.5px solid var(--slate-200); border-radius: 10px; padding: 10px; font-size: 0.86rem; box-sizing: border-box; outline: none;"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" onclick="closeSubmissionModal()">Cancel</button>
+        <button type="submit" class="btn-confirm-submit"><i class="fa-solid fa-paper-plane"></i> Upload & Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script>
+  function openSubmissionModal(assignmentId, title) {
+    document.getElementById('modalAssignmentId').value = assignmentId;
+    document.getElementById('modalTaskTitle').innerText = 'Submit: ' + title;
+    document.getElementById('fileChosenLabel').innerText = 'Click to browse and upload file';
+    document.getElementById('taskFileInput').value = '';
+    document.getElementById('submissionModal').classList.add('active');
+  }
+
+  function closeSubmissionModal() {
+    document.getElementById('submissionModal').classList.remove('active');
+  }
+
+  function updateFileLabel(input) {
+    if (input.files && input.files[0]) {
+      document.getElementById('fileChosenLabel').innerText = 'Selected: ' + input.files[0].name;
+    }
+  }
+
   function filterAssignments() {
     const searchVal = document.getElementById('assignSearchInput').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.assignment-card-item');
