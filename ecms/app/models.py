@@ -183,6 +183,8 @@ class Unit(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text)
     file_path = db.Column(db.String(255))
+    file_data = db.Column(db.LargeBinary, nullable=True)
+file_mimetype = db.Column(db.String(100), nullable=True)
 
     # Relationship
     course = db.relationship('Course', back_populates='units')
