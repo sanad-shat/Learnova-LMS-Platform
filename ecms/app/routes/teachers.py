@@ -384,19 +384,34 @@ def add_unit(teacher_id, course_id):
             return render_template("teacher/add_unit.html", teacher=teacher, course=course, course_id=course_id)
 
         filename = None
+        file_bytes = None
+        file_mimetype = None
+
         if file and file.filename and file.filename.strip() != "":
             if allowed_file(file.filename):
                 try:
                     original = secure_filename(file.filename)
-                    filename = f"{uuid.uuid4().hex}_{original}"
+                    filename = original
+                    file_mimetype = file.content_type
+                    file_bytes = file.read()  # قراءة الملف كثنائي لحفظه دائمًا في Neon
+
+                    # حفظ محلي إضافي كنسخة احتياطية
                     upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                     os.makedirs(upload_target, exist_ok=True)
-                    file.save(os.path.join(upload_target, filename))
+                    local_stored_name = f"{uuid.uuid4().hex}_{original}"
+                    with open(os.path.join(upload_target, local_stored_name), "wb") as f:
+                        f.write(file_bytes)
                 except Exception:
-                    filename = None
+                    pass
 
         try:
-            unit = Unit(title=title, file_path=filename, course_id=course_id)
+            unit = Unit(
+                title=title,
+                file_path=filename,
+                file_data=file_bytes,
+                file_mimetype=file_mimetype,
+                course_id=course_id,
+            )
             db.session.add(unit)
             db.session.commit()
             flash("Unit added successfully.", "success")
@@ -866,13 +881,19 @@ def edit_unit_page(teacher_id, course_id, unit_id):
         unit.content = request.form.get("content")
 
         file = request.files.get("file")
-        if file and file.filename and allowed_file(file.filename):
+        if file and file.filename and file.filename.strip() != "" and allowed_file(file.filename):
             try:
-                filename = secure_filename(file.filename)
+                original = secure_filename(file.filename)
+                unit.file_path = original
+                unit.file_mimetype = file.content_type
+                unit.file_data = file.read()  # تحديث محتوى الملف في قاعدة البيانات
+
+                # حفظ محلي اختياري
                 upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                 os.makedirs(upload_target, exist_ok=True)
-                file.save(os.path.join(upload_target, filename))
-                unit.file_path = filename
+                local_name = f"{uuid.uuid4().hex}_{original}"
+                with open(os.path.join(upload_target, local_name), "wb") as f:
+                    f.write(unit.file_data)
             except Exception:
                 pass
 
@@ -1454,14 +1475,12 @@ def notifications(teacher_id):
         flash("Access denied.", "danger")
         return redirect(url_for("teachers.login"))
 
-    # جلب الإشعارات بأمان تام مع تفادي أي تعليق بقاعدة البيانات
     try:
         items = Notification.query.filter_by(user_id=teacher.id).order_by(Notification.created_at.desc()).all()
     except Exception:
         db.session.rollback()
         items = []
 
-    # جلب عداد القائمة الجانبية بأمان
     try:
         nav_ctx = _teacher_nav_context(teacher)
     except Exception:
