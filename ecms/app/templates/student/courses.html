@@ -32,7 +32,7 @@
     gap: 24px;
   }
 
-  /* 1. Hero Header */
+  /* 1. Header Banner */
   .courses-hero-banner {
     background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
     border-radius: 20px;
@@ -99,7 +99,7 @@
   .courses-search-wrapper {
     position: relative;
     width: 100%;
-    max-width: 420px;
+    max-width: 440px;
   }
 
   .courses-search-wrapper i {
@@ -130,10 +130,11 @@
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  /* 3. Grid Layout */
+  /* 3. Grid Layout - توزيع متوازن يملأ المساحة */
   .courses-grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    max-width: 100%;
     gap: 24px;
     width: 100%;
   }
@@ -147,6 +148,8 @@
     flex-direction: column;
     transition: all 0.25s ease;
     box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    max-width: 580px; /* يعطي حجم عريض ومريح ومتناسق للبطاقة */
+    width: 100%;
   }
 
   .course-modern-card:hover {
@@ -203,16 +206,16 @@
   }
 
   .course-card-content {
-    padding: 28px 20px 20px;
+    padding: 28px 24px 22px;
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 14px;
+    gap: 16px;
   }
 
   .course-title-row h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--slate-900);
     line-height: 1.3;
@@ -222,20 +225,16 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     color: var(--slate-500);
     font-weight: 600;
   }
 
   .course-desc-text {
-    font-size: 0.84rem;
+    font-size: 0.86rem;
     color: var(--slate-600);
     margin: 0;
     line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
   }
 
   .course-metrics-row {
@@ -243,21 +242,21 @@
     grid-template-columns: repeat(3, 1fr);
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
-    border-radius: 10px;
-    padding: 10px 12px;
+    border-radius: 12px;
+    padding: 10px 14px;
     text-align: center;
     gap: 4px;
   }
 
   .metric-item strong {
     display: block;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .metric-item small {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     color: var(--slate-400);
     font-weight: 600;
     text-transform: uppercase;
@@ -272,14 +271,14 @@
   .progress-head-txt {
     display: flex;
     justify-content: space-between;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
     color: var(--slate-600);
   }
 
   .course-progress-track {
     width: 100%;
-    height: 7px;
+    height: 8px;
     background: var(--slate-100);
     border-radius: 999px;
     overflow: hidden;
@@ -294,18 +293,18 @@
   .course-actions-wrap {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-top: auto;
-    padding-top: 10px;
+    padding-top: 6px;
   }
 
   .btn-course-continue {
     flex: 1;
     background: var(--primary);
     color: #ffffff;
-    padding: 10px 14px;
+    padding: 11px 16px;
     border-radius: 10px;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
@@ -320,12 +319,12 @@
   }
 
   .btn-course-cert {
-    padding: 10px 16px;
+    padding: 11px 18px;
     border-radius: 10px;
     background: #fef3c7;
     color: #b45309;
     border: 1px solid #fde68a;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
@@ -374,12 +373,15 @@
     .courses-grid-layout {
       grid-template-columns: 1fr;
     }
+    .course-modern-card {
+      max-width: 100%;
+    }
   }
 </style>
 
 <div class="courses-page-shell">
 
-  <!-- 1. Hero Header -->
+  <!-- 1. Header Banner -->
   <div class="courses-hero-banner">
     <div>
       <h1>My Courses</h1>
@@ -400,7 +402,7 @@
     </div>
   </div>
 
-  <!-- 3. Courses Grid -->
+  <!-- 3. Grid Container -->
   <div class="courses-grid-layout" id="coursesGridContainer">
     {% if course_list %}
       {% for item in course_list %}
