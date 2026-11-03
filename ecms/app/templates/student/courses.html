@@ -19,17 +19,15 @@
     --slate-50: #f8fafc;
     --success: #10b981;
     --success-soft: #ecfdf5;
-    --warning: #f59e0b;
-    --warning-soft: #fffbeb;
   }
 
   .courses-page-shell {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
     display: flex;
     flex-direction: column;
     gap: 24px;
+    box-sizing: border-box;
   }
 
   /* 1. Header Banner */
@@ -63,7 +61,7 @@
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 10px 20px;
+    padding: 10px 22px;
     border-radius: 14px;
     text-align: center;
   }
@@ -119,8 +117,8 @@
     font-size: 0.88rem;
     background: var(--slate-50);
     color: var(--slate-900);
-    transition: all 0.2s ease;
     box-sizing: border-box;
+    transition: all 0.2s ease;
   }
 
   .courses-search-wrapper input:focus {
@@ -130,140 +128,132 @@
     box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  /* 3. Flexible Responsive Grid */
-  .courses-grid-layout {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
-    gap: 24px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .course-modern-card {
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    border-radius: 18px;
-    overflow: hidden;
+  /* 3. Wide Course Cards Container */
+  .courses-list-container {
     display: flex;
     flex-direction: column;
+    gap: 20px;
+    width: 100% !important;
+  }
+
+  .course-wide-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 28px;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
     transition: all 0.25s ease;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
-    width: 100%;
-    max-width: 100% !important;
+    width: 100% !important;
     box-sizing: border-box;
   }
 
-  .course-modern-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+  .course-wide-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.07);
     border-color: #cbd5e1;
   }
 
-  .course-card-cover {
-    height: 130px;
-    background: linear-gradient(135deg, #4338ca, #6366f1);
-    padding: 18px 22px;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
-
-  .course-code-badge {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
+  .course-cover-box {
+    width: 90px;
+    height: 90px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary), #6366f1);
     color: #ffffff;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-  }
-
-  .course-status-badge {
-    background: rgba(16, 185, 129, 0.9);
-    color: #ffffff;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-
-  .course-icon-floating {
-    position: absolute;
-    bottom: -22px;
-    left: 22px;
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #ffffff;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.35rem;
-    color: var(--primary);
+    font-size: 2rem;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.25);
+    flex-shrink: 0;
   }
 
-  .course-card-content {
-    padding: 30px 24px 24px;
+  .course-details-main {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    gap: 16px;
+    gap: 8px;
+    min-width: 0;
   }
 
-  .course-title-row h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    line-height: 1.3;
-  }
-
-  .course-instructor {
+  .course-badges-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.86rem;
-    color: var(--slate-500);
-    font-weight: 600;
+    gap: 10px;
   }
 
-  .course-desc-text {
-    font-size: 0.88rem;
-    color: var(--slate-600);
-    margin: 0;
-    line-height: 1.55;
-  }
-
-  .course-metrics-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: var(--slate-50);
-    border: 1px solid var(--slate-200);
-    border-radius: 12px;
-    padding: 12px 14px;
-    text-align: center;
-    gap: 6px;
-  }
-
-  .metric-item strong {
-    display: block;
-    font-size: 0.96rem;
+  .badge-code {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.76rem;
     font-weight: 800;
-    color: var(--slate-900);
+    padding: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.04em;
   }
 
-  .metric-item small {
+  .badge-status {
+    background: #ecfdf5;
+    color: #059669;
     font-size: 0.72rem;
-    color: var(--slate-400);
-    font-weight: 600;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
     text-transform: uppercase;
   }
 
-  .course-progress-section {
+  .course-details-main h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1.2;
+  }
+
+  .course-instructor-info {
+    font-size: 0.86rem;
+    color: var(--slate-500);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .course-metrics-inline {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 6px;
+  }
+
+  .metric-chip {
+    font-size: 0.82rem;
+    color: var(--slate-600);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .metric-chip i {
+    color: var(--slate-400);
+    font-size: 0.85rem;
+  }
+
+  /* Right Side Progress & Actions */
+  .course-side-action {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 16px;
+    width: 240px;
+    flex-shrink: 0;
+  }
+
+  .course-progress-full {
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -277,7 +267,7 @@
     color: var(--slate-600);
   }
 
-  .course-progress-track {
+  .progress-track-wide {
     width: 100%;
     height: 8px;
     background: var(--slate-100);
@@ -285,26 +275,25 @@
     overflow: hidden;
   }
 
-  .course-progress-bar {
+  .progress-fill-wide {
     height: 100%;
     background: var(--primary);
     border-radius: 999px;
   }
 
-  .course-actions-wrap {
+  .action-buttons-group {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: auto;
-    padding-top: 6px;
+    gap: 10px;
+    width: 100%;
   }
 
-  .btn-course-continue {
+  .btn-enter-course {
     flex: 1;
     background: var(--primary);
     color: #ffffff;
     padding: 11px 18px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 0.88rem;
     font-weight: 700;
     text-decoration: none;
@@ -313,15 +302,16 @@
     justify-content: center;
     gap: 8px;
     transition: all 0.2s ease;
+    white-space: nowrap;
   }
 
-  .btn-course-continue:hover {
+  .btn-enter-course:hover {
     background: var(--primary-hover);
   }
 
-  .btn-course-cert {
-    padding: 11px 18px;
-    border-radius: 10px;
+  .btn-view-cert {
+    padding: 11px 16px;
+    border-radius: 12px;
     background: #fef3c7;
     color: #b45309;
     border: 1px solid #fde68a;
@@ -330,16 +320,16 @@
     text-decoration: none;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     transition: all 0.2s ease;
   }
 
-  .btn-course-cert:hover {
+  .btn-view-cert:hover {
     background: #fde68a;
   }
 
   .empty-courses-state {
-    grid-column: 1 / -1;
     background: #ffffff;
     border: 1px dashed var(--slate-300);
     border-radius: 18px;
@@ -347,10 +337,32 @@
     text-align: center;
     color: var(--slate-400);
     display: none;
+    width: 100%;
   }
 
   .empty-courses-state.show {
     display: block;
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 992px) {
+    .course-wide-card {
+      grid-template-columns: 1fr;
+      align-items: flex-start;
+      gap: 20px;
+      padding: 20px;
+    }
+    .course-side-action {
+      width: 100%;
+      align-items: stretch;
+    }
+    .courses-toolbar {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .courses-search-wrapper {
+      max-width: 100%;
+    }
   }
 
   @media (max-width: 768px) {
@@ -364,15 +376,10 @@
       width: 100%;
       box-sizing: border-box;
     }
-    .courses-toolbar {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .courses-search-wrapper {
-      max-width: 100%;
-    }
-    .courses-grid-layout {
-      grid-template-columns: 1fr;
+    .course-cover-box {
+      width: 70px;
+      height: 70px;
+      font-size: 1.6rem;
     }
   }
 </style>
@@ -400,125 +407,101 @@
     </div>
   </div>
 
-  <!-- 3. Grid Container -->
-  <div class="courses-grid-layout" id="coursesGridContainer">
+  <!-- 3. Wide Cards List -->
+  <div class="courses-list-container" id="coursesListContainer">
     {% if course_list %}
       {% for item in course_list %}
       {% set c = item.course if item.course is defined else item %}
-      <div class="course-modern-card" data-search-target="{{ (c.name or c.title or '') ~ ' ' ~ (c.code or '') ~ ' ' ~ (c.teacher.name_person if c.teacher else '') }}">
-        <div class="course-card-cover">
-          <span class="course-code-badge">{{ c.code or 'BSAI 1211' }}</span>
-          <span class="course-status-badge">In Progress</span>
-          <div class="course-icon-floating">
-            <i class="fa-solid fa-book-open"></i>
-          </div>
+      <div class="course-wide-card" data-search-target="{{ (c.name or c.title or '') ~ ' ' ~ (c.code or '') ~ ' ' ~ (c.teacher.name_person if c.teacher else '') }}">
+        <div class="course-cover-box">
+          <i class="fa-solid fa-code"></i>
         </div>
 
-        <div class="course-card-content">
-          <div class="course-title-row">
-            <h3>{{ c.name or c.title or 'Programming (1)' }}</h3>
+        <div class="course-details-main">
+          <div class="course-badges-row">
+            <span class="badge-code">{{ c.code or 'BSAI 1211' }}</span>
+            <span class="badge-status">In Progress</span>
           </div>
 
-          <div class="course-instructor">
+          <h3>{{ c.name or c.title or 'Programming (1)' }}</h3>
+
+          <div class="course-instructor-info">
             <i class="fa-solid fa-user-tie"></i>
             <span>{{ c.teacher.name_person if c.teacher and c.teacher.name_person else (c.teacher.username if c.teacher else 'Lecturer: Aya Ali') }}</span>
           </div>
 
-          <p class="course-desc-text">
-            {{ c.description or 'A structured course covering learning modules, practical labs, and assessments.' }}
-          </p>
-
-          <div class="course-metrics-row">
-            <div class="metric-item">
-              <strong>{{ c.modules|length if c.modules is defined else 8 }}</strong>
-              <small>Units</small>
-            </div>
-            <div class="metric-item">
-              <strong>{{ c.completed_count if c.completed_count is defined else '0/14' }}</strong>
-              <small>Tasks</small>
-            </div>
-            <div class="metric-item">
-              <strong>0%</strong>
-              <small>Progress</small>
-            </div>
+          <div class="course-metrics-inline">
+            <span class="metric-chip"><i class="fa-solid fa-layer-group"></i> {{ c.modules|length if c.modules is defined else 8 }} Units</span>
+            <span class="metric-chip"><i class="fa-solid fa-list-check"></i> {{ c.completed_count if c.completed_count is defined else '0/14' }} Tasks</span>
+            <span class="metric-chip"><i class="fa-solid fa-chart-pie"></i> 0% Completed</span>
           </div>
+        </div>
 
-          <div class="course-progress-section">
+        <div class="course-side-action">
+          <div class="course-progress-full">
             <div class="progress-head-txt">
-              <span>Course Progress</span>
+              <span>Progress</span>
               <span>0%</span>
             </div>
-            <div class="course-progress-track">
-              <div class="course-progress-bar" style="width: 5%;"></div>
+            <div class="progress-track-wide">
+              <div class="progress-fill-wide" style="width: 5%;"></div>
             </div>
           </div>
 
-          <div class="course-actions-wrap">
-            <a href="/student/courses" class="btn-course-continue">
+          <div class="action-buttons-group">
+            <a href="/student/courses" class="btn-enter-course">
               <i class="fa-solid fa-play"></i> Continue Course
             </a>
-            <a href="/student/certificates" class="btn-course-cert">
-              <i class="fa-solid fa-award"></i> Certificate
+            <a href="/student/certificates" class="btn-view-cert" title="Certificate">
+              <i class="fa-solid fa-award"></i>
             </a>
           </div>
         </div>
       </div>
       {% endfor %}
     {% else %}
-      <div class="course-modern-card" data-search-target="Programming 1 BSAI 1211 Aya Ali">
-        <div class="course-card-cover">
-          <span class="course-code-badge">BSAI 1211</span>
-          <span class="course-status-badge">In Progress</span>
-          <div class="course-icon-floating">
-            <i class="fa-solid fa-code"></i>
-          </div>
+      <div class="course-wide-card" data-search-target="Programming 1 BSAI 1211 Aya Ali">
+        <div class="course-cover-box">
+          <i class="fa-solid fa-code"></i>
         </div>
 
-        <div class="course-card-content">
-          <div class="course-title-row">
-            <h3>Programming (1)</h3>
+        <div class="course-details-main">
+          <div class="course-badges-row">
+            <span class="badge-code">BSAI 1211</span>
+            <span class="badge-status">In Progress</span>
           </div>
 
-          <div class="course-instructor">
+          <h3>Programming (1)</h3>
+
+          <div class="course-instructor-info">
             <i class="fa-solid fa-user-tie"></i>
             <span>Lecturer: Aya Ali</span>
           </div>
 
-          <p class="course-desc-text">
-            A structured course with learning units, assignments, quizzes, and practical projects.
-          </p>
-
-          <div class="course-metrics-row">
-            <div class="metric-item">
-              <strong>8</strong>
-              <small>Units</small>
-            </div>
-            <div class="metric-item">
-              <strong>0/14</strong>
-              <small>Tasks</small>
-            </div>
-            <div class="metric-item">
-              <strong>0%</strong>
-              <small>Progress</small>
-            </div>
+          <div class="course-metrics-inline">
+            <span class="metric-chip"><i class="fa-solid fa-layer-group"></i> 8 Units</span>
+            <span class="metric-chip"><i class="fa-solid fa-list-check"></i> 0/14 Tasks</span>
+            <span class="metric-chip"><i class="fa-solid fa-chart-pie"></i> 0% Completed</span>
           </div>
+        </div>
 
-          <div class="course-progress-section">
+        <div class="course-side-action">
+          <div class="course-progress-full">
             <div class="progress-head-txt">
-              <span>Course Progress</span>
+              <span>Progress</span>
               <span>0%</span>
             </div>
-            <div class="course-progress-track">
-              <div class="course-progress-bar" style="width: 5%;"></div>
+            <div class="progress-track-wide">
+              <div class="progress-fill-wide" style="width: 5%;"></div>
             </div>
           </div>
 
-          <div class="course-actions-wrap">
-            <a href="/student/courses" class="btn-course-continue">
+          <div class="action-buttons-group">
+            <a href="/student/courses" class="btn-enter-course">
               <i class="fa-solid fa-play"></i> Continue Course
             </a>
-            <a href="/student/certificates" class="btn-course-cert">
-              <i class="fa-solid fa-award"></i> Certificate
+            <a href="/student/certificates" class="btn-view-cert" title="Certificate">
+              <i class="fa-solid fa-award"></i>
             </a>
           </div>
         </div>
@@ -526,7 +509,7 @@
     {% endif %}
 
     <div class="empty-courses-state" id="noCoursesFoundBox">
-      <i class="fa-solid fa-book-bookmark"></i>
+      <i class="fa-solid fa-book-bookmark" style="font-size: 2.5rem; margin-bottom: 12px; display: block;"></i>
       <h3 style="margin: 0 0 6px; font-size: 1.15rem; color: var(--slate-700);">No courses found</h3>
       <p style="margin: 0; font-size: 0.88rem;">Try searching with another keyword or course code.</p>
     </div>
@@ -538,14 +521,14 @@
   function filterCoursesList() {
     const input = document.getElementById('courseFilterInput');
     const filter = input.value.toLowerCase().trim();
-    const cards = document.querySelectorAll('.course-modern-card');
+    const cards = document.querySelectorAll('.course-wide-card');
     const emptyBox = document.getElementById('noCoursesFoundBox');
     let visibleCount = 0;
 
     cards.forEach(card => {
       const searchTarget = (card.getAttribute('data-search-target') || card.innerText).toLowerCase();
       if (searchTarget.includes(filter)) {
-        card.style.display = 'flex';
+        card.style.display = 'grid';
         visibleCount++;
       } else {
         card.style.display = 'none';
