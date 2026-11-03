@@ -64,22 +64,72 @@ def dashboard():
         return redirect(url_for("students.login"))
 
     course_cards = []
-    for enrollment in current_user.enrollments:
-        course = enrollment.course
-        progress = course_progress(current_user, course)
-        grade = final_grade(current_user, course)
-        cert = Certificate.query.filter_by(student_id=current_user.id, course_id=course.id).first()
-        course_cards.append({'course': course, 'progress': progress, 'grade': grade, 'certificate': cert})
+    try:
+        for enrollment in (current_user.enrollments or []):
+            course = enrollment.course
+            if not course:
+                continue
+            try:
+                progress = course_progress(current_user, course)
+            except Exception:
+                progress = {'percent': 0, 'total': 0, 'completed': 0}
+            try:
+                grade = final_grade(current_user, course)
+            except Exception:
+                grade = 0.0
+            cert = Certificate.query.filter_by(student_id=current_user.id, course_id=course.id).first()
+            course_cards.append({'course': course, 'progress': progress, 'grade': grade, 'certificate': cert})
+    except Exception as e:
+        current_app.logger.error(f"Dashboard enrollment loop error: {e}")
 
-    overall = round(sum(c['progress']['percent'] for c in course_cards) / len(course_cards)) if course_cards else 0
-    pending = sum(max(0, c['progress']['total'] - c['progress']['completed']) for c in course_cards)
-    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(8).all()
-    unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-    certificates = Certificate.query.filter_by(student_id=current_user.id).order_by(Certificate.issued_at.desc()).all()
-    return render_template('student/dashboard.html', student=current_user, course_cards=course_cards,
-                           overall_progress=overall, pending_items=pending, notifications=notifications,
-                           unread_count=unread_count, certificates=certificates, active_page='dashboard',
-                           **_student_nav_context(current_user))
+    # تفادي خطأ ZeroDivisionError
+    overall = 0
+    if course_cards:
+        try:
+            overall = round(sum(c.get('progress', {}).get('percent', 0) for c in course_cards) / len(course_cards))
+        except Exception:
+            overall = 0
+
+    pending = 0
+    try:
+        pending = sum(max(0, c.get('progress', {}).get('total', 0) - c.get('progress', {}).get('completed', 0)) for c in course_cards)
+    except Exception:
+        pending = 0
+
+    try:
+        notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.created_at.desc()).limit(8).all()
+        unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    except Exception:
+        notifications = []
+        unread_count = 0
+
+    try:
+        certificates = Certificate.query.filter_by(student_id=current_user.id).order_by(Certificate.issued_at.desc()).all()
+    except Exception:
+        certificates = []
+
+    nav_context = {}
+    try:
+        nav_context = _student_nav_context(current_user)
+    except Exception:
+        nav_context = {
+            'student_nav_unread': unread_count,
+            'student_nav_pending': pending,
+            'student_upcoming': []
+        }
+
+    return render_template(
+        'student/dashboard.html',
+        student=current_user,
+        course_cards=course_cards,
+        overall_progress=overall,
+        pending_items=pending,
+        notifications=notifications,
+        unread_count=unread_count,
+        certificates=certificates,
+        active_page='dashboard',
+        **nav_context
+    )
 
 
 # ------------------------- View Course Details -------------------------
