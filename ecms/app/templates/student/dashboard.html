@@ -114,7 +114,7 @@
     letter-spacing: 0.04em;
   }
 
-  /* 2. KPI Cards Row */
+  /* 2. KPI Cards */
   .dash-kpi-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -179,7 +179,7 @@
   .icon-green  { background: var(--success-soft); color: var(--success); }
   .icon-amber  { background: var(--warning-soft); color: var(--warning); }
 
-  /* 3. Main Dashboard Layout (2 Columns) */
+  /* 3. Main Dashboard Layout */
   .dash-main-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -193,7 +193,6 @@
     gap: 24px;
   }
 
-  /* Universal Section Cards */
   .dash-panel {
     background: #ffffff;
     border: 1px solid var(--slate-200);
@@ -245,7 +244,7 @@
     padding: 20px 24px;
   }
 
-  /* Continue Learning Active Course Card */
+  /* Continue Learning Card */
   .active-course-row {
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
@@ -346,7 +345,7 @@
     background: var(--primary-hover);
   }
 
-  /* Upcoming Assignments List */
+  /* Assignments List */
   .assignment-items-list {
     display: flex;
     flex-direction: column;
@@ -395,7 +394,7 @@
     white-space: nowrap;
   }
 
-  /* Quick Actions Grid */
+  /* Quick Actions */
   .quick-links-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -434,7 +433,7 @@
     color: #ffffff;
   }
 
-  /* Circular Achievement Card */
+  /* Achievement Card */
   .achievement-box {
     text-align: center;
     padding: 10px 0;
@@ -492,14 +491,9 @@
     color: #ffffff;
   }
 
-  /* Responsive Rules */
   @media (max-width: 1100px) {
-    .dash-kpi-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .dash-main-grid {
-      grid-template-columns: 1fr;
-    }
+    .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-main-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 768px) {
@@ -509,26 +503,19 @@
       align-items: flex-start;
       gap: 16px;
     }
-    .hero-welcome-card h1 {
-      font-size: 1.45rem;
-    }
+    .hero-welcome-card h1 { font-size: 1.45rem; }
     .hero-student-meta {
       width: 100%;
       justify-content: center;
       box-sizing: border-box;
     }
-    .dash-kpi-grid {
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
+    .dash-kpi-grid { grid-template-columns: 1fr; gap: 12px; }
     .active-course-row {
       flex-direction: column;
       align-items: flex-start;
       gap: 14px;
     }
-    .active-course-progress-wrap {
-      width: 100%;
-    }
+    .active-course-progress-wrap { width: 100%; }
     .btn-continue-course {
       width: 100%;
       justify-content: center;
@@ -539,15 +526,13 @@
       align-items: flex-start;
       gap: 10px;
     }
-    .assign-due-tag {
-      align-self: flex-start;
-    }
+    .assign-due-tag { align-self: flex-start; }
   }
 </style>
 
 <div class="student-dash-shell">
 
-  <!-- 1. البانر الترحيبي العريض -->
+  <!-- 1. البانر الترحيبي -->
   <div class="hero-welcome-card">
     <div>
       <div class="hero-badge-tag">
@@ -562,7 +547,7 @@
     </div>
   </div>
 
-  <!-- 2. شبكة المؤشرات الأكاديمية (KPIs) -->
+  <!-- 2. شبكة الإحصائيات -->
   <div class="dash-kpi-grid">
     <div class="stat-card">
       <div class="stat-card-info">
@@ -609,17 +594,16 @@
     </div>
   </div>
 
-  <!-- 3. المخطط الرئيسي (عمودين متجاوبين) -->
+  <!-- 3. المحتوى الرئيسي -->
   <div class="dash-main-grid">
     
-    <!-- العمود الأيسر (المقررات والواجبات) -->
     <div class="dash-col-left">
 
-      <!-- استكمال التعلم (Continue Learning) -->
+      <!-- استكمال التعلم -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-play-circle"></i> Continue Learning</h3>
-          <a href="{{ url_for('student.courses') }}" class="panel-link-btn">
+          <a href="/student/courses" class="panel-link-btn">
             View All Courses <i class="fa-solid fa-arrow-right"></i>
           </a>
         </div>
@@ -650,7 +634,7 @@
               </div>
 
               <div>
-                <a href="{{ url_for('student.course_details', course_id=c.id) if c.id is defined else '#' }}" class="btn-continue-course">
+                <a href="/student/courses" class="btn-continue-course">
                   Open Space <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 </a>
               </div>
@@ -675,18 +659,18 @@
                 </div>
               </div>
               <div>
-                <a href="{{ url_for('student.courses') }}" class="btn-continue-course">Resume Course</a>
+                <a href="/student/courses" class="btn-continue-course">Resume Course</a>
               </div>
             </div>
           {% endif %}
         </div>
       </div>
 
-      <!-- الواجبات القادمة (Upcoming Assignments) -->
+      <!-- الواجبات القادمة -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-clock"></i> Upcoming Assignments</h3>
-          <a href="{{ url_for('student.assignments') }}" class="panel-link-btn">
+          <a href="/student/assignments" class="panel-link-btn">
             View All <i class="fa-solid fa-arrow-right"></i>
           </a>
         </div>
@@ -698,7 +682,7 @@
               <div class="assignment-item-row">
                 <div class="assign-left">
                   <strong>{{ a.title }}</strong>
-                  <small>{{ a.course.name if a.course else 'Course Assignment' }}</small>
+                  <small>{{ a.course.name if a.course and a.course.name is defined else 'Course Assignment' }}</small>
                 </div>
                 <div class="assign-due-tag">
                   <i class="fa-regular fa-clock"></i> {{ a.due_date.strftime('%d %b, %H:%M') if a.due_date and a.due_date.strftime is defined else 'Upcoming' }}
@@ -731,29 +715,28 @@
 
     </div>
 
-    <!-- العمود الأيمن (الإجراءات السريعة والإنجازات) -->
     <div class="dash-col-right">
 
-      <!-- إجراءات سريعة (Quick Actions) -->
+      <!-- إجراءات سريعة -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-bolt"></i> Quick Actions</h3>
         </div>
         <div class="dash-panel-body">
           <div class="quick-links-grid">
-            <a href="{{ url_for('student.courses') }}" class="quick-action-link">
+            <a href="/student/courses" class="quick-action-link">
               <i class="fa-solid fa-book-open"></i>
               <span>My Enrolled Courses</span>
             </a>
-            <a href="{{ url_for('student.assignments') }}" class="quick-action-link">
+            <a href="/student/assignments" class="quick-action-link">
               <i class="fa-solid fa-pen-to-square"></i>
               <span>Pending Assignments</span>
             </a>
-            <a href="{{ url_for('student.grades') }}" class="quick-action-link">
+            <a href="/student/grades" class="quick-action-link">
               <i class="fa-solid fa-chart-simple"></i>
               <span>View Transcript & GPA</span>
             </a>
-            <a href="{{ url_for('forum.index') }}" class="quick-action-link">
+            <a href="/discussions" class="quick-action-link">
               <i class="fa-solid fa-comments"></i>
               <span>Community Forum</span>
             </a>
@@ -761,7 +744,7 @@
         </div>
       </div>
 
-      <!-- بطاقة الإنجازات والشهادات (Achievements) -->
+      <!-- الإنجازات والشهادات -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-trophy"></i> Achievements</h3>
@@ -773,7 +756,7 @@
               <div class="ring-sub">Awarded</div>
             </div>
             <p>Complete your course activities and achieve passing grades to unlock verified credentials.</p>
-            <a href="{{ url_for('student.certificates') }}" class="btn-view-certs">
+            <a href="/student/certificates" class="btn-view-certs">
               <i class="fa-solid fa-award"></i> View Certificates
             </a>
           </div>
