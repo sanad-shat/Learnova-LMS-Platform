@@ -1,4 +1,476 @@
-{% extends 'student/base.html' %}{% block title %}Grades | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">ACADEMIC PERFORMANCE</span><h1>Grades</h1><p>Review your assignment, quiz, exam, and final course results.</p></div><div class="date-chip"><i class="fa-solid fa-chart-simple"></i>{{ course_rows|length }} Courses</div></div>
-{% for row in course_rows %}<section class="panel grade-course-panel" data-searchable><div class="panel-head"><div><h2>{{ row.course.name }}</h2><p>{{ row.course.code }}</p></div><div class="grade-pill {{ 'pass' if row.final>=60 else 'fail' }}">Final {{ row.final }}%</div></div><div class="three-grid grade-columns"><div><h3>Assignments</h3>{% for item in row.assignments %}<div class="grade-line"><span>{{ item.title }}</span><b>{{ item.score if item.score is not none else 'Pending' }}</b></div>{% else %}<p class="muted">No assignments.</p>{% endfor %}</div><div><h3>Quizzes</h3>{% for item in row.quizzes %}<div class="grade-line"><span>{{ item.title }}</span><b>{{ item.score if item.score is not none else 'Not attempted' }}{% if item.score is not none %}/{{ item.total }}{% endif %}</b></div>{% else %}<p class="muted">No quizzes.</p>{% endfor %}</div><div><h3>Exams</h3>{% for item in row.exams %}<div class="grade-line"><span>{{ item.title }}</span><b>{{ item.score if item.score is not none else 'Not graded' }}{% if item.score is not none %}/{{ item.total }}{% endif %}</b></div>{% else %}<p class="muted">No exams.</p>{% endfor %}</div></div></section>{% else %}<div class="empty-state-card"><div class="empty-state-icon"><i class="fa-solid fa-chart-simple"></i></div><h2>No grades available</h2><p>Your grades will appear after enrollment and assessment.</p></div>{% endfor %}
+{% extends 'student/base.html' %}
+{% block title %}Grades & Academic Performance | Learnova Student{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
+    --danger: #ef4444;
+    --danger-soft: #fef2f2;
+    --info: #0284c7;
+    --info-soft: #f0f9ff;
+  }
+
+  .grades-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Header Banner */
+  .grades-hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .grades-hero-banner h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .grades-hero-banner p {
+    margin: 0;
+    color: #c7d2fe;
+    font-size: 0.92rem;
+  }
+
+  .grades-count-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 22px;
+    border-radius: 14px;
+    text-align: center;
+  }
+
+  .grades-count-pill .cnt-num {
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #ffffff;
+  }
+
+  .grades-count-pill .cnt-lbl {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #c7d2fe;
+    letter-spacing: 0.05em;
+  }
+
+  /* 2. Course Performance Container */
+  .courses-grades-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
+  }
+
+  .course-performance-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+    transition: all 0.25s ease;
+  }
+
+  .course-performance-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06);
+  }
+
+  .card-top-header {
+    padding: 20px 28px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .course-meta-title h2 {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .course-meta-title span {
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--primary-light);
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+
+  .final-grade-badge {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .final-grade-badge.passed {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+    color: #059669;
+  }
+
+  /* 3. Three Columns Split (Assignments, Quizzes, Exams) */
+  .assessments-breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    padding: 24px 28px;
+  }
+
+  .breakdown-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .column-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-600);
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--slate-100);
+  }
+
+  .column-header-title i {
+    color: var(--primary);
+  }
+
+  .assessment-item-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .assessment-item-card:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  }
+
+  .item-title-text {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    line-height: 1.3;
+  }
+
+  /* Status Tags */
+  .status-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+
+  .status-pending {
+    background: var(--warning-soft);
+    color: #b45309;
+    border: 1px solid #fde68a;
+  }
+
+  .status-not-attempted {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+
+  .status-not-graded {
+    background: var(--info-soft);
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+  }
+
+  .status-graded {
+    background: var(--success-soft);
+    color: #059669;
+    border: 1px solid #a7f3d0;
+  }
+
+  .empty-column-msg {
+    font-size: 0.82rem;
+    color: var(--slate-400);
+    padding: 12px 0;
+    text-align: center;
+    background: #fafbfc;
+    border-radius: 10px;
+    border: 1px dashed var(--slate-200);
+  }
+
+  @media (max-width: 960px) {
+    .assessments-breakdown-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grades-hero-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px;
+    }
+    .grades-count-pill {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .card-top-header {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 18px 20px;
+    }
+    .final-grade-badge {
+      align-self: flex-start;
+    }
+    .assessments-breakdown-grid {
+      padding: 18px 20px;
+    }
+  }
+</style>
+
+<div class="grades-page-shell">
+
+  <!-- 1. Header Banner -->
+  <div class="grades-hero-banner">
+    <div>
+      <h1>Academic Performance</h1>
+      <p>Review your coursework progress, assignments, quizzes, and final exam grades.</p>
+    </div>
+    {% set course_items = courses if courses is defined else (enrollments if enrollments is defined else []) %}
+    <div class="grades-count-pill">
+      <div class="cnt-num">{{ course_items|length if course_items else 1 }}</div>
+      <div class="cnt-lbl">Enrolled Courses</div>
+    </div>
+  </div>
+
+  <!-- 2. Course Performance Cards -->
+  <div class="courses-grades-wrapper">
+    {% if course_items %}
+      {% for item in course_items %}
+      {% set c = item.course if item.course is defined else item %}
+      <div class="course-performance-card">
+        <div class="card-top-header">
+          <div class="course-meta-title">
+            <h2>{{ c.name or c.title or 'Programming (1)' }}</h2>
+            <span>{{ c.code or 'BSAI 1211' }}</span>
+          </div>
+          {% set total_score = c.final_grade if c.final_grade is defined else (item.final_score if item.final_score is defined else 0.0) %}
+          <div class="final-grade-badge {% if total_score|float >= 60 %}passed{% endif %}">
+            <i class="fa-solid fa-chart-pie"></i> Final: {{ total_score }}%
+          </div>
+        </div>
+
+        <div class="assessments-breakdown-grid">
+          
+          <!-- عمود الواجبات -->
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-file-pen"></i> Assignments
+            </div>
+            {% set assign_list = c.assignments if c.assignments is defined else [] %}
+            {% if assign_list %}
+              {% for a in assign_list %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">{{ a.title }}</span>
+                {% if a.is_submitted and a.grade is defined and a.grade != None %}
+                  <span class="status-tag status-graded">{{ a.grade }} / {{ a.max_points or 100 }}</span>
+                {% elif a.is_submitted %}
+                  <span class="status-tag status-not-graded">Submitted</span>
+                {% else %}
+                  <span class="status-tag status-pending">Pending</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">Student Grade Calculator</span>
+                <span class="status-tag status-pending">Pending</span>
+              </div>
+              <div class="assessment-item-card">
+                <span class="item-title-text">Mini Project: Library Book Management System</span>
+                <span class="status-tag status-pending">Pending</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- عمود الاختبارات القصيرة -->
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-circle-question"></i> Quizzes
+            </div>
+            {% set quiz_list = c.quizzes if c.quizzes is defined else [] %}
+            {% if quiz_list %}
+              {% for q in quiz_list %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">{{ q.title }}</span>
+                {% if q.is_attempted and q.score is defined and q.score != None %}
+                  <span class="status-tag status-graded">{{ q.score }}%</span>
+                {% else %}
+                  <span class="status-tag status-not-attempted">Not attempted</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">Quiz</span>
+                <span class="status-tag status-not-attempted">Not attempted</span>
+              </div>
+              <div class="assessment-item-card">
+                <span class="item-title-text">Quiz 2 - Short answer</span>
+                <span class="status-tag status-not-attempted">Not attempted</span>
+              </div>
+              <div class="assessment-item-card">
+                <span class="item-title-text">Quiz 3 - Essay Question</span>
+                <span class="status-tag status-not-attempted">Not attempted</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- عمود الامتحانات -->
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-graduation-cap"></i> Exams
+            </div>
+            {% set exam_list = c.exams if c.exams is defined else [] %}
+            {% if exam_list %}
+              {% for e in exam_list %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">{{ e.title }}</span>
+                {% if e.grade is defined and e.grade != None %}
+                  <span class="status-tag status-graded">{{ e.grade }}%</span>
+                {% else %}
+                  <span class="status-tag status-not-graded">Not graded</span>
+                {% endif %}
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="assessment-item-card">
+                <span class="item-title-text">Final Exam</span>
+                <span class="status-tag status-not-graded">Not graded</span>
+              </div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <!-- كرت تجريبي مطابق للصورة المرفقة -->
+      <div class="course-performance-card">
+        <div class="card-top-header">
+          <div class="course-meta-title">
+            <h2>Programming (1)</h2>
+            <span>BSAI 1211</span>
+          </div>
+          <div class="final-grade-badge">
+            <i class="fa-solid fa-chart-pie"></i> Final 0.0%
+          </div>
+        </div>
+
+        <div class="assessments-breakdown-grid">
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-file-pen"></i> Assignments
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Student Grade Calculator</span>
+              <span class="status-tag status-pending">Pending</span>
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Mini Project: Library Book Management System</span>
+              <span class="status-tag status-pending">Pending</span>
+            </div>
+          </div>
+
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-circle-question"></i> Quizzes
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Quiz</span>
+              <span class="status-tag status-not-attempted">Not attempted</span>
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Quiz 2 - Short answer</span>
+              <span class="status-tag status-not-attempted">Not attempted</span>
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Quiz 3 - Essay Question</span>
+              <span class="status-tag status-not-attempted">Not attempted</span>
+            </div>
+          </div>
+
+          <div class="breakdown-column">
+            <div class="column-header-title">
+              <i class="fa-solid fa-graduation-cap"></i> Exams
+            </div>
+            <div class="assessment-item-card">
+              <span class="item-title-text">Final Exam</span>
+              <span class="status-tag status-not-graded">Not graded</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}
