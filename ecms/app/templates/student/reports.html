@@ -176,7 +176,7 @@
     transition: width 0.4s ease;
   }
 
-  /* Metrics Grid */
+  /* 4 Analytics Grid Boxes With Modern Icons */
   .report-metrics-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -186,15 +186,62 @@
   .metric-card {
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
-    border-radius: 14px;
-    padding: 14px 18px;
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .metric-card:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  }
+
+  .metric-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  /* تخصيص الألوان لكل أيقونة */
+  .icon-activities {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .icon-grades {
+    background: #ede9fe;
+    color: #7c3aed;
+  }
+
+  .icon-status {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .icon-certificate {
+    background: #ecfdf5;
+    color: #059669;
+  }
+
+  .metric-info-texts {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
+    min-width: 0;
   }
 
   .metric-card-lbl {
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--slate-500);
@@ -326,30 +373,53 @@
           <div class="custom-progress-fill" style="width: {{ prog.percent if prog is mapping else prog }}%;"></div>
         </div>
 
+        <!-- الصناديق الأربعة المزودة بأيقونات معبرة وملونة -->
         <div class="report-metrics-grid">
+          
           <div class="metric-card">
-            <span class="metric-card-lbl">Activities</span>
-            <span class="metric-card-val">{{ prog.completed if prog is mapping else 0 }}/{{ prog.total if prog is mapping else 14 }}</span>
+            <div class="metric-icon-box icon-activities">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Activities</span>
+              <span class="metric-card-val">{{ prog.completed if prog is mapping else 0 }}/{{ prog.total if prog is mapping else 14 }}</span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Final Grade</span>
-            <span class="metric-card-val">{{ '%.1f'|format(r.final or 0.0) }}%</span>
+            <div class="metric-icon-box icon-grades">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Final Grade</span>
+              <span class="metric-card-val">{{ '%.1f'|format(r.final or 0.0) }}%</span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Status</span>
-            <span class="metric-card-val status-badge-val {{ 'completed' if (prog.percent if prog is mapping else prog)|int == 100 else '' }}">
-              {{ 'Completed' if (prog.percent if prog is mapping else prog)|int == 100 else 'In Progress' }}
-            </span>
+            <div class="metric-icon-box icon-status">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Status</span>
+              <span class="metric-card-val status-badge-val {{ 'completed' if (prog.percent if prog is mapping else prog)|int == 100 else '' }}">
+                {{ 'Completed' if (prog.percent if prog is mapping else prog)|int == 100 else 'In Progress' }}
+              </span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Certificate</span>
-            <span class="metric-card-val" style="color: var(--primary);">
-              {{ 'Issued' if r.certificate else 'Locked' }}
-            </span>
+            <div class="metric-icon-box icon-certificate">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Certificate</span>
+              <span class="metric-card-val" style="color: var(--success);">
+                {{ 'Issued' if r.certificate else 'Locked' }}
+              </span>
+            </div>
           </div>
+
         </div>
 
         <div class="report-actions-row export-ignore">
@@ -384,23 +454,43 @@
 
         <div class="report-metrics-grid">
           <div class="metric-card">
-            <span class="metric-card-lbl">Activities</span>
-            <span class="metric-card-val">0/14</span>
+            <div class="metric-icon-box icon-activities">
+              <i class="fa-solid fa-list-check"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Activities</span>
+              <span class="metric-card-val">0/14</span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Final Grade</span>
-            <span class="metric-card-val">0.0%</span>
+            <div class="metric-icon-box icon-grades">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Final Grade</span>
+              <span class="metric-card-val">0.0%</span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Status</span>
-            <span class="metric-card-val status-badge-val">In Progress</span>
+            <div class="metric-icon-box icon-status">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Status</span>
+              <span class="metric-card-val status-badge-val">In Progress</span>
+            </div>
           </div>
 
           <div class="metric-card">
-            <span class="metric-card-lbl">Certificate</span>
-            <span class="metric-card-val" style="color: var(--primary);">Issued</span>
+            <div class="metric-icon-box icon-certificate">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="metric-info-texts">
+              <span class="metric-card-lbl">Certificate</span>
+              <span class="metric-card-val" style="color: var(--success);">Issued</span>
+            </div>
           </div>
         </div>
 
@@ -423,11 +513,9 @@
     const btn = document.getElementById('downloadPdfBtn');
     const originalText = btn.innerHTML;
     
-    // تغيير حالة الزر أثناء التوليد
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
     btn.style.pointerEvents = 'none';
 
-    // إخفاء الأزرار غير المرغوب بظهورها في ملف الـ PDF
     const ignoredElements = document.querySelectorAll('.export-ignore, #downloadPdfBtn');
     ignoredElements.forEach(el => el.style.visibility = 'hidden');
 
@@ -441,7 +529,6 @@
     };
 
     html2pdf().set(opt).from(element).save().then(() => {
-      // إعادة إظهار الأزرار والزر لوضعه الطبيعي
       ignoredElements.forEach(el => el.style.visibility = 'visible');
       btn.innerHTML = originalText;
       btn.style.pointerEvents = 'auto';
@@ -450,7 +537,6 @@
       ignoredElements.forEach(el => el.style.visibility = 'visible');
       btn.innerHTML = originalText;
       btn.style.pointerEvents = 'auto';
-      // في حال حدوث أي مانع في المتصفح نستخدم خيار الطباعة الاحتياطي
       window.print();
     });
   }
