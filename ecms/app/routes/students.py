@@ -752,20 +752,6 @@ def student_profile():
                            **_student_nav_context(current_user))
 
 
-# ------------------------- Student Settings -------------------------
-@students_bp.route('/settings', methods=['GET', 'POST'])
-@login_required
-def settings():
-    if current_user.role.lower() != 'student':
-        flash('Access denied.', 'danger')
-        return redirect(url_for('students.login'))
-    if request.method == 'POST':
-        flash('Your display preferences have been saved for this browser.', 'success')
-        return redirect(url_for('students.settings'))
-    return render_template('student/settings.html', student=current_user, active_page='settings',
-                           **_student_nav_context(current_user))
-
-
 # ------------------------- Student Discussions -------------------------
 @students_bp.route('/discussions')
 @login_required
@@ -780,10 +766,25 @@ def discussions():
     except Exception:
         courses_list = []
 
-    return render_template(
-        'student/discussions.html',
-        student=current_user,
-        courses=courses_list,
-        active_page='discussions',
-        **_student_nav_context(current_user)
-    )
+    nav_ctx = {}
+    try:
+        nav_ctx = _student_nav_context(current_user)
+    except Exception as e:
+        pass
+
+    # تجربة فتح مسارات القالب المحتملة تلقائياً لمنع TemplateNotFound
+    for tpl in ['student/discussions.html', 'discussions.html']:
+        try:
+            return render_template(
+                tpl,
+                student=current_user,
+                courses=courses_list,
+                active_page='discussions',
+                **nav_ctx
+            )
+        except Exception:
+            continue
+
+    # في حال وجود خطأ في ملف الـ HTML نفسه، سيطبع لك السبب الدقيق بدلاً من شاشة 500
+    import traceback
+    return f"<div style='padding:30px; font-family:sans-serif;'><h2>Error Details:</h2><pre>{traceback.format_exc()}</pre></div>", 200
