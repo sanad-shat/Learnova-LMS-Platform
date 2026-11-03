@@ -1,4 +1,547 @@
-{% extends 'student/base.html' %}{% block title %}Settings | Learnova LMS{% endblock %}{% block content %}
-<div class="page-title-row"><div><span class="eyebrow">PREFERENCES</span><h1>Settings</h1><p>Customize your learning experience on this browser.</p></div></div>
-<form method="post"><section class="settings-grid"><article class="panel"><div class="settings-icon"><i class="fa-solid fa-palette"></i></div><h2>Appearance</h2><p>Choose the interface mode that works best for you.</p><label class="toggle-row"><span>Dark mode</span><input type="checkbox" id="darkModeToggle"></label><label class="toggle-row"><span>Compact layout</span><input type="checkbox" id="compactToggle"></label></article><article class="panel"><div class="settings-icon"><i class="fa-solid fa-bell"></i></div><h2>Notifications</h2><p>Control which learning updates are emphasized.</p><label class="toggle-row"><span>Assignment reminders</span><input type="checkbox" checked></label><label class="toggle-row"><span>Grade notifications</span><input type="checkbox" checked></label><label class="toggle-row"><span>Discussion replies</span><input type="checkbox" checked></label></article><article class="panel"><div class="settings-icon"><i class="fa-solid fa-language"></i></div><h2>Language & Accessibility</h2><p>Interface preferences for comfortable use.</p><label>Interface language<select><option>English</option><option>Arabic</option></select></label><label class="toggle-row"><span>Reduce motion</span><input type="checkbox"></label></article></section><div class="form-actions"><button class="primary-btn" type="submit"><i class="fa-solid fa-floppy-disk"></i>Save Preferences</button></div></form>
-{% endblock %}{% block scripts %}<script>const d=document.getElementById('darkModeToggle');if(d){d.checked=localStorage.getItem('learnova-dark')==='1';document.body.classList.toggle('dark-ui',d.checked);d.addEventListener('change',()=>{localStorage.setItem('learnova-dark',d.checked?'1':'0');document.body.classList.toggle('dark-ui',d.checked)})}</script>{% endblock %}
+{% extends 'student/base.html' %}
+{% block title %}Settings & Preferences | Learnova Student{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-light: #eef2ff;
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --amber: #f59e0b;
+    --purple: #8b5cf6;
+  }
+
+  .settings-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    box-sizing: border-box;
+  }
+
+  /* 1. Hero Banner */
+  .settings-hero-banner {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+  }
+
+  .settings-hero-banner h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .settings-hero-banner p {
+    margin: 0;
+    color: #c7d2fe;
+    font-size: 0.92rem;
+  }
+
+  .settings-storage-pill {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+  }
+
+  /* 2. Settings Grid Cards */
+  .settings-grid-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .settings-box-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 20px;
+    padding: 26px;
+    box-shadow: 0 2px 14px rgba(15, 23, 42, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: all 0.2s ease;
+  }
+
+  .settings-box-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  }
+
+  .card-top-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid var(--slate-100);
+    padding-bottom: 16px;
+  }
+
+  .card-icon-pill {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .icon-appearance { background: #ede9fe; color: var(--purple); }
+  .icon-notifs { background: #e0e7ff; color: var(--primary); }
+  .icon-accessibility { background: #ecfdf5; color: var(--success); }
+  .icon-study { background: #fef3c7; color: var(--amber); }
+
+  .card-header-texts h2 {
+    margin: 0 0 2px;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .card-header-texts p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--slate-500);
+  }
+
+  /* Rows & Controls */
+  .settings-rows-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .setting-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--slate-50);
+  }
+
+  .setting-item-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .setting-text-info h4 {
+    margin: 0 0 3px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--slate-800);
+  }
+
+  .setting-text-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--slate-500);
+  }
+
+  /* Modern Switch Toggles */
+  .switch-control {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+
+  .switch-control input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider-toggle {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--slate-200);
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 999px;
+  }
+
+  .slider-toggle:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+
+  .switch-control input:checked + .slider-toggle {
+    background-color: var(--primary);
+  }
+
+  .switch-control input:checked + .slider-toggle:before {
+    transform: translateX(20px);
+  }
+
+  /* Select Controls */
+  .setting-select-box {
+    padding: 9px 14px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.86rem;
+    color: var(--slate-800);
+    outline: none;
+    background: #ffffff;
+    font-weight: 600;
+    min-width: 150px;
+    transition: all 0.2s;
+  }
+
+  .setting-select-box:focus {
+    border-color: var(--primary);
+  }
+
+  /* Submit Action Floating Bar */
+  .settings-save-bar {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  }
+
+  .save-bar-info {
+    font-size: 0.86rem;
+    color: var(--slate-500);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-save-settings {
+    background: var(--primary);
+    color: #ffffff;
+    padding: 11px 26px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 800;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s ease;
+  }
+
+  .btn-save-settings:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 900px) {
+    .settings-grid-layout {
+      grid-template-columns: 1fr;
+    }
+    .settings-hero-banner {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+    }
+  }
+</style>
+
+<div class="settings-page-shell">
+
+  <!-- 1. Header Banner -->
+  <div class="settings-hero-banner">
+    <div>
+      <h1>Preferences & Settings</h1>
+      <p>Configure study modes, accessibility features, notifications, and visual style.</p>
+    </div>
+    <div class="settings-storage-pill">
+      <i class="fa-solid fa-cloud-arrow-up"></i> Saved to Browser & Account
+    </div>
+  </div>
+
+  <form method="POST" action="{{ url_for('students.settings') }}">
+    <!-- 2. Grid Cards Container -->
+    <div class="settings-grid-layout">
+
+      <!-- Card 1: Appearance & Visuals -->
+      <div class="settings-box-card">
+        <div class="card-top-header">
+          <div class="card-icon-pill icon-appearance">
+            <i class="fa-solid fa-palette"></i>
+          </div>
+          <div class="card-header-texts">
+            <h2>Appearance & Layout</h2>
+            <p>Customize portal aesthetics and color schemes</p>
+          </div>
+        </div>
+
+        <div class="settings-rows-list">
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Dark Mode</h4>
+              <p>Comfortable dark theme for late night study sessions</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" id="darkModeToggle" name="dark_mode" onchange="toggleClientDarkMode(this.checked)">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Compact Sidebar & View</h4>
+              <p>Display denser content cards for larger laptop screens</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="compact_layout" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Modern Arabic Typography</h4>
+              <p>Enforce clean Cairo / Alexandria font smoothing</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="modern_font" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Notification Controls -->
+      <div class="settings-box-card">
+        <div class="card-top-header">
+          <div class="card-icon-pill icon-notifs">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div class="card-header-texts">
+            <h2>Notification Alerts</h2>
+            <p>Choose which updates trigger reminders</p>
+          </div>
+        </div>
+
+        <div class="settings-rows-list">
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Assignment Deadlines</h4>
+              <p>Remind 24 hours prior to submission cutoffs</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="assignment_reminders" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Exam & Quiz Scores</h4>
+              <p>Notify instantly once instructor grading is published</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="grade_notifications" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Discussion Activity</h4>
+              <p>Receive updates when instructors or peers answer you</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="discussion_replies" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Email Digest</h4>
+              <p>Send weekly summaries of course completions</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="email_digest">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Language & Accessibility -->
+      <div class="settings-box-card">
+        <div class="card-top-header">
+          <div class="card-icon-pill icon-accessibility">
+            <i class="fa-solid fa-universal-access"></i>
+          </div>
+          <div class="card-header-texts">
+            <h2>Language & Accessibility</h2>
+            <p>Tailor language, contrast, and motion effects</p>
+          </div>
+        </div>
+
+        <div class="settings-rows-list">
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Interface Language</h4>
+              <p>Preferred language across student portal pages</p>
+            </div>
+            <select name="language" class="setting-select-box">
+              <option value="en" selected>English (US)</option>
+              <option value="ar">العربية (Arabic)</option>
+            </select>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Reduce Animations</h4>
+              <p>Minimize motion effects for smoother, lightweight browsing</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="reduce_motion">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>High Contrast Borders</h4>
+              <p>Sharpen content boundaries for clearer readability</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="high_contrast">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Study Habits & Focus (جديد) -->
+      <div class="settings-box-card">
+        <div class="card-top-header">
+          <div class="card-icon-pill icon-study">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div class="card-header-texts">
+            <h2>Study & Exam Focus</h2>
+            <p>Tools designed to maximize academic concentration</p>
+          </div>
+        </div>
+
+        <div class="settings-rows-list">
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Distraction-Free Quizzes</h4>
+              <p>Hide side navigation drawers during timed tests</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="focus_mode" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Auto-Save Draft Answers</h4>
+              <p>Periodically cache assignment text to prevent data loss</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="autosave_drafts" checked>
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+
+          <div class="setting-item-row">
+            <div class="setting-text-info">
+              <h4>Study Break Prompts</h4>
+              <p>Show subtle reminders after 45 minutes of continuous study</p>
+            </div>
+            <label class="switch-control">
+              <input type="checkbox" name="study_prompts">
+              <span class="slider-toggle"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 3. Bottom Save Bar -->
+    <div class="settings-save-bar" style="margin-top: 24px;">
+      <div class="save-bar-info">
+        <i class="fa-solid fa-circle-check" style="color: var(--success);"></i>
+        Changes take effect immediately across this browser session.
+      </div>
+      <button type="submit" class="btn-save-settings">
+        <i class="fa-solid fa-floppy-disk"></i> Save Preferences
+      </button>
+    </div>
+  </form>
+
+</div>
+
+<script>
+  // استرجاع تفضيل الوضع الليلي من localStorage عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', () => {
+    const isDark = localStorage.getItem('learnova_dark_mode') === 'true';
+    const darkToggle = document.getElementById('darkModeToggle');
+    if (darkToggle) darkToggle.checked = isDark;
+    if (isDark) applyDarkModeCSS(true);
+  });
+
+  function toggleClientDarkMode(enable) {
+    localStorage.setItem('learnova_dark_mode', enable);
+    applyDarkModeCSS(enable);
+  }
+
+  function applyDarkModeCSS(enable) {
+    if (enable) {
+      document.body.style.filter = 'invert(0.92) hue-rotate(180deg)';
+      document.body.style.background = '#121212';
+    } else {
+      document.body.style.filter = 'none';
+      document.body.style.background = '#f8fafc';
+    }
+  }
+</script>
+{% endblock %}
