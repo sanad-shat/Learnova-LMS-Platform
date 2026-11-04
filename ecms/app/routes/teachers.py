@@ -106,25 +106,44 @@ def _question_payload(form, number):
     if score <= 0:
         raise ValueError(f"Question {number} score must be greater than zero.")
 
-    allowed_types = {"mcq", "true_false", "short_answer", "essay"}
+    allowed_types = {"mcq", "true_false", "boolean", "short_answer", "essay"}
     if question_type not in allowed_types:
         raise ValueError(f"Question {number} has an unsupported type.")
 
     if question_type == "mcq":
-        choices = [item.strip() for item in options.split(",") if item.strip()]
+        # قراءة مباشرة للخيارات إن أُرسلت بالحقول opt_a, opt_b
+        opt_a = (form.get(f"opt_a_{number}") or "").strip()
+        opt_b = (form.get(f"opt_b_{number}") or "").strip()
+        opt_c = (form.get(f"opt_c_{number}") or "").strip()
+        opt_d = (form.get(f"opt_d_{number}") or "").strip()
+
+        direct_choices = [c for c in [opt_a, opt_b, opt_c, opt_d] if c]
+        if direct_choices:
+            choices = direct_choices
+            options = ",".join(choices)
+            selected_radio = form.get(f"mcq_radio_{number}")
+            radio_map = {"a": opt_a, "b": opt_b, "c": opt_c, "d": opt_d}
+            if selected_radio and radio_map.get(selected_radio):
+                answer = radio_map.get(selected_radio)
+            elif not answer and choices:
+                answer = choices[0]
+        else:
+            choices = [item.strip() for item in options.split(",") if item.strip()]
+
         if len(choices) < 2:
             raise ValueError(f"Question {number} needs at least two choices.")
         if not answer:
-            raise ValueError(f"Question {number} needs a correct answer.")
-        if answer not in choices:
-            raise ValueError(f"Question {number} correct answer must match one listed choice.")
+            answer = choices[0]
         options = ",".join(choices)
-    elif question_type == "true_false":
+
+    elif question_type in {"true_false", "boolean"}:
+        question_type = "true_false"
         options = "True,False"
         normalized = answer.lower()
         if normalized not in {"true", "false"}:
-            raise ValueError(f"Question {number} answer must be True or False.")
-        answer = "True" if normalized == "true" else "False"
+            answer = "True"
+        else:
+            answer = "True" if normalized == "true" else "False"
     elif question_type == "short_answer" and not answer:
         raise ValueError(f"Question {number} needs a correct answer.")
     elif question_type == "essay":
@@ -393,9 +412,8 @@ def add_unit(teacher_id, course_id):
                     original = secure_filename(file.filename)
                     filename = original
                     file_mimetype = file.content_type
-                    file_bytes = file.read()  # قراءة الملف كثنائي لحفظه دائمًا في Neon
+                    file_bytes = file.read()
 
-                    # حفظ محلي إضافي كنسخة احتياطية
                     upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                     os.makedirs(upload_target, exist_ok=True)
                     local_stored_name = f"{uuid.uuid4().hex}_{original}"
@@ -886,9 +904,8 @@ def edit_unit_page(teacher_id, course_id, unit_id):
                 original = secure_filename(file.filename)
                 unit.file_path = original
                 unit.file_mimetype = file.content_type
-                unit.file_data = file.read()  # تحديث محتوى الملف في قاعدة البيانات
+                unit.file_data = file.read()
 
-                # حفظ محلي اختياري
                 upload_target = "/tmp/uploads" if os.environ.get("VERCEL") else UPLOAD_FOLDER
                 os.makedirs(upload_target, exist_ok=True)
                 local_name = f"{uuid.uuid4().hex}_{original}"
@@ -904,6 +921,7 @@ def edit_unit_page(teacher_id, course_id, unit_id):
     return render_template("teacher/edit_unit.html", teacher=teacher, course=course, unit=unit)
 
 
+# ------------------------- Edit Assignment -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/assignments/<int:assignment_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_assignment_page(teacher_id, course_id, assignment_id):
@@ -1070,30 +1088,141 @@ def edit_assignment_page(teacher_id, course_id, assignment_id):
 def preview_exam(teacher_id, course_id, exam_id):
     teacher = User.query.get_or_404(teacher_id)
     course = Course.query.get_or_404(course_id)
-    exam = Exam.query.get_or_404(exam_id)
+    exam = Exam.query.options(joinedload(Exam.questions)).get_or_404(exam_id)
     return render_template("teacher/preview_exam.html", teacher=teacher, course=course, exam=exam)
 
 
-# ------------------------- Edit Exam -------------------------
+# ------------------------- Edit Exam (مع حفظ وتحديث كافة الأسئلة) -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_exam_page(teacher_id, course_id, exam_id):
     teacher = User.query.get_or_404(teacher_id)
     course = Course.query.get_or_404(course_id)
-    exam = Exam.query.get_or_404(exam_id)
+    exam = Exam.query.options(joinedload(Exam.questions)).get_or_404(exam_id)
+
+    if current_user.id != teacher.id and current_user.role.lower() != "admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
 
     if request.method == "POST":
-        exam.title = request.form.get("title")
-        exam.description = request.form.get("description")
-        exam.total_score = float(request.form.get("total_score"))
-        exam.start_date = datetime.fromisoformat(request.form.get("start_date"))
-        exam.end_date = datetime.fromisoformat(request.form.get("end_date"))
+        title = (request.form.get("title") or "").strip()
+        description = (request.form.get("description") or "").strip()
 
-        db.session.commit()
-        flash("Exam updated successfully.", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+        if not title:
+            flash("Exam title is required.", "danger")
+            return render_template("teacher/edit_exam.html", teacher=teacher, course=course, exam=exam, **_teacher_nav_context(teacher))
 
-    return render_template("teacher/edit_exam.html", teacher=teacher, course=course, exam=exam)
+        try:
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
+            end_date = _parse_datetime(request.form.get("end_date"), "End date")
+            if end_date <= start_date:
+                raise ValueError("End date must be after the start date.")
+
+            numbers = _question_numbers(request.form)
+            if not numbers:
+                raise ValueError("The exam must contain at least one question.")
+
+            questions_payload = [_question_payload(request.form, num) for num in numbers]
+            calculated_total = sum(item["score"] for item in questions_payload)
+            requested_total = float(request.form.get("total_score") or calculated_total)
+
+            exam.title = title
+            exam.description = description
+            exam.start_date = start_date
+            exam.end_date = end_date
+            exam.total_score = calculated_total if requested_total != calculated_total else requested_total
+
+            # مسح الأسئلة السابقة وإعادة حفظ الأسئلة المحدثة
+            ExamQuestion.query.filter_by(exam_id=exam.id).delete(synchronize_session=False)
+
+            for payload in questions_payload:
+                db.session.add(ExamQuestion(exam_id=exam.id, **payload))
+
+            db.session.commit()
+            flash("Exam and questions updated successfully!", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+
+        except ValueError as exc:
+            db.session.rollback()
+            flash(str(exc), "danger")
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Error updating exam: {exc}", "danger")
+
+    return render_template("teacher/edit_exam.html", teacher=teacher, course=course, exam=exam, **_teacher_nav_context(teacher))
+
+
+# ------------------------- Edit Quiz (مع حفظ وتحديث كافة الأسئلة) -------------------------
+@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
+@login_required
+def edit_quiz(teacher_id, course_id, quiz_id):
+    teacher = User.query.get_or_404(teacher_id)
+    course = Course.query.get_or_404(course_id)
+    quiz = Quiz.query.options(joinedload(Quiz.questions)).get_or_404(quiz_id)
+
+    if current_user.id != teacher.id and current_user.role.lower() != "admin":
+        flash("Access denied.", "danger")
+        return redirect(url_for("teachers.dashboard", teacher_id=current_user.id))
+
+    if request.method == "POST":
+        title = (request.form.get("title") or "").strip()
+        description = (request.form.get("description") or "").strip()
+
+        if not title:
+            flash("Quiz title is required.", "danger")
+            return render_template("teacher/edit_quiz.html", teacher=teacher, course=course, quiz=quiz, **_teacher_nav_context(teacher))
+
+        try:
+            start_date = _parse_datetime(request.form.get("start_date"), "Start date")
+            end_date = _parse_datetime(request.form.get("end_date"), "End date")
+            if end_date <= start_date:
+                raise ValueError("End date must be after the start date.")
+
+            numbers = _question_numbers(request.form)
+            if not numbers:
+                raise ValueError("The quiz must contain at least one question.")
+
+            questions_payload = [_question_payload(request.form, num) for num in numbers]
+            calculated_total = sum(item["score"] for item in questions_payload)
+            requested_total = float(request.form.get("total_score") or calculated_total)
+
+            quiz.title = title
+            quiz.description = description
+            quiz.start_date = start_date
+            quiz.end_date = end_date
+            quiz.total_score = calculated_total if requested_total != calculated_total else requested_total
+
+            # تحديث الواجب المرتبط بالكويز إن وُجد
+            if quiz.assignment:
+                quiz.assignment.title = title
+                quiz.assignment.description = description
+                quiz.assignment.start_date = start_date
+                quiz.assignment.due_date = end_date
+
+            # مسح الأسئلة القديمة وإضافة الأسئلة المحدثة
+            QuizQuestion.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
+
+            for payload in questions_payload:
+                db.session.add(QuizQuestion(quiz_id=quiz.id, **payload))
+
+            db.session.commit()
+            flash("Quiz and questions updated successfully!", "success")
+            return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
+
+        except ValueError as exc:
+            db.session.rollback()
+            flash(str(exc), "danger")
+        except Exception as exc:
+            db.session.rollback()
+            flash(f"Error updating quiz: {exc}", "danger")
+
+    return render_template(
+        "teacher/edit_quiz.html",
+        teacher=teacher,
+        course=course,
+        quiz=quiz,
+        **_teacher_nav_context(teacher),
+    )
 
 
 # ------------------------- Update Student Quiz Score -------------------------
@@ -1608,35 +1737,3 @@ def delete_activity(teacher_id, course_id, student_id):
         db.session.commit()
         flash("Activity score removed.", "success")
     return redirect(url_for("teachers.view_course", teacher_id=teacher_id, course_id=course_id))
-
-
-# ------------------------- Edit Quiz -------------------------
-@teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
-@login_required
-def edit_quiz(teacher_id, course_id, quiz_id):
-    teacher = User.query.get_or_404(teacher_id)
-    course = Course.query.get_or_404(course_id)
-    quiz = Quiz.query.get_or_404(quiz_id)
-
-    if request.method == "POST":
-        quiz.title = request.form.get("title")
-        quiz.description = request.form.get("description")
-        start_date_str = request.form.get("start_date")
-        end_date_str = request.form.get("end_date")
-
-        if start_date_str:
-            quiz.start_date = datetime.fromisoformat(start_date_str)
-        if end_date_str:
-            quiz.end_date = datetime.fromisoformat(end_date_str)
-
-        db.session.commit()
-        flash("Quiz updated successfully!", "success")
-        return redirect(url_for("teachers.view_course", teacher_id=teacher.id, course_id=course.id))
-
-    return render_template(
-        "teacher/edit_quiz.html",
-        teacher=teacher,
-        course=course,
-        quiz=quiz,
-        **_teacher_nav_context(teacher),
-    )
