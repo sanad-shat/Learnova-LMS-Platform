@@ -424,7 +424,7 @@
     border: 1px solid var(--slate-200);
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-    min-width: 170px;
+    min-width: 175px;
     z-index: 50;
     padding: 6px;
   }
@@ -433,7 +433,30 @@
     display: block;
   }
 
-  .action-menu-dropdown button {
+  .action-menu-dropdown a.dropdown-action-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    border-radius: 7px;
+    transition: all 0.15s ease;
+  }
+
+  .action-menu-dropdown a.dropdown-action-link:hover {
+    background: var(--primary-soft);
+  }
+
+  .dropdown-divider-line {
+    height: 1px;
+    background: var(--slate-200);
+    margin: 4px 0;
+  }
+
+  .action-menu-dropdown button.btn-delete-action {
     display: flex;
     align-items: center;
     gap: 9px;
@@ -452,7 +475,7 @@
     transition: all 0.15s ease;
   }
 
-  .action-menu-dropdown button:hover {
+  .action-menu-dropdown button.btn-delete-action:hover {
     background: var(--danger-soft);
   }
 
@@ -628,7 +651,7 @@
             {% for std in students %}
             <tr>
               <td data-label="UNIVERSITY ID">
-                <span style="font-weight: 700; color: var(--slate-900);">#{{ std.student_id if std.student_id is defined and std.student_id else (std.id if std.id is defined else '—') }}</span>
+                <span style="font-weight: 700; color: var(--slate-900);">#{{ std.university_id if std.university_id is defined and std.university_id else (std.student_id if std.student_id is defined and std.student_id else (std.id if std.id is defined else '—')) }}</span>
               </td>
 
               <td data-label="STUDENT">
@@ -663,15 +686,15 @@
               </td>
 
               <!-- PASSWORD CELL -->
-             <td data-label="PASSWORD">
-  <div style="display: inline-flex; align-items: center; gap: 8px;">
-    <span id="pwd-val-std-{{ std.id }}" data-pwd="{{ std.visible_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
-    <button type="button" class="btn-pwd-pill" id="pwd-btn-std-{{ std.id }}" 
-            onclick="togglePasswordDirect('pwd-val-std-{{ std.id }}', 'pwd-btn-std-{{ std.id }}')">
-      Show
-    </button>
-  </div>
-</td>
+              <td data-label="PASSWORD">
+                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span id="pwd-val-std-{{ std.id }}" data-pwd="{{ std.visible_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
+                  <button type="button" class="btn-pwd-pill" id="pwd-btn-std-{{ std.id }}" 
+                          onclick="togglePasswordDirect('pwd-val-std-{{ std.id }}', 'pwd-btn-std-{{ std.id }}')">
+                    Show
+                  </button>
+                </div>
+              </td>
 
               <td data-label="COURSES">
                 {% if std.enrollments is defined and std.enrollments %}
@@ -699,8 +722,12 @@
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div id="std-menu-{{ std.id }}" class="action-menu-dropdown">
+                      <a class="dropdown-action-link" href="/admin/students/{{ std.id }}/enroll">
+                        <i class="fa-solid fa-book-open"></i> Enroll Courses
+                      </a>
+                      <div class="dropdown-divider-line"></div>
                       <form method="POST" action="/admin/students/delete/{{ std.id }}" onsubmit="return confirm('Are you sure you want to delete this student?');" style="margin: 0;">
-                        <button type="submit">
+                        <button type="submit" class="btn-delete-action">
                           <i class="fa-solid fa-trash"></i> Delete Student
                         </button>
                       </form>
