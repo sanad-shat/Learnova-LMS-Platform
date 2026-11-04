@@ -191,21 +191,33 @@
 
   .question-item-card {
     background: #f8fafc;
-    border: 1px solid var(--border-normal);
+    border: 1.5px solid var(--border-normal);
     border-radius: var(--radius-lg);
-    padding: 20px;
+    padding: 22px;
     margin-bottom: 16px;
     position: relative;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
   }
   .question-item-card .remove-q-btn {
     position: absolute;
-    top: 16px;
-    right: 16px;
+    top: 18px;
+    right: 18px;
     color: #ef4444;
-    background: none;
+    background: #fee2e2;
     border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     font-size: 14px;
+    transition: all 0.15s ease;
+  }
+  .question-item-card .remove-q-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
   }
 
   .empty-questions-notice {
@@ -363,8 +375,13 @@
 
   <div class="layout-grid">
     
-    <form method="POST" action="{{ url_for('teachers.add_quiz', teacher_id=teacher.id, course_id=course.id) }}" class="form-section-stack">
+    <form id="quizForm" method="POST" action="{{ url_for('teachers.add_quiz', teacher_id=teacher.id, course_id=course.id) }}" class="form-section-stack">
       
+      <!-- Hidden inputs for backend versatility -->
+      <input type="hidden" name="total_questions" id="totalQuestionsInput" value="0">
+      <input type="hidden" name="questions_json" id="questionsJsonInput" value="">
+      <input type="hidden" name="quiz_data" id="quizDataInput" value="">
+
       <!-- Card 1: Quiz Details -->
       <div class="main-form-card">
         <div class="form-head-block">
@@ -530,6 +547,7 @@
     if (emptyMsg) {
       emptyMsg.style.display = total === 0 ? 'block' : 'none';
     }
+    document.getElementById('totalQuestionsInput').value = total;
   }
 
   function addQuestion(type) {
@@ -546,19 +564,20 @@
     const card = document.createElement('div');
     card.className = 'question-item-card';
     card.id = 'qCard_' + qIndex;
+    card.setAttribute('data-type', type);
 
     let optionsHtml = '';
     if (type === 'mcq') {
       optionsHtml = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
-          <input type="text" name="q_${qIndex}_opt1" placeholder="Option A" class="field-input">
-          <input type="text" name="q_${qIndex}_opt2" placeholder="Option B" class="field-input">
-          <input type="text" name="q_${qIndex}_opt3" placeholder="Option C" class="field-input">
-          <input type="text" name="q_${qIndex}_opt4" placeholder="Option D" class="field-input">
+          <input type="text" name="option_a[]" placeholder="Option A" class="field-input opt-a" required>
+          <input type="text" name="option_b[]" placeholder="Option B" class="field-input opt-b" required>
+          <input type="text" name="option_c[]" placeholder="Option C" class="field-input opt-c">
+          <input type="text" name="option_d[]" placeholder="Option D" class="field-input opt-d">
         </div>
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 12px;">
           <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
-          <select name="q_${qIndex}_answer" class="field-input" style="padding: 8px 12px; margin-top: 4px;">
+          <select name="correct_answer[]" class="field-input sel-answer" style="padding: 8px 12px; margin-top: 4px;">
             <option value="A">Option A</option>
             <option value="B">Option B</option>
             <option value="C">Option C</option>
@@ -568,30 +587,44 @@
       `;
     } else if (type === 'tf') {
       optionsHtml = `
-        <div style="margin-top: 10px;">
+        <div style="margin-top: 12px;">
           <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
-          <select name="q_${qIndex}_answer" class="field-input" style="padding: 8px 12px; margin-top: 4px;">
+          <select name="correct_answer[]" class="field-input sel-answer" style="padding: 8px 12px; margin-top: 4px;">
             <option value="True">True</option>
             <option value="False">False</option>
           </select>
         </div>
       `;
+    } else {
+      optionsHtml = `
+        <input type="hidden" name="correct_answer[]" value="" class="sel-answer">
+      `;
     }
 
     card.innerHTML = `
+      <input type="hidden" name="questions[]" value="${qIndex}">
+      <input type="hidden" name="question_type[]" value="${type}" class="q-type">
+      
+      <!-- توافق إضافي مع الأسماء الفردية القديمة -->
       <input type="hidden" name="q_${qIndex}_type" value="${type}">
+
       <button type="button" class="remove-q-btn" onclick="removeQuestion('${card.id}')" title="Remove Question">
         <i class="fa-solid fa-trash-can"></i>
       </button>
-      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
-        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px;">${typeTitle}</span>
+
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; background: #eff6ff; color: #2563eb; padding: 4px 10px; border-radius: 6px;">${typeTitle}</span>
         <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Question #${qIndex}</span>
       </div>
-      <input type="text" name="q_${qIndex}_text" placeholder="Type question prompt here..." class="field-input" required>
-      <div style="margin-top: 10px; max-width: 140px;">
+
+      <input type="text" name="question_text[]" placeholder="Type question prompt here..." class="field-input q-prompt" required>
+      <input type="hidden" name="q_${qIndex}_text" class="fallback-q-text">
+
+      <div style="margin-top: 12px; max-width: 140px;">
         <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points</label>
-        <input type="number" name="q_${qIndex}_points" value="1" min="0.5" step="0.5" class="field-input" style="padding: 8px 12px;">
+        <input type="number" name="points[]" value="1" min="0.5" step="0.5" class="field-input q-points" style="padding: 8px 12px;">
       </div>
+
       ${optionsHtml}
     `;
 
@@ -604,5 +637,45 @@
     if (el) el.remove();
     updateCount();
   }
+
+  // تجميع كل الأسئلة في الـ JSON والـ Fallback inputs قبل الإرسال مباشرة
+  document.getElementById('quizForm').addEventListener('submit', function(e) {
+    const cards = document.querySelectorAll('.question-item-card');
+    if (cards.length === 0) {
+      e.preventDefault();
+      alert('Please add at least one question before creating the quiz.');
+      return false;
+    }
+
+    const payload = [];
+    cards.forEach((card, idx) => {
+      const type = card.getAttribute('data-type');
+      const text = card.querySelector('.q-prompt')?.value || '';
+      const points = card.querySelector('.q-points')?.value || 1;
+      const ans = card.querySelector('.sel-answer')?.value || '';
+      
+      const optA = card.querySelector('.opt-a')?.value || '';
+      const optB = card.querySelector('.opt-b')?.value || '';
+      const optC = card.querySelector('.opt-c')?.value || '';
+      const optD = card.querySelector('.opt-d')?.value || '';
+
+      // مزامنة الـ Fallback input
+      const fallbackText = card.querySelector('.fallback-q-text');
+      if (fallbackText) fallbackText.value = text;
+
+      payload.push({
+        index: idx + 1,
+        type: type,
+        text: text,
+        points: points,
+        answer: ans,
+        options: { A: optA, B: optB, C: optC, D: optD }
+      });
+    });
+
+    const jsonString = JSON.stringify(payload);
+    document.getElementById('questionsJsonInput').value = jsonString;
+    document.getElementById('quizDataInput').value = jsonString;
+  });
 </script>
 {% endblock %}
