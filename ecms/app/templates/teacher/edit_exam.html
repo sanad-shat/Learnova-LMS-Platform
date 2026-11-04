@@ -19,13 +19,13 @@
     --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   }
 
-  /* إزالة أي قيود عرض أو فراغات جانبية مشوهة */
   .full-page-shell {
     width: 100% !important;
     max-width: 1440px;
     margin: 0 auto;
     padding: 24px 28px 60px;
     box-sizing: border-box;
+    font-family: inherit;
   }
 
   .header-actions-bar {
@@ -160,7 +160,6 @@
     line-height: 1.6;
   }
 
-  /* Question Bank Tools */
   .qb-header-row {
     display: flex;
     justify-content: space-between;
@@ -240,6 +239,47 @@
   .question-item-card .remove-q-btn:hover {
     background: #dc2626;
     color: #ffffff;
+  }
+
+  .opt-choice-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border-normal);
+    transition: border-color 0.15s;
+  }
+
+  .opt-choice-row:focus-within {
+    border-color: var(--primary);
+  }
+
+  .opt-choice-row input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .opt-choice-row .badge-letter {
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 14px;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .opt-choice-row input[type="text"] {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: transparent;
   }
 
   .form-actions-row {
@@ -427,12 +467,12 @@
             name="description" 
             rows="4" 
             class="field-textarea" 
-            placeholder="Specify instructions or honor code..."
+            placeholder="Specify instructions or guidelines..."
           >{{ exam.description or '' }}</textarea>
         </div>
       </div>
 
-      <!-- Card 2: Questions Editor (مراجعة وتعديل الأسئلة الحالية + إضافة جديدة) -->
+      <!-- Card 2: Questions Editor -->
       <div class="main-form-card">
         <div class="qb-header-row">
           <div>
@@ -458,10 +498,9 @@
         </div>
 
         <div id="questionsContainer">
-          <!-- تحميل كافة الأسئلة المحفوظة مسبقاً في قاعدة البيانات -->
           {% for q in exam.questions %}
           {% set num = loop.index %}
-          <div class="question-item-card" id="examQuestionRow_{{ num }}">
+          <div class="question-item-card" id="examQuestionRow_{{ num }}" data-num="{{ num }}">
             <input type="hidden" name="type_{{ num }}" value="{{ q.question_type }}">
             <button type="button" class="remove-q-btn" onclick="removeQuestion('examQuestionRow_{{ num }}')" title="Delete Question">
               <i class="fa-solid fa-trash-can"></i>
@@ -485,33 +524,38 @@
 
             {% if q.question_type == 'mcq' %}
               {% set opts = q.options.split(',') if q.options else [] %}
-              <input type="hidden" name="options_{{ num }}" id="options_hidden_{{ num }}" value="{{ q.options }}">
-              <input type="hidden" name="answer_{{ num }}" id="answer_hidden_{{ num }}" value="{{ q.answer }}">
+              {% set opt_a = opts[0].strip() if opts|length > 0 else '' %}
+              {% set opt_b = opts[1].strip() if opts|length > 1 else '' %}
+              {% set opt_c = opts[2].strip() if opts|length > 2 else '' %}
+              {% set opt_d = opts[3].strip() if opts|length > 3 else '' %}
+              
+              <input type="hidden" name="options_{{ num }}" id="options_hidden_{{ num }}" value="{{ q.options or '' }}">
+              <input type="hidden" name="answer_{{ num }}" id="answer_hidden_{{ num }}" value="{{ q.answer or opt_a }}">
 
               <div style="margin-top: 16px;">
                 <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
-                  Answer Choices (Select radio for correct answer):
+                  Answer Choices (Select radio to specify correct answer):
                 </label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-                    <input type="radio" name="mcq_radio_{{ num }}" value="a" onchange="syncMcqChoices({{ num }})" {% if opts|length > 0 and opts[0].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #7c3aed;">
-                    <span style="font-weight: 800; color: #7c3aed;">A</span>
-                    <input type="text" id="mcq_opt_a_{{ num }}" value="{{ opts[0].strip() if opts|length > 0 else '' }}" placeholder="Choice A" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})" required>
+                  <div class="opt-choice-row">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="a" onchange="syncMcqChoices({{ num }})" {% if q.answer == opt_a or not q.answer %}checked{% endif %}>
+                    <span class="badge-letter">A</span>
+                    <input type="text" id="mcq_opt_a_{{ num }}" value="{{ opt_a }}" placeholder="Choice A" oninput="syncMcqChoices({{ num }})" required>
                   </div>
-                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-                    <input type="radio" name="mcq_radio_{{ num }}" value="b" onchange="syncMcqChoices({{ num }})" {% if opts|length > 1 and opts[1].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #7c3aed;">
-                    <span style="font-weight: 800; color: #7c3aed;">B</span>
-                    <input type="text" id="mcq_opt_b_{{ num }}" value="{{ opts[1].strip() if opts|length > 1 else '' }}" placeholder="Choice B" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})" required>
+                  <div class="opt-choice-row">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="b" onchange="syncMcqChoices({{ num }})" {% if q.answer == opt_b and opt_b != '' %}checked{% endif %}>
+                    <span class="badge-letter">B</span>
+                    <input type="text" id="mcq_opt_b_{{ num }}" value="{{ opt_b }}" placeholder="Choice B" oninput="syncMcqChoices({{ num }})" required>
                   </div>
-                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-                    <input type="radio" name="mcq_radio_{{ num }}" value="c" onchange="syncMcqChoices({{ num }})" {% if opts|length > 2 and opts[2].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #7c3aed;">
-                    <span style="font-weight: 800; color: #7c3aed;">C</span>
-                    <input type="text" id="mcq_opt_c_{{ num }}" value="{{ opts[2].strip() if opts|length > 2 else '' }}" placeholder="Choice C (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})">
+                  <div class="opt-choice-row">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="c" onchange="syncMcqChoices({{ num }})" {% if q.answer == opt_c and opt_c != '' %}checked{% endif %}>
+                    <span class="badge-letter">C</span>
+                    <input type="text" id="mcq_opt_c_{{ num }}" value="{{ opt_c }}" placeholder="Choice C (Optional)" oninput="syncMcqChoices({{ num }})">
                   </div>
-                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-                    <input type="radio" name="mcq_radio_{{ num }}" value="d" onchange="syncMcqChoices({{ num }})" {% if opts|length > 3 and opts[3].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #7c3aed;">
-                    <span style="font-weight: 800; color: #7c3aed;">D</span>
-                    <input type="text" id="mcq_opt_d_{{ num }}" value="{{ opts[3].strip() if opts|length > 3 else '' }}" placeholder="Choice D (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})">
+                  <div class="opt-choice-row">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="d" onchange="syncMcqChoices({{ num }})" {% if q.answer == opt_d and opt_d != '' %}checked{% endif %}>
+                    <span class="badge-letter">D</span>
+                    <input type="text" id="mcq_opt_d_{{ num }}" value="{{ opt_d }}" placeholder="Choice D (Optional)" oninput="syncMcqChoices({{ num }})">
                   </div>
                 </div>
               </div>
@@ -608,11 +652,13 @@
     const answerField = document.getElementById(`answer_hidden_${num}`);
 
     const choices = [a, b, c, d].filter(Boolean);
-    if (optionsField) optionsField.value = choices.join(',');
+    if (optionsField) {
+      optionsField.value = choices.join(',');
+    }
 
-    if (answerField && selected) {
+    if (answerField) {
       const map = { a: a, b: b, c: c, d: d };
-      answerField.value = map[selected.value] || '';
+      answerField.value = selected ? (map[selected.value] || a) : a;
     }
   }
 
@@ -628,6 +674,7 @@
     const card = document.createElement('div');
     card.className = 'question-item-card';
     card.id = 'examQuestionRow_' + qCount;
+    card.setAttribute('data-num', qCount);
 
     let bodyHtml = '';
     if (type === 'mcq') {
@@ -637,25 +684,25 @@
         <div style="margin-top: 16px;">
           <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">Choices (Select radio for correct answer):</label>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-              <input type="radio" name="mcq_radio_${qCount}" value="a" onchange="syncMcqChoices(${qCount})" checked style="accent-color: #7c3aed;">
-              <span style="font-weight: 800; color: #7c3aed;">A</span>
-              <input type="text" id="mcq_opt_a_${qCount}" placeholder="Choice A" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})" required>
+            <div class="opt-choice-row">
+              <input type="radio" name="mcq_radio_${qCount}" value="a" onchange="syncMcqChoices(${qCount})" checked>
+              <span class="badge-letter">A</span>
+              <input type="text" id="mcq_opt_a_${qCount}" placeholder="Choice A" oninput="syncMcqChoices(${qCount})" required>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-              <input type="radio" name="mcq_radio_${qCount}" value="b" onchange="syncMcqChoices(${qCount})" style="accent-color: #7c3aed;">
-              <span style="font-weight: 800; color: #7c3aed;">B</span>
-              <input type="text" id="mcq_opt_b_${qCount}" placeholder="Choice B" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})" required>
+            <div class="opt-choice-row">
+              <input type="radio" name="mcq_radio_${qCount}" value="b" onchange="syncMcqChoices(${qCount})">
+              <span class="badge-letter">B</span>
+              <input type="text" id="mcq_opt_b_${qCount}" placeholder="Choice B" oninput="syncMcqChoices(${qCount})" required>
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-              <input type="radio" name="mcq_radio_${qCount}" value="c" onchange="syncMcqChoices(${qCount})" style="accent-color: #7c3aed;">
-              <span style="font-weight: 800; color: #7c3aed;">C</span>
-              <input type="text" id="mcq_opt_c_${qCount}" placeholder="Choice C (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})">
+            <div class="opt-choice-row">
+              <input type="radio" name="mcq_radio_${qCount}" value="c" onchange="syncMcqChoices(${qCount})">
+              <span class="badge-letter">C</span>
+              <input type="text" id="mcq_opt_c_${qCount}" placeholder="Choice C (Optional)" oninput="syncMcqChoices(${qCount})">
             </div>
-            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
-              <input type="radio" name="mcq_radio_${qCount}" value="d" onchange="syncMcqChoices(${qCount})" style="accent-color: #7c3aed;">
-              <span style="font-weight: 800; color: #7c3aed;">D</span>
-              <input type="text" id="mcq_opt_d_${qCount}" placeholder="Choice D (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})">
+            <div class="opt-choice-row">
+              <input type="radio" name="mcq_radio_${qCount}" value="d" onchange="syncMcqChoices(${qCount})">
+              <span class="badge-letter">D</span>
+              <input type="text" id="mcq_opt_d_${qCount}" placeholder="Choice D (Optional)" oninput="syncMcqChoices(${qCount})">
             </div>
           </div>
         </div>
@@ -719,6 +766,7 @@
     updateQuestionCount();
   }
 
+  // مزامنة إجبارية لكافة أسئلة الـ MCQ قبل الإرسال
   document.getElementById('editExamForm').addEventListener('submit', function(e) {
     const cards = document.querySelectorAll('.question-item-card');
     if (cards.length === 0) {
@@ -727,14 +775,22 @@
       return false;
     }
     cards.forEach(card => {
-      const match = card.id.match(/examQuestionRow_(\d+)/);
-      if (match) {
-        syncMcqChoices(match[1]);
+      const num = card.getAttribute('data-num');
+      if (num) {
+        syncMcqChoices(num);
       }
     });
   });
 
-  // تحديث الحساب المبدئي عند تحميل الصفحة
-  window.addEventListener('DOMContentLoaded', recalculateScore);
+  // مزامنة أولية عند تحميل الصفحة لكافة خيارات الـ MCQ الموجودة مسبقاً
+  window.addEventListener('DOMContentLoaded', () => {
+    recalculateScore();
+    document.querySelectorAll('.question-item-card').forEach(card => {
+      const num = card.getAttribute('data-num');
+      if (num) {
+        syncMcqChoices(num);
+      }
+    });
+  });
 </script>
 {% endblock %}
