@@ -2,7 +2,10 @@ from functools import wraps
 from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from sqlalchemy.exc import IntegrityError
 from app import db
-from app.models import User, Course, Enrollment, Assignment, Submission, Grade, Activity, Quiz, Exam, Certificate, DiscussionTopic, Notification
+from app.models import (
+    User, Course, Enrollment, Assignment, Submission, 
+    Grade, Activity, Quiz, Exam, Certificate, DiscussionTopic, Notification
+)
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -477,7 +480,7 @@ def add_course():
             request.form.get('course_identifier') or 
             request.form.get('identifier') or 
             request.form.get('section') or 
-            ''
+            code
         ).strip()
 
         if not code or not name:
@@ -488,9 +491,11 @@ def add_course():
             code=code,
             name=name,
             description=description,
-            teacher_id=int(teacher_id),
-            course_identifier=course_identifier
+            teacher_id=int(teacher_id)
         )
+        if hasattr(course, 'course_identifier'):
+            course.course_identifier = course_identifier
+
         try:
             db.session.add(course)
             db.session.commit()
@@ -499,6 +504,10 @@ def add_course():
         except IntegrityError:
             db.session.rollback()
             flash('Course code or identifier already exists.', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred: {str(e)}', 'danger')
+
     return render_template('admin/add_course.html', teachers=teachers)
 
 
@@ -525,28 +534,49 @@ def delete_course(course_id):
 def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
     teachers = User.query.filter_by(role='teacher').all()
+
     if request.method == 'POST':
-        course.code = (request.form.get('code') or request.form.get('course_code') or course.code).strip()
-        course.name = (request.form.get('name') or request.form.get('course_name') or course.name).strip()
-        course.description = request.form.get('description', course.description)
-        course.course_identifier = (
-            request.form.get('course_identifier') or 
-            request.form.get('identifier') or 
-            request.form.get('section') or 
-            course.course_identifier
-        ).strip()
-
-        teacher_id = _resolve_teacher_id(request.form)
-        if teacher_id:
-            course.teacher_id = int(teacher_id)
-
         try:
+            new_code = (request.form.get('code') or request.form.get('course_code') or course.code or '').strip()
+            new_name = (request.form.get('name') or request.form.get('course_name') or course.name or '').strip()
+            new_desc = request.form.get('description', '')
+            new_ident = (
+                request.form.get('course_identifier') or 
+                request.form.get('identifier') or 
+                request.form.get('section') or 
+                new_code
+            ).strip()
+
+            if not new_code or not new_name:
+                flash('Course code and course name are required.', 'danger')
+                return render_template('admin/edit_course.html', course=course, teachers=teachers)
+
+            course.code = new_code
+            course.name = new_name
+            course.description = new_desc
+
+            # حفظ المعرف إذا كان الموديل يدعمه
+            if hasattr(course, 'course_identifier'):
+                course.course_identifier = new_ident
+
+            # معالجة مدرس المادة (تحديثه أو تفريغه)
+            teacher_id = _resolve_teacher_id(request.form)
+            if teacher_id:
+                course.teacher_id = int(teacher_id)
+            elif 'teacher_id' in request.form:
+                course.teacher_id = None
+
             db.session.commit()
             flash('Course updated successfully!', 'success')
             return redirect(url_for('admin.manage_courses'))
+
         except IntegrityError:
             db.session.rollback()
-            flash('Course code or identifier already exists.', 'danger')
+            flash('Course code or identifier already exists in another course.', 'danger')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred while updating the course: {str(e)}', 'danger')
+
     return render_template('admin/edit_course.html', course=course, teachers=teachers)
 
 
