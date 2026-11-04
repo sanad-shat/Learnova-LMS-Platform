@@ -376,11 +376,6 @@
     
     <form id="quizForm" method="POST" action="{{ url_for('teachers.add_quiz', teacher_id=teacher.id, course_id=course.id) }}" class="form-section-stack">
       
-      <!-- Hidden inputs for backend versatility -->
-      <input type="hidden" name="total_questions" id="totalQuestionsInput" value="0">
-      <input type="hidden" name="questions_json" id="questionsJsonInput" value="">
-      <input type="hidden" name="quiz_data" id="quizDataInput" value="">
-
       <!-- Card 1: Quiz Details -->
       <div class="main-form-card">
         <div class="form-head-block">
@@ -463,10 +458,10 @@
           <button type="button" class="btn-type-option" onclick="addQuestion('mcq')">
             <i class="fa-solid fa-list-check" style="color: #2563eb;"></i> Multiple Choice
           </button>
-          <button type="button" class="btn-type-option" onclick="addQuestion('tf')">
+          <button type="button" class="btn-type-option" onclick="addQuestion('true_false')">
             <i class="fa-solid fa-toggle-on" style="color: #16a34a;"></i> True / False
           </button>
-          <button type="button" class="btn-type-option" onclick="addQuestion('short')">
+          <button type="button" class="btn-type-option" onclick="addQuestion('short_answer')">
             <i class="fa-solid fa-pencil" style="color: #d97706;"></i> Short Answer
           </button>
           <button type="button" class="btn-type-option" onclick="addQuestion('essay')">
@@ -546,23 +541,27 @@
     if (emptyMsg) {
       emptyMsg.style.display = total === 0 ? 'block' : 'none';
     }
-    document.getElementById('totalQuestionsInput').value = total;
   }
 
-  function syncQuestionValues(index) {
-    const card = document.getElementById('qCard_' + index);
-    if (!card) return;
-    const textVal = card.querySelector('.q-prompt-main')?.value || '';
-    
-    // مزامنة فورية لكل أسماء الحقول الممكنة
-    const fall1 = card.querySelector('.fallback-q-text');
-    if (fall1) fall1.value = textVal;
+  function syncQuizMcq(num) {
+    const optA = (document.getElementById(`opt_a_${num}`)?.value || '').trim();
+    const optB = (document.getElementById(`opt_b_${num}`)?.value || '').trim();
+    const optC = (document.getElementById(`opt_c_${num}`)?.value || '').trim();
+    const optD = (document.getElementById(`opt_d_${num}`)?.value || '').trim();
 
-    const fall2 = card.querySelector('.fallback-question-text');
-    if (fall2) fall2.value = textVal;
+    const selectedRadio = document.querySelector(`input[name="mcq_radio_${num}"]:checked`);
+    const optionsField = document.getElementById(`options_${num}`);
+    const answerField = document.getElementById(`answer_${num}`);
 
-    const promptArr = card.querySelector('.q-prompt-arr');
-    if (promptArr) promptArr.value = textVal;
+    const choices = [optA, optB, optC, optD].filter(Boolean);
+    if (optionsField) {
+      optionsField.value = choices.join(', ');
+    }
+
+    if (answerField && selectedRadio) {
+      const valMap = { a: optA, b: optB, c: optC, d: optD };
+      answerField.value = valMap[selectedRadio.value] || '';
+    }
   }
 
   function addQuestion(type) {
@@ -572,59 +571,83 @@
     if (emptyMsg) emptyMsg.style.display = 'none';
 
     let typeTitle = 'Multiple Choice';
-    if (type === 'tf') typeTitle = 'True / False';
-    if (type === 'short') typeTitle = 'Short Answer';
+    if (type === 'true_false') typeTitle = 'True / False';
+    if (type === 'short_answer') typeTitle = 'Short Answer';
     if (type === 'essay') typeTitle = 'Essay';
 
     const card = document.createElement('div');
     card.className = 'question-item-card';
     card.id = 'qCard_' + qIndex;
-    card.setAttribute('data-type', type);
-    card.setAttribute('data-index', qIndex);
 
-    let optionsHtml = '';
+    let bodyHtml = '';
     if (type === 'mcq') {
-      optionsHtml = `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
-          <input type="text" name="q_${qIndex}_opt1" placeholder="Option A" class="field-input opt-a" required>
-          <input type="text" name="q_${qIndex}_opt2" placeholder="Option B" class="field-input opt-b" required>
-          <input type="text" name="q_${qIndex}_opt3" placeholder="Option C" class="field-input opt-c">
-          <input type="text" name="q_${qIndex}_opt4" placeholder="Option D" class="field-input opt-d">
-        </div>
-        <div style="margin-top: 12px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
-          <select name="q_${qIndex}_answer" class="field-input sel-answer" style="padding: 8px 12px; margin-top: 4px;">
-            <option value="A">Option A</option>
-            <option value="B">Option B</option>
-            <option value="C">Option C</option>
-            <option value="D">Option D</option>
-          </select>
+      bodyHtml = `
+        <input type="hidden" name="options_${qIndex}" id="options_${qIndex}" value="">
+        <input type="hidden" name="answer_${qIndex}" id="answer_${qIndex}" value="">
+
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+            Choices (Select the radio of the correct choice):
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qIndex}" value="a" onchange="syncQuizMcq(${qIndex})" checked style="cursor: pointer; accent-color: #2563eb;">
+              <span style="font-weight: 800; color: #2563eb;">A</span>
+              <input type="text" id="opt_a_${qIndex}" placeholder="Choice A" class="field-input" style="border: none; padding: 6px;" oninput="syncQuizMcq(${qIndex})" required>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qIndex}" value="b" onchange="syncQuizMcq(${qIndex})" style="cursor: pointer; accent-color: #2563eb;">
+              <span style="font-weight: 800; color: #2563eb;">B</span>
+              <input type="text" id="opt_b_${qIndex}" placeholder="Choice B" class="field-input" style="border: none; padding: 6px;" oninput="syncQuizMcq(${qIndex})" required>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qIndex}" value="c" onchange="syncQuizMcq(${qIndex})" style="cursor: pointer; accent-color: #2563eb;">
+              <span style="font-weight: 800; color: #2563eb;">C</span>
+              <input type="text" id="opt_c_${qIndex}" placeholder="Choice C (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncQuizMcq(${qIndex})">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qIndex}" value="d" onchange="syncQuizMcq(${qIndex})" style="cursor: pointer; accent-color: #2563eb;">
+              <span style="font-weight: 800; color: #2563eb;">D</span>
+              <input type="text" id="opt_d_${qIndex}" placeholder="Choice D (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncQuizMcq(${qIndex})">
+            </div>
+          </div>
         </div>
       `;
-    } else if (type === 'tf') {
-      optionsHtml = `
-        <div style="margin-top: 12px;">
-          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer:</label>
-          <select name="q_${qIndex}_answer" class="field-input sel-answer" style="padding: 8px 12px; margin-top: 4px;">
-            <option value="True">True</option>
-            <option value="False">False</option>
-          </select>
+    } else if (type === 'true_false') {
+      bodyHtml = `
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+            Select Correct Answer:
+          </label>
+          <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #16a34a;">
+              <input type="radio" name="answer_${qIndex}" value="True" checked style="accent-color: #16a34a; width: 18px; height: 18px;"> True
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #dc2626;">
+              <input type="radio" name="answer_${qIndex}" value="False" style="accent-color: #dc2626; width: 18px; height: 18px;"> False
+            </label>
+          </div>
         </div>
       `;
-    } else {
-      optionsHtml = `
-        <input type="hidden" name="q_${qIndex}_answer" value="" class="sel-answer">
+    } else if (type === 'short_answer') {
+      bodyHtml = `
+        <div style="margin-top: 16px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer / Keyword:</label>
+          <input type="text" name="answer_${qIndex}" placeholder="Type expected answer" class="field-input" style="margin-top: 4px;" required>
+        </div>
+      `;
+    } else if (type === 'essay') {
+      bodyHtml = `
+        <div style="margin-top: 14px;">
+          <input type="hidden" name="answer_${qIndex}" value="Manual grading required">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;"><i class="fa-solid fa-circle-info"></i> Essay questions require manual instructor grading.</p>
+        </div>
       `;
     }
 
     card.innerHTML = `
-      <!-- الحقول المباشرة بكافة التسميات الممكنة -->
-      <input type="hidden" name="questions[]" value="${qIndex}">
-      <input type="hidden" name="quiz_questions[]" value="${qIndex}">
-      <input type="hidden" name="q_${qIndex}_type" value="${type}">
       <input type="hidden" name="type_${qIndex}" value="${type}">
-      <input type="hidden" name="question_type[]" value="${type}">
-
+      
       <button type="button" class="remove-q-btn" onclick="removeQuestion('${card.id}')" title="Remove Question">
         <i class="fa-solid fa-trash-can"></i>
       </button>
@@ -634,21 +657,14 @@
         <span style="font-size: 13px; font-weight: 700; color: var(--text-primary);">Question #${qIndex}</span>
       </div>
 
-      <!-- الحقل الأساسي -->
-      <input type="text" name="q_${qIndex}_text" placeholder="Type question prompt here..." class="field-input q-prompt-main" oninput="syncQuestionValues(${qIndex})" required>
-
-      <!-- حقول متطابقة احتياطية ترسل مباشرة مع الـ form -->
-      <input type="hidden" name="question_${qIndex}" class="fallback-question-text">
-      <input type="hidden" name="question_text[]" class="q-prompt-arr">
+      <input type="text" name="question_${qIndex}" placeholder="Type question prompt here..." class="field-input" required autocomplete="off">
 
       <div style="margin-top: 12px; max-width: 140px;">
         <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points</label>
-        <input type="number" name="q_${qIndex}_points" value="1" min="0.5" step="0.5" class="field-input q-points" style="padding: 8px 12px;">
-        <input type="hidden" name="score_${qIndex}" value="1">
-        <input type="hidden" name="points[]" value="1">
+        <input type="number" name="score_${qIndex}" value="1" min="0.5" step="0.5" class="field-input" style="padding: 8px 12px;" required>
       </div>
 
-      ${optionsHtml}
+      ${bodyHtml}
     `;
 
     container.appendChild(card);
@@ -665,39 +681,17 @@
     const cards = document.querySelectorAll('.question-item-card');
     if (cards.length === 0) {
       e.preventDefault();
-      alert('Please click one of the buttons above to add at least one question.');
+      alert('Please add at least one question.');
       return false;
     }
 
-    const payload = [];
-    cards.forEach((card, idx) => {
-      const qIdx = card.getAttribute('data-index');
-      syncQuestionValues(qIdx);
-
-      const type = card.getAttribute('data-type');
-      const text = card.querySelector('.q-prompt-main')?.value || '';
-      const points = card.querySelector('.q-points')?.value || 1;
-      const ans = card.querySelector('.sel-answer')?.value || '';
-      
-      const optA = card.querySelector('.opt-a')?.value || '';
-      const optB = card.querySelector('.opt-b')?.value || '';
-      const optC = card.querySelector('.opt-c')?.value || '';
-      const optD = card.querySelector('.opt-d')?.value || '';
-
-      payload.push({
-        index: idx + 1,
-        type: type,
-        text: text,
-        question: text,
-        points: points,
-        answer: ans,
-        options: { A: optA, B: optB, C: optC, D: optD }
-      });
+    // مزامنة خيارات MCQ قبل إرسال الفورم
+    cards.forEach(card => {
+      const match = card.id.match(/qCard_(\d+)/);
+      if (match) {
+        syncQuizMcq(match[1]);
+      }
     });
-
-    const jsonString = JSON.stringify(payload);
-    document.getElementById('questionsJsonInput').value = jsonString;
-    document.getElementById('quizDataInput').value = jsonString;
   });
 </script>
 {% endblock %}
