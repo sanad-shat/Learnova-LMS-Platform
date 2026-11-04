@@ -333,7 +333,7 @@
 
   .btn-continue-course {
     background: var(--primary);
-    color: #ffffff;
+    color: #ffffff !important;
     padding: 9px 18px;
     border-radius: 10px;
     font-size: 0.84rem;
@@ -349,6 +349,7 @@
 
   .btn-continue-course:hover {
     background: var(--primary-hover);
+    transform: translateY(-1px);
   }
 
   /* Upcoming Assignments */
@@ -656,7 +657,8 @@
         <div class="dash-panel-body">
           {% if student_courses %}
             {% for item in student_courses[:3] %}
-              {% set c = item.course if item.course is defined else item %}
+              {% set c = item.course if item.course is defined and item.course else item %}
+              {% set cid = c.id if c.id is defined else (item.course_id if item.course_id is defined else item.id) %}
               <div class="active-course-row" style="margin-bottom: 12px;">
                 <div class="active-course-main">
                   <div class="active-course-icon">
@@ -679,7 +681,7 @@
                 </div>
 
                 <div>
-                  <a href="/course/{{ c.id }}" class="btn-continue-course">
+                  <a href="/student/courses/{{ cid }}" class="btn-continue-course">
                     Resume Course <i class="fa-solid fa-arrow-right"></i>
                   </a>
                 </div>
