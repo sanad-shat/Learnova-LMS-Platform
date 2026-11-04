@@ -1,103 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Preview Exam - {{ exam.title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-        header { background: #2c3e50; color: white; padding: 20px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        nav { background: #34495e; padding: 15px; display: flex; flex-wrap: wrap; justify-content: center; }
-        nav a { color: white; margin: 5px 10px; text-decoration: none; font-weight: 600; padding: 8px 12px; border-radius: 6px; transition: background 0.3s; }
-        nav a:hover { background: #1abc9c; }
-        main { padding: 20px; max-width: 1000px; margin: 20px auto; }
-        .card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .card h2 { color: #34495e; margin-bottom: 15px; border-bottom: 2px solid #ecf0f1; padding-bottom: 5px; }
-        .exam-info p { margin: 8px 0; font-size: 1.05em; }
-        .question-block { border-left: 5px solid #3498db; background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; transition: transform 0.2s; }
-        .question-block:hover { transform: translateY(-2px); }
-        .question-block h3 { margin: 0 0 10px 0; color: #2980b9; }
-        .question-type, .question-score { font-size: 0.9em; color: #7f8c8d; margin-bottom: 5px; }
-        .options { margin-top: 8px; padding-left: 20px; }
-        .options li { margin-bottom: 5px; }
-        .back-btn { display: inline-block; background: #7f8c8d; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; margin-top: 15px; transition: background 0.3s; }
-        .back-btn:hover { background: #636e72; }
-        @media (max-width: 768px) { main { padding: 10px; } nav { flex-direction: column; align-items: center; } nav a { margin: 5px 0; } }
-    </style>
-<link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
-<body>
-<header>
-    <h1>Preview Exam: {{ exam.title }}</h1>
-</header>
-<nav>
-    <a href="{{ url_for('teachers.dashboard', teacher_id=teacher.id) }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}"><i class="fas fa-book"></i> My Courses</a>
-    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}"><i class="fas fa-arrow-left"></i> Back to Course</a>
-    <a href="{{ url_for('teachers.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
-</nav>
-<main>
-  
-<!-- Exam Info Stylish Block -->
-<div class="exam-info-blocks" style="display:flex; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
+{% extends 'teacher/base.html' %}
+{% block title %}Preview Exam: {{ exam.title }} | Learnova{% endblock %}
 
-    <div style="flex:1 1 200px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-        <i class="fas fa-calendar-alt"></i>
-        <strong>Start Date:</strong>
-        <div>{{ exam.start_date.strftime('%Y-%m-%d %H:%M') }}</div>
+{% block content %}
+<style>
+  .exam-preview-shell {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+    box-sizing: border-box;
+  }
+  .preview-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--slate-200);
+  }
+  .q-card-preview {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.02);
+  }
+</style>
+
+<div class="exam-preview-shell">
+  <div class="preview-top-bar">
+    <div>
+      <span style="font-size: 0.75rem; font-weight: 800; color: #4f46e5; text-transform: uppercase;">INSTRUCTOR PREVIEW</span>
+      <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 4px 0;">{{ exam.title }}</h1>
+      <p style="font-size: 0.9rem; color: #64748b; margin: 0;">{{ exam.description or 'No additional instructions.' }}</p>
     </div>
-
-    <div style="flex:1 1 200px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-        <i class="fas fa-calendar-check"></i>
-        <strong>End Date:</strong>
-        <div>{{ exam.end_date.strftime('%Y-%m-%d %H:%M') }}</div>
+    <div style="display: flex; gap: 10px;">
+      <a href="/teacher/{{ teacher.id }}/courses/{{ course.id }}/exams/{{ exam.id }}/edit" class="btn btn-primary" style="background: #4f46e5; color: #fff; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-weight: 700;">
+        <i class="fa-regular fa-pen-to-square"></i> Edit Exam
+      </a>
+      <a href="/teacher/{{ teacher.id }}/courses/{{ course.id }}" class="btn btn-light" style="background: #f1f5f9; color: #334155; padding: 9px 18px; border-radius: 10px; text-decoration: none; font-weight: 700;">
+        Back to Course
+      </a>
     </div>
+  </div>
 
-    <div style="flex:1 1 150px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-        <i class="fas fa-star"></i>
-        <strong>Total Score:</strong>
-        <div>{{ exam.total_score }}</div>
+  <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 14px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; font-weight: 700; color: #312e81;">
+    <span><i class="fa-solid fa-list-check"></i> {{ exam.questions|length }} Total Questions</span>
+    <span>Total Exam Score: {{ exam.total_score }} pts</span>
+  </div>
+
+  {% for q in exam.questions %}
+  <div class="q-card-preview">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+      <span style="font-size: 0.8rem; font-weight: 800; background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px;">
+        Question {{ loop.index }} ({{ q.question_type }})
+      </span>
+      <span style="font-weight: 700; color: #4f46e5;">{{ q.score }} pts</span>
     </div>
-
-    <div style="flex:1 1 300px; background:#f0f4f8; padding:12px 15px; border-radius:10px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
-        <i class="fas fa-file-alt"></i>
-        <strong>Description:</strong>
-        <div>{{ exam.description }}</div>
-    </div>
-
+    <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 14px;">{{ q.question_text }}</h3>
+    
+    {% if q.options %}
+      <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+        {% for opt in q.options.split(',') %}
+          <div style="padding: 10px 14px; border-radius: 8px; background: {% if opt.strip() == q.answer %}#ecfdf5; border: 1.5px solid #10b981; font-weight: 700; color: #065f46;{% else %}#f8fafc; border: 1px solid #e2e8f0; color: #334155;{% endif %}">
+            {{ opt.strip() }} {% if opt.strip() == q.answer %} <i class="fa-solid fa-check" style="color: #10b981;"></i> (Correct Answer){% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 0.9rem;">
+        <strong>Correct Answer / Guide:</strong> {{ q.answer }}
+      </div>
+    {% endif %}
+  </div>
+  {% endfor %}
 </div>
-
-
-    <!-- Questions -->
-    <div class="card">
-        <h2>Questions</h2>
-        {% if exam.questions %}
-            {% for question in exam.questions %}
-            <div class="question-block">
-                <h3>Question {{ loop.index }}: {{ question.question_text }}</h3>
-                <p class="question-type"><i class="fas fa-tag"></i> Type: {{ question.question_type.replace('_', ' ').title() }}</p>
-                <p class="question-score"><i class="fas fa-star-half-alt"></i> Score: {{ question.score }}</p>
-
-                {% if question.question_type in ['multiple_choice', 'mcq'] and question.options %}
-                <ul class="options">
-                    {% for option in question.options.split(',') %}
-                    <li>{{ option }}</li>
-                    {% endfor %}
-                </ul>
-                <p><strong>Answer:</strong> {{ question.answer }}</p>
-                {% elif question.question_type in ['open_ended', 'short_answer', 'essay'] %}
-                <p><strong>Expected Answer:</strong> {{ question.answer }}</p>
-                {% endif %}
-            </div>
-            {% endfor %}
-        {% else %}
-            <p>No questions added yet.</p>
-        {% endif %}
-    </div>
-
-    <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-btn">
-        <i class="fas fa-arrow-left"></i> Back to Course
-    </a>
-</main>
-</body>
-</html>
+{% endblock %}
