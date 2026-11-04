@@ -497,6 +497,30 @@
     color: #ffffff;
   }
 
+  .empty-state-card {
+    text-align: center;
+    padding: 36px 16px;
+    color: var(--slate-400);
+  }
+
+  .empty-state-card i {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    display: block;
+    color: var(--slate-300);
+  }
+
+  .empty-state-card p {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--slate-700);
+  }
+
+  .empty-state-card span {
+    font-size: 0.82rem;
+  }
+
   @media (max-width: 1100px) {
     .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .dash-main-grid { grid-template-columns: 1fr; }
@@ -536,6 +560,16 @@
   }
 </style>
 
+{# تجهيز قائمة الكورسات الفعلية للطالب من أي متغير متاح #}
+{% set student_courses = [] %}
+{% if courses is defined and courses %}
+  {% set student_courses = courses %}
+{% elif enrollments is defined and enrollments %}
+  {% set student_courses = enrollments %}
+{% elif current_user.enrollments is defined and current_user.enrollments %}
+  {% set student_courses = current_user.enrollments %}
+{% endif %}
+
 <div class="student-dash-shell">
 
   <!-- 1. Hero Welcome Banner -->
@@ -549,16 +583,16 @@
     </div>
     <div class="hero-student-meta">
       <i class="fa-solid fa-id-card"></i>
-      <span>ID: #{{ current_user.university_id or current_user.id }}</span>
+      <span>ID: #{{ current_user.university_id or current_user.student_id or current_user.id }}</span>
     </div>
   </div>
 
-  <!-- 2. KPI Cards Row -->
+  <!-- 2. KPI Cards Row (بيانات فعلية من قاعدة البيانات فقط) -->
   <div class="dash-kpi-grid">
     <div class="stat-card">
       <div class="stat-card-info">
         <h4>Enrolled Courses</h4>
-        <div class="stat-number">{{ courses|length if courses is defined else (enrollments|length if enrollments is defined else 1) }}</div>
+        <div class="stat-number">{{ student_courses|length }}</div>
         <small>Active learning spaces</small>
       </div>
       <div class="stat-icon-wrapper icon-purple">
@@ -569,7 +603,7 @@
     <div class="stat-card">
       <div class="stat-card-info">
         <h4>Pending Tasks</h4>
-        <div class="stat-number">{{ pending_count if pending_count is defined else 14 }}</div>
+        <div class="stat-number">{{ pending_count if pending_count is defined else (assignments|length if assignments is defined else 0) }}</div>
         <small>Submissions remaining</small>
       </div>
       <div class="stat-icon-wrapper icon-blue">
@@ -597,7 +631,7 @@
     <div class="stat-card">
       <div class="stat-card-info">
         <h4>Certificates</h4>
-        <div class="stat-number">{{ certs_count if certs_count is defined else 1 }}</div>
+        <div class="stat-number">{{ certs_count if certs_count is defined else (current_user.certificates|length if current_user.certificates is defined else 0) }}</div>
         <small>Verified achievements</small>
       </div>
       <div class="stat-icon-wrapper icon-amber">
@@ -611,7 +645,7 @@
     
     <div class="dash-col-left">
 
-      <!-- Continue Learning -->
+      <!-- Continue Learning (ديناميكي بالكامل) -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-play-circle"></i> Continue Learning</h3>
@@ -620,65 +654,48 @@
           </a>
         </div>
         <div class="dash-panel-body">
-          {% set course_list = courses if courses is defined else (enrollments if enrollments is defined else []) %}
-          {% if course_list %}
-            {% for item in course_list[:2] %}
-            {% set c = item.course if item.course is defined else item %}
-            <div class="active-course-row" style="margin-bottom: 12px;">
-              <div class="active-course-main">
-                <div class="active-course-icon">
-                  <i class="fa-solid fa-book"></i>
+          {% if student_courses %}
+            {% for item in student_courses[:3] %}
+              {% set c = item.course if item.course is defined else item %}
+              <div class="active-course-row" style="margin-bottom: 12px;">
+                <div class="active-course-main">
+                  <div class="active-course-icon">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                  </div>
+                  <div class="active-course-info">
+                    <h4>{{ c.name or c.title }}</h4>
+                    <span>{{ c.code or 'SE' }} • Instructor: {{ c.teacher.name_person or c.teacher.username if c.teacher else 'Faculty Member' }}</span>
+                  </div>
                 </div>
-                <div class="active-course-info">
-                  <h4>{{ c.name or c.title or 'Programming (1)' }}</h4>
-                  <span>{{ c.code or 'BSAI 1211' }} • {{ c.teacher.name_person if c.teacher and c.teacher.name_person else 'Lecturer' }}</span>
-                </div>
-              </div>
 
-              <div class="active-course-progress-wrap">
-                <div class="progress-meta-txt">
-                  <span>Progress</span>
-                  <span>0%</span>
+                <div class="active-course-progress-wrap">
+                  <div class="progress-meta-txt">
+                    <span>Progress</span>
+                    <span>0%</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: 0%;"></div>
+                  </div>
                 </div>
-                <div class="progress-bar-bg">
-                  <div class="progress-bar-fill" style="width: 15%;"></div>
-                </div>
-              </div>
 
-              <div>
-                <a href="/student/courses" class="btn-continue-course">
-                  Resume Course <i class="fa-solid fa-arrow-right"></i>
-                </a>
+                <div>
+                  <a href="/course/{{ c.id }}" class="btn-continue-course">
+                    Resume Course <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </div>
               </div>
-            </div>
             {% endfor %}
           {% else %}
-            <div class="active-course-row">
-              <div class="active-course-main">
-                <div class="active-course-icon"><i class="fa-solid fa-code"></i></div>
-                <div class="active-course-info">
-                  <h4>Programming (1)</h4>
-                  <span>BSAI 1211 • Lecturer: Aya Ali</span>
-                </div>
-              </div>
-              <div class="active-course-progress-wrap">
-                <div class="progress-meta-txt">
-                  <span>Progress</span>
-                  <span>0%</span>
-                </div>
-                <div class="progress-bar-bg">
-                  <div class="progress-bar-fill" style="width: 0%;"></div>
-                </div>
-              </div>
-              <div>
-                <a href="/student/courses" class="btn-continue-course">Resume Course</a>
-              </div>
+            <div class="empty-state-card">
+              <i class="fa-solid fa-book-open-reader"></i>
+              <p>No Enrolled Courses Yet</p>
+              <span>You have not been assigned to any courses. Contact the administrator to enroll.</span>
             </div>
           {% endif %}
         </div>
       </div>
 
-      <!-- Upcoming Assignments -->
+      <!-- Upcoming Assignments (ديناميكي بالكامل) -->
       <div class="dash-panel">
         <div class="dash-panel-header">
           <h3><i class="fa-solid fa-clock"></i> Upcoming Assignments</h3>
@@ -688,7 +705,7 @@
         </div>
         <div class="dash-panel-body">
           <div class="assignment-items-list">
-            {% set assign_list = assignments if assignments is defined else [] %}
+            {% set assign_list = assignments if assignments is defined and assignments else [] %}
             {% if assign_list %}
               {% for a in assign_list[:3] %}
               <div class="assignment-item-row">
@@ -702,23 +719,10 @@
               </div>
               {% endfor %}
             {% else %}
-              <div class="assignment-item-row">
-                <div class="assign-left">
-                  <strong>Student Grade Calculator</strong>
-                  <small>Programming (1) • Lab Assignment</small>
-                </div>
-                <div class="assign-due-tag">
-                  <i class="fa-regular fa-clock"></i> Due Soon
-                </div>
-              </div>
-              <div class="assignment-item-row">
-                <div class="assign-left">
-                  <strong>Mini Project: Library Book Management System</strong>
-                  <small>Programming (1) • Core Milestone</small>
-                </div>
-                <div class="assign-due-tag">
-                  <i class="fa-regular fa-clock"></i> Due 30 Nov
-                </div>
+              <div class="empty-state-card" style="padding: 24px 16px;">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <p>No Pending Assignments</p>
+                <span>You are all caught up with your coursework.</span>
               </div>
             {% endif %}
           </div>
@@ -763,7 +767,7 @@
         <div class="dash-panel-body">
           <div class="achievement-box">
             <div class="cert-ring-outer">
-              <div class="ring-num">{{ certs_count if certs_count is defined else 1 }}</div>
+              <div class="ring-num">{{ certs_count if certs_count is defined else (current_user.certificates|length if current_user.certificates is defined else 0) }}</div>
               <div class="ring-sub">Awarded</div>
             </div>
             <p>Complete your course activities and achieve passing grades to unlock verified credentials.</p>
