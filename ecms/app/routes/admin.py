@@ -71,8 +71,17 @@ def _duplicate_profile_id(field_name, value, exclude_id=None):
 
 
 def _apply_student_profile(user, form):
-    user.name_person = form.get('name_person', '').strip()
-    user.university_id = form.get('university_id', '').strip() or None
+    user.name_person = (
+        form.get('name_person') or 
+        form.get('name') or 
+        form.get('full_name') or 
+        ''
+    ).strip()
+    user.university_id = (
+        form.get('university_id') or 
+        form.get('student_id') or 
+        ''
+    ).strip() or None
     user.phone = form.get('phone', '').strip() or None
     user.department = form.get('department', '').strip() or None
     user.level = form.get('level', '').strip() or None
@@ -81,8 +90,17 @@ def _apply_student_profile(user, form):
 
 
 def _apply_teacher_profile(user, form):
-    user.name_person = form.get('name_person', '').strip()
-    user.employee_id = form.get('employee_id', '').strip() or None
+    user.name_person = (
+        form.get('name_person') or 
+        form.get('name') or 
+        form.get('full_name') or 
+        ''
+    ).strip()
+    user.employee_id = (
+        form.get('employee_id') or 
+        form.get('teacher_id') or 
+        ''
+    ).strip() or None
     user.phone = form.get('phone', '').strip() or None
     user.department = form.get('department', '').strip() or None
     user.office_number = form.get('office_number', '').strip() or None
@@ -127,24 +145,41 @@ def manage_students():
 @admin_required
 def add_student():
     if request.method == 'POST':
+        name_person = (
+            request.form.get('name_person') or 
+            request.form.get('name') or 
+            request.form.get('full_name') or 
+            ''
+        ).strip()
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
-        university_id = request.form.get('university_id', '').strip()
-        if not all([request.form.get('name_person','').strip(), university_id, username, email, password]):
+        university_id = (
+            request.form.get('university_id') or 
+            request.form.get('student_id') or 
+            ''
+        ).strip()
+
+        if not all([name_person, university_id, username, email, password]):
             flash('Please complete all required fields.', 'danger')
             return render_template('admin/add_student.html')
+
         duplicate_username, duplicate_email = _duplicate_user(username, email)
         if duplicate_username or duplicate_email:
             flash('Username or email is already registered.', 'danger')
             return render_template('admin/add_student.html')
+
         if _duplicate_profile_id('university_id', university_id):
             flash('University ID is already registered.', 'danger')
             return render_template('admin/add_student.html')
+
         student = User(username=username, email=email, role='student')
         _apply_student_profile(student, request.form)
+        student.name_person = name_person
+        student.university_id = university_id
         student.set_password(password)
         student.visible_password = password
+
         try:
             db.session.add(student)
             db.session.commit()
@@ -153,6 +188,7 @@ def add_student():
         except IntegrityError:
             db.session.rollback()
             flash('A student with the same username, email, or university ID already exists.', 'danger')
+
     return render_template('admin/add_student.html')
 
 
@@ -179,29 +215,40 @@ def delete_student(student_id):
 def edit_student(student_id):
     student = User.query.get_or_404(student_id)
     if request.method == 'POST':
-        username = request.form.get('username','').strip()
-        email = request.form.get('email','').strip().lower()
-        university_id = request.form.get('university_id','').strip()
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        university_id = (
+            request.form.get('university_id') or 
+            request.form.get('student_id') or 
+            ''
+        ).strip()
+
         du, de = _duplicate_user(username, email, student.id)
         if du or de:
             flash('Username or email is already used by another account.', 'danger')
             return render_template('admin/edit_student.html', student=student)
+
         if _duplicate_profile_id('university_id', university_id, student.id):
             flash('University ID is already used by another student.', 'danger')
             return render_template('admin/edit_student.html', student=student)
+
         student.username, student.email = username, email
         _apply_student_profile(student, request.form)
-        password = request.form.get('password','')
+        student.university_id = university_id
+
+        password = request.form.get('password', '')
         if password:
             student.set_password(password)
             student.visible_password = password
+
         db.session.commit()
         flash('Student profile updated successfully.', 'success')
         return redirect(url_for('admin.manage_students'))
+
     return render_template('admin/edit_student.html', student=student)
 
 
-@admin_bp.route('/students/<int:student_id>/reset-password', methods=['GET','POST'])
+@admin_bp.route('/students/<int:student_id>/reset-password', methods=['GET', 'POST'])
 @admin_required
 def reset_student_password(student_id):
     return _reset_password(student_id, 'student', 'admin.manage_students')
@@ -213,8 +260,8 @@ def _reset_password(user_id, role, redirect_endpoint):
         flash('Invalid account type.', 'danger')
         return redirect(url_for(redirect_endpoint))
     if request.method == 'POST':
-        password = request.form.get('new_password','')
-        confirm = request.form.get('confirm_password','')
+        password = request.form.get('new_password', '')
+        confirm = request.form.get('confirm_password', '')
         if len(password) < 6:
             flash('Password must contain at least 6 characters.', 'danger')
         elif password != confirm:
@@ -253,16 +300,27 @@ def manage_teachers():
     return render_template('admin/manage_teachers.html', teachers=User.query.filter_by(role='teacher').all())
 
 
-@admin_bp.route('/teachers/add', methods=['GET','POST'])
+@admin_bp.route('/teachers/add', methods=['GET', 'POST'])
 @admin_required
 def add_teacher():
     if request.method == 'POST':
-        username = request.form.get('username','').strip()
-        email = request.form.get('email','').strip().lower()
-        password = request.form.get('password','')
-        employee_id = request.form.get('employee_id','').strip()
+        name_person = (
+            request.form.get('name_person') or 
+            request.form.get('name') or 
+            request.form.get('full_name') or 
+            ''
+        ).strip()
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        employee_id = (
+            request.form.get('employee_id') or 
+            request.form.get('teacher_id') or 
+            ''
+        ).strip()
+
         du, de = _duplicate_user(username, email)
-        if not all([request.form.get('name_person','').strip(), employee_id, username, email, password]):
+        if not all([name_person, employee_id, username, email, password]):
             flash('Please complete all required fields.', 'danger')
         elif du or de:
             flash('Username or email is already registered.', 'danger')
@@ -271,11 +329,13 @@ def add_teacher():
         else:
             teacher = User(username=username, email=email, role='teacher')
             _apply_teacher_profile(teacher, request.form)
+            teacher.name_person = name_person
+            teacher.employee_id = employee_id
             teacher.set_password(password)
             teacher.visible_password = password
             db.session.add(teacher)
             db.session.commit()
-            flash('Instructor account created successfully.','success')
+            flash('Instructor account created successfully.', 'success')
             return redirect(url_for('admin.manage_teachers'))
     return render_template('admin/add_teacher.html')
 
@@ -289,44 +349,55 @@ def delete_teacher(teacher_id):
     else:
         db.session.delete(teacher)
         db.session.commit()
-        flash('Teacher deleted successfully!','success')
+        flash('Teacher deleted successfully!', 'success')
     return redirect(url_for('admin.manage_teachers'))
 
 
-@admin_bp.route('/teachers/<int:teacher_id>/edit', methods=['GET','POST'])
+@admin_bp.route('/teachers/<int:teacher_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_teacher(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
     if request.method == 'POST':
-        username = request.form.get('username','').strip()
-        email = request.form.get('email','').strip().lower()
-        employee_id = request.form.get('employee_id','').strip()
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        employee_id = (
+            request.form.get('employee_id') or 
+            request.form.get('teacher_id') or 
+            ''
+        ).strip()
+
         du, de = _duplicate_user(username, email, teacher.id)
         if du or de:
-            flash('Username or email is already used by another account.','danger')
-            return render_template('admin/edit_teacher.html',teacher=teacher)
+            flash('Username or email is already used by another account.', 'danger')
+            return render_template('admin/edit_teacher.html', teacher=teacher)
+
         if _duplicate_profile_id('employee_id', employee_id, teacher.id):
-            flash('Employee ID is already used by another instructor.','danger')
-            return render_template('admin/edit_teacher.html',teacher=teacher)
+            flash('Employee ID is already used by another instructor.', 'danger')
+            return render_template('admin/edit_teacher.html', teacher=teacher)
+
         teacher.username, teacher.email = username, email
         _apply_teacher_profile(teacher, request.form)
-        password = request.form.get('password','')
+        teacher.employee_id = employee_id
+
+        password = request.form.get('password', '')
         if password:
             teacher.set_password(password)
             teacher.visible_password = password
+
         db.session.commit()
-        flash('Instructor profile updated successfully.','success')
+        flash('Instructor profile updated successfully.', 'success')
         return redirect(url_for('admin.manage_teachers'))
-    return render_template('admin/edit_teacher.html',teacher=teacher)
+
+    return render_template('admin/edit_teacher.html', teacher=teacher)
 
 
-@admin_bp.route('/teachers/<int:teacher_id>/reset-password', methods=['GET','POST'])
+@admin_bp.route('/teachers/<int:teacher_id>/reset-password', methods=['GET', 'POST'])
 @admin_required
 def reset_teacher_password(teacher_id):
     return _reset_password(teacher_id, 'teacher', 'admin.manage_teachers')
 
 
-@admin_bp.route('/teachers/<int:teacher_id>/assign_courses', methods=['GET','POST'])
+@admin_bp.route('/teachers/<int:teacher_id>/assign_courses', methods=['GET', 'POST'])
 @admin_required
 def assign_courses(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -335,36 +406,42 @@ def assign_courses(teacher_id):
         course = Course.query.get_or_404(int(request.form['course_id']))
         course.teacher_id = teacher.id
         db.session.commit()
-        flash('Course assigned to teacher!','success')
+        flash('Course assigned to teacher!', 'success')
         return redirect(url_for('admin.manage_teachers'))
-    return render_template('admin/assign_courses.html',teacher=teacher,courses=courses)
+    return render_template('admin/assign_courses.html', teacher=teacher, courses=courses)
 
 
 @admin_bp.route('/courses')
 @admin_required
 def manage_courses():
-    return render_template('admin/manage_courses.html',courses=Course.query.all())
+    return render_template('admin/manage_courses.html', courses=Course.query.all())
 
 
-@admin_bp.route('/courses/add', methods=['GET','POST'])
+@admin_bp.route('/courses/add', methods=['GET', 'POST'])
 @admin_required
 def add_course():
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
         teacher_id = request.form.get('teacher_id')
         if not teacher_id:
-            flash('Please select a teacher.','danger')
-            return render_template('admin/add_course.html',teachers=teachers)
-        course = Course(code=request.form['code'].strip(),name=request.form['name'].strip(),description=request.form.get('description',''),teacher_id=int(teacher_id),course_identifier=request.form.get('course_identifier','').strip())
+            flash('Please select a teacher.', 'danger')
+            return render_template('admin/add_course.html', teachers=teachers)
+        course = Course(
+            code=request.form['code'].strip(),
+            name=request.form['name'].strip(),
+            description=request.form.get('description', ''),
+            teacher_id=int(teacher_id),
+            course_identifier=request.form.get('course_identifier', '').strip()
+        )
         try:
             db.session.add(course)
             db.session.commit()
-            flash('Course added successfully!','success')
+            flash('Course added successfully!', 'success')
             return redirect(url_for('admin.manage_courses'))
         except IntegrityError:
             db.session.rollback()
-            flash('Course code or identifier already exists.','danger')
-    return render_template('admin/add_course.html',teachers=teachers)
+            flash('Course code or identifier already exists.', 'danger')
+    return render_template('admin/add_course.html', teachers=teachers)
 
 
 @admin_bp.route('/courses/delete/<int:course_id>', methods=['POST'])
@@ -375,14 +452,14 @@ def delete_course(course_id):
         Activity.query.filter_by(course_id=course.id).delete(synchronize_session=False)
         db.session.delete(course)
         db.session.commit()
-        flash('Course deleted successfully!','success')
+        flash('Course deleted successfully!', 'success')
     except Exception:
         db.session.rollback()
-        flash('Course could not be deleted because related data still exists.','danger')
+        flash('Course could not be deleted because related data still exists.', 'danger')
     return redirect(url_for('admin.manage_courses'))
 
 
-@admin_bp.route('/courses/<int:course_id>/edit', methods=['GET','POST'])
+@admin_bp.route('/courses/<int:course_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
@@ -390,16 +467,16 @@ def edit_course(course_id):
     if request.method == 'POST':
         course.code = request.form['code'].strip()
         course.name = request.form['name'].strip()
-        course.description = request.form.get('description','')
+        course.description = request.form.get('description', '')
         teacher_id = request.form.get('teacher_id')
         course.teacher_id = int(teacher_id) if teacher_id else course.teacher_id
         db.session.commit()
-        flash('Course updated successfully!','success')
+        flash('Course updated successfully!', 'success')
         return redirect(url_for('admin.manage_courses'))
-    return render_template('admin/edit_course.html',course=course,teachers=teachers)
+    return render_template('admin/edit_course.html', course=course, teachers=teachers)
 
 
-@admin_bp.route('/courses/<int:course_id>/assign', methods=['GET','POST'])
+@admin_bp.route('/courses/<int:course_id>/assign', methods=['GET', 'POST'])
 @admin_required
 def assign_course(course_id):
     course = Course.query.get_or_404(course_id)
@@ -407,9 +484,9 @@ def assign_course(course_id):
     if request.method == 'POST':
         course.teacher_id = int(request.form['teacher_id'])
         db.session.commit()
-        flash('Teacher assigned successfully!','success')
+        flash('Teacher assigned successfully!', 'success')
         return redirect(url_for('admin.manage_courses'))
-    return render_template('admin/assign_course.html',course=course,teachers=teachers)
+    return render_template('admin/assign_course.html', course=course, teachers=teachers)
 
 
 @admin_bp.route('/reports')
@@ -424,12 +501,12 @@ def reports_teachers():
                 student = enrollment.student
                 subs = []
                 for assignment in course.assignments:
-                    submission = Submission.query.filter_by(student_id=student.id,assignment_id=assignment.id).first()
-                    subs.append({'assignment_title':assignment.title,'grade':submission.grade if submission else 'Not graded'})
-                students_data.append({'student':student,'submissions':subs})
-            courses_data.append({'course':course,'student_count':len(course.enrollments),'assignments':course.assignments,'students_data':students_data})
-        report_data.append({'teacher':teacher,'courses':courses_data})
-    return render_template('admin/reports.html',report_data=report_data)
+                    submission = Submission.query.filter_by(student_id=student.id, assignment_id=assignment.id).first()
+                    subs.append({'assignment_title': assignment.title, 'grade': submission.grade if submission else 'Not graded'})
+                students_data.append({'student': student, 'submissions': subs})
+            courses_data.append({'course': course, 'student_count': len(course.enrollments), 'assignments': course.assignments, 'students_data': students_data})
+        report_data.append({'teacher': teacher, 'courses': courses_data})
+    return render_template('admin/reports.html', report_data=report_data)
 
 
 @admin_bp.route('/courses/<int:course_id>/students')
@@ -439,9 +516,9 @@ def course_students(course_id):
     data = []
     for enrollment in course.enrollments:
         student = enrollment.student
-        total = sum(s.grade for s in student.submissions if s.assignment.course_id==course.id and s.grade is not None)
-        data.append({'student':student,'total_grade':total})
-    return render_template('admin/course_students.html',course=course,student_data=data)
+        total = sum(s.grade for s in student.submissions if s.assignment.course_id == course.id and s.grade is not None)
+        data.append({'student': student, 'total_grade': total})
+    return render_template('admin/course_students.html', course=course, student_data=data)
 
 
 @admin_bp.route('/certificates')
@@ -455,9 +532,15 @@ def certificates():
 @admin_required
 def view_certificate(certificate_id):
     certificate = Certificate.query.get_or_404(certificate_id)
-    return render_template('student/certificate.html', student=certificate.student, course=certificate.course,
-                           teacher=certificate.course.teacher, percentage=certificate.final_grade,
-                           certificate=certificate, today=certificate.issued_at)
+    return render_template(
+        'student/certificate.html',
+        student=certificate.student,
+        course=certificate.course,
+        teacher=certificate.course.teacher,
+        percentage=certificate.final_grade,
+        certificate=certificate,
+        today=certificate.issued_at
+    )
 
 
 @admin_bp.app_context_processor
