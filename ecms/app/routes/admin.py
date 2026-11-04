@@ -211,6 +211,7 @@ def delete_student(student_id):
 
 
 @admin_bp.route('/students/<int:student_id>/edit', methods=['GET', 'POST'])
+@admin_bp.route('/students/edit/<int:student_id>', methods=['GET', 'POST'])
 @admin_required
 def edit_student(student_id):
     student = User.query.get_or_404(student_id)
@@ -354,6 +355,7 @@ def delete_teacher(teacher_id):
 
 
 @admin_bp.route('/teachers/<int:teacher_id>/edit', methods=['GET', 'POST'])
+@admin_bp.route('/teachers/edit/<int:teacher_id>', methods=['GET', 'POST'])
 @admin_required
 def edit_teacher(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
@@ -426,7 +428,6 @@ def manage_courses():
 def add_course():
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        # التحقق من معرّف المدرس بجميع التسميات الممكنة
         teacher_id = (
             request.form.get('teacher_id') or 
             request.form.get('instructor_id') or 
@@ -478,6 +479,7 @@ def add_course():
 
 
 @admin_bp.route('/courses/delete/<int:course_id>', methods=['POST'])
+@admin_bp.route('/courses/<int:course_id>/delete', methods=['POST'])
 @admin_required
 def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
@@ -493,6 +495,8 @@ def delete_course(course_id):
 
 
 @admin_bp.route('/courses/<int:course_id>/edit', methods=['GET', 'POST'])
+@admin_bp.route('/courses/edit/<int:course_id>', methods=['GET', 'POST'])
+@admin_bp.route('/course/<int:course_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
@@ -528,6 +532,7 @@ def edit_course(course_id):
 
 
 @admin_bp.route('/courses/<int:course_id>/assign', methods=['GET', 'POST'])
+@admin_bp.route('/courses/assign/<int:course_id>', methods=['GET', 'POST'])
 @admin_required
 def assign_course(course_id):
     course = Course.query.get_or_404(course_id)
