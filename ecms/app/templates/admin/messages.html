@@ -1,39 +1,16 @@
 {% extends 'admin/base.html' %}
-{% block title %}Messages & Discussions | Learnova LMS{% endblock %}
+{% block title %}Discussions & Community Forum | Admin{% endblock %}
 
 {% block content %}
 <style>
-  :root {
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
-    --primary-soft: rgba(79, 70, 229, 0.08);
-    --slate-900: #0f172a;
-    --slate-800: #1e293b;
-    --slate-700: #334155;
-    --slate-500: #64748b;
-    --slate-400: #94a3b8;
-    --slate-200: #e2e8f0;
-    --slate-100: #f1f5f9;
-    --slate-50: #f8fafc;
-  }
-
-  .content, .app-main {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-  }
-
-  .admin-page-shell {
+  .disc-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 24px 16px 60px !important;
-    margin: 0 !important;
+    padding: 24px 20px 60px !important;
     box-sizing: border-box;
     font-family: inherit;
   }
-
-  .page-top-bar {
+  .disc-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -42,204 +19,127 @@
     margin-bottom: 24px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--slate-200);
-    width: 100%;
   }
-
-  .page-title-group h5 {
-    font-size: 0.72rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--primary);
-    margin: 0 0 4px;
-  }
-
-  .page-title-group h1 {
-    font-size: 1.85rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.025em;
-    margin: 0 0 4px;
-    line-height: 1.2;
-  }
-
-  .page-title-group p {
-    font-size: 0.9rem;
-    color: var(--slate-500);
-    margin: 0;
-  }
-
-  .messages-container-card {
+  .disc-table-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
     overflow: hidden;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+  }
+  .table-responsive-box {
     width: 100%;
-    box-sizing: border-box;
+    overflow-x: auto;
   }
-
-  .messages-toolbar {
-    padding: 16px 22px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 14px;
+  .disc-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+  .disc-table th {
+    background: var(--slate-50);
+    padding: 16px 20px;
+    font-weight: 700;
+    color: var(--slate-600);
     border-bottom: 1px solid var(--slate-200);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
   }
-
-  .messages-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .disc-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-800);
+    vertical-align: middle;
   }
-
-  .messages-icon-box {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+  .disc-table tr:hover {
+    background: #fafbff;
+  }
+  .badge-tag {
     background: var(--primary-soft);
     color: var(--primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
   }
-
-  .messages-meta h3 {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    margin: 0;
+  .btn-trash-action {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
-
-  .messages-list-wrap {
-    display: flex;
-    flex-direction: column;
-    padding: 16px 20px;
-    gap: 12px;
-    background: var(--slate-50);
-  }
-
-  .message-item-card {
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    border-radius: 14px;
-    padding: 18px 22px;
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    transition: all 0.2s ease;
-  }
-
-  .message-item-card:hover {
-    border-color: var(--slate-300);
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-  }
-
-  .msg-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary), #6366f1);
+  .btn-trash-action:hover {
+    background: #ef4444;
     color: #ffffff;
-    font-weight: 800;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .msg-body-content {
-    flex-grow: 1;
-  }
-
-  .msg-sender-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-  }
-
-  .msg-sender-row strong {
-    font-size: 0.95rem;
-    color: var(--slate-900);
-  }
-
-  .msg-time-tag {
-    font-size: 0.78rem;
-    color: var(--slate-400);
-    font-weight: 600;
-  }
-
-  .msg-text-paragraph {
-    margin: 0;
-    font-size: 0.88rem;
-    color: var(--slate-600);
-    line-height: 1.5;
-  }
-
-  .empty-messages-box {
-    padding: 60px 20px;
-    text-align: center;
-    color: var(--slate-400);
   }
 </style>
 
-<div class="admin-page-shell">
-  <div class="page-top-bar">
-    <div class="page-title-group">
-      <h5>COMMUNICATION</h5>
-      <h1>Messages & Discussions</h1>
-      <p>Direct inquiries, course discussions, and administrative notifications.</p>
+<div class="disc-page-shell">
+  <div class="disc-header-row">
+    <div>
+      <h5 style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin: 0 0 4px;">COMMUNITY MODERATION</h5>
+      <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--slate-900); margin: 0;">Discussions & Community Forum</h1>
+      <p style="font-size: 0.9rem; color: var(--slate-500); margin: 4px 0 0;">Review student discussions, teacher announcements, and forum topics.</p>
     </div>
   </div>
 
-  {% set msg_list = messages if messages is defined else (discussions if discussions is defined else (inbox if inbox is defined else [])) %}
-
-  <div class="messages-container-card">
-    <div class="messages-toolbar">
-      <div class="messages-meta">
-        <div class="messages-icon-box">
-          <i class="fa-solid fa-comments"></i>
-        </div>
-        <div>
-          <h3>Inbox</h3>
-          <span style="font-size: 0.8rem; color: var(--slate-500);">Recent incoming messages</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="messages-list-wrap">
-      {% if msg_list %}
-        {% for m in msg_list %}
-        <div class="message-item-card">
-          <div class="msg-avatar">
-            {{ (m.sender.name_person or m.sender.username or m.sender or 'U')[0]|upper }}
-          </div>
-          <div class="msg-body-content">
-            <div class="msg-sender-row">
-              <strong>{{ m.sender.name_person or m.sender.username if m.sender and (m.sender.name_person or m.sender.username) else (m.sender if m.sender else 'User') }}</strong>
-              <span class="msg-time-tag">{{ m.created_at.strftime('%d %b, %H:%M') if m.created_at and m.created_at.strftime is defined else 'Recent' }}</span>
-            </div>
-            <p class="msg-text-paragraph">{{ m.content or m.message or m.body or 'No message content' }}</p>
-          </div>
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="message-item-card">
-          <div class="msg-avatar"><i class="fa-solid fa-user"></i></div>
-          <div class="msg-body-content">
-            <div class="msg-sender-row">
-              <strong>Academic Support Inquiry</strong>
-              <span class="msg-time-tag">Today, 11:20 AM</span>
-            </div>
-            <p class="msg-text-paragraph">Student Ahmed Ali requested assistance regarding course syllabus access for Programming (1).</p>
-          </div>
-        </div>
-      {% endif %}
+  <div class="disc-table-card">
+    <div class="table-responsive-box">
+      <table class="disc-table">
+        <thead>
+          <tr>
+            <th>Topic Title</th>
+            <th>Author</th>
+            <th>Category / Course</th>
+            <th>Date Posted</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if topics %}
+            {% for t in topics %}
+            <tr>
+              <td>
+                <strong style="display: block; font-size: 0.95rem; color: var(--slate-900);">{{ t.title }}</strong>
+                <small style="color: var(--slate-500);">{{ t.content[:90] ~ '...' if t.content and t.content|length > 90 else (t.content or '') }}</small>
+              </td>
+              <td>
+                <strong>{{ t.author.name_person or t.author.username if t.author else 'Learnova User' }}</strong>
+                <small style="display: block; color: var(--slate-400);">{{ t.author.email if t.author else '' }}</small>
+              </td>
+              <td>
+                <span class="badge-tag">{{ t.course.name if t.course else 'General Forum' }}</span>
+              </td>
+              <td>
+                <span style="font-size: 0.84rem; color: var(--slate-500);">
+                  {{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at and t.created_at.strftime is defined else 'Recently' }}
+                </span>
+              </td>
+              <td>
+                <form method="POST" action="/admin/discussions/{{ t.id }}/delete" onsubmit="return confirm('Delete this topic permanently?');">
+                  <button type="submit" class="btn-trash-action" title="Delete Topic">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 48px 16px; color: var(--slate-400);">
+                <i class="fa-solid fa-comments" style="font-size: 2.2rem; margin-bottom: 10px; display: block; color: var(--slate-300);"></i>
+                <p style="margin: 0; font-weight: 700; color: var(--slate-700);">No discussion topics found</p>
+                <small>Forum topics created across courses will appear here for admin moderation.</small>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
