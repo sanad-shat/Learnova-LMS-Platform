@@ -70,6 +70,35 @@ def _duplicate_profile_id(field_name, value, exclude_id=None):
     return query.first()
 
 
+def _resolve_teacher_id(form):
+    """استخراج معرّف المدرس سواء تم إرسال رقمه أو اسمه أو بريده"""
+    val = (
+        form.get('teacher_id') or 
+        form.get('teacher') or 
+        form.get('instructor_id') or 
+        form.get('instructor') or 
+        form.get('assigned_instructor') or 
+        form.get('user_id') or 
+        ''
+    ).strip()
+
+    if not val:
+        return None
+
+    if val.isdigit():
+        return int(val)
+
+    teacher = User.query.filter(
+        (User.role == 'teacher') & (
+            (User.name_person.ilike(f"%{val}%")) | 
+            (User.username == val) | 
+            (User.email == val)
+        )
+    ).first()
+
+    return teacher.id if teacher else None
+
+
 def _apply_student_profile(user, form):
     user.name_person = (
         form.get('name_person') or 
@@ -428,12 +457,7 @@ def manage_courses():
 def add_course():
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        teacher_id = (
-            request.form.get('teacher_id') or 
-            request.form.get('instructor_id') or 
-            request.form.get('assigned_instructor') or 
-            request.form.get('instructor')
-        )
+        teacher_id = _resolve_teacher_id(request.form)
         if not teacher_id:
             flash('Please select a teacher.', 'danger')
             return render_template('admin/add_course.html', teachers=teachers)
@@ -512,12 +536,7 @@ def edit_course(course_id):
             course.course_identifier
         ).strip()
 
-        teacher_id = (
-            request.form.get('teacher_id') or 
-            request.form.get('instructor_id') or 
-            request.form.get('assigned_instructor') or 
-            request.form.get('instructor')
-        )
+        teacher_id = _resolve_teacher_id(request.form)
         if teacher_id:
             course.teacher_id = int(teacher_id)
 
@@ -538,12 +557,7 @@ def assign_course(course_id):
     course = Course.query.get_or_404(course_id)
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        teacher_id = (
-            request.form.get('teacher_id') or 
-            request.form.get('instructor_id') or 
-            request.form.get('assigned_instructor') or 
-            request.form.get('instructor')
-        )
+        teacher_id = _resolve_teacher_id(request.form)
         if not teacher_id:
             flash('Please select a teacher.', 'danger')
             return render_template('admin/assign_course.html', course=course, teachers=teachers)
