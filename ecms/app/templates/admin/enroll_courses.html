@@ -21,26 +21,95 @@
     --success-text: #059669;
   }
 
-  .enroll-page-shell {
-    width: 100%;
-    max-width: 860px;
-    margin: 20px auto 60px;
-    padding: 0 16px;
-    box-sizing: border-box;
+  .content, .app-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
   }
 
-  .enroll-header-card {
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  .enroll-page-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 24px 20px 60px !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  .enroll-top-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--slate-200);
+    width: 100%;
+  }
+
+  .page-title-group h5 {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .page-title-group h1 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.025em;
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .page-title-group p {
+    font-size: 0.9rem;
+    color: var(--slate-500);
+    margin: 0;
+  }
+
+  .btn-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--slate-600);
+    text-decoration: none;
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--slate-200);
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+    transition: all 0.2s ease;
+  }
+
+  .btn-back-link:hover {
+    background: var(--slate-50);
+    color: var(--slate-900);
+    border-color: var(--slate-300);
+    transform: translateY(-1px);
+  }
+
+  .student-overview-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.03);
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .student-hero-meta {
@@ -50,89 +119,85 @@
   }
 
   .student-hero-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     background: linear-gradient(135deg, var(--primary), #818cf8);
     color: #ffffff;
     font-weight: 800;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
   }
 
-  .student-hero-info h2 {
-    font-size: 1.35rem;
+  .student-hero-info h3 {
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0 0 4px;
   }
 
-  .student-hero-info p {
-    font-size: 0.85rem;
-    color: var(--slate-500);
-    margin: 0;
+  .student-hero-badges {
     display: flex;
-    gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--slate-500);
   }
 
-  .btn-back-link {
+  .pill-badge {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.84rem;
-    font-weight: 700;
-    color: var(--slate-600);
-    text-decoration: none;
-    padding: 8px 14px;
-    border-radius: 9px;
-    border: 1px solid var(--slate-200);
-    background: var(--slate-50);
-    transition: all 0.2s ease;
+    gap: 5px;
   }
 
-  .btn-back-link:hover {
-    background: #ffffff;
-    color: var(--slate-900);
-    border-color: var(--slate-300);
-  }
-
-  .courses-selection-card {
+  .courses-panel-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 18px;
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .courses-selection-header {
+  .courses-panel-header {
     padding: 18px 24px;
     border-bottom: 1px solid var(--slate-200);
     background: var(--slate-50);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .courses-selection-header h4 {
+  .courses-panel-header h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: var(--slate-900);
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
-  .courses-grid-body {
-    padding: 24px;
+  .courses-list-body {
+    padding: 20px 24px;
     display: flex;
     flex-direction: column;
     gap: 12px;
   }
 
-  .course-check-item {
-    position: relative;
+  .course-check-card {
     display: flex;
     align-items: center;
     padding: 16px 20px;
@@ -141,55 +206,66 @@
     background: #ffffff;
     cursor: pointer;
     transition: all 0.2s ease;
+    user-select: none;
   }
 
-  .course-check-item:hover {
+  .course-check-card:hover {
     border-color: var(--primary-border);
     background: #fafbff;
+    transform: translateY(-1px);
   }
 
-  .course-check-item input[type="checkbox"] {
+  .course-check-card.selected {
+    border-color: var(--primary);
+    background: #f8faff;
+    box-shadow: 0 0 0 1px var(--primary);
+  }
+
+  .course-check-card input[type="checkbox"] {
     width: 20px;
     height: 20px;
     accent-color: var(--primary);
     cursor: pointer;
-    margin-right: 16px;
+    margin-right: 18px;
     flex-shrink: 0;
   }
 
-  .course-item-details {
+  .course-card-details {
     flex-grow: 1;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
 
-  .course-title-group strong {
-    display: block;
-    font-size: 0.95rem;
+  .course-name-title {
+    font-size: 1rem;
     font-weight: 700;
     color: var(--slate-900);
+    margin-bottom: 4px;
   }
 
-  .course-title-group span {
-    font-size: 0.8rem;
+  .course-instructor-sub {
+    font-size: 0.82rem;
     color: var(--slate-500);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .course-badge-code {
+  .badge-course-code {
     background: #eff6ff;
     color: #2563eb;
     border: 1px solid #bfdbfe;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 7px;
-    font-family: ui-monospace, monospace;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-family: ui-monospace, SFMono-Regular, monospace;
   }
 
-  .enroll-footer-bar {
+  .enroll-footer {
     padding: 18px 24px;
     border-top: 1px solid var(--slate-200);
     background: var(--slate-50);
@@ -199,12 +275,12 @@
     gap: 12px;
   }
 
-  .btn-submit-enroll {
+  .btn-submit-save {
     background: var(--primary);
     color: #ffffff;
     font-size: 0.9rem;
     font-weight: 700;
-    padding: 10px 24px;
+    padding: 11px 26px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
@@ -215,76 +291,111 @@
     transition: all 0.2s ease;
   }
 
-  .btn-submit-enroll:hover {
+  .btn-submit-save:hover {
     background: var(--primary-hover);
     transform: translateY(-1px);
     box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
   }
+
+  @media (max-width: 640px) {
+    .enroll-page-shell { padding: 16px 12px 40px !important; }
+    .enroll-top-bar { flex-direction: column; align-items: stretch; }
+    .student-overview-card { flex-direction: column; align-items: flex-start; }
+    .btn-submit-save { width: 100%; justify-content: center; }
+  }
 </style>
 
 <div class="enroll-page-shell">
-  <div class="enroll-header-card">
+  <!-- Top Navigation & Action -->
+  <div class="enroll-top-bar">
+    <div class="page-title-group">
+      <h5>ACADEMIC MANAGEMENT</h5>
+      <h1>Course Enrollment</h1>
+      <p>Assign courses and manage class access for this student account.</p>
+    </div>
+    <div>
+      <a href="/admin/students" class="btn-back-link">
+        <i class="fa-solid fa-arrow-left"></i> Back to Students
+      </a>
+    </div>
+  </div>
+
+  <!-- Student Info Strip -->
+  <div class="student-overview-card">
     <div class="student-hero-meta">
       <div class="student-hero-avatar">
         {{ (student.name_person or student.username or 'S')[0]|upper }}
       </div>
       <div class="student-hero-info">
-        <h2>{{ student.name_person or student.username }}</h2>
-        <p>
-          <span><i class="fa-solid fa-id-card"></i> #{{ student.university_id or student.student_id or student.id }}</span>
-          <span>•</span>
-          <span><i class="fa-solid fa-envelope"></i> {{ student.email }}</span>
-        </p>
+        <h3>{{ student.name_person or student.username }}</h3>
+        <div class="student-hero-badges">
+          <span class="pill-badge"><i class="fa-solid fa-id-card"></i> #{{ student.university_id or student.student_id or student.id }}</span>
+          <span class="pill-badge"><i class="fa-solid fa-envelope"></i> {{ student.email }}</span>
+          <span class="pill-badge"><i class="fa-solid fa-graduation-cap"></i> {{ student.department or 'Software Engineering' }}</span>
+        </div>
       </div>
     </div>
-    <a href="/admin/students" class="btn-back-link">
-      <i class="fa-solid fa-arrow-left"></i> Back to Students
-    </a>
   </div>
 
+  <!-- Course Checklist Form -->
   <form method="POST" action="">
-    <div class="courses-selection-card">
-      <div class="courses-selection-header">
-        <h4><i class="fa-solid fa-book-bookmark text-primary me-2"></i> Select Courses for Enrollment</h4>
-        <span style="font-size: 0.8rem; color: var(--slate-500); font-weight: 600;">Check to enroll</span>
+    <div class="courses-panel-card">
+      <div class="courses-panel-header">
+        <h3><i class="fa-solid fa-book-bookmark text-primary"></i> Available Courses</h3>
+        <span style="font-size: 0.82rem; color: var(--slate-500); font-weight: 600;">
+          Select the courses to enroll the student into
+        </span>
       </div>
 
-      <div class="courses-grid-body">
+      <div class="courses-list-body">
         {% if courses %}
           {% for course in courses %}
-          <label class="course-check-item" for="course_{{ course.id }}">
+          {% set is_enrolled = (student.enrollments and course.id in student.enrollments|map(attribute='course_id')|list) %}
+          <label class="course-check-card {% if is_enrolled %}selected{% endif %}" for="course_{{ course.id }}">
             <input type="checkbox" name="course_ids" id="course_{{ course.id }}" value="{{ course.id }}"
-              {% if student.enrollments and course.id in student.enrollments|map(attribute='course_id')|list %}checked{% endif %}>
+                   {% if is_enrolled %}checked{% endif %} onchange="toggleCardStyle(this)">
             
-            <div class="course-item-details">
-              <div class="course-title-group">
-                <strong>{{ course.name }}</strong>
-                <span>
+            <div class="course-card-details">
+              <div>
+                <div class="course-name-title">{{ course.name }}</div>
+                <div class="course-instructor-sub">
                   <i class="fa-solid fa-chalkboard-user"></i>
                   Instructor: {{ course.teacher.name_person or course.teacher.username if course.teacher else 'Unassigned' }}
-                </span>
+                </div>
               </div>
               <div>
-                <span class="course-badge-code">{{ course.code }}</span>
+                <span class="badge-course-code">{{ course.code }}</span>
               </div>
             </div>
           </label>
           {% endfor %}
         {% else %}
-          <div style="text-align: center; padding: 40px 10px; color: var(--slate-400);">
-            <i class="fa-solid fa-book-open" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-            No courses available to enroll. Please add courses first.
+          <div style="text-align: center; padding: 48px 16px; color: var(--slate-400);">
+            <i class="fa-solid fa-book-open" style="font-size: 2.2rem; margin-bottom: 12px; display: block;"></i>
+            <p style="font-size: 0.95rem; font-weight: 600; margin: 0 0 6px;">No courses available</p>
+            <span style="font-size: 0.82rem;">Create courses in Course Management before enrolling students.</span>
           </div>
         {% endif %}
       </div>
 
-      <div class="enroll-footer-bar">
-        <a href="/admin/students" class="btn-back-link" style="background: transparent;">Cancel</a>
-        <button type="submit" class="btn-submit-enroll">
+      <div class="enroll-footer">
+        <a href="/admin/students" class="btn-back-link" style="border: none; background: transparent; box-shadow: none;">Cancel</a>
+        <button type="submit" class="btn-submit-save">
           <i class="fa-solid fa-check"></i> Save Enrollments
         </button>
       </div>
     </div>
   </form>
 </div>
+
+<script>
+  function toggleCardStyle(checkbox) {
+    const card = checkbox.closest('.course-check-card');
+    if (checkbox.checked) {
+      card.classList.add('selected');
+    } else {
+      card.classList.remove('selected');
+    }
+  }
+</script>
 {% endblock %}
