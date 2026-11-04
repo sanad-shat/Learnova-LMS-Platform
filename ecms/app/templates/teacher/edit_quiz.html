@@ -1,14 +1,13 @@
-{% extends "teacher/base.html" %}
-{% block title %}Edit Quiz | {{ course.name }}{% endblock %}
+{% extends 'teacher/base.html' %}
+{% block title %}Edit Quiz | {{ quiz.title }}{% endblock %}
 
 {% block content %}
 <style>
   :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-light: #eff6ff;
+    --primary: #4f46e5;
+    --primary-dark: #4338ca;
+    --primary-light: #eef2ff;
     --card-bg: #ffffff;
-    --page-bg: #f8fafc;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-muted: #94a3b8;
@@ -20,10 +19,12 @@
     --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   }
 
-  .full-page-wrapper {
+  .full-page-shell {
+    width: 100% !important;
     max-width: 1440px;
     margin: 0 auto;
     padding: 24px 28px 60px;
+    box-sizing: border-box;
   }
 
   .header-actions-bar {
@@ -33,6 +34,7 @@
     margin-bottom: 24px;
     gap: 16px;
   }
+
   .back-navigation {
     display: inline-flex;
     align-items: center;
@@ -40,14 +42,15 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--primary);
-    background: #eff6ff;
+    background: #eef2ff;
     padding: 8px 16px;
     border-radius: 30px;
     text-decoration: none;
     transition: all 0.2s;
   }
+
   .back-navigation:hover {
-    background: #2563eb;
+    background: var(--primary);
     color: #ffffff;
     transform: translateX(-2px);
   }
@@ -57,6 +60,14 @@
     grid-template-columns: 2fr 1fr;
     gap: 26px;
     align-items: start;
+    width: 100%;
+  }
+
+  .form-section-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: 100%;
   }
 
   .main-form-card {
@@ -75,26 +86,28 @@
     margin-bottom: 26px;
     border-bottom: 1px solid var(--border-subtle);
   }
+
   .head-icon-box {
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 22px;
-    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
     flex-shrink: 0;
   }
+
   .head-texts h1 {
     font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0 0 4px;
-    letter-spacing: -0.4px;
   }
+
   .head-texts p {
     font-size: 13px;
     color: var(--text-muted);
@@ -104,11 +117,13 @@
   .form-field-group {
     margin-bottom: 22px;
   }
+
   .form-row-2col {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
   }
+
   .field-label {
     display: block;
     font-size: 13px;
@@ -116,9 +131,11 @@
     color: var(--text-primary);
     margin-bottom: 8px;
   }
+
   .field-label .required-mark {
     color: #ef4444;
   }
+
   .field-input, .field-textarea {
     width: 100%;
     border: 1.5px solid var(--border-normal);
@@ -128,15 +145,99 @@
     color: var(--text-primary);
     background: #ffffff;
     outline: none;
+    box-sizing: border-box;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
+
   .field-input:focus, .field-textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
   }
+
   .field-textarea {
     resize: vertical;
     line-height: 1.6;
+  }
+
+  .qb-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .qb-counter-pill {
+    background: #eef2ff;
+    color: var(--primary);
+    border: 1px solid #c7d2fe;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .question-type-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .btn-type-option {
+    border: 1.5px solid var(--border-normal);
+    background: #ffffff;
+    border-radius: var(--radius-md);
+    padding: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-type-option:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: #f8fafc;
+  }
+
+  .question-item-card {
+    background: #f8fafc;
+    border: 1.5px solid var(--border-normal);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 18px;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  }
+
+  .question-item-card .remove-q-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    color: #ef4444;
+    background: #fee2e2;
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .question-item-card .remove-q-btn:hover {
+    background: #dc2626;
+    color: #ffffff;
   }
 
   .form-actions-row {
@@ -148,10 +249,11 @@
     padding-top: 20px;
     border-top: 1px solid var(--border-subtle);
   }
+
   .btn-form-cancel {
     display: inline-flex;
     align-items: center;
-    padding: 10px 22px;
+    padding: 11px 22px;
     border-radius: var(--radius-md);
     background: #f1f5f9;
     color: var(--text-secondary);
@@ -160,15 +262,17 @@
     text-decoration: none;
     transition: all 0.2s;
   }
+
   .btn-form-cancel:hover {
     background: #e2e8f0;
     color: var(--text-primary);
   }
+
   .btn-form-submit {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 26px;
+    padding: 11px 28px;
     border-radius: var(--radius-md);
     background: var(--primary);
     color: #ffffff;
@@ -176,13 +280,14 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
     transition: all 0.2s;
   }
+
   .btn-form-submit:hover {
     background: var(--primary-dark);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.38);
   }
 
   .sidebar-guide-card {
@@ -192,43 +297,16 @@
     padding: 26px;
     box-shadow: var(--shadow-card);
   }
-  .guide-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .guide-item {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .guide-item i {
-    color: #10b981;
-    font-size: 16px;
-    margin-top: 2px;
-  }
-  .guide-item-text h5 {
-    margin: 0 0 2px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .guide-item-text p {
-    margin: 0;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.4;
-  }
-  .course-context-pill {
+
+  .total-score-badge-card {
     background: #f8fafc;
     border: 1px solid var(--border-normal);
     border-radius: var(--radius-md);
-    padding: 14px;
+    padding: 16px;
     margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   @media (max-width: 1024px) {
@@ -238,24 +316,17 @@
   }
 
   @media (max-width: 768px) {
-    .full-page-wrapper {
+    .full-page-shell {
       padding: 16px 14px 40px;
     }
     .main-form-card {
       padding: 24px 18px;
     }
-    .form-row-2col {
+    .form-row-2col, .question-type-selector {
       grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .form-head-block {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
     }
     .form-actions-row {
       flex-direction: column-reverse;
-      gap: 10px;
     }
     .btn-form-cancel, .btn-form-submit {
       width: 100%;
@@ -264,8 +335,7 @@
   }
 </style>
 
-<div class="full-page-wrapper">
-  
+<div class="full-page-shell">
   <div class="header-actions-bar">
     <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="back-navigation">
       <i class="fa-solid fa-arrow-left"></i> Back to {{ course.name }}
@@ -273,20 +343,20 @@
   </div>
 
   <div class="layout-grid">
-    
-    <div class="main-form-card">
-      <div class="form-head-block">
-        <div class="head-icon-box">
-          <i class="fa-solid fa-pen-to-square"></i>
+    <form method="POST" action="" class="form-section-stack" id="editQuizForm">
+      
+      <!-- Card 1: Quiz General Details -->
+      <div class="main-form-card">
+        <div class="form-head-block">
+          <div class="head-icon-box">
+            <i class="fa-solid fa-file-pen"></i>
+          </div>
+          <div class="head-texts">
+            <h1>Edit Quiz Details</h1>
+            <p>Update title, dates, quiz score, and review questions.</p>
+          </div>
         </div>
-        <div class="head-texts">
-          <h1>Edit Quiz Details</h1>
-          <p>Modify quiz settings, schedule, and test instructions.</p>
-        </div>
-      </div>
 
-      <form method="POST" action="{{ url_for('teachers.edit_quiz', teacher_id=teacher.id, course_id=course.id, quiz_id=quiz.id) }}">
-        
         <div class="form-field-group">
           <label class="field-label" for="quizTitle">
             Quiz Title <span class="required-mark">*</span>
@@ -304,6 +374,20 @@
 
         <div class="form-field-group form-row-2col">
           <div>
+            <label class="field-label" for="totalScoreInput">
+              Total Points <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="number" 
+              id="totalScoreInput" 
+              name="total_score" 
+              class="field-input" 
+              value="{{ quiz.total_score or (quiz.questions|sum(attribute='score') if quiz.questions else 0) }}" 
+              step="0.5" 
+              required
+            >
+          </div>
+          <div>
             <label class="field-label" for="startDate">
               Start Date & Time <span class="required-mark">*</span>
             </label>
@@ -316,75 +400,337 @@
               required
             >
           </div>
-          <div>
-            <label class="field-label" for="endDate">
-              End Date & Time <span class="required-mark">*</span>
-            </label>
-            <input 
-              type="datetime-local" 
-              id="endDate" 
-              name="end_date" 
-              class="field-input" 
-              value="{{ quiz.end_date.strftime('%Y-%m-%dT%H:%M') if quiz.end_date else '' }}" 
-              required
-            >
-          </div>
         </div>
 
         <div class="form-field-group">
+          <label class="field-label" for="endDate">
+            End Date & Time <span class="required-mark">*</span>
+          </label>
+          <input 
+            type="datetime-local" 
+            id="endDate" 
+            name="end_date" 
+            class="field-input" 
+            value="{{ quiz.end_date.strftime('%Y-%m-%dT%H:%M') if quiz.end_date else '' }}" 
+            required
+          >
+        </div>
+
+        <div class="form-field-group" style="margin-bottom: 0;">
           <label class="field-label" for="instructions">
-            Instructions / Guidelines
+            Instructions & Quiz Description
           </label>
           <textarea 
             id="instructions" 
             name="description" 
-            rows="5" 
+            rows="4" 
             class="field-textarea" 
-            placeholder="Add instructions or timing notes..."
+            placeholder="Specify quiz guidelines..."
           >{{ quiz.description or '' }}</textarea>
         </div>
+      </div>
 
-        <div class="form-actions-row">
-          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">
-            Cancel
-          </a>
-          <button type="submit" class="btn-form-submit">
-            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+      <!-- Card 2: Questions Editor -->
+      <div class="main-form-card">
+        <div class="qb-header-row">
+          <div>
+            <h2 style="font-size: 18px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">Quiz Questions</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Review saved questions or append new ones.</p>
+          </div>
+          <span class="qb-counter-pill" id="questionCountPill">{{ quiz.questions|length }} Questions</span>
+        </div>
+
+        <div class="question-type-selector">
+          <button type="button" class="btn-type-option" onclick="appendQuestion('mcq')">
+            <i class="fa-solid fa-list-check" style="color: #4f46e5;"></i> Multiple Choice
+          </button>
+          <button type="button" class="btn-type-option" onclick="appendQuestion('true_false')">
+            <i class="fa-solid fa-toggle-on" style="color: #16a34a;"></i> True / False
+          </button>
+          <button type="button" class="btn-type-option" onclick="appendQuestion('short_answer')">
+            <i class="fa-solid fa-pencil" style="color: #d97706;"></i> Short Answer
+          </button>
+          <button type="button" class="btn-type-option" onclick="appendQuestion('essay')">
+            <i class="fa-solid fa-align-left" style="color: #7c3aed;"></i> Essay Question
           </button>
         </div>
 
-      </form>
-    </div>
+        <div id="questionsContainer">
+          {% for q in quiz.questions %}
+          {% set num = loop.index %}
+          <div class="question-item-card" id="quizQuestionRow_{{ num }}">
+            <input type="hidden" name="type_{{ num }}" value="{{ q.question_type }}">
+            <button type="button" class="remove-q-btn" onclick="removeQuestion('quizQuestionRow_{{ num }}')" title="Delete Question">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
 
-    <!-- Sidebar Guidelines -->
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; background: #eef2ff; color: #4f46e5;">
+                {{ q.question_type }}
+              </span>
+              <strong style="font-size: 13px; color: var(--text-primary);">Question #{{ num }}</strong>
+            </div>
+
+            <div class="form-field-group" style="margin-bottom: 12px;">
+              <input type="text" name="question_{{ num }}" value="{{ q.question_text }}" placeholder="Type question prompt text here..." class="field-input" required autocomplete="off">
+            </div>
+
+            <div style="max-width: 140px;">
+              <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points / Marks</label>
+              <input type="number" name="score_{{ num }}" value="{{ q.score or 1 }}" min="0.5" step="0.5" class="field-input question-score-input" style="padding: 8px 12px; margin-top: 4px;" oninput="recalculateScore()" required>
+            </div>
+
+            {% if q.question_type == 'mcq' %}
+              {% set opts = q.options.split(',') if q.options else [] %}
+              <input type="hidden" name="options_{{ num }}" id="options_hidden_{{ num }}" value="{{ q.options }}">
+              <input type="hidden" name="answer_{{ num }}" id="answer_hidden_{{ num }}" value="{{ q.answer }}">
+
+              <div style="margin-top: 16px;">
+                <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">
+                  Answer Choices (Select radio for correct answer):
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="a" onchange="syncMcqChoices({{ num }})" {% if opts|length > 0 and opts[0].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #4f46e5;">
+                    <span style="font-weight: 800; color: #4f46e5;">A</span>
+                    <input type="text" id="mcq_opt_a_{{ num }}" value="{{ opts[0].strip() if opts|length > 0 else '' }}" placeholder="Choice A" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})" required>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="b" onchange="syncMcqChoices({{ num }})" {% if opts|length > 1 and opts[1].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #4f46e5;">
+                    <span style="font-weight: 800; color: #4f46e5;">B</span>
+                    <input type="text" id="mcq_opt_b_{{ num }}" value="{{ opts[1].strip() if opts|length > 1 else '' }}" placeholder="Choice B" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})" required>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="c" onchange="syncMcqChoices({{ num }})" {% if opts|length > 2 and opts[2].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #4f46e5;">
+                    <span style="font-weight: 800; color: #4f46e5;">C</span>
+                    <input type="text" id="mcq_opt_c_{{ num }}" value="{{ opts[2].strip() if opts|length > 2 else '' }}" placeholder="Choice C (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})">
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+                    <input type="radio" name="mcq_radio_{{ num }}" value="d" onchange="syncMcqChoices({{ num }})" {% if opts|length > 3 and opts[3].strip() == q.answer %}checked{% endif %} style="cursor: pointer; accent-color: #4f46e5;">
+                    <span style="font-weight: 800; color: #4f46e5;">D</span>
+                    <input type="text" id="mcq_opt_d_{{ num }}" value="{{ opts[3].strip() if opts|length > 3 else '' }}" placeholder="Choice D (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices({{ num }})">
+                  </div>
+                </div>
+              </div>
+
+            {% elif q.question_type in ['true_false', 'boolean'] %}
+              <div style="margin-top: 16px;">
+                <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">Select Correct Answer:</label>
+                <div style="display: flex; gap: 20px;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #16a34a;">
+                    <input type="radio" name="answer_{{ num }}" value="True" {% if q.answer|lower == 'true' %}checked{% endif %} style="accent-color: #16a34a;"> True
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #dc2626;">
+                    <input type="radio" name="answer_{{ num }}" value="False" {% if q.answer|lower == 'false' %}checked{% endif %} style="accent-color: #dc2626;"> False
+                  </label>
+                </div>
+              </div>
+
+            {% elif q.question_type == 'short_answer' %}
+              <div style="margin-top: 16px;">
+                <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer / Key:</label>
+                <input type="text" name="answer_{{ num }}" value="{{ q.answer }}" class="field-input" style="margin-top: 4px;" required>
+              </div>
+
+            {% else %}
+              <div style="margin-top: 14px;">
+                <input type="hidden" name="answer_{{ num }}" value="{{ q.answer or 'Manual grading required' }}">
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0;"><i class="fa-solid fa-circle-info"></i> Essay questions require manual instructor evaluation.</p>
+              </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="form-actions-row">
+          <a href="{{ url_for('teachers.view_course', teacher_id=teacher.id, course_id=course.id) }}" class="btn-form-cancel">Cancel</a>
+          <button type="submit" class="btn-form-submit">
+            <i class="fa-solid fa-check"></i> Save Quiz Changes
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Sidebar Summary -->
     <div class="sidebar-guide-card">
-      <h3 class="guide-title">
-        <i class="fa-solid fa-lightbulb" style="color: #eab308;"></i> Quiz Questions
+      <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 16px; display: flex; align-items: center; gap: 8px;">
+        <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i> Quiz Information
       </h3>
-      
-      <div class="guide-item">
-        <i class="fa-solid fa-circle-check"></i>
-        <div class="guide-item-text">
-          <h5>Manage Question Bank</h5>
-          <p>To add, remove, or modify specific quiz questions, open the question builder directly from the course workspace.</p>
-        </div>
+
+      <div style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+        <p style="margin: 0 0 10px;"><strong>Course:</strong> {{ course.name }} ({{ course.code }})</p>
+        <p style="margin: 0 0 10px;"><strong>Instructor:</strong> {{ teacher.name_person or teacher.username }}</p>
       </div>
 
-      <div class="guide-item">
-        <i class="fa-solid fa-circle-check"></i>
-        <div class="guide-item-text">
-          <h5>Deadline Synchronization</h5>
-          <p>Any modifications to start or end schedules reflect instantly for enrolled learners.</p>
+      <div class="total-score-badge-card">
+        <div>
+          <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block;">Calculated Score</span>
+          <strong style="color: var(--primary); font-size: 20px;" id="sidebarScoreDisplay">{{ quiz.total_score or 0 }} pts</strong>
         </div>
-      </div>
-
-      <div class="course-context-pill">
-        <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 4px;">Target Course</span>
-        <strong style="color: var(--text-primary); font-size: 14px;">{{ course.name }}</strong>
-        <span style="font-size: 12px; color: var(--primary); display: block; margin-top: 2px; font-weight: 600;">Code: {{ course.code }}</span>
+        <i class="fa-solid fa-calculator" style="font-size: 24px; color: #cbd5e1;"></i>
       </div>
     </div>
-
   </div>
 </div>
+
+<script>
+  let qCount = {{ quiz.questions|length }};
+
+  function recalculateScore() {
+    let total = 0;
+    const scoreInputs = document.querySelectorAll('.question-score-input');
+    scoreInputs.forEach(input => {
+      total += (parseFloat(input.value) || 0);
+    });
+    const totalScoreField = document.getElementById('totalScoreInput');
+    if (totalScoreField) totalScoreField.value = total;
+    const sidebarScore = document.getElementById('sidebarScoreDisplay');
+    if (sidebarScore) sidebarScore.textContent = total.toFixed(1) + ' pts';
+  }
+
+  function updateQuestionCount() {
+    const total = document.querySelectorAll('.question-item-card').length;
+    document.getElementById('questionCountPill').textContent = total + ' Question' + (total !== 1 ? 's' : '');
+    recalculateScore();
+  }
+
+  function syncMcqChoices(num) {
+    const a = (document.getElementById(`mcq_opt_a_${num}`)?.value || '').trim();
+    const b = (document.getElementById(`mcq_opt_b_${num}`)?.value || '').trim();
+    const c = (document.getElementById(`mcq_opt_c_${num}`)?.value || '').trim();
+    const d = (document.getElementById(`mcq_opt_d_${num}`)?.value || '').trim();
+
+    const selected = document.querySelector(`input[name="mcq_radio_${num}"]:checked`);
+    const optionsField = document.getElementById(`options_hidden_${num}`);
+    const answerField = document.getElementById(`answer_hidden_${num}`);
+
+    const choices = [a, b, c, d].filter(Boolean);
+    if (optionsField) optionsField.value = choices.join(',');
+
+    if (answerField && selected) {
+      const map = { a: a, b: b, c: c, d: d };
+      answerField.value = map[selected.value] || '';
+    }
+  }
+
+  function appendQuestion(type) {
+    qCount++;
+    const container = document.getElementById('questionsContainer');
+
+    let typeTitle = 'Multiple Choice';
+    if (type === 'true_false') typeTitle = 'True / False';
+    if (type === 'short_answer') typeTitle = 'Short Answer';
+    if (type === 'essay') typeTitle = 'Essay';
+
+    const card = document.createElement('div');
+    card.className = 'question-item-card';
+    card.id = 'quizQuestionRow_' + qCount;
+
+    let bodyHtml = '';
+    if (type === 'mcq') {
+      bodyHtml = `
+        <input type="hidden" name="options_${qCount}" id="options_hidden_${qCount}" value="">
+        <input type="hidden" name="answer_${qCount}" id="answer_hidden_${qCount}" value="">
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">Choices (Select radio for correct answer):</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qCount}" value="a" onchange="syncMcqChoices(${qCount})" checked style="accent-color: #4f46e5;">
+              <span style="font-weight: 800; color: #4f46e5;">A</span>
+              <input type="text" id="mcq_opt_a_${qCount}" placeholder="Choice A" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})" required>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qCount}" value="b" onchange="syncMcqChoices(${qCount})" style="accent-color: #4f46e5;">
+              <span style="font-weight: 800; color: #4f46e5;">B</span>
+              <input type="text" id="mcq_opt_b_${qCount}" placeholder="Choice B" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})" required>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qCount}" value="c" onchange="syncMcqChoices(${qCount})" style="accent-color: #4f46e5;">
+              <span style="font-weight: 800; color: #4f46e5;">C</span>
+              <input type="text" id="mcq_opt_c_${qCount}" placeholder="Choice C (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; background: #fff; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border-normal);">
+              <input type="radio" name="mcq_radio_${qCount}" value="d" onchange="syncMcqChoices(${qCount})" style="accent-color: #4f46e5;">
+              <span style="font-weight: 800; color: #4f46e5;">D</span>
+              <input type="text" id="mcq_opt_d_${qCount}" placeholder="Choice D (Optional)" class="field-input" style="border: none; padding: 6px;" oninput="syncMcqChoices(${qCount})">
+            </div>
+          </div>
+        </div>
+      `;
+    } else if (type === 'true_false') {
+      bodyHtml = `
+        <div style="margin-top: 16px;">
+          <label style="font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 8px; display: block;">Select Correct Answer:</label>
+          <div style="display: flex; gap: 20px;">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #16a34a;">
+              <input type="radio" name="answer_${qCount}" value="True" checked style="accent-color: #16a34a;"> True
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #dc2626;">
+              <input type="radio" name="answer_${qCount}" value="False" style="accent-color: #dc2626;"> False
+            </label>
+          </div>
+        </div>
+      `;
+    } else if (type === 'short_answer') {
+      bodyHtml = `
+        <div style="margin-top: 16px;">
+          <label style="font-size: 12px; font-weight: 700; color: var(--text-secondary);">Correct Answer / Key:</label>
+          <input type="text" name="answer_${qCount}" placeholder="Type expected answer" class="field-input" style="margin-top: 4px;" required>
+        </div>
+      `;
+    } else {
+      bodyHtml = `
+        <div style="margin-top: 14px;">
+          <input type="hidden" name="answer_${qCount}" value="Manual grading required">
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0;"><i class="fa-solid fa-circle-info"></i> Essay questions require manual instructor evaluation.</p>
+        </div>
+      `;
+    }
+
+    card.innerHTML = `
+      <input type="hidden" name="type_${qCount}" value="${type}">
+      <button type="button" class="remove-q-btn" onclick="removeQuestion('${card.id}')" title="Delete Question">
+        <i class="fa-solid fa-trash-can"></i>
+      </button>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 6px; background: #eef2ff; color: #4f46e5;">${typeTitle}</span>
+        <strong style="font-size: 13px; color: var(--text-primary);">Question #${qCount}</strong>
+      </div>
+      <div class="form-field-group" style="margin-bottom: 12px;">
+        <input type="text" name="question_${qCount}" placeholder="Type question prompt text here..." class="field-input" required autocomplete="off">
+      </div>
+      <div style="max-width: 140px;">
+        <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">Points / Marks</label>
+        <input type="number" name="score_${qCount}" value="1" min="0.5" step="0.5" class="field-input question-score-input" style="padding: 8px 12px; margin-top: 4px;" oninput="recalculateScore()" required>
+      </div>
+      ${bodyHtml}
+    `;
+
+    container.appendChild(card);
+    updateQuestionCount();
+  }
+
+  function removeQuestion(cardId) {
+    const el = document.getElementById(cardId);
+    if (el) el.remove();
+    updateQuestionCount();
+  }
+
+  document.getElementById('editQuizForm').addEventListener('submit', function(e) {
+    const cards = document.querySelectorAll('.question-item-card');
+    if (cards.length === 0) {
+      e.preventDefault();
+      alert('The quiz must contain at least one question.');
+      return false;
+    }
+    cards.forEach(card => {
+      const match = card.id.match(/quizQuestionRow_(\d+)/);
+      if (match) {
+        syncMcqChoices(match[1]);
+      }
+    });
+  });
+
+  window.addEventListener('DOMContentLoaded', recalculateScore);
+</script>
 {% endblock %}
