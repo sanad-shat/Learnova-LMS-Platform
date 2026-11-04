@@ -7,6 +7,7 @@
     --primary: #4f46e5;
     --primary-hover: #4338ca;
     --primary-soft: rgba(79, 70, 229, 0.08);
+    --primary-border: rgba(79, 70, 229, 0.2);
     --slate-900: #0f172a;
     --slate-800: #1e293b;
     --slate-700: #334155;
@@ -23,18 +24,10 @@
     --danger-text: #dc2626;
   }
 
-  .content, .app-main {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
-  }
-
   .admin-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 24px 16px 60px !important;
-    margin: 0 !important;
+    padding: 24px 20px 60px !important;
     box-sizing: border-box;
     font-family: inherit;
   }
@@ -48,16 +41,15 @@
     margin-bottom: 24px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--slate-200);
-    width: 100%;
   }
 
   .page-title-group h5 {
-    font-size: 0.72rem;
+    font-size: 0.75rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--primary);
-    margin: 0 0 4px;
+    margin: 0 0 6px;
   }
 
   .page-title-group h1 {
@@ -77,7 +69,7 @@
 
   .btn-add-primary {
     background: var(--primary);
-    color: #ffffff;
+    color: #ffffff !important;
     font-size: 0.88rem;
     font-weight: 700;
     padding: 10px 20px;
@@ -103,60 +95,57 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     margin-bottom: 24px;
-    width: 100%;
   }
 
   .kpi-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 14px;
-    padding: 16px 20px;
+    border-radius: 16px;
+    padding: 18px 22px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-sizing: border-box;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   }
 
   .kpi-card .kpi-num {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--slate-900);
     line-height: 1;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
 
   .kpi-card .kpi-lbl {
     font-size: 0.78rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--slate-500);
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
 
   .kpi-card .kpi-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     background: var(--slate-100);
     color: var(--slate-700);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
 
   .directory-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
     overflow: hidden;
-    width: 100%;
-    box-sizing: border-box;
   }
 
   .directory-toolbar {
-    padding: 16px 22px;
+    padding: 18px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -173,51 +162,51 @@
   }
 
   .directory-icon-box {
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     background: var(--primary-soft);
     color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
 
   .directory-meta h3 {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0;
   }
 
   .directory-meta span {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: var(--slate-500);
   }
 
   .search-input-box {
     position: relative;
-    width: 260px;
+    width: 280px;
     max-width: 100%;
   }
 
   .search-input-box i {
     position: absolute;
-    left: 12px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--slate-400);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
   }
 
   .search-input-box input {
     width: 100%;
-    padding: 8px 12px 8px 34px;
-    font-size: 0.86rem;
+    padding: 9px 14px 9px 38px;
+    font-size: 0.88rem;
     border: 1.5px solid var(--slate-200);
-    border-radius: 9px;
+    border-radius: 10px;
     background: var(--slate-50);
     color: var(--slate-900);
     box-sizing: border-box;
@@ -240,16 +229,16 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.86rem;
+    font-size: 0.88rem;
   }
 
   .modern-data-table thead th {
-    background: var(--slate-50);
-    padding: 12px 18px;
-    font-size: 0.7rem;
+    background: #f8fafc;
+    padding: 14px 20px;
+    font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     color: var(--slate-500);
     border-bottom: 1px solid var(--slate-200);
     white-space: nowrap;
@@ -257,7 +246,7 @@
 
   .modern-data-table tbody tr {
     border-bottom: 1px solid var(--slate-100);
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
   }
 
   .modern-data-table tbody tr:hover {
@@ -265,9 +254,21 @@
   }
 
   .modern-data-table td {
-    padding: 14px 18px;
+    padding: 16px 20px;
     vertical-align: middle;
     color: var(--slate-700);
+  }
+
+  .id-pill {
+    background: var(--slate-100);
+    color: var(--slate-800);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--slate-200);
+    display: inline-block;
   }
 
   .student-profile-cell {
@@ -277,60 +278,62 @@
   }
 
   .student-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--primary), #6366f1);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #818cf8);
     color: #ffffff;
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2);
   }
 
   .student-name-col strong {
     display: block;
-    font-size: 0.92rem;
+    font-size: 0.94rem;
     font-weight: 700;
     color: var(--slate-900);
   }
 
   .student-name-col small {
     display: block;
-    font-size: 0.76rem;
+    font-size: 0.78rem;
     color: var(--slate-400);
   }
 
   .badge-dept {
     background: var(--slate-100);
     color: var(--slate-700);
-    padding: 3px 9px;
-    border-radius: 7px;
+    padding: 4px 10px;
+    border-radius: 8px;
     font-weight: 600;
     font-size: 0.78rem;
     display: inline-block;
+    border: 1px solid var(--slate-200);
   }
 
   .badge-status-active {
     background: var(--success-bg);
     color: var(--success-text);
     border: 1px solid var(--success-border);
-    padding: 2px 8px;
+    padding: 3px 9px;
     border-radius: 999px;
     font-weight: 700;
-    font-size: 0.7rem;
+    font-size: 0.72rem;
     text-transform: uppercase;
     display: inline-flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
   }
 
   .badge-status-active::before {
     content: '';
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
     background: var(--success-text);
   }
@@ -339,12 +342,12 @@
     background: #eff6ff;
     color: #2563eb;
     border: 1px solid #bfdbfe;
-    padding: 2px 7px;
+    padding: 3px 8px;
     border-radius: 6px;
     font-weight: 700;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     display: inline-block;
-    margin: 1px;
+    margin: 2px;
   }
 
   .actions-cell-wrap {
@@ -352,7 +355,27 @@
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
-    position: relative;
+  }
+
+  .btn-action-enroll {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary) !important;
+    border: 1px solid var(--primary-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+  }
+
+  .btn-action-enroll:hover {
+    background: var(--primary);
+    color: #ffffff !important;
+    transform: translateY(-1px);
   }
 
   .btn-quick-edit {
@@ -360,9 +383,9 @@
     font-size: 0.78rem;
     font-weight: 700;
     border-radius: 8px;
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
+    background: #f1f5f9;
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -371,8 +394,9 @@
   }
 
   .btn-quick-edit:hover {
-    background: #2563eb;
+    background: var(--slate-800);
     color: #ffffff;
+    border-color: var(--slate-800);
   }
 
   .btn-pwd-pill {
@@ -397,11 +421,11 @@
   }
 
   .btn-dots-menu {
-    width: 30px;
-    height: 30px;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
     background: var(--slate-100);
-    border: none;
+    border: 1px solid var(--slate-200);
     color: var(--slate-600);
     display: flex;
     align-items: center;
@@ -419,11 +443,11 @@
     display: none;
     position: absolute;
     right: 0;
-    top: 36px;
+    top: 38px;
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
     min-width: 175px;
     z-index: 50;
     padding: 6px;
@@ -433,34 +457,11 @@
     display: block;
   }
 
-  .action-menu-dropdown a.dropdown-action-link {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--primary);
-    text-decoration: none;
-    border-radius: 7px;
-    transition: all 0.15s ease;
-  }
-
-  .action-menu-dropdown a.dropdown-action-link:hover {
-    background: var(--primary-soft);
-  }
-
-  .dropdown-divider-line {
-    height: 1px;
-    background: var(--slate-200);
-    margin: 4px 0;
-  }
-
   .action-menu-dropdown button.btn-delete-action {
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 8px 12px;
+    padding: 9px 12px;
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--danger-text);
@@ -572,15 +573,16 @@
     .btn-add-primary { width: 100%; justify-content: center; }
     .directory-toolbar { flex-direction: column; align-items: stretch; }
     .search-input-box { width: 100%; }
+    .actions-cell-wrap { flex-wrap: wrap; }
   }
 </style>
 
 <div class="admin-page-shell">
   <div class="page-top-bar">
     <div class="page-title-group">
-      <h5>USER MANAGEMENT</h5>
+      <h5>User Management</h5>
       <h1>Students</h1>
-      <p>Manage student accounts, enrollment status, and academic profiles.</p>
+      <p>Manage student accounts, course enrollments, and academic records.</p>
     </div>
     <div>
       <a href="/admin/students/add" class="btn-add-primary">
@@ -635,15 +637,15 @@
       <table class="modern-data-table" id="studentsTable">
         <thead>
           <tr>
-            <th>UNIVERSITY ID</th>
-            <th>STUDENT</th>
-            <th>DEPARTMENT</th>
-            <th>LEVEL</th>
-            <th>CONTACT</th>
-            <th>STATUS</th>
-            <th>PASSWORD</th>
-            <th>COURSES</th>
-            <th style="text-align: right; padding-right: 22px;">ACTIONS</th>
+            <th>University ID</th>
+            <th>Student</th>
+            <th>Department</th>
+            <th>Level</th>
+            <th>Contact</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Courses</th>
+            <th style="text-align: right; padding-right: 22px;">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -651,7 +653,7 @@
             {% for std in students %}
             <tr>
               <td data-label="UNIVERSITY ID">
-                <span style="font-weight: 700; color: var(--slate-900);">#{{ std.university_id if std.university_id is defined and std.university_id else (std.student_id if std.student_id is defined and std.student_id else (std.id if std.id is defined else '—')) }}</span>
+                <span class="id-pill">#{{ std.university_id if std.university_id is defined and std.university_id else (std.student_id if std.student_id is defined and std.student_id else (std.id if std.id is defined else '—')) }}</span>
               </td>
 
               <td data-label="STUDENT">
@@ -712,6 +714,12 @@
 
               <td data-label="ACTIONS" style="text-align: right;">
                 <div class="actions-cell-wrap">
+                  <!-- زر Enroll المباشر -->
+                  <a href="/admin/students/{{ std.id }}/enroll" class="btn-action-enroll" title="Enroll in courses">
+                    <i class="fa-solid fa-plus"></i> Enroll
+                  </a>
+
+                  <!-- زر Edit السريع -->
                   <button type="button" class="btn-quick-edit" 
                           onclick="openEditStudentModal('{{ std.id }}', '{{ std.name_person or std.username }}', '{{ std.department or '' }}', '{{ std.academic_year or std.level or '' }}')">
                     <i class="fa-solid fa-pen"></i> Edit
@@ -722,10 +730,6 @@
                       <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                     <div id="std-menu-{{ std.id }}" class="action-menu-dropdown">
-                      <a class="dropdown-action-link" href="/admin/students/{{ std.id }}/enroll">
-                        <i class="fa-solid fa-book-open"></i> Enroll Courses
-                      </a>
-                      <div class="dropdown-divider-line"></div>
                       <form method="POST" action="/admin/students/delete/{{ std.id }}" onsubmit="return confirm('Are you sure you want to delete this student?');" style="margin: 0;">
                         <button type="submit" class="btn-delete-action">
                           <i class="fa-solid fa-trash"></i> Delete Student
