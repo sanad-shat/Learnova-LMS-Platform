@@ -403,7 +403,11 @@ def assign_courses(teacher_id):
     teacher = User.query.get_or_404(teacher_id)
     courses = Course.query.all()
     if request.method == 'POST':
-        course = Course.query.get_or_404(int(request.form['course_id']))
+        course_id = request.form.get('course_id')
+        if not course_id:
+            flash('Please select a course.', 'danger')
+            return render_template('admin/assign_courses.html', teacher=teacher, courses=courses)
+        course = Course.query.get_or_404(int(course_id))
         course.teacher_id = teacher.id
         db.session.commit()
         flash('Course assigned to teacher!', 'success')
@@ -422,16 +426,45 @@ def manage_courses():
 def add_course():
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        teacher_id = request.form.get('teacher_id')
+        # التحقق من معرّف المدرس بجميع التسميات الممكنة
+        teacher_id = (
+            request.form.get('teacher_id') or 
+            request.form.get('instructor_id') or 
+            request.form.get('assigned_instructor') or 
+            request.form.get('instructor')
+        )
         if not teacher_id:
             flash('Please select a teacher.', 'danger')
             return render_template('admin/add_course.html', teachers=teachers)
+
+        code = (
+            request.form.get('code') or 
+            request.form.get('course_code') or 
+            ''
+        ).strip()
+        name = (
+            request.form.get('name') or 
+            request.form.get('course_name') or 
+            ''
+        ).strip()
+        description = request.form.get('description', '').strip()
+        course_identifier = (
+            request.form.get('course_identifier') or 
+            request.form.get('identifier') or 
+            request.form.get('section') or 
+            ''
+        ).strip()
+
+        if not code or not name:
+            flash('Please provide both course code and course name.', 'danger')
+            return render_template('admin/add_course.html', teachers=teachers)
+
         course = Course(
-            code=request.form['code'].strip(),
-            name=request.form['name'].strip(),
-            description=request.form.get('description', ''),
+            code=code,
+            name=name,
+            description=description,
             teacher_id=int(teacher_id),
-            course_identifier=request.form.get('course_identifier', '').strip()
+            course_identifier=course_identifier
         )
         try:
             db.session.add(course)
@@ -465,14 +498,32 @@ def edit_course(course_id):
     course = Course.query.get_or_404(course_id)
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        course.code = request.form['code'].strip()
-        course.name = request.form['name'].strip()
-        course.description = request.form.get('description', '')
-        teacher_id = request.form.get('teacher_id')
-        course.teacher_id = int(teacher_id) if teacher_id else course.teacher_id
-        db.session.commit()
-        flash('Course updated successfully!', 'success')
-        return redirect(url_for('admin.manage_courses'))
+        course.code = (request.form.get('code') or request.form.get('course_code') or course.code).strip()
+        course.name = (request.form.get('name') or request.form.get('course_name') or course.name).strip()
+        course.description = request.form.get('description', course.description)
+        course.course_identifier = (
+            request.form.get('course_identifier') or 
+            request.form.get('identifier') or 
+            request.form.get('section') or 
+            course.course_identifier
+        ).strip()
+
+        teacher_id = (
+            request.form.get('teacher_id') or 
+            request.form.get('instructor_id') or 
+            request.form.get('assigned_instructor') or 
+            request.form.get('instructor')
+        )
+        if teacher_id:
+            course.teacher_id = int(teacher_id)
+
+        try:
+            db.session.commit()
+            flash('Course updated successfully!', 'success')
+            return redirect(url_for('admin.manage_courses'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Course code or identifier already exists.', 'danger')
     return render_template('admin/edit_course.html', course=course, teachers=teachers)
 
 
@@ -482,7 +533,16 @@ def assign_course(course_id):
     course = Course.query.get_or_404(course_id)
     teachers = User.query.filter_by(role='teacher').all()
     if request.method == 'POST':
-        course.teacher_id = int(request.form['teacher_id'])
+        teacher_id = (
+            request.form.get('teacher_id') or 
+            request.form.get('instructor_id') or 
+            request.form.get('assigned_instructor') or 
+            request.form.get('instructor')
+        )
+        if not teacher_id:
+            flash('Please select a teacher.', 'danger')
+            return render_template('admin/assign_course.html', course=course, teachers=teachers)
+        course.teacher_id = int(teacher_id)
         db.session.commit()
         flash('Teacher assigned successfully!', 'success')
         return redirect(url_for('admin.manage_courses'))
