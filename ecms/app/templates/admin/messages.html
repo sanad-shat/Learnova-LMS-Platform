@@ -5,6 +5,7 @@
 <style>
   :root {
     --primary: #4f46e5;
+    --primary-hover: #4338ca;
     --primary-soft: rgba(79, 70, 229, 0.08);
     --slate-900: #0f172a;
     --slate-800: #1e293b;
@@ -15,23 +16,30 @@
     --slate-200: #e2e8f0;
     --slate-100: #f1f5f9;
     --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --danger: #ef4444;
+    --danger-soft: #fef2f2;
   }
 
+  /* ضبط الحاوية الرئيسية لمحاذاة الهيدر بالكامل وإزالة الفراغ العلوي */
   .content, .app-main, main {
     padding-top: 12px !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
-  .disc-page-shell {
+  .forum-admin-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 16px 50px !important;
+    padding: 0 14px 50px !important;
     margin-top: -8px;
     box-sizing: border-box !important;
   }
 
-  .disc-header-row {
+  /* Header Section */
+  .forum-header-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -40,7 +48,7 @@
     margin-bottom: 20px;
   }
 
-  .disc-header-row h5 {
+  .forum-title-wrap h5 {
     font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -49,147 +57,869 @@
     margin: 0 0 4px;
   }
 
-  .disc-header-row h1 {
+  .forum-title-wrap h1 {
     font-size: 1.65rem;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0;
+    letter-spacing: -0.02em;
   }
 
-  .disc-table-card {
+  .forum-title-wrap p {
+    font-size: 0.85rem;
+    color: var(--slate-500);
+    margin: 4px 0 0;
+  }
+
+  .moderation-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--slate-700);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+  }
+
+  .status-dot-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-soft);
+  }
+
+  /* KPI Summary Cards */
+  .forum-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .forum-kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  }
+
+  .forum-kpi-card span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slate-500);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .forum-kpi-card strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .forum-kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* Main Moderation Panel */
+  .forum-panel {
+    width: 100%;
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
   }
 
-  .table-responsive-box {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .disc-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.85rem;
-  }
-
-  .disc-table th {
-    background: var(--slate-50);
-    padding: 13px 16px;
-    font-weight: 800;
-    color: var(--slate-500);
-    border-bottom: 1px solid var(--slate-200);
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-  }
-
-  .disc-table td {
-    padding: 14px 16px;
+  .forum-toolbar {
+    padding: 16px 20px;
     border-bottom: 1px solid var(--slate-100);
-    color: var(--slate-800);
-    vertical-align: middle;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #ffffff;
   }
 
-  .disc-table tr:hover {
+  .toolbar-left-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .toolbar-badge-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .toolbar-left-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .toolbar-left-info small {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+  }
+
+  .toolbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .forum-search-box {
+    position: relative;
+    width: 250px;
+  }
+
+  .forum-search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.84rem;
+  }
+
+  .forum-search-box input {
+    width: 100%;
+    padding: 8px 12px 8px 34px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.84rem;
+    background: var(--slate-50);
+    color: var(--slate-900);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .forum-search-box input:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .forum-filter-select {
+    padding: 8px 12px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--slate-700);
+    background: var(--slate-50);
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .forum-filter-select:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+  }
+
+  /* SaaS Grid List Header (Desktop) */
+  .forum-grid-head {
+    display: grid;
+    grid-template-columns: 2.3fr 1.3fr 1.1fr 0.7fr 1fr 90px;
+    gap: 14px;
+    padding: 12px 20px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-200);
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+  }
+
+  /* Topic Row Item */
+  .forum-topic-row {
+    display: grid;
+    grid-template-columns: 2.3fr 1.3fr 1.1fr 0.7fr 1fr 90px;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    align-items: center;
+    transition: background 0.15s ease;
+  }
+
+  .forum-topic-row:last-child {
+    border-bottom: none;
+  }
+
+  .forum-topic-row:hover {
     background: #fafbff;
   }
 
-  .badge-tag {
-    background: var(--primary-soft);
-    color: var(--primary);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.76rem;
-    font-weight: 700;
-    white-space: nowrap;
+  .topic-main-col {
+    min-width: 0;
   }
 
-  .btn-trash-action {
-    background: #fef2f2;
-    color: #dc2626;
-    border: 1px solid #fee2e2;
+  .topic-title-link {
+    display: inline-block;
+    font-size: 0.94rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin: 0 0 4px;
+    cursor: pointer;
+    transition: color 0.15s;
+    text-decoration: none;
+  }
+
+  .topic-title-link:hover {
+    color: var(--primary);
+  }
+
+  .topic-excerpt {
+    font-size: 0.8rem;
+    color: var(--slate-500);
+    margin: 0;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Author Column */
+  .author-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .author-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .author-info {
+    min-width: 0;
+  }
+
+  .author-info strong {
+    display: block;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .author-info span {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--slate-400);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Course Badge */
+  .course-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Replies Pill */
+  .replies-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    width: fit-content;
+  }
+
+  /* Date */
+  .date-cell {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+    font-weight: 500;
+  }
+
+  /* Actions */
+  .row-actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+  }
+
+  .btn-row-icon {
     width: 32px;
     height: 32px;
     border-radius: 8px;
+    border: 1px solid transparent;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    font-size: 0.82rem;
     cursor: pointer;
     transition: all 0.15s;
   }
 
-  .btn-trash-action:hover {
-    background: #dc2626;
+  .btn-view-topic {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #dbeafe;
+  }
+
+  .btn-view-topic:hover {
+    background: #2563eb;
     color: #ffffff;
+  }
+
+  .btn-delete-topic {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border-color: #fee2e2;
+  }
+
+  .btn-delete-topic:hover {
+    background: var(--danger);
+    color: #ffffff;
+  }
+
+  /* Empty State */
+  .forum-empty-state {
+    padding: 64px 20px;
+    text-align: center;
+  }
+
+  .empty-icon-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin: 0 auto 16px;
+  }
+
+  .forum-empty-state h4 {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .forum-empty-state p {
+    margin: 0 auto;
+    max-width: 420px;
+    font-size: 0.85rem;
+    color: var(--slate-500);
+    line-height: 1.5;
+  }
+
+  /* Quick Preview Modal */
+  .topic-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .topic-modal-backdrop.open {
+    display: flex;
+  }
+
+  .topic-modal-card {
+    background: #ffffff;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 600px;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+    overflow: hidden;
+    animation: modalPop 0.2s ease-out;
+  }
+
+  @keyframes modalPop {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal-card-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .modal-card-head h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .modal-close-btn {
+    background: var(--slate-100);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    color: var(--slate-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-close-btn:hover {
+    background: var(--slate-200);
+    color: var(--slate-900);
+  }
+
+  .modal-card-body {
+    padding: 22px;
+  }
+
+  .modal-meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+    font-size: 0.78rem;
+    color: var(--slate-500);
+  }
+
+  .modal-content-box {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 0.9rem;
+    color: var(--slate-800);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+
+  .modal-card-foot {
+    padding: 14px 22px;
+    border-top: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    background: var(--slate-50);
+  }
+
+  .btn-modal-secondary {
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: 1px solid var(--slate-200);
+    background: #ffffff;
+    color: var(--slate-700);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .btn-modal-danger {
+    padding: 8px 16px;
+    border-radius: 9px;
+    border: none;
+    background: var(--danger);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* =====================================================
+     Responsive Mobile & Tablet Layout (<= 992px & <= 768px)
+     ===================================================== */
+  @media (max-width: 992px) {
+    .forum-grid-head {
+      display: none;
+    }
+
+    .forum-topic-row {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .row-actions-group {
+      justify-content: flex-end;
+      padding-top: 10px;
+      border-top: 1px dashed var(--slate-200);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .forum-admin-shell {
+      padding: 0 4px 40px !important;
+    }
+
+    .forum-kpi-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    .toolbar-controls {
+      width: 100%;
+    }
+
+    .forum-search-box,
+    .forum-filter-select {
+      width: 100%;
+    }
   }
 </style>
 
-<div class="disc-page-shell">
-  <div class="disc-header-row">
-    <div>
+{% set ns = namespace(total_replies=0, courses=[]) %}
+{% if topics %}
+  {% for t in topics %}
+    {% if t.replies is defined and t.replies %}
+      {% set ns.total_replies = ns.total_replies + (t.replies|length) %}
+    {% endif %}
+    {% if t.course is defined and t.course and t.course.name not in ns.courses %}
+      {% set _ = ns.courses.append(t.course.name) %}
+    {% endif %}
+  {% endfor %}
+{% endif %}
+
+<div class="forum-admin-shell">
+  <!-- Header -->
+  <div class="forum-header-bar">
+    <div class="forum-title-wrap">
       <h5>Community Moderation</h5>
       <h1>Discussions & Community Forum</h1>
+      <p>Monitor student questions, instructor announcements, and course discussions across Learnova.</p>
+    </div>
+
+    <div class="moderation-status-pill">
+      <span class="status-dot-live"></span>
+      <span>Forum Moderation Active</span>
     </div>
   </div>
 
-  <div class="disc-table-card">
-    <div class="table-responsive-box">
-      <table class="disc-table">
-        <thead>
-          <tr>
-            <th>Topic Title</th>
-            <th>Author</th>
-            <th>Category / Course</th>
-            <th>Date Posted</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% if topics %}
-            {% for t in topics %}
-            {% set writer = t.author or t.user %}
-            {% set body_text = t.content or t.body or t.description or '' %}
-            <tr>
-              <td>
-                <strong style="display: block; font-size: 0.9rem; color: var(--slate-900);">{{ t.title or 'Untitled Topic' }}</strong>
-                <small style="color: var(--slate-500);">{{ body_text[:90] ~ '...' if body_text|length > 90 else body_text }}</small>
-              </td>
-              <td>
-                <strong>{{ (writer.name_person or writer.username) if writer else 'Learnova User' }}</strong>
-                <small style="display: block; color: var(--slate-400);">{{ writer.email if writer else '' }}</small>
-              </td>
-              <td>
-                <span class="badge-tag">{{ t.course.name if t.course else 'General Forum' }}</span>
-              </td>
-              <td style="white-space: nowrap; font-size: 0.8rem; color: var(--slate-500);">
-                {{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at and t.created_at.strftime is defined else 'Recently' }}
-              </td>
-              <td>
-                <form method="POST" action="/admin/discussions/{{ t.id }}/delete" style="margin: 0;" onsubmit="return confirm('Delete this discussion topic permanently?');">
-                  <button type="submit" class="btn-trash-action" title="Delete Topic">
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </form>
-              </td>
-            </tr>
-            {% endfor %}
-          {% else %}
-            <tr>
-              <td colspan="5" style="text-align: center; padding: 48px 16px; color: var(--slate-400);">
-                <i class="fa-solid fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block; color: #cbd5e1;"></i>
-                <p style="margin: 0; font-weight: 700; color: var(--slate-700);">No discussion topics found</p>
-                <small>Forum topics created across courses will appear here for admin moderation.</small>
-              </td>
-            </tr>
-          {% endif %}
-        </tbody>
-      </table>
+  <!-- KPI Cards -->
+  <div class="forum-kpi-grid">
+    <div class="forum-kpi-card">
+      <div>
+        <span>Total Discussions</span>
+        <strong>{{ topics|length if topics else 0 }}</strong>
+      </div>
+      <div class="forum-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
+        <i class="fa-solid fa-comments"></i>
+      </div>
+    </div>
+
+    <div class="forum-kpi-card">
+      <div>
+        <span>Community Replies</span>
+        <strong>{{ ns.total_replies }}</strong>
+      </div>
+      <div class="forum-kpi-icon" style="background: var(--success-soft); color: var(--success);">
+        <i class="fa-solid fa-reply-all"></i>
+      </div>
+    </div>
+
+    <div class="forum-kpi-card">
+      <div>
+        <span>Active Courses</span>
+        <strong>{{ ns.courses|length }}</strong>
+      </div>
+      <div class="forum-kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+        <i class="fa-solid fa-layer-group"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Forum Feed Panel -->
+  <div class="forum-panel">
+    <div class="forum-toolbar">
+      <div class="toolbar-left-info">
+        <div class="toolbar-badge-icon">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h3>Discussion Feed</h3>
+          <small id="visibleTopicsCount">{{ topics|length if topics else 0 }} topics listed</small>
+        </div>
+      </div>
+
+      <div class="toolbar-controls">
+        <div class="forum-search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="forumSearchInput" placeholder="Search topics, authors..." onkeyup="filterForumTopics()">
+        </div>
+
+        <select id="forumCourseFilter" class="forum-filter-select" onchange="filterForumTopics()">
+          <option value="all">All Categories & Courses</option>
+          <option value="General Forum">General Forum</option>
+          {% for cname in ns.courses %}
+            <option value="{{ cname }}">{{ cname }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    {% if topics %}
+      <div class="forum-grid-head">
+        <div>Topic & Preview</div>
+        <div>Author</div>
+        <div>Category / Course</div>
+        <div>Replies</div>
+        <div>Date Posted</div>
+        <div style="text-align: right;">Actions</div>
+      </div>
+
+      <div id="forumTopicsList">
+        {% for t in topics %}
+          {% set writer = t.author if (t.author is defined and t.author) else (t.user if (t.user is defined and t.user) else none) %}
+          {% set writer_name = (writer.name_person or writer.username) if writer else 'Learnova User' %}
+          {% set writer_email = writer.email if (writer and writer.email is defined) else '' %}
+          {% set body_text = t.content if (t.content is defined and t.content) else (t.body if (t.body is defined and t.body) else (t.description if (t.description is defined and t.description) else '')) %}
+          {% set course_name = t.course.name if (t.course is defined and t.course) else 'General Forum' %}
+          {% set reply_count = t.replies|length if (t.replies is defined and t.replies) else 0 %}
+          {% set posted_date = t.created_at.strftime('%d %b %Y, %H:%M') if (t.created_at is defined and t.created_at and t.created_at.strftime is defined) else 'Recently' %}
+
+          <div class="forum-topic-row" data-course="{{ course_name|e }}">
+            <div class="topic-main-col">
+              <a class="topic-title-link"
+                 onclick="openTopicPreview(this)"
+                 data-id="{{ t.id }}"
+                 data-title="{{ (t.title or 'Untitled Topic')|e }}"
+                 data-author="{{ writer_name|e }}"
+                 data-course="{{ course_name|e }}"
+                 data-date="{{ posted_date|e }}"
+                 data-body="{{ body_text|e }}">
+                {{ t.title or 'Untitled Topic' }}
+              </a>
+              <p class="topic-excerpt">{{ body_text or 'No additional description provided.' }}</p>
+            </div>
+
+            <div class="author-cell">
+              <div class="author-avatar">{{ writer_name[0]|upper }}</div>
+              <div class="author-info">
+                <strong>{{ writer_name }}</strong>
+                <span>{{ writer_email or 'Platform Member' }}</span>
+              </div>
+            </div>
+
+            <div>
+              <span class="course-pill" title="{{ course_name }}">
+                <i class="fa-solid fa-book-bookmark"></i> {{ course_name }}
+              </span>
+            </div>
+
+            <div>
+              <span class="replies-pill">
+                <i class="fa-regular fa-comment"></i> {{ reply_count }}
+              </span>
+            </div>
+
+            <div class="date-cell">
+              <i class="fa-regular fa-clock" style="margin-right: 4px; color: var(--slate-400);"></i>{{ posted_date }}
+            </div>
+
+            <div class="row-actions-group">
+              <button type="button"
+                      class="btn-row-icon btn-view-topic"
+                      title="Read Full Topic"
+                      onclick="openTopicPreview(this)"
+                      data-id="{{ t.id }}"
+                      data-title="{{ (t.title or 'Untitled Topic')|e }}"
+                      data-author="{{ writer_name|e }}"
+                      data-course="{{ course_name|e }}"
+                      data-date="{{ posted_date|e }}"
+                      data-body="{{ body_text|e }}">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+
+              <form method="POST" action="/admin/discussions/{{ t.id }}/delete" style="margin: 0;" onsubmit="return confirm('Delete this discussion topic permanently?');">
+                <button type="submit" class="btn-row-icon btn-delete-topic" title="Delete Topic">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div id="noFilterMatchState" class="forum-empty-state" style="display: none;">
+        <div class="empty-icon-circle">
+          <i class="fa-solid fa-filter-circle-xmark"></i>
+        </div>
+        <h4>No matching discussions</h4>
+        <p>Try adjusting your search keywords or selecting another course filter.</p>
+      </div>
+    {% else %}
+      <div class="forum-empty-state">
+        <div class="empty-icon-circle">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <h4>No discussion topics yet</h4>
+        <p>When students or instructors start discussions inside courses or the community forum, they will appear here for moderation.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Quick-Read Topic Modal -->
+<div class="topic-modal-backdrop" id="topicPreviewModal" onclick="if(event.target === this) closeTopicPreview()">
+  <div class="topic-modal-card">
+    <div class="modal-card-head">
+      <h3 id="modalTopicTitle">Topic Details</h3>
+      <button type="button" class="modal-close-btn" onclick="closeTopicPreview()" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="modal-card-body">
+      <div class="modal-meta-strip">
+        <span><i class="fa-solid fa-user"></i> <strong id="modalTopicAuthor"></strong></span>
+        <span>•</span>
+        <span><i class="fa-solid fa-book"></i> <span id="modalTopicCourse"></span></span>
+        <span>•</span>
+        <span><i class="fa-regular fa-clock"></i> <span id="modalTopicDate"></span></span>
+      </div>
+      <div class="modal-content-box" id="modalTopicBody"></div>
+    </div>
+    <div class="modal-card-foot">
+      <button type="button" class="btn-modal-secondary" onclick="closeTopicPreview()">Close</button>
+      <form id="modalDeleteForm" method="POST" action="" style="margin: 0;" onsubmit="return confirm('Delete this discussion topic permanently?');">
+        <button type="submit" class="btn-modal-danger">
+          <i class="fa-solid fa-trash-can"></i> Delete Topic
+        </button>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+  function filterForumTopics() {
+    const query = (document.getElementById('forumSearchInput')?.value || '').toLowerCase().trim();
+    const courseFilter = document.getElementById('forumCourseFilter')?.value || 'all';
+    const rows = document.querySelectorAll('#forumTopicsList .forum-topic-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      const rowCourse = row.getAttribute('data-course') || '';
+      const matchesQuery = !query || text.includes(query);
+      const matchesCourse = (courseFilter === 'all') || (rowCourse === courseFilter);
+
+      if (matchesQuery && matchesCourse) {
+        row.style.display = '';
+        visibleCount++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    const countLabel = document.getElementById('visibleTopicsCount');
+    if (countLabel) {
+      countLabel.textContent = visibleCount + ' topic' + (visibleCount !== 1 ? 's' : '') + ' listed';
+    }
+
+    const noMatchBox = document.getElementById('noFilterMatchState');
+    if (noMatchBox) {
+      noMatchBox.style.display = (rows.length > 0 && visibleCount === 0) ? 'block' : 'none';
+    }
+  }
+
+  function openTopicPreview(el) {
+    const id = el.getAttribute('data-id');
+    const title = el.getAttribute('data-title') || 'Untitled Topic';
+    const author = el.getAttribute('data-author') || 'Learnova User';
+    const course = el.getAttribute('data-course') || 'General Forum';
+    const date = el.getAttribute('data-date') || 'Recently';
+    const body = el.getAttribute('data-body') || 'No content provided.';
+
+    document.getElementById('modalTopicTitle').textContent = title;
+    document.getElementById('modalTopicAuthor').textContent = author;
+    document.getElementById('modalTopicCourse').textContent = course;
+    document.getElementById('modalTopicDate').textContent = date;
+    document.getElementById('modalTopicBody').textContent = body;
+    document.getElementById('modalDeleteForm').action = '/admin/discussions/' + id + '/delete';
+
+    document.getElementById('topicPreviewModal').classList.add('open');
+  }
+
+  function closeTopicPreview() {
+    document.getElementById('topicPreviewModal').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      closeTopicPreview();
+    }
+  });
+</script>
 {% endblock %}
