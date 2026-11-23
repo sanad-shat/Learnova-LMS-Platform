@@ -1,28 +1,695 @@
-{% extends "admin/base.html" %}
+{% extends 'admin/base.html' %}
+{% block title %}Enrolled Students - {{ course.name if (course is defined and course.name) else 'Course' }} | Learnova Admin{% endblock %}
 
 {% block content %}
-<h2>Students in {{ course.name }}</h2>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-hover: #4338ca;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+  }
 
-<table>
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Student Name</th>
+  .app-main {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  main.content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 24px 50px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .course-students-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin-top: -4px;
+    box-sizing: border-box !important;
+  }
+
+  /* ترويسة وتذييل ملف الـ PDF الرسمي */
+  .pdf-official-letterhead {
+    display: none;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-top: 4px solid var(--primary);
+    border-radius: 14px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
+    box-sizing: border-box;
+  }
+
+  .pdf-lh-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--slate-200);
+  }
+
+  .pdf-brand-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .pdf-logo-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pdf-brand-text strong {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1.15;
+  }
+
+  .pdf-brand-text strong b {
+    color: var(--primary);
+  }
+
+  .pdf-brand-text span {
+    display: block;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--slate-500);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .pdf-doc-meta {
+    text-align: right;
+    font-size: 0.75rem;
+    color: var(--slate-600);
+    line-height: 1.5;
+  }
+
+  .pdf-doc-badge {
+    display: inline-block;
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+
+  .pdf-official-footer {
+    display: none;
+    margin-top: 20px;
+    padding-top: 12px;
+    border-top: 1px solid var(--slate-200);
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
+    color: var(--slate-500);
+  }
+
+  /* Header Bar */
+  .cs-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .cs-title-group h5 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .cs-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .cs-title-row h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .cs-code-pill {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .cs-actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-back-courses {
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1.5px solid var(--slate-200);
+    color: var(--slate-700);
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.15s;
+  }
+
+  .btn-back-courses:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--primary-soft);
+  }
+
+  .btn-export-roster {
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 10px;
+    background: var(--primary);
+    border: none;
+    color: #ffffff;
+    font-size: 0.83rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
+    transition: all 0.15s;
+  }
+
+  .btn-export-roster:hover {
+    background: var(--primary-hover);
+  }
+
+  /* KPI Cards */
+  .cs-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+
+  .cs-kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  }
+
+  .cs-kpi-card span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slate-500);
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .cs-kpi-card strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .cs-kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  /* Table Panel */
+  .cs-table-panel {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--slate-200);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+    overflow: hidden;
+  }
+
+  .cs-toolbar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cs-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cs-toolbar-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .cs-toolbar-left h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .cs-toolbar-left small {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+  }
+
+  .cs-search-box {
+    position: relative;
+    width: 260px;
+    max-width: 100%;
+  }
+
+  .cs-search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.84rem;
+  }
+
+  .cs-search-box input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 34px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.84rem;
+    background: var(--slate-50);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .cs-search-box input:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+  }
+
+  .table-scroll-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .cs-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.84rem;
+  }
+
+  .cs-data-table th {
+    background: var(--slate-50);
+    padding: 12px 18px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--slate-200);
+    white-space: nowrap;
+  }
+
+  .cs-data-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-800);
+    vertical-align: middle;
+  }
+
+  .cs-data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .cs-data-table tr:hover {
+    background: #fafbff;
+  }
+
+  .student-row-info {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .st-avatar-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .st-name-stack strong {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--slate-900);
+  }
+
+  .st-name-stack span {
+    font-size: 0.75rem;
+    color: var(--slate-400);
+  }
+
+  .grade-score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  .enrolled-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: var(--success-soft);
+    color: var(--success);
+  }
+
+  @media (max-width: 768px) {
+    main.content {
+      padding: 12px 12px 40px !important;
+    }
+    .cs-kpi-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .cs-actions-wrap {
+      width: 100%;
+    }
+    .btn-back-courses, .btn-export-roster {
+      flex: 1;
+      justify-content: center;
+    }
+    .cs-search-box {
+      width: 100%;
+    }
+  }
+</style>
+
+{# التقاط المتغير student_data القادم من دالة course_students في admin.py #}
+{% set student_rows = (
+  student_data|list if (student_data is defined and student_data is iterable and student_data is not string and student_data is not mapping) else (
+  students|list if (students is defined and students is iterable and students is not string and students is not mapping) else []
+)) %}
+
+{% set ns = namespace(grade_sum=0) %}
+{% for item in student_rows %}
+  {% if item is mapping %}
+    {% set g = item.get('total_grade') if item.get('total_grade') is not none else 0 %}
+  {% else %}
+    {% set g = item.total_grade if (item.total_grade is defined and item.total_grade is not none) else 0 %}
+  {% endif %}
+  {% set ns.grade_sum = ns.grade_sum + (g|float) %}
+{% endfor %}
+{% set avg_grade = ((ns.grade_sum / student_rows|length)|round(1)) if student_rows|length > 0 else 0 %}
+
+<div class="course-students-shell" id="courseRosterPrintable">
+  <!-- ترويسة PDF الرسمية -->
+  <div class="pdf-official-letterhead" id="rosterPdfHeader">
+    <div class="pdf-lh-top">
+      <div class="pdf-brand-block">
+        <div class="pdf-logo-badge">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FFFFFF"/>
+            <path d="M5 10.5V16.5C5 18.433 8.13401 20 12 20C15.866 20 19 18.433 19 16.5V10.5L12 14L5 10.5Z" fill="#E0E7FF"/>
+            <path d="M21 8V14" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="pdf-brand-text">
+          <strong>Learnova <b>LMS</b></strong>
+          <span>LEARN. GROW. SUCCEED.</span>
+        </div>
+      </div>
+
+      <div class="pdf-doc-meta">
+        <div class="pdf-doc-badge">Course Enrollment Roster</div>
+        <div><strong>Generated:</strong> <span id="rosterPdfDate">—</span></div>
+        <div><strong>Issued By:</strong> Academic Administration</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="cs-header-bar">
+    <div class="cs-title-group">
+      <h5>Course Enrollment Roster</h5>
+      <div class="cs-title-row">
+        <h1>Students in {{ course.name if (course is defined and course.name) else 'Course' }}</h1>
+        {% if course is defined and course.code %}
+          <span class="cs-code-pill">{{ course.code }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="cs-actions-wrap" data-html2canvas-ignore="true">
+      <a href="{{ url_for('admin.manage_courses') }}" class="btn-back-courses">
+        <i class="fa-solid fa-arrow-left"></i> Back to Courses
+      </a>
+      <button type="button" class="btn-export-roster" onclick="exportRosterPDF()">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="cs-kpi-grid">
+    <div class="cs-kpi-card">
+      <div>
+        <span>Enrolled Students</span>
+        <strong>{{ student_rows|length }}</strong>
+      </div>
+      <div class="cs-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
+        <i class="fa-solid fa-users"></i>
+      </div>
+    </div>
+
+    <div class="cs-kpi-card">
+      <div>
+        <span>Course Average Grade</span>
+        <strong>{{ avg_grade }}</strong>
+      </div>
+      <div class="cs-kpi-icon" style="background: var(--success-soft); color: var(--success);">
+        <i class="fa-solid fa-chart-simple"></i>
+      </div>
+    </div>
+
+    <div class="cs-kpi-card">
+      <div>
+        <span>Enrollment Status</span>
+        <strong>Active</strong>
+      </div>
+      <div class="cs-kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Table -->
+  <div class="cs-table-panel">
+    <div class="cs-toolbar">
+      <div class="cs-toolbar-left">
+        <div class="cs-toolbar-icon">
+          <i class="fa-solid fa-user-graduate"></i>
+        </div>
+        <div>
+          <h3>Enrolled Students</h3>
+          <small>{{ student_rows|length }} student(s) currently enrolled</small>
+        </div>
+      </div>
+
+      <div class="cs-search-box" data-html2canvas-ignore="true">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="rosterSearchInput" placeholder="Search name, ID, or email..." onkeyup="filterCourseRoster()">
+      </div>
+    </div>
+
+    <div class="table-scroll-wrap">
+      <table class="cs-data-table" id="courseRosterTable">
+        <thead>
+          <tr>
+            <th style="width: 60px;">#</th>
+            <th>Student</th>
             <th>Email</th>
-            <th>Total Grade</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for data in student_data %}
-        <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ data.student.username }}</td>
-            <td>{{ data.student.email }}</td>
-            <td>{{ data.total_grade }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <th>Status</th>
+            <th style="text-align: right;">Total Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if student_rows %}
+            {% for item in student_rows %}
+              {% set st = item.get('student') if (item is mapping) else item %}
+              {% set grade_val = (item.get('total_grade') if (item is mapping and item.get('total_grade') is not none) else 0) %}
+              {% set raw_name = (st.name_person if (st is not none and st.name_person is defined and st.name_person) else (st.username if (st is not none and st.username is defined and st.username) else '')) %}
+              {% set display_name = (raw_name|string) if raw_name else 'Student' %}
+              {% set sub_username = (st.username|string) if (st is not none and st.username is defined and st.username and (st.username|string) != display_name) else '' %}
+              {% set st_email = (st.email|string) if (st is not none and st.email is defined and st.email) else '—' %}
 
-<a href="{{ url_for('admin.manage_courses') }}">Back to Courses</a>
+              <tr>
+                <td style="font-weight: 700; color: var(--slate-400);">{{ loop.index }}</td>
+                <td>
+                  <div class="student-row-info">
+                    <div class="st-avatar-box">{{ display_name[0]|upper }}</div>
+                    <div class="st-name-stack">
+                      <strong>{{ display_name }}</strong>
+                      {% if sub_username %}<span>@{{ sub_username }}</span>{% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td style="color: var(--slate-600);">{{ st_email }}</td>
+                <td><span class="enrolled-status-pill">● Enrolled</span></td>
+                <td style="text-align: right;">
+                  <span class="grade-score-badge">{{ grade_val }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 44px 16px; color: var(--slate-400);">
+                No students are enrolled in this course yet.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- تذييل PDF الرسمي -->
+  <div class="pdf-official-footer" id="rosterPdfFooter">
+    <span>© Learnova LMS • Official Course Roster</span>
+    <span>Confidential — Academic Administration</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+  function filterCourseRoster() {
+    const query = (document.getElementById('rosterSearchInput')?.value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#courseRosterTable tbody tr');
+    rows.forEach(row => {
+      row.style.display = (!query || row.textContent.toLowerCase().includes(query)) ? '' : 'none';
+    });
+  }
+
+  function exportRosterPDF() {
+    const element = document.getElementById('courseRosterPrintable');
+    const pdfHeader = document.getElementById('rosterPdfHeader');
+    const pdfFooter = document.getElementById('rosterPdfFooter');
+
+    const now = new Date();
+    const dateEl = document.getElementById('rosterPdfDate');
+    if (dateEl) {
+      dateEl.textContent = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      return;
+    }
+
+    if (pdfHeader) pdfHeader.style.display = 'block';
+    if (pdfFooter) pdfFooter.style.display = 'flex';
+    element.style.background = '#ffffff';
+    element.style.padding = '12px';
+
+    html2pdf().set({
+      margin: [8, 8, 8, 8],
+      filename: '{{ (course.code if (course is defined and course.code) else "Course") }}_Students_Roster.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(element).save().then(function () {
+      if (pdfHeader) pdfHeader.style.display = 'none';
+      if (pdfFooter) pdfFooter.style.display = 'none';
+      element.style.background = '';
+      element.style.padding = '';
+    });
+  }
+</script>
 {% endblock %}
