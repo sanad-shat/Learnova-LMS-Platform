@@ -22,10 +22,17 @@
     --danger-soft: #fef2f2;
   }
 
-  /* ضبط الحاوية الرئيسية لمحاذاة الهيدر بالكامل وإزالة الفراغ العلوي */
-  .content, .app-main, main {
-    padding-top: 12px !important;
+  /* توسيع الحاوية الرئيسية لمحاذاة الحافة اليمنى أسفل Admin User بالكامل */
+  .app-main {
     max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  main.content {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px 24px 50px !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;
   }
@@ -33,8 +40,8 @@
   .forum-admin-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 14px 50px !important;
-    margin-top: -8px;
+    padding: 0 !important;
+    margin-top: -4px;
     box-sizing: border-box !important;
   }
 
@@ -83,6 +90,7 @@
     font-weight: 700;
     color: var(--slate-700);
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    white-space: nowrap;
   }
 
   .status-dot-live {
@@ -110,6 +118,7 @@
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    min-width: 0;
   }
 
   .forum-kpi-card span {
@@ -176,6 +185,7 @@
     align-items: center;
     justify-content: center;
     font-size: 1rem;
+    flex-shrink: 0;
   }
 
   .toolbar-left-info h3 {
@@ -190,16 +200,18 @@
     color: var(--slate-500);
   }
 
+  /* إبقاء حقل البحث والقائمة المنسدلة في صف واحد على سطح المكتب */
   .toolbar-controls {
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .forum-search-box {
     position: relative;
-    width: 250px;
+    width: 240px !important;
+    flex-shrink: 0;
   }
 
   .forum-search-box i {
@@ -209,11 +221,13 @@
     transform: translateY(-50%);
     color: var(--slate-400);
     font-size: 0.84rem;
+    pointer-events: none;
   }
 
   .forum-search-box input {
     width: 100%;
-    padding: 8px 12px 8px 34px;
+    height: 38px;
+    padding: 0 12px 0 34px;
     border: 1.5px solid var(--slate-200);
     border-radius: 10px;
     font-size: 0.84rem;
@@ -230,21 +244,27 @@
   }
 
   .forum-filter-select {
-    padding: 8px 12px;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 10px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: var(--slate-700);
-    background: var(--slate-50);
+    width: auto !important;
+    min-width: 195px;
+    max-width: 240px;
+    height: 38px;
+    margin: 0 !important;
+    padding: 0 32px 0 12px !important;
+    border: 1.5px solid var(--slate-200) !important;
+    border-radius: 10px !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    color: var(--slate-700) !important;
+    background-color: var(--slate-50) !important;
     outline: none;
     cursor: pointer;
+    flex-shrink: 0;
     transition: all 0.2s;
   }
 
   .forum-filter-select:focus {
-    border-color: var(--primary);
-    background: #ffffff;
+    border-color: var(--primary) !important;
+    background-color: #ffffff !important;
   }
 
   /* SaaS Grid List Header (Desktop) */
@@ -621,8 +641,8 @@
   }
 
   @media (max-width: 768px) {
-    .forum-admin-shell {
-      padding: 0 4px 40px !important;
+    main.content {
+      padding: 12px 12px 40px !important;
     }
 
     .forum-kpi-grid {
@@ -631,12 +651,14 @@
     }
 
     .toolbar-controls {
+      flex-wrap: wrap;
       width: 100%;
     }
 
     .forum-search-box,
     .forum-filter-select {
-      width: 100%;
+      width: 100% !important;
+      max-width: 100% !important;
     }
   }
 </style>
