@@ -450,10 +450,10 @@
         gap: 10px;
       }
       .search-box {
-        display: none; /* إخفاء البحث الثابت من الهيدر لتوفير المساحة */
+        display: none;
       }
       .profile-copy {
-        display: none; /* إخفاء اسم الأدمن الفرعي لإبقاء الهيدر نظيفاً */
+        display: none;
       }
       .profile-chip {
         padding: 3px;
@@ -586,7 +586,7 @@
         <a href="{{ url_for('admin.certificates') }}" class="{% if 'certificate' in request.endpoint %}active{% endif %}">
           <i class="fa-solid fa-award"></i> Certificates
         </a>
-        <a href="{{ url_for('forum.index') }}">
+        <a href="{{ url_for('admin.messages') }}" class="{% if request.endpoint in ['admin.messages', 'admin.discussions'] %}active{% endif %}">
           <i class="fa-solid fa-comments"></i> Discussions
         </a>
         <a href="{{ url_for('admin.reports_teachers') }}" class="{% if request.endpoint=='admin.reports_teachers' %}active{% endif %}">
