@@ -24,17 +24,20 @@
     --danger-soft: #fef2f2;
   }
 
-  /* إلغاء المسافة الفارغة تحت الهيدر مباشرة */
+  /* ضبط عرض الحاوية الرئيسية لمنع التمدد خارج الشاشة وإزالة الفراغ العلوي */
   .content, .app-main, main {
     padding-top: 12px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
   .teachers-page-shell {
-    width: 100%;
-    max-width: 100%;
-    padding: 0 20px 50px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 14px 50px !important;
     margin-top: -8px;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
     overflow-x: hidden;
   }
 
@@ -44,8 +47,8 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 18px;
   }
 
   .page-title-block h5 {
@@ -58,7 +61,7 @@
   }
 
   .page-title-block h1 {
-    font-size: 1.65rem;
+    font-size: 1.6rem;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0;
@@ -68,16 +71,17 @@
   .btn-add-primary {
     background: var(--primary);
     color: #ffffff !important;
-    padding: 10px 18px;
+    padding: 9px 16px;
     border-radius: 10px;
-    font-size: 0.85rem;
+    font-size: 0.83rem;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
     transition: all 0.2s ease;
+    white-space: nowrap;
   }
 
   .btn-add-primary:hover {
@@ -88,24 +92,25 @@
   /* KPI Summary Cards */
   .kpi-summary-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 22px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
   .kpi-box {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 14px;
-    padding: 16px 20px;
+    padding: 15px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    min-width: 0;
   }
 
   .kpi-box span {
-    font-size: 0.74rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     color: var(--slate-500);
@@ -114,19 +119,20 @@
   }
 
   .kpi-box strong {
-    font-size: 1.5rem;
+    font-size: 1.45rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .kpi-icon {
-    width: 42px;
-    height: 42px;
+    width: 40px;
+    height: 40px;
     border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    flex-shrink: 0;
   }
 
   /* Main Table Panel */
@@ -137,10 +143,11 @@
     box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
     overflow: hidden;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .directory-toolbar {
-    padding: 16px 20px;
+    padding: 14px 18px;
     border-bottom: 1px solid var(--slate-100);
     display: flex;
     justify-content: space-between;
@@ -152,54 +159,54 @@
   .toolbar-title {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
 
   .toolbar-title-icon {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
     background: var(--primary-soft);
     color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .toolbar-title h3 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 0.98rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .toolbar-title small {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     color: var(--slate-500);
   }
 
   .search-input-wrap {
     position: relative;
-    width: 260px;
+    width: 240px;
     max-width: 100%;
   }
 
   .search-input-wrap i {
     position: absolute;
-    left: 12px;
+    left: 11px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--slate-400);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
   }
 
   .search-input-wrap input {
     width: 100%;
-    padding: 8px 12px 8px 34px;
+    padding: 8px 12px 8px 32px;
     border: 1.5px solid var(--slate-200);
     border-radius: 10px;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     background: var(--slate-50);
     outline: none;
     box-sizing: border-box;
@@ -222,23 +229,23 @@
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.83rem;
+    font-size: 0.81rem;
   }
 
   .teachers-table th {
     background: var(--slate-50);
-    padding: 12px 14px;
-    font-size: 0.7rem;
+    padding: 11px 10px;
+    font-size: 0.68rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     color: var(--slate-500);
     border-bottom: 1px solid var(--slate-200);
     white-space: nowrap;
   }
 
   .teachers-table td {
-    padding: 12px 14px;
+    padding: 11px 10px;
     border-bottom: 1px solid var(--slate-100);
     vertical-align: middle;
     color: var(--slate-700);
@@ -252,10 +259,10 @@
   .emp-badge {
     font-family: monospace;
     font-weight: 700;
-    font-size: 0.78rem;
+    font-size: 0.75rem;
     background: var(--slate-100);
     color: var(--slate-700);
-    padding: 4px 8px;
+    padding: 4px 7px;
     border-radius: 6px;
     white-space: nowrap;
   }
@@ -263,18 +270,18 @@
   .teacher-cell-flex {
     display: flex;
     align-items: center;
-    gap: 10px;
-    min-width: 170px;
+    gap: 8px;
+    min-width: 145px;
   }
 
   .avatar-circle {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
     color: #ffffff;
     font-weight: 800;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -283,14 +290,14 @@
 
   .teacher-name-meta strong {
     display: block;
-    font-size: 0.86rem;
+    font-size: 0.84rem;
     font-weight: 700;
     color: var(--slate-900);
     line-height: 1.25;
   }
 
   .teacher-name-meta span {
-    font-size: 0.75rem;
+    font-size: 0.73rem;
     color: var(--slate-400);
   }
 
@@ -299,15 +306,15 @@
     background: var(--slate-100);
     color: var(--slate-700);
     font-weight: 600;
-    font-size: 0.75rem;
-    padding: 4px 9px;
+    font-size: 0.74rem;
+    padding: 4px 8px;
     border-radius: 6px;
     line-height: 1.3;
-    max-width: 130px;
+    max-width: 115px;
   }
 
   .rank-stack {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     line-height: 1.35;
     white-space: nowrap;
   }
@@ -320,11 +327,11 @@
 
   .rank-stack span {
     color: var(--slate-400);
-    font-size: 0.72rem;
+    font-size: 0.71rem;
   }
 
   .contact-stack {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     line-height: 1.35;
   }
 
@@ -336,16 +343,16 @@
 
   .contact-stack span {
     color: var(--slate-400);
-    font-size: 0.73rem;
+    font-size: 0.71rem;
   }
 
   .status-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 3px 9px;
+    gap: 4px;
+    padding: 3px 8px;
     border-radius: 999px;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 800;
     text-transform: uppercase;
     background: var(--success-soft);
@@ -356,13 +363,13 @@
   .pwd-box {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     white-space: nowrap;
   }
 
   .pwd-text {
     font-family: monospace;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--slate-700);
   }
 
@@ -371,8 +378,8 @@
     color: #b45309;
     border: 1px solid #fde68a;
     border-radius: 5px;
-    padding: 2px 7px;
-    font-size: 0.7rem;
+    padding: 2px 6px;
+    font-size: 0.68rem;
     font-weight: 700;
     cursor: pointer;
   }
@@ -381,13 +388,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
-    max-width: 145px;
+    max-width: 120px;
   }
 
   .course-code-tag {
     background: var(--primary-soft);
     color: var(--primary);
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 5px;
@@ -398,9 +405,9 @@
     background: #eef2ff;
     color: var(--primary);
     border: 1px dashed #a5b4fc;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 5px;
     text-decoration: none;
     white-space: nowrap;
@@ -416,18 +423,18 @@
   .actions-btn-group {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     white-space: nowrap;
   }
 
   .act-icon-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     border: 1px solid transparent;
     text-decoration: none;
     cursor: pointer;
