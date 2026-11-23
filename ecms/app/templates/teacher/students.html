@@ -14,17 +14,29 @@
     --text-muted: #94a3b8;
     --border-normal: #e2e8f0;
     --border-subtle: #f1f5f9;
-    --radius-xl: 20px;
+    --radius-xl: 18px;
     --radius-lg: 14px;
     --radius-md: 10px;
-    --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
     --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
   }
 
+  /* إخفاء شريط التمرير الرفيع بجانب القائمة الجانبية */
+  aside, .sidebar {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  aside::-webkit-scrollbar, .sidebar::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+  }
+
   .students-page-wrapper {
-    max-width: 1440px;
+    width: 100% !important;
+    max-width: 100% !important;
     margin: 0 auto;
-    padding: 24px 28px 60px;
+    padding: 16px 24px 40px !important;
+    box-sizing: border-box;
   }
 
   /* ---------------- Header Banner ---------------- */
@@ -32,15 +44,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
-    gap: 16px;
+    gap: 12px;
   }
   .header-titles h1 {
-    font-size: 24px;
+    font-size: 23px;
     font-weight: 800;
     color: var(--text-primary);
-    margin: 0 0 4px;
+    margin: 0 0 2px;
     letter-spacing: -0.4px;
   }
   .header-titles p {
@@ -49,92 +61,103 @@
     margin: 0;
   }
   .total-count-pill {
+    height: 36px;
     background: #ffffff;
     border: 1px solid var(--border-normal);
-    padding: 8px 18px;
+    padding: 0 15px;
     border-radius: 30px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
     gap: 8px;
     box-shadow: var(--shadow-card);
+    white-space: nowrap;
   }
 
   /* ---------------- KPI Overview Cards ---------------- */
   .kpi-metrics-row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-    margin-bottom: 26px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
   }
   .kpi-card {
     background: var(--card-bg);
     border: 1px solid var(--border-normal);
     border-radius: var(--radius-lg);
-    padding: 18px 22px;
+    padding: 13px 16px;
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 13px;
     box-shadow: var(--shadow-card);
   }
   .kpi-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 16px;
     flex-shrink: 0;
   }
   .kpi-text h3 {
-    font-size: 22px;
+    font-size: 19px;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0 0 2px;
+    line-height: 1.1;
   }
   .kpi-text p {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: var(--text-muted);
     margin: 0;
   }
 
-  /* ---------------- Search & Filter Box ---------------- */
-  .table-toolbar-card {
+  /* ---------------- Students Table Card & Toolbar ---------------- */
+  .main-table-card {
+    width: 100%;
     background: var(--card-bg);
     border: 1px solid var(--border-normal);
     border-radius: var(--radius-xl);
-    padding: 18px 24px;
-    margin-bottom: 20px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+  .table-toolbar-inside {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border-subtle);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 16px;
-    box-shadow: var(--shadow-card);
+    gap: 12px;
+    background: #ffffff;
     flex-wrap: wrap;
   }
   .search-input-box {
     position: relative;
-    flex: 1;
-    max-width: 420px;
+    width: 320px;
+    max-width: 100%;
   }
   .search-input-box i {
     position: absolute;
-    left: 14px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: 13px;
+    pointer-events: none;
   }
   .search-input-box input {
     width: 100%;
+    height: 35px;
     border: 1.5px solid var(--border-normal);
-    border-radius: 30px;
-    padding: 10px 16px 10px 38px;
-    font-size: 13px;
+    border-radius: var(--radius-md);
+    padding: 0 14px 0 34px;
+    font-size: 12.5px;
+    color: var(--text-primary);
     outline: none;
     transition: all 0.2s;
   }
@@ -143,39 +166,36 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
   }
 
-  /* ---------------- Students Table ---------------- */
-  .main-table-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-normal);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-card);
-    overflow: hidden;
-  }
   .students-table-wrap {
     width: 100%;
     overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .students-table-wrap::-webkit-scrollbar {
+    display: none;
   }
   .students-data-table {
     width: 100%;
-    min-width: 900px;
     border-collapse: collapse;
     text-align: left;
   }
   .students-data-table th {
     background: #f8fafc;
-    padding: 16px 24px;
-    font-size: 11px;
+    padding: 10px 16px;
+    font-size: 10.5px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.5px;
     color: var(--text-muted);
     border-bottom: 1px solid var(--border-normal);
+    white-space: nowrap;
   }
   .students-data-table td {
-    padding: 18px 24px;
+    padding: 11px 16px;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-subtle);
-    font-size: 13px;
+    font-size: 12.5px;
     color: var(--text-secondary);
   }
   .students-data-table tr:hover td {
@@ -189,15 +209,15 @@
   .student-user-cell {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
   .student-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #2563eb, #3b82f6);
     color: #ffffff;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 800;
     display: flex;
     align-items: center;
@@ -206,49 +226,52 @@
   }
   .student-name-block strong {
     display: block;
-    font-size: 14px;
+    font-size: 13.5px;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
   .student-name-block span {
-    font-size: 12px;
+    font-size: 11.5px;
     color: var(--text-muted);
   }
 
   .id-badge {
     font-family: monospace;
     font-weight: 700;
+    font-size: 12px;
     color: var(--text-primary);
     background: #f1f5f9;
-    padding: 4px 8px;
+    padding: 3px 8px;
     border-radius: 6px;
   }
 
   .level-badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 3px 9px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     background: #eff6ff;
     color: var(--primary);
+    white-space: nowrap;
   }
 
   .course-badge-pill {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 3px 9px;
     background: #f5f3ff;
     border: 1px solid #ddd6fe;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     color: #7c3aed;
+    white-space: nowrap;
   }
 
   .contact-info-block {
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     font-size: 12px;
   }
   .contact-info-block a {
@@ -262,7 +285,7 @@
 
   .empty-state-card {
     text-align: center;
-    padding: 50px 20px;
+    padding: 42px 20px;
     color: var(--text-muted);
   }
 
@@ -270,24 +293,39 @@
   @media (max-width: 992px) {
     .kpi-metrics-row {
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 10px;
+    }
+    .students-data-table {
+      min-width: 760px;
+    }
+    .students-table-wrap {
+      scrollbar-width: auto;
+      -ms-overflow-style: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .students-table-wrap::-webkit-scrollbar {
+      display: block;
+      height: 5px;
     }
   }
 
   @media (max-width: 768px) {
     .students-page-wrapper {
-      padding: 16px 14px 40px;
+      padding: 16px 14px 40px !important;
     }
     .students-header-bar {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 10px;
     }
-    .table-toolbar-card {
-      padding: 14px 16px;
+    .total-count-pill {
+      justify-content: center;
+    }
+    .table-toolbar-inside {
+      padding: 12px 14px;
     }
     .search-input-box {
-      max-width: 100%;
+      width: 100%;
     }
   }
 </style>
@@ -297,7 +335,7 @@
   <!-- Header Section -->
   <div class="students-header-bar">
     <div class="header-titles">
-      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 4px;">Learners</span>
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 3px;">Learners</span>
       <h1>My Students</h1>
       <p>View students enrolled in your assigned courses.</p>
     </div>
@@ -340,19 +378,18 @@
     </div>
   </div>
 
-  <!-- Search & Filter Toolbar -->
-  <div class="table-toolbar-card">
-    <div class="search-input-box">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input type="text" id="studentSearchInput" placeholder="Search by name, ID, or email..." onkeyup="filterStudentsTable()">
-    </div>
-    <span style="font-size: 13px; font-weight: 600; color: var(--text-muted);" id="visibleStudentsCount">
-      Showing {{ students|length }} student(s)
-    </span>
-  </div>
-
-  <!-- Students Data Table -->
+  <!-- Students Data Table Card -->
   <div class="main-table-card">
+    <div class="table-toolbar-inside">
+      <div class="search-input-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="studentSearchInput" placeholder="Search by name, ID, or email..." onkeyup="filterStudentsTable()">
+      </div>
+      <span style="font-size: 12px; font-weight: 600; color: var(--text-muted);" id="visibleStudentsCount">
+        Showing {{ students|length }} student(s)
+      </span>
+    </div>
+
     <div class="students-table-wrap">
       <table class="students-data-table" id="studentsTable">
         <thead>
@@ -412,9 +449,9 @@
           <tr>
             <td colspan="6">
               <div class="empty-state-card">
-                <i class="fa-solid fa-user-slash" style="font-size: 38px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
-                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin: 0 0 6px;">No Students Found</h3>
-                <p style="font-size: 13px; color: var(--text-muted); margin: 0;">There are currently no students enrolled in your courses.</p>
+                <i class="fa-solid fa-user-slash" style="font-size: 32px; color: #cbd5e1; margin-bottom: 10px; display: block;"></i>
+                <h3 style="font-size: 15px; font-weight: 800; color: var(--text-primary); margin: 0 0 4px;">No Students Found</h3>
+                <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">There are currently no students enrolled in your courses.</p>
               </div>
             </td>
           </tr>
