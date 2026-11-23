@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% block title %}Instructors | Learnova LMS{% endblock %}
+{% block title %}Instructor Management | Learnova Admin{% endblock %}
 
 {% block content %}
 <style>
@@ -16,44 +16,39 @@
     --slate-200: #e2e8f0;
     --slate-100: #f1f5f9;
     --slate-50: #f8fafc;
-    --success-bg: #ecfdf5;
-    --success-text: #059669;
-    --success-border: #a7f3d0;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
+    --danger: #ef4444;
     --danger-soft: #fef2f2;
-    --danger-text: #dc2626;
   }
 
-  /* فك قيود العرض وتوسيع المساحة */
-  .content, .app-main {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+  /* إلغاء المسافة الفارغة تحت الهيدر مباشرة */
+  .content, .app-main, main {
+    padding-top: 12px !important;
   }
 
-  .admin-page-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 24px 16px 60px !important;
-    margin: 0 !important;
+  .teachers-page-shell {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 20px 50px !important;
+    margin-top: -8px;
     box-sizing: border-box;
-    font-family: inherit;
+    overflow-x: hidden;
   }
 
-  /* Header Section */
-  .page-top-bar {
+  /* Header Bar */
+  .page-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--slate-200);
-    width: 100%;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
-  .page-title-group h5 {
+  .page-title-block h5 {
     font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -62,54 +57,43 @@
     margin: 0 0 4px;
   }
 
-  .page-title-group h1 {
-    font-size: 1.85rem;
+  .page-title-block h1 {
+    font-size: 1.65rem;
     font-weight: 800;
     color: var(--slate-900);
-    letter-spacing: -0.025em;
-    margin: 0 0 4px;
-    line-height: 1.2;
-  }
-
-  .page-title-group p {
-    font-size: 0.9rem;
-    color: var(--slate-500);
     margin: 0;
+    letter-spacing: -0.02em;
   }
 
   .btn-add-primary {
     background: var(--primary);
-    color: #ffffff;
-    font-size: 0.88rem;
-    font-weight: 700;
-    padding: 10px 20px;
+    color: #ffffff !important;
+    padding: 10px 18px;
     border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
     transition: all 0.2s ease;
-    border: none;
-    cursor: pointer;
   }
 
   .btn-add-primary:hover {
     background: var(--primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
   }
 
-  /* KPI Summary Mini-Bar */
-  .kpi-row {
+  /* KPI Summary Cards */
+  .kpi-summary-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
-    margin-bottom: 24px;
-    width: 100%;
+    margin-bottom: 22px;
   }
 
-  .kpi-card {
+  .kpi-box {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 14px;
@@ -117,66 +101,61 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
   }
 
-  .kpi-card .kpi-num {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    line-height: 1;
+  .kpi-box span {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--slate-500);
+    display: block;
     margin-bottom: 4px;
   }
 
-  .kpi-card .kpi-lbl {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--slate-500);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+  .kpi-box strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--slate-900);
   }
 
-  .kpi-card .kpi-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--slate-100);
-    color: var(--slate-700);
+  .kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
   }
 
-  /* Table Card */
-  .directory-card {
+  /* Main Table Panel */
+  .directory-panel {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
     overflow: hidden;
     width: 100%;
-    box-sizing: border-box;
   }
 
   .directory-toolbar {
-    padding: 16px 22px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--slate-100);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 14px;
-    border-bottom: 1px solid var(--slate-200);
-    background: #ffffff;
+    gap: 12px;
   }
 
-  .directory-meta {
+  .toolbar-title {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .directory-icon-box {
+  .toolbar-title-icon {
     width: 38px;
     height: 38px;
     border-radius: 10px;
@@ -188,530 +167,446 @@
     font-size: 1rem;
   }
 
-  .directory-meta h3 {
-    font-size: 1.05rem;
+  .toolbar-title h3 {
+    margin: 0;
+    font-size: 1rem;
     font-weight: 800;
     color: var(--slate-900);
-    margin: 0;
   }
 
-  .directory-meta span {
-    font-size: 0.8rem;
-    font-weight: 600;
+  .toolbar-title small {
+    font-size: 0.78rem;
     color: var(--slate-500);
   }
 
-  .search-input-box {
+  .search-input-wrap {
     position: relative;
     width: 260px;
     max-width: 100%;
   }
 
-  .search-input-box i {
+  .search-input-wrap i {
     position: absolute;
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--slate-400);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
   }
 
-  .search-input-box input {
+  .search-input-wrap input {
     width: 100%;
     padding: 8px 12px 8px 34px;
-    font-size: 0.86rem;
     border: 1.5px solid var(--slate-200);
-    border-radius: 9px;
+    border-radius: 10px;
+    font-size: 0.84rem;
     background: var(--slate-50);
-    color: var(--slate-900);
+    outline: none;
     box-sizing: border-box;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
   }
 
-  .search-input-box input:focus {
-    outline: none;
+  .search-input-wrap input:focus {
     border-color: var(--primary);
     background: #ffffff;
-    box-shadow: 0 0 0 3px var(--primary-soft);
   }
 
-  .table-responsive-wrapper {
+  /* Responsive Table Wrapper */
+  .table-scroll-container {
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .modern-data-table {
+  .teachers-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.86rem;
+    font-size: 0.83rem;
   }
 
-  .modern-data-table thead th {
+  .teachers-table th {
     background: var(--slate-50);
-    padding: 12px 18px;
+    padding: 12px 14px;
     font-size: 0.7rem;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     color: var(--slate-500);
     border-bottom: 1px solid var(--slate-200);
     white-space: nowrap;
   }
 
-  .modern-data-table tbody tr {
+  .teachers-table td {
+    padding: 12px 14px;
     border-bottom: 1px solid var(--slate-100);
-    transition: background 0.15s ease;
-  }
-
-  .modern-data-table tbody tr:hover {
-    background: #fafbff;
-  }
-
-  .modern-data-table td {
-    padding: 14px 18px;
     vertical-align: middle;
     color: var(--slate-700);
   }
 
-  .instructor-profile-cell {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .teachers-table tr:hover {
+    background: #fafbff;
   }
 
-  .instructor-avatar {
-    width: 38px;
-    height: 38px;
+  /* Compact Cells */
+  .emp-badge {
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 0.78rem;
+    background: var(--slate-100);
+    color: var(--slate-700);
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+
+  .teacher-cell-flex {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 170px;
+  }
+
+  .avatar-circle {
+    width: 34px;
+    height: 34px;
     border-radius: 10px;
-    background: linear-gradient(135deg, var(--primary), #6366f1);
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
     color: #ffffff;
     font-weight: 800;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .instructor-name-col strong {
+  .teacher-name-meta strong {
     display: block;
-    font-size: 0.92rem;
+    font-size: 0.86rem;
     font-weight: 700;
     color: var(--slate-900);
+    line-height: 1.25;
   }
 
-  .instructor-name-col small {
-    display: block;
-    font-size: 0.76rem;
+  .teacher-name-meta span {
+    font-size: 0.75rem;
     color: var(--slate-400);
   }
 
-  .badge-dept {
+  .dept-pill {
+    display: inline-block;
     background: var(--slate-100);
     color: var(--slate-700);
-    padding: 3px 9px;
-    border-radius: 7px;
     font-weight: 600;
-    font-size: 0.78rem;
-    display: inline-block;
-  }
-
-  .badge-status-active {
-    background: var(--success-bg);
-    color: var(--success-text);
-    border: 1px solid var(--success-border);
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .badge-status-active::before {
-    content: '';
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--success-text);
-  }
-
-  .course-pill {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
-    padding: 2px 7px;
+    font-size: 0.75rem;
+    padding: 4px 9px;
     border-radius: 6px;
-    font-weight: 700;
-    font-size: 0.72rem;
-    display: inline-block;
-    margin: 1px;
+    line-height: 1.3;
+    max-width: 130px;
   }
 
-  .actions-cell-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
-    position: relative;
-  }
-
-  .btn-quick-edit {
-    padding: 6px 12px;
+  .rank-stack {
     font-size: 0.78rem;
+    line-height: 1.35;
+    white-space: nowrap;
+  }
+
+  .rank-stack strong {
+    display: block;
+    color: var(--slate-800);
     font-weight: 700;
-    border-radius: 8px;
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
+  }
+
+  .rank-stack span {
+    color: var(--slate-400);
+    font-size: 0.72rem;
+  }
+
+  .contact-stack {
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .contact-stack strong {
+    display: block;
+    color: var(--slate-800);
+    font-weight: 600;
+  }
+
+  .contact-stack span {
+    color: var(--slate-400);
+    font-size: 0.73rem;
+  }
+
+  .status-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    cursor: pointer;
-    transition: all 0.15s ease;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    background: var(--success-soft);
+    color: var(--success);
+    white-space: nowrap;
   }
 
-  .btn-quick-edit:hover {
-    background: #2563eb;
+  .pwd-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+
+  .pwd-text {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--slate-700);
+  }
+
+  .btn-toggle-pwd {
+    background: var(--warning-soft);
+    color: #b45309;
+    border: 1px solid #fde68a;
+    border-radius: 5px;
+    padding: 2px 7px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .courses-pills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    max-width: 145px;
+  }
+
+  .course-code-tag {
+    background: var(--primary-soft);
+    color: var(--primary);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+
+  .btn-assign-mini {
+    background: #eef2ff;
+    color: var(--primary);
+    border: 1px dashed #a5b4fc;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 5px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .btn-assign-mini:hover {
+    background: var(--primary);
     color: #ffffff;
   }
 
-  .dropdown-action-wrap {
-    position: relative;
-    display: inline-block;
+  /* Compact Action Buttons */
+  .actions-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
   }
 
-  .btn-dots-menu {
+  .act-icon-btn {
     width: 30px;
     height: 30px;
     border-radius: 8px;
-    background: var(--slate-100);
-    border: none;
-    color: var(--slate-600);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .btn-dots-menu:hover {
-    background: var(--slate-200);
-    color: var(--slate-900);
-  }
-
-  .action-menu-dropdown {
-    display: none;
-    position: absolute;
-    right: 0;
-    top: 36px;
-    background: #ffffff;
-    border: 1px solid var(--slate-200);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
-    min-width: 170px;
-    z-index: 50;
-    padding: 6px;
-  }
-
-  .action-menu-dropdown.show {
-    display: block;
-  }
-
-  .action-menu-dropdown a, 
-  .action-menu-dropdown button {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 8px 12px;
     font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--slate-700);
+    border: 1px solid transparent;
     text-decoration: none;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-    border-radius: 7px;
     cursor: pointer;
-    box-sizing: border-box;
-    transition: all 0.15s ease;
+    transition: all 0.15s;
   }
 
-  .action-menu-dropdown a:hover, 
-  .action-menu-dropdown button:hover {
-    background: var(--slate-50);
-    color: var(--slate-900);
-  }
+  .btn-edit-tc { background: #eff6ff; color: #2563eb; border-color: #dbeafe; }
+  .btn-edit-tc:hover { background: #2563eb; color: #ffffff; }
 
-  .action-menu-dropdown .item-danger {
-    color: var(--danger-text);
-  }
+  .btn-key-tc { background: #fffbeb; color: #d97706; border-color: #fef3c7; }
+  .btn-key-tc:hover { background: #d97706; color: #ffffff; }
 
-  .action-menu-dropdown .item-danger:hover {
-    background: var(--danger-soft);
-    color: var(--danger-text);
-  }
+  .btn-del-tc { background: #fef2f2; color: #dc2626; border-color: #fee2e2; }
+  .btn-del-tc:hover { background: #dc2626; color: #ffffff; }
 
-  /* Modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(15, 23, 42, 0.5);
-    backdrop-filter: blur(4px);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-  }
-
-  .modal-overlay.active {
-    display: flex;
-  }
-
-  .modal-card {
-    background: #ffffff;
-    border-radius: 18px;
-    max-width: 520px;
-    width: 100%;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-  }
-
-  .modal-header {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--slate-200);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .modal-header h3 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 800;
-    color: var(--slate-900);
-  }
-
-  .modal-close-btn {
-    background: transparent;
-    border: none;
-    font-size: 1.2rem;
-    color: var(--slate-400);
-    cursor: pointer;
-  }
-
-  .modal-body {
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .modal-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .modal-form-group label {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--slate-700);
-  }
-
-  .modal-form-group input {
-    padding: 10px 14px;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 10px;
-    font-size: 0.9rem;
-  }
-
-  .modal-footer {
-    padding: 16px 24px;
-    border-top: 1px solid var(--slate-200);
-    background: var(--slate-50);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  @media (max-width: 992px) {
-    .kpi-row { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 640px) {
-    .admin-page-shell { padding: 16px 10px 40px !important; }
-    .page-top-bar { flex-direction: column; align-items: stretch; }
-    .btn-add-primary { width: 100%; justify-content: center; }
-    .directory-toolbar { flex-direction: column; align-items: stretch; }
-    .search-input-box { width: 100%; }
+  @media (max-width: 900px) {
+    .kpi-summary-grid { grid-template-columns: 1fr; }
+    .search-input-wrap { width: 100%; }
   }
 </style>
 
-<div class="admin-page-shell">
-  <div class="page-top-bar">
-    <div class="page-title-group">
-      <h5>ACADEMIC STAFF</h5>
-      <h1>Instructors</h1>
-      <p>Manage instructor accounts, departments, ranks, and assigned courses.</p>
+<div class="teachers-page-shell">
+  <!-- Header -->
+  <div class="page-header-row">
+    <div class="page-title-block">
+      <h5>Faculty & Staff</h5>
+      <h1>Instructor Accounts Management</h1>
     </div>
-    <div>
-      <a href="/admin/teachers/add" class="btn-add-primary">
-        <i class="fa-solid fa-plus"></i> Add Instructor
-      </a>
+    <a href="/admin/teachers/add" class="btn-add-primary">
+      <i class="fa-solid fa-user-plus"></i> Add New Instructor
+    </a>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-summary-grid">
+    <div class="kpi-box">
+      <div>
+        <span>Total Instructors</span>
+        <strong>{{ teachers|length }}</strong>
+      </div>
+      <div class="kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
+        <i class="fa-solid fa-chalkboard-user"></i>
+      </div>
+    </div>
+
+    <div class="kpi-box">
+      <div>
+        <span>Active Faculty</span>
+        <strong>{{ teachers|selectattr('status', 'equalto', 'Active')|list|length if teachers else 0 }}</strong>
+      </div>
+      <div class="kpi-icon" style="background: var(--success-soft); color: var(--success);">
+        <i class="fa-solid fa-user-check"></i>
+      </div>
+    </div>
+
+    <div class="kpi-box">
+      <div>
+        <span>Assigned Courses</span>
+        <strong>
+          {% set ns = namespace(total=0) %}
+          {% for t in teachers %}
+            {% set ns.total = ns.total + (t.courses|length if t.courses else 0) %}
+          {% endfor %}
+          {{ ns.total }}
+        </strong>
+      </div>
+      <div class="kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+        <i class="fa-solid fa-book-open"></i>
+      </div>
     </div>
   </div>
 
-  <div class="kpi-row">
-    <div class="kpi-card">
-      <div>
-        <div class="kpi-num">{{ teachers|length if teachers else 0 }}</div>
-        <div class="kpi-lbl">Total Instructors</div>
-      </div>
-      <div class="kpi-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div>
-        <div class="kpi-num">{{ teachers|length if teachers else 0 }}</div>
-        <div class="kpi-lbl">Active Accounts</div>
-      </div>
-      <div class="kpi-icon" style="color: var(--success-text);"><i class="fa-solid fa-circle-check"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div>
-        <div class="kpi-num">100%</div>
-        <div class="kpi-lbl">Department Coverage</div>
-      </div>
-      <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-building-columns"></i></div>
-    </div>
-  </div>
-
-  <div class="directory-card">
+  <!-- Directory Table -->
+  <div class="directory-panel">
     <div class="directory-toolbar">
-      <div class="directory-meta">
-        <div class="directory-icon-box">
-          <i class="fa-solid fa-user-graduate"></i>
+      <div class="toolbar-title">
+        <div class="toolbar-title-icon">
+          <i class="fa-solid fa-user-tie"></i>
         </div>
         <div>
           <h3>Instructor Directory</h3>
-          <span>{{ teachers|length if teachers else 0 }} registered instructors</span>
+          <small>{{ teachers|length }} registered instructors</small>
         </div>
       </div>
 
-      <div class="search-input-box">
+      <div class="search-input-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="instructorSearchInput" placeholder="Search instructors..." onkeyup="filterInstructorTable()">
+        <input type="text" id="teacherSearchInput" placeholder="Search name, ID, or department..." onkeyup="filterTeachersTable()">
       </div>
     </div>
 
-    <div class="table-responsive-wrapper">
-      <table class="modern-data-table" id="instructorsTable">
+    <div class="table-scroll-container">
+      <table class="teachers-table" id="teachersTable">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>INSTRUCTOR</th>
-            <th>DEPARTMENT</th>
-            <th>RANK</th>
-            <th>OFFICE & EMAIL</th>
-            <th>STATUS</th>
-            <th>PASSWORD</th>
-            <th>COURSES</th>
-            <th style="text-align: right; padding-right: 22px;">ACTIONS</th>
+            <th>Employee ID</th>
+            <th>Instructor</th>
+            <th>Department</th>
+            <th>Rank & Office</th>
+            <th>Contact</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Courses</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {% if teachers %}
-            {% for inst in teachers %}
+            {% for t in teachers %}
             <tr>
-              <td data-label="ID">
-                <span style="font-weight: 700; color: var(--slate-900);">#{{ inst.employee_id if inst.employee_id is defined and inst.employee_id else (inst.id if inst.id is defined else '—') }}</span>
+              <td>
+                <span class="emp-badge">#{{ t.employee_id or t.id }}</span>
               </td>
-
-              <td data-label="INSTRUCTOR">
-                <div class="instructor-profile-cell">
-                  <div class="instructor-avatar">
-                    {{ (inst.name_person or inst.username or 'I')[0]|upper }}
+              <td>
+                <div class="teacher-cell-flex">
+                  <div class="avatar-circle">
+                    {{ (t.name_person or t.username)[0]|upper }}
                   </div>
-                  <div class="instructor-name-col">
-                    <strong>{{ inst.name_person or inst.username }}</strong>
-                    <small>{{ inst.username }}</small>
+                  <div class="teacher-name-meta">
+                    <strong>{{ t.name_person or t.username }}</strong>
+                    <span>{{ t.username }}</span>
                   </div>
                 </div>
               </td>
-
-              <td data-label="DEPARTMENT">
-                <span class="badge-dept">{{ inst.department or 'General' }}</span>
+              <td>
+                <span class="dept-pill">{{ t.department or 'General' }}</span>
               </td>
-
-              <td data-label="RANK">
-                <span style="font-weight: 600; color: var(--slate-700);">{{ inst.academic_rank or 'Instructor' }}</span>
-              </td>
-
-              <td data-label="OFFICE & EMAIL">
-                <div>
-                  <div style="font-weight: 600; color: var(--slate-800); font-size: 0.82rem;">{{ inst.office_number or 'Office None' }}</div>
-                  <small style="color: var(--slate-400);">{{ inst.email or '' }}</small>
+              <td>
+                <div class="rank-stack">
+                  <strong>{{ t.academic_rank or 'Lecturer' }}</strong>
+                  <span>{{ 'Office: ' ~ t.office_number if t.office_number else '—' }}</span>
                 </div>
               </td>
-
-              <td data-label="STATUS">
-                <span class="badge-status-active">Active</span>
+              <td>
+                <div class="contact-stack">
+                  <strong>{{ t.email }}</strong>
+                  <span>{{ t.phone or '—' }}</span>
+                </div>
               </td>
-
-              <!-- PASSWORD CELL -->
-              <td data-label="PASSWORD">
-  <div style="display: inline-flex; align-items: center; gap: 8px;">
-    <span id="pwd-val-inst-{{ inst.id }}" data-pwd="{{ inst.visible_password or 'Learnova@2026' }}" data-shown="false" style="font-family: monospace; font-size: 0.9rem; font-weight: 700; color: var(--slate-800);">••••••</span>
-    <button type="button" class="btn-quick-edit" id="pwd-btn-inst-{{ inst.id }}" style="padding: 3px 8px; font-size: 0.72rem; background: #fef3c7; color: #b45309; border-color: #fde68a;" 
-            onclick="togglePasswordDirect('pwd-val-inst-{{ inst.id }}', 'pwd-btn-inst-{{ inst.id }}')">
-      Show
-    </button>
-  </div>
-</td>
-
-              <td data-label="COURSES">
-                {% if inst.courses is defined and inst.courses %}
-                  {% for c in inst.courses %}
-                    <span class="course-pill">{{ c.code if c.code is defined and c.code else (c.name if c.name is defined else 'Course') }}</span>
-                  {% endfor %}
-                {% else %}
-                  <span style="color: var(--slate-400); font-size: 0.78rem;">—</span>
-                {% endif %}
+              <td>
+                <span class="status-pill">● {{ t.status or 'ACTIVE' }}</span>
               </td>
-
-              <td data-label="ACTIONS" style="text-align: right;">
-                <div class="actions-cell-wrap">
-                  <button type="button" class="btn-quick-edit" 
-                          onclick="openEditModal('{{ inst.id }}', '{{ inst.name_person or inst.username }}', '{{ inst.department or '' }}', '{{ inst.academic_rank or '' }}', '{{ inst.office_number or '' }}')">
-                    <i class="fa-solid fa-pen"></i> Edit
-                  </button>
-
-                  <div class="dropdown-action-wrap">
-                    <button type="button" class="btn-dots-menu" onclick="toggleActionMenu(event, 'menu-{{ inst.id }}')">
-                      <i class="fa-solid fa-ellipsis-vertical"></i>
+              <td>
+                <div class="pwd-box">
+                  <span class="pwd-text" id="pwd_tc_{{ t.id }}" data-real="{{ t.visible_password or '••••••' }}">••••••</span>
+                  <button type="button" class="btn-toggle-pwd" onclick="toggleTeacherPwd({{ t.id }}, this)">Show</button>
+                </div>
+              </td>
+              <td>
+                <div class="courses-pills-wrap">
+                  {% if t.courses %}
+                    {% for c in t.courses %}
+                      <span class="course-code-tag">{{ c.code }}</span>
+                    {% endfor %}
+                  {% endif %}
+                  <a href="/admin/teachers/{{ t.id }}/assign_courses" class="btn-assign-mini" title="Assign Course">+ Assign</a>
+                </div>
+              </td>
+              <td>
+                <div class="actions-btn-group">
+                  <a href="/admin/teachers/{{ t.id }}/edit" class="act-icon-btn btn-edit-tc" title="Edit Profile">
+                    <i class="fa-solid fa-pen"></i>
+                  </a>
+                  <a href="/admin/teachers/{{ t.id }}/reset-password" class="act-icon-btn btn-key-tc" title="Reset Password">
+                    <i class="fa-solid fa-key"></i>
+                  </a>
+                  <form method="POST" action="/admin/teachers/delete/{{ t.id }}" style="margin: 0;" onsubmit="return confirm('Delete instructor {{ t.name_person or t.username }} permanently?');">
+                    <button type="submit" class="act-icon-btn btn-del-tc" title="Delete Instructor">
+                      <i class="fa-solid fa-trash"></i>
                     </button>
-                    <div id="menu-{{ inst.id }}" class="action-menu-dropdown">
-                      <form method="POST" action="/admin/teachers/delete/{{ inst.id }}" onsubmit="return confirm('Are you sure you want to delete this instructor?');" style="margin: 0;">
-                        <button type="submit" class="item-danger">
-                          <i class="fa-solid fa-trash"></i> Delete Instructor
-                        </button>
-                      </form>
-                    </div>
-                  </div>
+                  </form>
                 </div>
               </td>
             </tr>
             {% endfor %}
           {% else %}
             <tr>
-              <td colspan="9" style="text-align: center; padding: 48px 20px; color: var(--slate-400);">
-                <i class="fa-solid fa-user-slash" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-                No instructors registered yet.
+              <td colspan="9" style="text-align: center; padding: 40px; color: var(--slate-400);">
+                No instructors registered yet. Click "Add New Instructor" to create one.
               </td>
             </tr>
           {% endif %}
@@ -721,103 +616,26 @@
   </div>
 </div>
 
-<!-- Modal -->
-<div id="editTeacherModal" class="modal-overlay">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h3>Edit Instructor Profile</h3>
-      <button class="modal-close-btn" onclick="closeEditModal()">&times;</button>
-    </div>
-    <form id="editTeacherForm" method="POST" action="">
-      <div class="modal-body">
-        <input type="hidden" id="edit_teacher_id" name="teacher_id">
-        <div class="modal-form-group">
-          <label>Full Name</label>
-          <input type="text" id="edit_name" name="name_person" required>
-        </div>
-        <div class="modal-form-group">
-          <label>Department</label>
-          <input type="text" id="edit_department" name="department">
-        </div>
-        <div class="modal-form-group">
-          <label>Academic Rank</label>
-          <input type="text" id="edit_rank" name="academic_rank">
-        </div>
-        <div class="modal-form-group">
-          <label>Office Number</label>
-          <input type="text" id="edit_office" name="office_number">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-quick-edit" style="background: var(--slate-200); color: var(--slate-700); border:none;" onclick="closeEditModal()">Cancel</button>
-        <button type="submit" class="btn-add-primary">Save Changes</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
-  function togglePasswordDirect(spanId, btnId) {
-    const span = document.getElementById(spanId);
-    const btn = document.getElementById(btnId);
-    if (!span || !btn) return;
-
-    const realPwd = span.getAttribute('data-pwd');
-    const isShown = span.getAttribute('data-shown') === 'true';
-
-    if (isShown) {
-      span.textContent = '••••••';
-      span.setAttribute('data-shown', 'false');
-      btn.textContent = 'Show';
-      btn.style.background = '#fef3c7';
-      btn.style.color = '#b45309';
-      btn.style.borderColor = '#fde68a';
-    } else {
-      span.textContent = realPwd;
-      span.setAttribute('data-shown', 'true');
+  function toggleTeacherPwd(id, btn) {
+    const span = document.getElementById('pwd_tc_' + id);
+    if (!span) return;
+    if (btn.textContent === 'Show') {
+      span.textContent = span.getAttribute('data-real');
       btn.textContent = 'Hide';
-      btn.style.background = '#e2e8f0';
-      btn.style.color = '#475569';
-      btn.style.borderColor = '#cbd5e1';
+    } else {
+      span.textContent = '••••••';
+      btn.textContent = 'Show';
     }
   }
 
-  function filterInstructorTable() {
-    const input = document.getElementById('instructorSearchInput');
-    const filter = input.value.toLowerCase();
-    const rows = document.querySelectorAll('#instructorsTable tbody tr');
-
+  function filterTeachersTable() {
+    const query = document.getElementById('teacherSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#teachersTable tbody tr');
     rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(filter) ? '' : 'none';
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(query) ? '' : 'none';
     });
-  }
-
-  function toggleActionMenu(event, menuId) {
-    event.stopPropagation();
-    document.querySelectorAll('.action-menu-dropdown').forEach(m => {
-      if (m.id !== menuId) m.classList.remove('show');
-    });
-    const menu = document.getElementById(menuId);
-    if (menu) menu.classList.toggle('show');
-  }
-
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.action-menu-dropdown').forEach(m => m.classList.remove('show'));
-  });
-
-  function openEditModal(id, name, dept, rank, office) {
-    document.getElementById('edit_teacher_id').value = id;
-    document.getElementById('edit_name').value = name;
-    document.getElementById('edit_department').value = dept;
-    document.getElementById('edit_rank').value = rank;
-    document.getElementById('edit_office').value = office;
-    document.getElementById('editTeacherForm').action = '/admin/teachers/edit/' + id;
-    document.getElementById('editTeacherModal').classList.add('active');
-  }
-
-  function closeEditModal() {
-    document.getElementById('editTeacherModal').classList.remove('active');
   }
 </script>
 {% endblock %}
