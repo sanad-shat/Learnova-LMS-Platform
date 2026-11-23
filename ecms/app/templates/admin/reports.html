@@ -462,15 +462,26 @@
   }
 </style>
 
-{% set staff_list = teachers if teachers is defined else (instructors if instructors is defined else []) %}
+{# التقاط قائمة المدرسين والتقارير مهما كان اسم المتغير المرسل من admin.py #}
+{% set raw_list = (
+  report_data if (report_data is defined and report_data) else (
+  reports if (reports is defined and reports) else (
+  teacher_reports if (teacher_reports is defined and teacher_reports) else (
+  teachers if (teachers is defined and teachers) else (
+  instructors if (instructors is defined and instructors) else (
+  data if (data is defined and data) else []
+))))) ) %}
+
 {% set ns = namespace(total_courses=0, total_assessments=0) %}
-{% for t in staff_list %}
-  {% if t.courses %}
-    {% set ns.total_courses = ns.total_courses + (t.courses|length) %}
-    {% for c in t.courses %}
-      {% set ns.total_assessments = ns.total_assessments + (c.assignments|length if c.assignments else 0) %}
-    {% endfor %}
-  {% endif %}
+{% for item in raw_list %}
+  {% set t_obj = item.get('teacher') or item.get('instructor') or item if (item is mapping) else item %}
+  {% set c_list = (item.get('courses') if (item is mapping and item.get('courses') is not none) else (t_obj.courses if (t_obj and t_obj.courses is defined) else [])) %}
+  {% set ns.total_courses = ns.total_courses + (c_list|length) %}
+  {% for c_item in c_list %}
+    {% set c_obj = c_item.get('course') or c_item if (c_item is mapping) else c_item %}
+    {% set a_list = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c_obj.assignments if (c_obj and c_obj.assignments is defined) else [])) %}
+    {% set ns.total_assessments = ns.total_assessments + (a_list|length) %}
+  {% endfor %}
 {% endfor %}
 
 <div class="reports-admin-shell">
@@ -499,7 +510,7 @@
     <div class="reports-kpi-card">
       <div>
         <span>Instructors Analyzed</span>
-        <strong>{{ staff_list|length }}</strong>
+        <strong>{{ raw_list|length }}</strong>
       </div>
       <div class="reports-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
         <i class="fa-solid fa-chalkboard-user"></i>
@@ -529,104 +540,137 @@
 
   <!-- Instructor Cards List -->
   <div id="reportsCardsContainer">
-    {% if staff_list %}
-      {% for t in staff_list %}
-      <div class="instructor-report-card">
-        <div class="instructor-card-head">
-          <div class="instructor-identity">
-            <div class="instructor-avatar">
-              {{ (t.name_person or t.username)[0]|upper }}
-            </div>
-            <div>
-              <h3>{{ t.name_person or t.username }}</h3>
-              <p>{{ t.department or 'Faculty Department' }} • {{ t.email }}</p>
-            </div>
-          </div>
+    {% if raw_list %}
+      {% for item in raw_list %}
+        {% set t = item.get('teacher') or item.get('instructor') or item if (item is mapping) else item %}
+        {% set t_name = (t.name_person or t.username) if (t.name_person is defined or t.username is defined) else 'Instructor' %}
+        {% set t_dept = t.department if (t.department is defined and t.department) else 'Faculty Department' %}
+        {% set t_email = t.email if (t.email is defined and t.email) else '' %}
+        {% set courses_list = (item.get('courses') if (item is mapping and item.get('courses') is not none) else (t.courses if (t.courses is defined) else [])) %}
 
-          <div class="instructor-summary-pills">
-            <span class="summary-mini-pill">
-              <i class="fa-solid fa-book-open" style="color: var(--primary); margin-right: 4px;"></i>
-              {{ t.courses|length if t.courses else 0 }} Course(s)
-            </span>
-          </div>
-        </div>
-
-        {% if t.courses %}
-          {% for c in t.courses %}
-          <div class="course-report-section">
-            <div class="course-sub-header">
-              <div class="course-title-left">
-                <span class="course-code-badge">{{ c.code }}</span>
-                <strong>{{ c.name }}</strong>
+        <div class="instructor-report-card">
+          <div class="instructor-card-head">
+            <div class="instructor-identity">
+              <div class="instructor-avatar">
+                {{ t_name[0]|upper }}
               </div>
-              <a href="/admin/courses/{{ c.id }}/students" class="enrolled-link-btn">
-                {{ c.enrollments|length if c.enrollments else 0 }} students enrolled <i class="fa-solid fa-arrow-right"></i>
-              </a>
+              <div>
+                <h3>{{ t_name }}</h3>
+                <p>{{ t_dept }}{% if t_email %} • {{ t_email }}{% endif %}</p>
+              </div>
             </div>
 
-            {% if c.assignments %}
-              <div class="table-scroll-wrap">
-                <table class="report-data-table">
-                  <thead>
-                    <tr>
-                      <th style="width: 32%;">Assignment / Quiz</th>
-                      <th style="width: 32%;">Student</th>
-                      <th style="width: 18%;">Grade</th>
-                      <th style="width: 18%; text-align: right;">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for a in c.assignments %}
-                      {% if a.submissions %}
-                        {% for sub in a.submissions %}
+            <div class="instructor-summary-pills">
+              <span class="summary-mini-pill">
+                <i class="fa-solid fa-book-open" style="color: var(--primary); margin-right: 4px;"></i>
+                {{ courses_list|length }} Course(s)
+              </span>
+            </div>
+          </div>
+
+          {% if courses_list %}
+            {% for c_item in courses_list %}
+              {% set c = c_item.get('course') or c_item if (c_item is mapping) else c_item %}
+              {% set c_id = c.id if (c.id is defined) else '' %}
+              {% set c_code = c.code if (c.code is defined) else 'COURSE' %}
+              {% set c_name = c.name if (c.name is defined) else '' %}
+              {% set enrolled_count = (
+                c_item.get('student_count') if (c_item is mapping and c_item.get('student_count') is not none) else (
+                c_item.get('students_count') if (c_item is mapping and c_item.get('students_count') is not none) else (
+                c.enrollments|length if (c.enrollments is defined) else 0
+              ))) %}
+              {% set assign_list = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c.assignments if (c.assignments is defined) else [])) %}
+
+              <div class="course-report-section">
+                <div class="course-sub-header">
+                  <div class="course-title-left">
+                    <span class="course-code-badge">{{ c_code }}</span>
+                    <strong>{{ c_name }}</strong>
+                  </div>
+                  {% if c_id %}
+                  <a href="/admin/courses/{{ c_id }}/students" class="enrolled-link-btn">
+                    {{ enrolled_count }} students enrolled <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                  {% else %}
+                  <span class="enrolled-link-btn">{{ enrolled_count }} students enrolled</span>
+                  {% endif %}
+                </div>
+
+                {% if assign_list %}
+                  <div class="table-scroll-wrap">
+                    <table class="report-data-table">
+                      <thead>
                         <tr>
-                          <td><strong>{{ a.title }}</strong></td>
-                          <td>{{ (sub.student.name_person or sub.student.username) if sub.student else 'Student' }}</td>
-                          <td>
-                            {% if sub.grade is not none %}
-                              <span class="grade-pill">{{ sub.grade }}</span>
-                            {% else %}
-                              <span class="grade-muted">Ungraded</span>
-                            {% endif %}
-                          </td>
-                          <td style="text-align: right;">
-                            {% if sub.grade is not none %}
-                              <span class="status-badge-done">● Graded</span>
-                            {% else %}
-                              <span class="status-badge-pending">Submitted</span>
-                            {% endif %}
-                          </td>
+                          <th style="width: 32%;">Assignment / Quiz</th>
+                          <th style="width: 32%;">Student</th>
+                          <th style="width: 18%;">Grade</th>
+                          <th style="width: 18%; text-align: right;">Status</th>
                         </tr>
+                      </thead>
+                      <tbody>
+                        {% for a_item in assign_list %}
+                          {% set a = a_item.get('assignment') or a_item if (a_item is mapping) else a_item %}
+                          {% set a_title = a.title if (a.title is defined) else 'Assessment' %}
+                          {% set subs_list = (a_item.get('submissions') if (a_item is mapping and a_item.get('submissions') is not none) else (a.submissions if (a.submissions is defined) else [])) %}
+
+                          {% if subs_list %}
+                            {% for sub in subs_list %}
+                              {% if sub is mapping %}
+                                {% set st_obj = sub.get('student') %}
+                                {% set st_name = (st_obj.name_person or st_obj.username) if (st_obj and (st_obj.name_person is defined or st_obj.username is defined)) else (st_obj or sub.get('student_name') or 'Student') %}
+                                {% set st_grade = sub.get('grade') %}
+                              {% else %}
+                                {% set st_name = (sub.student.name_person or sub.student.username) if sub.student else 'Student' %}
+                                {% set st_grade = sub.grade %}
+                              {% endif %}
+                              <tr>
+                                <td><strong>{{ a_title }}</strong></td>
+                                <td>{{ st_name }}</td>
+                                <td>
+                                  {% if st_grade is not none %}
+                                    <span class="grade-pill">{{ st_grade }}</span>
+                                  {% else %}
+                                    <span class="grade-muted">Ungraded</span>
+                                  {% endif %}
+                                </td>
+                                <td style="text-align: right;">
+                                  {% if st_grade is not none %}
+                                    <span class="status-badge-done">● Graded</span>
+                                  {% else %}
+                                    <span class="status-badge-pending">Submitted</span>
+                                  {% endif %}
+                                </td>
+                              </tr>
+                            {% endfor %}
+                          {% else %}
+                            <tr>
+                              <td><strong>{{ a_title }}</strong></td>
+                              <td style="color: var(--slate-400);">No submissions yet.</td>
+                              <td><span class="grade-muted">—</span></td>
+                              <td style="text-align: right;">
+                                <span class="status-badge-pending">Awaiting</span>
+                              </td>
+                            </tr>
+                          {% endif %}
                         {% endfor %}
-                      {% else %}
-                        <tr>
-                          <td><strong>{{ a.title }}</strong></td>
-                          <td style="color: var(--slate-400);">No submissions yet.</td>
-                          <td><span class="grade-muted">—</span></td>
-                          <td style="text-align: right;">
-                            <span class="status-badge-pending">Awaiting</span>
-                          </td>
-                        </tr>
-                      {% endif %}
-                    {% endfor %}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                {% else %}
+                  <div class="empty-course-box">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <p>No assignments in this course.</p>
+                  </div>
+                {% endif %}
               </div>
-            {% else %}
-              <div class="empty-course-box">
-                <i class="fa-solid fa-folder-open"></i>
-                <p>No assignments in this course.</p>
-              </div>
-            {% endif %}
-          </div>
-          {% endfor %}
-        {% else %}
-          <div class="empty-course-box">
-            <i class="fa-solid fa-book"></i>
-            <p>No courses assigned to this instructor yet.</p>
-          </div>
-        {% endif %}
-      </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-course-box">
+              <i class="fa-solid fa-book"></i>
+              <p>No courses assigned to this instructor yet.</p>
+            </div>
+          {% endif %}
+        </div>
       {% endfor %}
     {% else %}
       <div class="instructor-report-card">
