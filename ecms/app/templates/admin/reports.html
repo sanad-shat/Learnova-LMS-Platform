@@ -573,50 +573,63 @@
   }
 </style>
 
-{# فحص شامل لجميع أسماء المتغيرات المحتملة القادمة من مسار التقارير في admin.py #}
-{% set raw_list = (
-  rows if (rows is defined and rows) else (
-  items if (items is defined and items) else (
-  report_rows if (report_rows is defined and report_rows) else (
-  teacher_rows if (teacher_rows is defined and teacher_rows) else (
-  instructor_rows if (instructor_rows is defined and instructor_rows) else (
-  records if (records is defined and records) else (
-  results if (results is defined and results) else (
-  entries if (entries is defined and entries) else (
-  groups if (groups is defined and groups) else (
-  sections if (sections is defined and sections) else (
-  faculty if (faculty is defined and faculty) else (
-  staff if (staff is defined and staff) else (
-  report_list if (report_list is defined and report_list) else (
-  teacher_list if (teacher_list is defined and teacher_list) else (
-  course_reports if (course_reports is defined and course_reports) else (
-  report_data if (report_data is defined and report_data) else (
-  reports if (reports is defined and reports) else (
-  teacher_reports if (teacher_reports is defined and teacher_reports) else (
+{# استخراج آمن لقائمة المدرسين والتقارير مهما كان نوع البيانات أو اسم المتغير #}
+{% set raw_candidate = (
   teachers if (teachers is defined and teachers) else (
   instructors if (instructors is defined and instructors) else (
-  data if (data is defined and data) else (
-  users if (users is defined and users) else []
-)))))))))))))))))))))) %}
+  teachers_data if (teachers_data is defined and teachers_data) else (
+  teacher_reports if (teacher_reports is defined and teacher_reports) else (
+  teachers_reports if (teachers_reports is defined and teachers_reports) else (
+  instructor_reports if (instructor_reports is defined and instructor_reports) else (
+  report_rows if (report_rows is defined and report_rows) else (
+  teacher_rows if (teacher_rows is defined and teacher_rows) else (
+  rows if (rows is defined and rows) else (
+  items if (items is defined and items) else (
+  report_data if (report_data is defined and report_data) else (
+  reports if (reports is defined and reports) else (
+  data if (data is defined and data) else []
+))))))))))))) %}
 
-{% set ns = namespace(total_courses=0, total_assessments=0) %}
-{% for item in raw_list %}
-  {% set t_obj = (item.get('teacher') or item.get('instructor') or item.get('user') or item) if (item is mapping) else item %}
-  {% set c_list = (
-    (item.get('courses') or item.get('course_list') or item.get('items') or item.get('classes'))
-    if (item is mapping and (item.get('courses') is not none or item.get('course_list') is not none or item.get('items') is not none or item.get('classes') is not none))
-    else (t_obj.courses if (t_obj and t_obj.courses is defined) else [])
+{% if raw_candidate is mapping %}
+  {% set raw_list = (
+    raw_candidate.get('teachers') or
+    raw_candidate.get('instructors') or
+    raw_candidate.get('items') or
+    raw_candidate.get('rows') or
+    raw_candidate.get('reports') or
+    (raw_candidate.values()|list)
   ) %}
-  {% set ns.total_courses = ns.total_courses + (c_list|length) %}
-  {% for c_item in c_list %}
-    {% set c_obj = (c_item.get('course') or c_item) if (c_item is mapping) else c_item %}
-    {% set a_list = (
-      (c_item.get('assignments') or c_item.get('tasks') or c_item.get('items'))
-      if (c_item is mapping and (c_item.get('assignments') is not none or c_item.get('tasks') is not none or c_item.get('items') is not none))
-      else (c_obj.assignments if (c_obj and c_obj.assignments is defined) else [])
-    ) %}
-    {% set ns.total_assessments = ns.total_assessments + (a_list|length) %}
-  {% endfor %}
+{% elif raw_candidate is iterable and raw_candidate is not string %}
+  {% set raw_list = raw_candidate|list %}
+{% else %}
+  {% set raw_list = [] %}
+{% endif %}
+
+{% set ns = namespace(valid_teachers=[], total_courses=0, total_assessments=0) %}
+{% for item in raw_list %}
+  {% if item is mapping %}
+    {% set t_obj = item.get('teacher') or item.get('instructor') or item.get('user') or item %}
+    {% set c_raw = item.get('courses') if (item.get('courses') is not none) else (t_obj.get('courses') if (t_obj is mapping and t_obj.get('courses') is not none) else (t_obj.courses if (t_obj is not mapping and t_obj.courses is defined and t_obj.courses is not none) else [])) %}
+  {% elif item is iterable and item is not string %}
+    {% set item_tuple = item|list %}
+    {% set t_obj = item_tuple[0] if (item_tuple|length > 0) else none %}
+    {% set c_raw = item_tuple[1] if (item_tuple|length > 1) else [] %}
+  {% else %}
+    {% set t_obj = item %}
+    {% set c_raw = t_obj.courses if (t_obj is not none and t_obj is not string and t_obj is not number and t_obj.courses is defined and t_obj.courses is not none) else [] %}
+  {% endif %}
+
+  {% if t_obj is not none and t_obj is not string and t_obj is not number %}
+    {% set c_list = c_raw|list if (c_raw is iterable and c_raw is not string and c_raw is not mapping) else [] %}
+    {% set _ = ns.valid_teachers.append({'teacher': t_obj, 'courses': c_list, 'raw': item}) %}
+    {% set ns.total_courses = ns.total_courses + (c_list|length) %}
+    {% for c_item in c_list %}
+      {% set c_obj = (c_item.get('course') or c_item) if (c_item is mapping) else c_item %}
+      {% set a_raw = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c_obj.get('assignments') if (c_obj is mapping and c_obj.get('assignments') is not none) else (c_obj.assignments if (c_obj is not mapping and c_obj.assignments is defined and c_obj.assignments is not none) else []))) %}
+      {% set a_list = a_raw|list if (a_raw is iterable and a_raw is not string and a_raw is not mapping) else [] %}
+      {% set ns.total_assessments = ns.total_assessments + (a_list|length) %}
+    {% endfor %}
+  {% endif %}
 {% endfor %}
 
 <div class="reports-admin-shell" id="printableReportArea">
@@ -625,7 +638,6 @@
     <div class="pdf-lh-top">
       <div class="pdf-brand-block">
         <div class="pdf-logo-badge">
-          <!-- شعار Learnova LMS المتجهي لضمان وضوحه التام داخل الـ PDF -->
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="#FFFFFF"/>
             <path d="M5 10.5V16.5C5 18.433 8.13401 20 12 20C15.866 20 19 18.433 19 16.5V10.5L12 14L5 10.5Z" fill="#E0E7FF"/>
@@ -676,7 +688,7 @@
     <div class="reports-kpi-card">
       <div>
         <span>Instructors Analyzed</span>
-        <strong>{{ raw_list|length }}</strong>
+        <strong>{{ ns.valid_teachers|length }}</strong>
       </div>
       <div class="reports-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
         <i class="fa-solid fa-chalkboard-user"></i>
@@ -706,28 +718,24 @@
 
   <!-- Instructor Cards List -->
   <div id="reportsCardsContainer">
-    {% if raw_list %}
-      {% for item in raw_list %}
-        {% set t = (item.get('teacher') or item.get('instructor') or item.get('user') or item) if (item is mapping) else item %}
+    {% if ns.valid_teachers %}
+      {% for entry in ns.valid_teachers %}
+        {% set t = entry.teacher %}
+        {% set courses_list = entry.courses %}
         {% set t_name = (
-          t.get('name_person') or t.get('name') or t.get('username') or item.get('teacher_name')
+          t.get('name_person') or t.get('name') or t.get('username')
           if (t is mapping)
           else (t.name_person or t.username if (t.name_person is defined or t.username is defined) else 'Instructor')
         ) %}
         {% set t_dept = (
-          t.get('department') or item.get('department') or 'Faculty Department'
+          t.get('department') or 'Faculty Department'
           if (t is mapping)
           else (t.department if (t.department is defined and t.department) else 'Faculty Department')
         ) %}
         {% set t_email = (
-          t.get('email') or item.get('email') or ''
+          t.get('email') or ''
           if (t is mapping)
           else (t.email if (t.email is defined and t.email) else '')
-        ) %}
-        {% set courses_list = (
-          (item.get('courses') or item.get('course_list') or item.get('items') or item.get('classes'))
-          if (item is mapping and (item.get('courses') is not none or item.get('course_list') is not none or item.get('items') is not none or item.get('classes') is not none))
-          else (t.courses if (t.courses is defined) else [])
         ) %}
 
         <div class="instructor-report-card">
@@ -756,17 +764,19 @@
               {% set c_id = (c.get('id') if (c is mapping) else (c.id if (c.id is defined) else '')) %}
               {% set c_code = (c.get('code') if (c is mapping) else (c.code if (c.code is defined) else 'COURSE')) %}
               {% set c_name = (c.get('name') if (c is mapping) else (c.name if (c.name is defined) else '')) %}
-              {% set enrolled_count = (
-                (c_item.get('student_count') if (c_item is mapping and c_item.get('student_count') is not none) else (
-                c_item.get('students_count') if (c_item is mapping and c_item.get('students_count') is not none) else (
-                c_item.get('enrolled_count') if (c_item is mapping and c_item.get('enrolled_count') is not none) else (
-                c.enrollments|length if (c.enrollments is defined) else 0
-              )))) %}
-              {% set assign_list = (
-                (c_item.get('assignments') or c_item.get('tasks') or c_item.get('items'))
-                if (c_item is mapping and (c_item.get('assignments') is not none or c_item.get('tasks') is not none or c_item.get('items') is not none))
-                else (c.assignments if (c.assignments is defined) else [])
-              ) %}
+
+              {% if c_item is mapping and c_item.get('student_count') is not none %}
+                {% set enrolled_count = c_item.get('student_count') %}
+              {% elif c_item is mapping and c_item.get('students_count') is not none %}
+                {% set enrolled_count = c_item.get('students_count') %}
+              {% elif c is not mapping and c.enrollments is defined and c.enrollments is not none %}
+                {% set enrolled_count = (c.enrollments|list)|length %}
+              {% else %}
+                {% set enrolled_count = 0 %}
+              {% endif %}
+
+              {% set a_raw = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c.get('assignments') if (c is mapping and c.get('assignments') is not none) else (c.assignments if (c is not mapping and c.assignments is defined and c.assignments is not none) else []))) %}
+              {% set assign_list = a_raw|list if (a_raw is iterable and a_raw is not string and a_raw is not mapping) else [] %}
 
               <div class="course-report-section">
                 <div class="course-sub-header">
@@ -798,11 +808,8 @@
                         {% for a_item in assign_list %}
                           {% set a = (a_item.get('assignment') or a_item) if (a_item is mapping) else a_item %}
                           {% set a_title = (a.get('title') if (a is mapping) else (a.title if (a.title is defined) else 'Assessment')) %}
-                          {% set subs_list = (
-                            (a_item.get('submissions') or a_item.get('rows') or a_item.get('grades'))
-                            if (a_item is mapping and (a_item.get('submissions') is not none or a_item.get('rows') is not none or a_item.get('grades') is not none))
-                            else (a.submissions if (a.submissions is defined) else [])
-                          ) %}
+                          {% set s_raw = (a_item.get('submissions') if (a_item is mapping and a_item.get('submissions') is not none) else (a.get('submissions') if (a is mapping and a.get('submissions') is not none) else (a.submissions if (a is not mapping and a.submissions is defined and a.submissions is not none) else []))) %}
+                          {% set subs_list = s_raw|list if (s_raw is iterable and s_raw is not string and s_raw is not mapping) else [] %}
 
                           {% if subs_list %}
                             {% for sub in subs_list %}
@@ -880,7 +887,6 @@
   </div>
 </div>
 
-<!-- مكتبة توليد وتنزيل PDF مباشرة -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   function filterAcademicReports() {
@@ -899,7 +905,6 @@
     const btn = document.getElementById('downloadPdfBtn');
     if (!element) return;
 
-    // تعبئة تاريخ ووقت الإصدار ورقم المرجع في الترويسة
     const now = new Date();
     const dateFormatted = now.toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric'
@@ -925,7 +930,6 @@
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating PDF...';
 
-    // إظهار الترويسة والتذييل الرسميين أثناء التقاط الـ PDF
     if (pdfHeader) pdfHeader.style.display = 'block';
     if (pdfFooter) pdfFooter.style.display = 'flex';
     element.style.background = '#ffffff';
