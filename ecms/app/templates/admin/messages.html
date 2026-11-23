@@ -1,80 +1,130 @@
 {% extends 'admin/base.html' %}
-{% block title %}Discussions & Community Forum | Admin{% endblock %}
+{% block title %}Discussions & Community Forum | Learnova Admin{% endblock %}
 
 {% block content %}
 <style>
+  :root {
+    --primary: #4f46e5;
+    --primary-soft: rgba(79, 70, 229, 0.08);
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50: #f8fafc;
+  }
+
+  .content, .app-main, main {
+    padding-top: 12px !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
   .disc-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 24px 20px 60px !important;
-    box-sizing: border-box;
-    font-family: inherit;
+    padding: 0 16px 50px !important;
+    margin-top: -8px;
+    box-sizing: border-box !important;
   }
+
   .disc-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--slate-200);
+    gap: 14px;
+    margin-bottom: 20px;
   }
+
+  .disc-header-row h5 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--primary);
+    margin: 0 0 4px;
+  }
+
+  .disc-header-row h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    margin: 0;
+  }
+
   .disc-table-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 18px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
   }
+
   .table-responsive-box {
     width: 100%;
     overflow-x: auto;
   }
+
   .disc-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
   }
+
   .disc-table th {
     background: var(--slate-50);
-    padding: 16px 20px;
-    font-weight: 700;
-    color: var(--slate-600);
+    padding: 13px 16px;
+    font-weight: 800;
+    color: var(--slate-500);
     border-bottom: 1px solid var(--slate-200);
     text-transform: uppercase;
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
   }
+
   .disc-table td {
-    padding: 18px 20px;
+    padding: 14px 16px;
     border-bottom: 1px solid var(--slate-100);
     color: var(--slate-800);
     vertical-align: middle;
   }
+
   .disc-table tr:hover {
     background: #fafbff;
   }
+
   .badge-tag {
     background: var(--primary-soft);
     color: var(--primary);
     padding: 4px 10px;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.76rem;
     font-weight: 700;
+    white-space: nowrap;
   }
+
   .btn-trash-action {
-    background: #fee2e2;
-    color: #ef4444;
-    border: none;
-    padding: 8px 12px;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+    width: 32px;
+    height: 32px;
     border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.15s;
   }
+
   .btn-trash-action:hover {
-    background: #ef4444;
+    background: #dc2626;
     color: #ffffff;
   }
 </style>
@@ -82,9 +132,8 @@
 <div class="disc-page-shell">
   <div class="disc-header-row">
     <div>
-      <h5 style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--primary); margin: 0 0 4px;">COMMUNITY MODERATION</h5>
-      <h1 style="font-size: 1.85rem; font-weight: 800; color: var(--slate-900); margin: 0;">Discussions & Community Forum</h1>
-      <p style="font-size: 0.9rem; color: var(--slate-500); margin: 4px 0 0;">Review student discussions, teacher announcements, and forum topics.</p>
+      <h5>Community Moderation</h5>
+      <h1>Discussions & Community Forum</h1>
     </div>
   </div>
 
@@ -103,25 +152,25 @@
         <tbody>
           {% if topics %}
             {% for t in topics %}
+            {% set writer = t.author or t.user %}
+            {% set body_text = t.content or t.body or t.description or '' %}
             <tr>
               <td>
-                <strong style="display: block; font-size: 0.95rem; color: var(--slate-900);">{{ t.title }}</strong>
-                <small style="color: var(--slate-500);">{{ t.content[:90] ~ '...' if t.content and t.content|length > 90 else (t.content or '') }}</small>
+                <strong style="display: block; font-size: 0.9rem; color: var(--slate-900);">{{ t.title or 'Untitled Topic' }}</strong>
+                <small style="color: var(--slate-500);">{{ body_text[:90] ~ '...' if body_text|length > 90 else body_text }}</small>
               </td>
               <td>
-                <strong>{{ t.author.name_person or t.author.username if t.author else 'Learnova User' }}</strong>
-                <small style="display: block; color: var(--slate-400);">{{ t.author.email if t.author else '' }}</small>
+                <strong>{{ (writer.name_person or writer.username) if writer else 'Learnova User' }}</strong>
+                <small style="display: block; color: var(--slate-400);">{{ writer.email if writer else '' }}</small>
               </td>
               <td>
                 <span class="badge-tag">{{ t.course.name if t.course else 'General Forum' }}</span>
               </td>
-              <td>
-                <span style="font-size: 0.84rem; color: var(--slate-500);">
-                  {{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at and t.created_at.strftime is defined else 'Recently' }}
-                </span>
+              <td style="white-space: nowrap; font-size: 0.8rem; color: var(--slate-500);">
+                {{ t.created_at.strftime('%d %b %Y, %H:%M') if t.created_at and t.created_at.strftime is defined else 'Recently' }}
               </td>
               <td>
-                <form method="POST" action="/admin/discussions/{{ t.id }}/delete" onsubmit="return confirm('Delete this topic permanently?');">
+                <form method="POST" action="/admin/discussions/{{ t.id }}/delete" style="margin: 0;" onsubmit="return confirm('Delete this discussion topic permanently?');">
                   <button type="submit" class="btn-trash-action" title="Delete Topic">
                     <i class="fa-solid fa-trash-can"></i>
                   </button>
@@ -132,7 +181,7 @@
           {% else %}
             <tr>
               <td colspan="5" style="text-align: center; padding: 48px 16px; color: var(--slate-400);">
-                <i class="fa-solid fa-comments" style="font-size: 2.2rem; margin-bottom: 10px; display: block; color: var(--slate-300);"></i>
+                <i class="fa-solid fa-comments" style="font-size: 2rem; margin-bottom: 10px; display: block; color: #cbd5e1;"></i>
                 <p style="margin: 0; font-weight: 700; color: var(--slate-700);">No discussion topics found</p>
                 <small>Forum topics created across courses will appear here for admin moderation.</small>
               </td>
