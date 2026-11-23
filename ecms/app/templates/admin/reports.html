@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% block title %}Academic Reports & Analytics | Learnova Admin{% endblock %}
+{% block title %}Enrolled Students - {{ course.name if course is defined else 'Course' }} | Learnova Admin{% endblock %}
 
 {% block content %}
 <style>
@@ -18,11 +18,8 @@
     --slate-50: #f8fafc;
     --success: #10b981;
     --success-soft: #ecfdf5;
-    --warning: #f59e0b;
-    --warning-soft: #fffbeb;
   }
 
-  /* توسيع الحاوية الرئيسية لمحاذاة الحافة اليمنى أسفل Admin User بالكامل */
   .app-main {
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -37,7 +34,7 @@
     overflow-x: hidden !important;
   }
 
-  .reports-admin-shell {
+  .course-students-shell {
     width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
@@ -45,8 +42,8 @@
     box-sizing: border-box !important;
   }
 
-  /* Header Section */
-  .reports-header-bar {
+  /* Header Bar */
+  .cs-header-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -55,7 +52,7 @@
     margin-bottom: 20px;
   }
 
-  .reports-title-wrap h5 {
+  .cs-title-group h5 {
     font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -64,7 +61,14 @@
     margin: 0 0 4px;
   }
 
-  .reports-title-wrap h1 {
+  .cs-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .cs-title-row h1 {
     font-size: 1.65rem;
     font-weight: 800;
     color: var(--slate-900);
@@ -72,85 +76,75 @@
     letter-spacing: -0.02em;
   }
 
-  .reports-title-wrap p {
-    font-size: 0.85rem;
-    color: var(--slate-500);
-    margin: 4px 0 0;
+  .cs-code-pill {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid rgba(79, 70, 229, 0.2);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 800;
   }
 
-  .header-right-tools {
+  .cs-actions-wrap {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  .report-search-box {
-    position: relative;
-    width: 240px;
-  }
-
-  .report-search-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--slate-400);
-    font-size: 0.84rem;
-    pointer-events: none;
-  }
-
-  .report-search-box input {
-    width: 100%;
+  .btn-back-courses {
     height: 38px;
-    padding: 0 12px 0 34px;
-    border: 1.5px solid var(--slate-200);
-    border-radius: 10px;
-    font-size: 0.83rem;
-    background: #ffffff;
-    color: var(--slate-900);
-    outline: none;
-    transition: all 0.2s;
-  }
-
-  .report-search-box input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-  }
-
-  .btn-print-report {
-    height: 38px;
-    padding: 0 16px;
+    padding: 0 15px;
     border-radius: 10px;
     background: #ffffff;
     border: 1.5px solid var(--slate-200);
-    color: var(--slate-800);
+    color: var(--slate-700);
     font-size: 0.83rem;
     font-weight: 700;
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    gap: 7px;
     transition: all 0.15s;
-    white-space: nowrap;
   }
 
-  .btn-print-report:hover {
+  .btn-back-courses:hover {
     border-color: var(--primary);
     color: var(--primary);
     background: var(--primary-soft);
   }
 
-  /* KPI Summary Cards */
-  .reports-kpi-grid {
+  .btn-export-roster {
+    height: 38px;
+    padding: 0 15px;
+    border-radius: 10px;
+    background: var(--primary);
+    border: none;
+    color: #ffffff;
+    font-size: 0.83rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
+    transition: all 0.15s;
+  }
+
+  .btn-export-roster:hover {
+    background: var(--primary-hover);
+  }
+
+  /* KPI Cards */
+  .cs-kpi-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 22px;
   }
 
-  .reports-kpi-card {
+  .cs-kpi-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 14px;
@@ -159,10 +153,9 @@
     align-items: center;
     justify-content: space-between;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
-    min-width: 0;
   }
 
-  .reports-kpi-card span {
+  .cs-kpi-card span {
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -172,13 +165,13 @@
     margin-bottom: 4px;
   }
 
-  .reports-kpi-card strong {
+  .cs-kpi-card strong {
     font-size: 1.5rem;
     font-weight: 800;
     color: var(--slate-900);
   }
 
-  .reports-kpi-icon {
+  .cs-kpi-icon {
     width: 42px;
     height: 42px;
     border-radius: 11px;
@@ -189,196 +182,177 @@
     flex-shrink: 0;
   }
 
-  /* Instructor Report Card */
-  .instructor-report-card {
+  /* Table Panel */
+  .cs-table-panel {
     width: 100%;
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 16px;
     box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
-    margin-bottom: 20px;
     overflow: hidden;
   }
 
-  .instructor-card-head {
-    padding: 18px 22px;
+  .cs-toolbar {
+    padding: 16px 20px;
     border-bottom: 1px solid var(--slate-100);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
+  }
+
+  .cs-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cs-toolbar-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .cs-toolbar-left h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+  }
+
+  .cs-toolbar-left small {
+    font-size: 0.78rem;
+    color: var(--slate-500);
+  }
+
+  .cs-search-box {
+    position: relative;
+    width: 260px;
+    max-width: 100%;
+  }
+
+  .cs-search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.84rem;
+  }
+
+  .cs-search-box input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 34px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.84rem;
+    background: var(--slate-50);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .cs-search-box input:focus {
+    border-color: var(--primary);
     background: #ffffff;
   }
 
-  .instructor-identity {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+  .table-scroll-wrap {
+    width: 100%;
+    overflow-x: auto;
   }
 
-  .instructor-avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 12px;
+  .cs-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.84rem;
+  }
+
+  .cs-data-table th {
+    background: var(--slate-50);
+    padding: 12px 18px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--slate-200);
+    white-space: nowrap;
+  }
+
+  .cs-data-table td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-800);
+    vertical-align: middle;
+  }
+
+  .cs-data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .cs-data-table tr:hover {
+    background: #fafbff;
+  }
+
+  .student-row-info {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .st-avatar-box {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: #ffffff;
-    font-size: 1rem;
     font-weight: 800;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .instructor-identity h3 {
-    margin: 0 0 3px;
-    font-size: 1.02rem;
-    font-weight: 800;
-    color: var(--slate-900);
-  }
-
-  .instructor-identity p {
-    margin: 0;
-    font-size: 0.78rem;
-    color: var(--slate-500);
-  }
-
-  .instructor-summary-pills {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .summary-mini-pill {
-    background: var(--slate-50);
-    border: 1px solid var(--slate-200);
-    color: var(--slate-700);
-    padding: 5px 11px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 700;
-  }
-
-  /* Course Block inside Instructor Card */
-  .course-report-section {
-    border-bottom: 1px solid var(--slate-100);
-  }
-
-  .course-report-section:last-child {
-    border-bottom: none;
-  }
-
-  .course-sub-header {
-    padding: 13px 22px;
-    background: var(--slate-50);
-    border-bottom: 1px solid var(--slate-100);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-
-  .course-title-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .course-code-badge {
-    background: var(--primary-soft);
-    color: var(--primary);
-    border: 1px solid rgba(79, 70, 229, 0.18);
-    padding: 4px 10px;
-    border-radius: 7px;
-    font-size: 0.75rem;
-    font-weight: 800;
-  }
-
-  .course-title-left strong {
-    font-size: 0.92rem;
+  .st-name-stack strong {
+    display: block;
+    font-size: 0.88rem;
     font-weight: 700;
     color: var(--slate-900);
   }
 
-  .enrolled-link-btn {
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 7px;
-    transition: background 0.15s;
-  }
-
-  .enrolled-link-btn:hover {
-    background: var(--primary-soft);
-  }
-
-  /* Report Table */
-  .table-scroll-wrap {
-    width: 100%;
-    overflow-x: auto;
-  }
-
-  .report-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 0.83rem;
-  }
-
-  .report-data-table th {
-    padding: 11px 22px;
-    font-size: 0.69rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--slate-500);
-    border-bottom: 1px solid var(--slate-100);
-    background: #ffffff;
-    white-space: nowrap;
-  }
-
-  .report-data-table td {
-    padding: 13px 22px;
-    border-bottom: 1px solid var(--slate-100);
-    color: var(--slate-800);
-    vertical-align: middle;
-  }
-
-  .report-data-table tr:last-child td {
-    border-bottom: none;
-  }
-
-  .report-data-table tr:hover {
-    background: #fafbff;
-  }
-
-  .grade-pill {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-weight: 800;
-    font-size: 0.78rem;
-    background: var(--primary-soft);
-    color: var(--primary);
-  }
-
-  .grade-muted {
+  .st-name-stack span {
+    font-size: 0.75rem;
     color: var(--slate-400);
-    font-weight: 600;
   }
 
-  .status-badge-done {
+  .grade-score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.82rem;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  .enrolled-status-pill {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 3px 10px;
+    padding: 4px 10px;
     border-radius: 999px;
     font-size: 0.72rem;
     font-weight: 800;
@@ -386,311 +360,200 @@
     color: var(--success);
   }
 
-  .status-badge-pending {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    background: var(--slate-100);
-    color: var(--slate-500);
-  }
-
-  .empty-course-box {
-    padding: 34px 20px;
-    text-align: center;
-    color: var(--slate-400);
-  }
-
-  .empty-course-box i {
-    font-size: 1.6rem;
-    margin-bottom: 8px;
-    display: block;
-    color: #cbd5e1;
-  }
-
-  .empty-course-box p {
-    margin: 0;
-    font-size: 0.84rem;
-    font-weight: 600;
-    color: var(--slate-500);
-  }
-
-  /* Responsive Mobile & Print Styles */
   @media (max-width: 768px) {
     main.content {
       padding: 12px 12px 40px !important;
     }
-    .reports-kpi-grid {
+    .cs-kpi-grid {
       grid-template-columns: 1fr;
       gap: 10px;
     }
-    .header-right-tools {
+    .cs-actions-wrap {
       width: 100%;
     }
-    .report-search-box {
-      width: 100%;
-    }
-    .btn-print-report {
-      width: 100%;
+    .btn-back-courses, .btn-export-roster {
+      flex: 1;
       justify-content: center;
     }
-    .report-data-table th,
-    .report-data-table td {
-      padding: 11px 14px;
-      white-space: nowrap;
-    }
-  }
-
-  @media print {
-    .sidebar, .top-header, .header-right-tools {
-      display: none !important;
-    }
-    .app-main {
-      margin-left: 0 !important;
-    }
-    main.content {
-      padding: 0 !important;
-    }
-    .instructor-report-card, .reports-kpi-card {
-      box-shadow: none !important;
-      border: 1px solid #cbd5e1 !important;
-      break-inside: avoid;
+    .cs-search-box {
+      width: 100%;
     }
   }
 </style>
 
-{# التقاط قائمة المدرسين والتقارير مهما كان اسم المتغير المرسل من admin.py #}
-{% set raw_list = (
-  report_data if (report_data is defined and report_data) else (
-  reports if (reports is defined and reports) else (
-  teacher_reports if (teacher_reports is defined and teacher_reports) else (
-  teachers if (teachers is defined and teachers) else (
-  instructors if (instructors is defined and instructors) else (
-  data if (data is defined and data) else []
-))))) ) %}
-
-{% set ns = namespace(total_courses=0, total_assessments=0) %}
-{% for item in raw_list %}
-  {% set t_obj = item.get('teacher') or item.get('instructor') or item if (item is mapping) else item %}
-  {% set c_list = (item.get('courses') if (item is mapping and item.get('courses') is not none) else (t_obj.courses if (t_obj and t_obj.courses is defined) else [])) %}
-  {% set ns.total_courses = ns.total_courses + (c_list|length) %}
-  {% for c_item in c_list %}
-    {% set c_obj = c_item.get('course') or c_item if (c_item is mapping) else c_item %}
-    {% set a_list = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c_obj.assignments if (c_obj and c_obj.assignments is defined) else [])) %}
-    {% set ns.total_assessments = ns.total_assessments + (a_list|length) %}
-  {% endfor %}
+{% set student_rows = students if (students is defined and students) else (rows if (rows is defined and rows) else (enrollments if (enrollments is defined and enrollments) else [])) %}
+{% set ns = namespace(grade_sum=0) %}
+{% for item in student_rows %}
+  {% if item is mapping %}
+    {% set g = item.get('total_grade') if item.get('total_grade') is not none else (item.get('grade') if item.get('grade') is not none else 0) %}
+  {% elif item is iterable and item is not string %}
+    {% set g = item[1] if item|length > 1 else 0 %}
+  {% else %}
+    {% set st_tmp = item.student if (item.student is defined and item.student) else item %}
+    {% set g = (grades.get(st_tmp.id, 0) if (grades is defined and grades is mapping) else (item.total_grade if (item.total_grade is defined and item.total_grade is not none) else (item.grade if (item.grade is defined and item.grade is not none) else 0))) %}
+  {% endif %}
+  {% set ns.grade_sum = ns.grade_sum + (g|float) %}
 {% endfor %}
+{% set avg_grade = ((ns.grade_sum / student_rows|length)|round(1)) if student_rows|length > 0 else 0 %}
 
-<div class="reports-admin-shell">
+<div class="course-students-shell" id="courseRosterPrintable">
   <!-- Header -->
-  <div class="reports-header-bar">
-    <div class="reports-title-wrap">
-      <h5>Analytics</h5>
-      <h1>Academic Reports</h1>
-      <p>Review instructor performance, course enrollment, submissions, and grades.</p>
+  <div class="cs-header-bar">
+    <div class="cs-title-group">
+      <h5>Course Enrollment Roster</h5>
+      <div class="cs-title-row">
+        <h1>Students in {{ course.name if (course is defined and course.name) else 'Course' }}</h1>
+        {% if course is defined and course.code %}
+          <span class="cs-code-pill">{{ course.code }}</span>
+        {% endif %}
+      </div>
     </div>
 
-    <div class="header-right-tools">
-      <div class="report-search-box">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="reportSearchInput" placeholder="Filter instructor or course..." onkeyup="filterAcademicReports()">
-      </div>
-
-      <button type="button" class="btn-print-report" onclick="window.print()">
-        <i class="fa-solid fa-print"></i> Print Report
+    <div class="cs-actions-wrap" data-html2canvas-ignore="true">
+      <a href="{{ url_for('admin.manage_courses') }}" class="btn-back-courses">
+        <i class="fa-solid fa-arrow-left"></i> Back to Courses
+      </a>
+      <button type="button" class="btn-export-roster" onclick="exportRosterPDF()">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
       </button>
     </div>
   </div>
 
   <!-- KPI Cards -->
-  <div class="reports-kpi-grid">
-    <div class="reports-kpi-card">
+  <div class="cs-kpi-grid">
+    <div class="cs-kpi-card">
       <div>
-        <span>Instructors Analyzed</span>
-        <strong>{{ raw_list|length }}</strong>
+        <span>Enrolled Students</span>
+        <strong>{{ student_rows|length }}</strong>
       </div>
-      <div class="reports-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
-        <i class="fa-solid fa-chalkboard-user"></i>
+      <div class="cs-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
+        <i class="fa-solid fa-users"></i>
       </div>
     </div>
 
-    <div class="reports-kpi-card">
+    <div class="cs-kpi-card">
       <div>
-        <span>Active Courses</span>
-        <strong>{{ ns.total_courses }}</strong>
+        <span>Course Average Grade</span>
+        <strong>{{ avg_grade }}</strong>
       </div>
-      <div class="reports-kpi-icon" style="background: var(--success-soft); color: var(--success);">
-        <i class="fa-solid fa-chart-line"></i>
+      <div class="cs-kpi-icon" style="background: var(--success-soft); color: var(--success);">
+        <i class="fa-solid fa-chart-simple"></i>
       </div>
     </div>
 
-    <div class="reports-kpi-card">
+    <div class="cs-kpi-card">
       <div>
-        <span>Total Assessments</span>
-        <strong>{{ ns.total_assessments }}</strong>
+        <span>Enrollment Status</span>
+        <strong>Active</strong>
       </div>
-      <div class="reports-kpi-icon" style="background: #f0f9ff; color: #0284c7;">
-        <i class="fa-solid fa-file-circle-check"></i>
+      <div class="cs-kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+        <i class="fa-solid fa-circle-check"></i>
       </div>
     </div>
   </div>
 
-  <!-- Instructor Cards List -->
-  <div id="reportsCardsContainer">
-    {% if raw_list %}
-      {% for item in raw_list %}
-        {% set t = item.get('teacher') or item.get('instructor') or item if (item is mapping) else item %}
-        {% set t_name = (t.name_person or t.username) if (t.name_person is defined or t.username is defined) else 'Instructor' %}
-        {% set t_dept = t.department if (t.department is defined and t.department) else 'Faculty Department' %}
-        {% set t_email = t.email if (t.email is defined and t.email) else '' %}
-        {% set courses_list = (item.get('courses') if (item is mapping and item.get('courses') is not none) else (t.courses if (t.courses is defined) else [])) %}
-
-        <div class="instructor-report-card">
-          <div class="instructor-card-head">
-            <div class="instructor-identity">
-              <div class="instructor-avatar">
-                {{ t_name[0]|upper }}
-              </div>
-              <div>
-                <h3>{{ t_name }}</h3>
-                <p>{{ t_dept }}{% if t_email %} • {{ t_email }}{% endif %}</p>
-              </div>
-            </div>
-
-            <div class="instructor-summary-pills">
-              <span class="summary-mini-pill">
-                <i class="fa-solid fa-book-open" style="color: var(--primary); margin-right: 4px;"></i>
-                {{ courses_list|length }} Course(s)
-              </span>
-            </div>
-          </div>
-
-          {% if courses_list %}
-            {% for c_item in courses_list %}
-              {% set c = c_item.get('course') or c_item if (c_item is mapping) else c_item %}
-              {% set c_id = c.id if (c.id is defined) else '' %}
-              {% set c_code = c.code if (c.code is defined) else 'COURSE' %}
-              {% set c_name = c.name if (c.name is defined) else '' %}
-              {% set enrolled_count = (
-                c_item.get('student_count') if (c_item is mapping and c_item.get('student_count') is not none) else (
-                c_item.get('students_count') if (c_item is mapping and c_item.get('students_count') is not none) else (
-                c.enrollments|length if (c.enrollments is defined) else 0
-              ))) %}
-              {% set assign_list = (c_item.get('assignments') if (c_item is mapping and c_item.get('assignments') is not none) else (c.assignments if (c.assignments is defined) else [])) %}
-
-              <div class="course-report-section">
-                <div class="course-sub-header">
-                  <div class="course-title-left">
-                    <span class="course-code-badge">{{ c_code }}</span>
-                    <strong>{{ c_name }}</strong>
-                  </div>
-                  {% if c_id %}
-                  <a href="/admin/courses/{{ c_id }}/students" class="enrolled-link-btn">
-                    {{ enrolled_count }} students enrolled <i class="fa-solid fa-arrow-right"></i>
-                  </a>
-                  {% else %}
-                  <span class="enrolled-link-btn">{{ enrolled_count }} students enrolled</span>
-                  {% endif %}
-                </div>
-
-                {% if assign_list %}
-                  <div class="table-scroll-wrap">
-                    <table class="report-data-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 32%;">Assignment / Quiz</th>
-                          <th style="width: 32%;">Student</th>
-                          <th style="width: 18%;">Grade</th>
-                          <th style="width: 18%; text-align: right;">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for a_item in assign_list %}
-                          {% set a = a_item.get('assignment') or a_item if (a_item is mapping) else a_item %}
-                          {% set a_title = a.title if (a.title is defined) else 'Assessment' %}
-                          {% set subs_list = (a_item.get('submissions') if (a_item is mapping and a_item.get('submissions') is not none) else (a.submissions if (a.submissions is defined) else [])) %}
-
-                          {% if subs_list %}
-                            {% for sub in subs_list %}
-                              {% if sub is mapping %}
-                                {% set st_obj = sub.get('student') %}
-                                {% set st_name = (st_obj.name_person or st_obj.username) if (st_obj and (st_obj.name_person is defined or st_obj.username is defined)) else (st_obj or sub.get('student_name') or 'Student') %}
-                                {% set st_grade = sub.get('grade') %}
-                              {% else %}
-                                {% set st_name = (sub.student.name_person or sub.student.username) if sub.student else 'Student' %}
-                                {% set st_grade = sub.grade %}
-                              {% endif %}
-                              <tr>
-                                <td><strong>{{ a_title }}</strong></td>
-                                <td>{{ st_name }}</td>
-                                <td>
-                                  {% if st_grade is not none %}
-                                    <span class="grade-pill">{{ st_grade }}</span>
-                                  {% else %}
-                                    <span class="grade-muted">Ungraded</span>
-                                  {% endif %}
-                                </td>
-                                <td style="text-align: right;">
-                                  {% if st_grade is not none %}
-                                    <span class="status-badge-done">● Graded</span>
-                                  {% else %}
-                                    <span class="status-badge-pending">Submitted</span>
-                                  {% endif %}
-                                </td>
-                              </tr>
-                            {% endfor %}
-                          {% else %}
-                            <tr>
-                              <td><strong>{{ a_title }}</strong></td>
-                              <td style="color: var(--slate-400);">No submissions yet.</td>
-                              <td><span class="grade-muted">—</span></td>
-                              <td style="text-align: right;">
-                                <span class="status-badge-pending">Awaiting</span>
-                              </td>
-                            </tr>
-                          {% endif %}
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-                {% else %}
-                  <div class="empty-course-box">
-                    <i class="fa-solid fa-folder-open"></i>
-                    <p>No assignments in this course.</p>
-                  </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          {% else %}
-            <div class="empty-course-box">
-              <i class="fa-solid fa-book"></i>
-              <p>No courses assigned to this instructor yet.</p>
-            </div>
-          {% endif %}
+  <!-- Students Table -->
+  <div class="cs-table-panel">
+    <div class="cs-toolbar">
+      <div class="cs-toolbar-left">
+        <div class="cs-toolbar-icon">
+          <i class="fa-solid fa-user-graduate"></i>
         </div>
-      {% endfor %}
-    {% else %}
-      <div class="instructor-report-card">
-        <div class="empty-course-box" style="padding: 50px 20px;">
-          <i class="fa-solid fa-chart-column"></i>
-          <p>No academic report data available yet.</p>
+        <div>
+          <h3>Enrolled Students</h3>
+          <small>{{ student_rows|length }} student(s) currently enrolled</small>
         </div>
       </div>
-    {% endif %}
+
+      <div class="cs-search-box" data-html2canvas-ignore="true">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="rosterSearchInput" placeholder="Search name or email..." onkeyup="filterCourseRoster()">
+      </div>
+    </div>
+
+    <div class="table-scroll-wrap">
+      <table class="cs-data-table" id="courseRosterTable">
+        <thead>
+          <tr>
+            <th style="width: 60px;">#</th>
+            <th>Student Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th style="text-align: right;">Total Grade</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if student_rows %}
+            {% for item in student_rows %}
+              {% if item is mapping %}
+                {% set st = item.get('student') or item %}
+                {% set grade_val = item.get('total_grade') if item.get('total_grade') is not none else (item.get('grade') if item.get('grade') is not none else 0) %}
+              {% elif item is iterable and item is not string %}
+                {% set st = item[0] %}
+                {% set grade_val = item[1] if item|length > 1 else 0 %}
+              {% else %}
+                {% set st = item.student if (item.student is defined and item.student) else item %}
+                {% set grade_val = (grades.get(st.id, 0) if (grades is defined and grades is mapping) else (item.total_grade if (item.total_grade is defined and item.total_grade is not none) else (item.grade if (item.grade is defined and item.grade is not none) else 0))) %}
+              {% endif %}
+
+              {% set display_name = (st.name_person or st.username) if (st.name_person is defined or st.username is defined) else 'Student' %}
+              {% set sub_username = st.username if (st.username is defined and st.username != display_name) else '' %}
+              {% set st_email = st.email if (st.email is defined) else '—' %}
+
+              <tr>
+                <td style="font-weight: 700; color: var(--slate-400);">{{ loop.index }}</td>
+                <td>
+                  <div class="student-row-info">
+                    <div class="st-avatar-box">{{ display_name[0]|upper }}</div>
+                    <div class="st-name-stack">
+                      <strong>{{ display_name }}</strong>
+                      {% if sub_username %}<span>@{{ sub_username }}</span>{% endif %}
+                    </div>
+                  </div>
+                </td>
+                <td style="color: var(--slate-600);">{{ st_email }}</td>
+                <td><span class="enrolled-status-pill">● Enrolled</span></td>
+                <td style="text-align: right;">
+                  <span class="grade-score-badge">{{ grade_val }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 44px 16px; color: var(--slate-400);">
+                No students are enrolled in this course yet.
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-  function filterAcademicReports() {
-    const query = (document.getElementById('reportSearchInput')?.value || '').toLowerCase().trim();
-    const cards = document.querySelectorAll('#reportsCardsContainer .instructor-report-card');
-    cards.forEach(card => {
-      const text = card.textContent.toLowerCase();
-      card.style.display = (!query || text.includes(query)) ? '' : 'none';
+  function filterCourseRoster() {
+    const query = (document.getElementById('rosterSearchInput')?.value || '').toLowerCase().trim();
+    const rows = document.querySelectorAll('#courseRosterTable tbody tr');
+    rows.forEach(row => {
+      row.style.display = (!query || row.textContent.toLowerCase().includes(query)) ? '' : 'none';
     });
+  }
+
+  function exportRosterPDF() {
+    const element = document.getElementById('courseRosterPrintable');
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      return;
+    }
+    html2pdf().set({
+      margin: [10, 10, 10, 10],
+      filename: '{{ (course.code if (course is defined and course.code) else "Course") }}_Students_Roster.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }).from(element).save();
   }
 </script>
 {% endblock %}
