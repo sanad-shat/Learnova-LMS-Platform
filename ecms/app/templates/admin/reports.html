@@ -1,5 +1,5 @@
 {% extends 'admin/base.html' %}
-{% block title %}Academic Reports | Learnova LMS{% endblock %}
+{% block title %}Academic Reports & Analytics | Learnova Admin{% endblock %}
 
 {% block content %}
 <style>
@@ -16,44 +16,46 @@
     --slate-200: #e2e8f0;
     --slate-100: #f1f5f9;
     --slate-50: #f8fafc;
-    --warning-soft: #fffbeb;
-    --warning-text: #b45309;
-    --warning-border: #fde68a;
+    --success: #10b981;
     --success-soft: #ecfdf5;
-    --success-text: #059669;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
   }
 
-  /* إزالة قيود العرض لتعبئة الشاشة بالكامل */
-  .content, .app-main {
+  /* توسيع الحاوية الرئيسية لمحاذاة الحافة اليمنى أسفل Admin User بالكامل */
+  .app-main {
     max-width: 100% !important;
-    width: 100% !important;
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
-  .admin-page-shell {
+  main.content {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 24px 16px 60px !important;
-    margin: 0 !important;
-    box-sizing: border-box;
-    font-family: inherit;
+    padding: 12px 24px 50px !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
   }
 
-  /* رأس الصفحة */
-  .page-top-bar {
+  .reports-admin-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin-top: -4px;
+    box-sizing: border-box !important;
+  }
+
+  /* Header Section */
+  .reports-header-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 16px;
-    margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--slate-200);
-    width: 100%;
+    gap: 14px;
+    margin-bottom: 20px;
   }
 
-  .page-title-group h5 {
+  .reports-title-wrap h5 {
     font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
@@ -62,52 +64,93 @@
     margin: 0 0 4px;
   }
 
-  .page-title-group h1 {
-    font-size: 1.85rem;
+  .reports-title-wrap h1 {
+    font-size: 1.65rem;
     font-weight: 800;
     color: var(--slate-900);
-    letter-spacing: -0.025em;
-    margin: 0 0 4px;
-    line-height: 1.2;
+    margin: 0;
+    letter-spacing: -0.02em;
   }
 
-  .page-title-group p {
-    font-size: 0.9rem;
+  .reports-title-wrap p {
+    font-size: 0.85rem;
     color: var(--slate-500);
-    margin: 0;
+    margin: 4px 0 0;
+  }
+
+  .header-right-tools {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .report-search-box {
+    position: relative;
+    width: 240px;
+  }
+
+  .report-search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--slate-400);
+    font-size: 0.84rem;
+    pointer-events: none;
+  }
+
+  .report-search-box input {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px 0 34px;
+    border: 1.5px solid var(--slate-200);
+    border-radius: 10px;
+    font-size: 0.83rem;
+    background: #ffffff;
+    color: var(--slate-900);
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .report-search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   .btn-print-report {
-    background: #ffffff;
-    color: var(--slate-700);
-    font-size: 0.88rem;
-    font-weight: 700;
-    padding: 10px 18px;
+    height: 38px;
+    padding: 0 16px;
     border-radius: 10px;
+    background: #ffffff;
     border: 1.5px solid var(--slate-200);
+    color: var(--slate-800);
+    font-size: 0.83rem;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    transition: all 0.15s;
+    white-space: nowrap;
   }
 
   .btn-print-report:hover {
-    background: var(--slate-50);
-    border-color: var(--slate-300);
+    border-color: var(--primary);
     color: var(--primary);
+    background: var(--primary-soft);
   }
 
-  /* بطاقات الملخص الإحصائي */
-  .kpi-row {
+  /* KPI Summary Cards */
+  .reports-kpi-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
   }
 
-  .kpi-card {
+  .reports-kpi-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
     border-radius: 14px;
@@ -115,89 +158,121 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    min-width: 0;
   }
 
-  .kpi-card .kpi-num {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    line-height: 1;
+  .reports-kpi-card span {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--slate-500);
+    display: block;
     margin-bottom: 4px;
   }
 
-  .kpi-card .kpi-lbl {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--slate-500);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+  .reports-kpi-card strong {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--slate-900);
   }
 
-  .kpi-card .kpi-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--slate-100);
-    color: var(--slate-700);
+  .reports-kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.1rem;
+    flex-shrink: 0;
   }
 
-  /* بطاقة المدرس ومقرراته */
-  .instructor-report-block {
+  /* Instructor Report Card */
+  .instructor-report-card {
+    width: 100%;
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 18px;
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.03);
-    margin-bottom: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.03);
+    margin-bottom: 20px;
     overflow: hidden;
-    width: 100%;
-    box-sizing: border-box;
   }
 
-  .instructor-block-header {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--slate-200);
+  .instructor-card-head {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #ffffff;
+  }
+
+  .instructor-identity {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: #ffffff;
   }
 
-  .inst-avatar-large {
-    width: 44px;
-    height: 44px;
+  .instructor-avatar {
+    width: 42px;
+    height: 42px;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary), #6366f1);
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: #ffffff;
+    font-size: 1rem;
     font-weight: 800;
-    font-size: 1.05rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .inst-meta-text h3 {
-    font-size: 1.1rem;
+  .instructor-identity h3 {
+    margin: 0 0 3px;
+    font-size: 1.02rem;
     font-weight: 800;
     color: var(--slate-900);
-    margin: 0 0 3px;
   }
 
-  .inst-meta-text span {
-    font-size: 0.82rem;
+  .instructor-identity p {
+    margin: 0;
+    font-size: 0.78rem;
     color: var(--slate-500);
   }
 
-  /* شريط الكورس */
-  .course-strip {
-    padding: 12px 24px;
+  .instructor-summary-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .summary-mini-pill {
     background: var(--slate-50);
-    border-bottom: 1px solid var(--slate-200);
+    border: 1px solid var(--slate-200);
+    color: var(--slate-700);
+    padding: 5px 11px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  /* Course Block inside Instructor Card */
+  .course-report-section {
+    border-bottom: 1px solid var(--slate-100);
+  }
+
+  .course-report-section:last-child {
+    border-bottom: none;
+  }
+
+  .course-sub-header {
+    padding: 13px 22px;
+    background: var(--slate-50);
+    border-bottom: 1px solid var(--slate-100);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -205,274 +280,373 @@
     gap: 10px;
   }
 
-  .course-strip-info {
+  .course-title-left {
     display: flex;
     align-items: center;
     gap: 10px;
   }
 
-  .course-tag {
-    background: #eff6ff;
-    color: #2563eb;
-    border: 1px solid #bfdbfe;
-    font-size: 0.76rem;
+  .course-code-badge {
+    background: var(--primary-soft);
+    color: var(--primary);
+    border: 1px solid rgba(79, 70, 229, 0.18);
+    padding: 4px 10px;
+    border-radius: 7px;
+    font-size: 0.75rem;
     font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 6px;
   }
 
-  .course-title-txt {
-    font-weight: 700;
+  .course-title-left strong {
     font-size: 0.92rem;
-    color: var(--slate-800);
+    font-weight: 700;
+    color: var(--slate-900);
   }
 
-  .course-students-count {
+  .enrolled-link-btn {
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 7px;
+    transition: background 0.15s;
   }
 
-  /* جدول الواجبات والدرجات */
-  .report-table {
+  .enrolled-link-btn:hover {
+    background: var(--primary-soft);
+  }
+
+  /* Report Table */
+  .table-scroll-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .report-data-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.86rem;
+    text-align: left;
+    font-size: 0.83rem;
   }
 
-  .report-table thead th {
-    background: #ffffff;
-    padding: 12px 24px;
-    font-size: 0.7rem;
+  .report-data-table th {
+    padding: 11px 22px;
+    font-size: 0.69rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--slate-500);
-    border-bottom: 1px solid var(--slate-200);
-    text-align: left;
-  }
-
-  .report-table tbody tr {
     border-bottom: 1px solid var(--slate-100);
-    transition: background 0.15s ease;
+    background: #ffffff;
+    white-space: nowrap;
   }
 
-  .report-table tbody tr:hover {
+  .report-data-table td {
+    padding: 13px 22px;
+    border-bottom: 1px solid var(--slate-100);
+    color: var(--slate-800);
+    vertical-align: middle;
+  }
+
+  .report-data-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .report-data-table tr:hover {
     background: #fafbff;
   }
 
-  .report-table td {
-    padding: 14px 24px;
-    vertical-align: middle;
-    color: var(--slate-700);
+  .grade-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.78rem;
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  .grade-muted {
+    color: var(--slate-400);
+    font-weight: 600;
+  }
+
+  .status-badge-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: var(--success-soft);
+    color: var(--success);
   }
 
   .status-badge-pending {
-    background: var(--warning-soft);
-    color: var(--warning-text);
-    border: 1px solid var(--warning-border);
-    padding: 3px 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
     border-radius: 999px;
-    font-weight: 700;
     font-size: 0.72rem;
-    text-transform: uppercase;
+    font-weight: 700;
+    background: var(--slate-100);
+    color: var(--slate-500);
   }
 
-  .status-badge-graded {
-    background: var(--success-soft);
-    color: var(--success-text);
-    padding: 3px 8px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 0.72rem;
-    text-transform: uppercase;
-  }
-
-  .empty-state-box {
-    padding: 36px 20px;
+  .empty-course-box {
+    padding: 34px 20px;
     text-align: center;
     color: var(--slate-400);
-    font-size: 0.88rem;
   }
 
-  @media (max-width: 992px) {
-    .kpi-row { grid-template-columns: 1fr; }
-    .report-table thead { display: none; }
-    .report-table, .report-table tbody, .report-table tr, .report-table td {
-      display: block; width: 100%; box-sizing: border-box;
-    }
-    .report-table tbody tr {
-      margin-bottom: 10px; border-bottom: 1px solid var(--slate-200); padding: 10px 16px;
-    }
-    .report-table td {
-      display: flex; justify-content: space-between; align-items: center; padding: 6px 0;
-    }
-    .report-table td::before {
-      content: attr(data-label); font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--slate-400);
-    }
+  .empty-course-box i {
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    display: block;
+    color: #cbd5e1;
   }
 
-  @media (max-width: 640px) {
-    .admin-page-shell { padding: 16px 10px 40px !important; }
-    .page-top-bar { flex-direction: column; align-items: stretch; }
-    .btn-print-report { width: 100%; justify-content: center; }
+  .empty-course-box p {
+    margin: 0;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--slate-500);
+  }
+
+  /* Responsive Mobile & Print Styles */
+  @media (max-width: 768px) {
+    main.content {
+      padding: 12px 12px 40px !important;
+    }
+    .reports-kpi-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .header-right-tools {
+      width: 100%;
+    }
+    .report-search-box {
+      width: 100%;
+    }
+    .btn-print-report {
+      width: 100%;
+      justify-content: center;
+    }
+    .report-data-table th,
+    .report-data-table td {
+      padding: 11px 14px;
+      white-space: nowrap;
+    }
   }
 
   @media print {
-    .page-top-bar, .btn-print-report, .app-sidebar, header { display: none !important; }
-    .admin-page-shell { padding: 0 !important; }
-    .instructor-report-block { box-shadow: none !important; border: 1px solid #ccc !important; }
+    .sidebar, .top-header, .header-right-tools {
+      display: none !important;
+    }
+    .app-main {
+      margin-left: 0 !important;
+    }
+    main.content {
+      padding: 0 !important;
+    }
+    .instructor-report-card, .reports-kpi-card {
+      box-shadow: none !important;
+      border: 1px solid #cbd5e1 !important;
+      break-inside: avoid;
+    }
   }
 </style>
 
-<div class="admin-page-shell">
-  <!-- رأس الصفحة -->
-  <div class="page-top-bar">
-    <div class="page-title-group">
-      <h5>ANALYTICS</h5>
+{% set staff_list = teachers if teachers is defined else (instructors if instructors is defined else []) %}
+{% set ns = namespace(total_courses=0, total_assessments=0) %}
+{% for t in staff_list %}
+  {% if t.courses %}
+    {% set ns.total_courses = ns.total_courses + (t.courses|length) %}
+    {% for c in t.courses %}
+      {% set ns.total_assessments = ns.total_assessments + (c.assignments|length if c.assignments else 0) %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
+<div class="reports-admin-shell">
+  <!-- Header -->
+  <div class="reports-header-bar">
+    <div class="reports-title-wrap">
+      <h5>Analytics</h5>
       <h1>Academic Reports</h1>
       <p>Review instructor performance, course enrollment, submissions, and grades.</p>
     </div>
-    <div>
+
+    <div class="header-right-tools">
+      <div class="report-search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="reportSearchInput" placeholder="Filter instructor or course..." onkeyup="filterAcademicReports()">
+      </div>
+
       <button type="button" class="btn-print-report" onclick="window.print()">
         <i class="fa-solid fa-print"></i> Print Report
       </button>
     </div>
   </div>
 
-  <!-- تحديد ذكي لمصدر البيانات القادم من بايثون -->
-  {% set raw_list = report_data if report_data is defined else (reports if reports is defined else (instructors_data if instructors_data is defined else (data if data is defined else (teachers if teachers is defined else (instructors if instructors is defined else []))))) %}
+  <!-- KPI Cards -->
+  <div class="reports-kpi-grid">
+    <div class="reports-kpi-card">
+      <div>
+        <span>Instructors Analyzed</span>
+        <strong>{{ staff_list|length }}</strong>
+      </div>
+      <div class="reports-kpi-icon" style="background: var(--primary-soft); color: var(--primary);">
+        <i class="fa-solid fa-chalkboard-user"></i>
+      </div>
+    </div>
 
-  <!-- ملخص إحصائي سريع -->
-  <div class="kpi-row">
-    <div class="kpi-card">
+    <div class="reports-kpi-card">
       <div>
-        <div class="kpi-num">{{ raw_list|length if raw_list else 2 }}</div>
-        <div class="kpi-lbl">Instructors Analyzed</div>
+        <span>Active Courses</span>
+        <strong>{{ ns.total_courses }}</strong>
       </div>
-      <div class="kpi-icon" style="color: var(--primary);"><i class="fa-solid fa-chalkboard-user"></i></div>
+      <div class="reports-kpi-icon" style="background: var(--success-soft); color: var(--success);">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
     </div>
-    <div class="kpi-card">
+
+    <div class="reports-kpi-card">
       <div>
-        <div class="kpi-num">Live</div>
-        <div class="kpi-lbl">Course Activity</div>
+        <span>Total Assessments</span>
+        <strong>{{ ns.total_assessments }}</strong>
       </div>
-      <div class="kpi-icon" style="color: var(--success-text);"><i class="fa-solid fa-chart-line"></i></div>
-    </div>
-    <div class="kpi-card">
-      <div>
-        <div class="kpi-num">Updated</div>
-        <div class="kpi-lbl">Current Database</div>
+      <div class="reports-kpi-icon" style="background: #f0f9ff; color: #0284c7;">
+        <i class="fa-solid fa-file-circle-check"></i>
       </div>
-      <div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
     </div>
   </div>
 
-  <!-- عرض التقارير -->
-  {% if raw_list %}
-    {% for item in raw_list %}
-    {% set inst = item.instructor if item.instructor is defined else (item.teacher if item.teacher is defined else item) %}
-    {% set courses_list = item.courses if item.courses is defined else (inst.courses if inst.courses is defined else []) %}
-    
-    <div class="instructor-report-block">
-      <!-- بيانات المدرس -->
-      <div class="instructor-block-header">
-        <div class="inst-avatar-large">
-          {{ (inst.name_person or inst.username or inst.name or 'I')[0]|upper }}
-        </div>
-        <div class="inst-meta-text">
-          <h3>{{ inst.name_person or inst.username or inst.name or 'Instructor' }}</h3>
-          <span>{{ inst.department or 'Department not specified' }} • {{ inst.email or '' }}</span>
-        </div>
-      </div>
-
-      <!-- المقررات التابعة للمدرس -->
-      {% if courses_list %}
-        {% for course_wrap in courses_list %}
-        {% set course = course_wrap.course if course_wrap.course is defined else course_wrap %}
-        <div>
-          <div class="course-strip">
-            <div class="course-strip-info">
-              <span class="course-tag">{{ course.code or 'CRS' }}</span>
-              <span class="course-title-txt">{{ course.name or course.title }}</span>
+  <!-- Instructor Cards List -->
+  <div id="reportsCardsContainer">
+    {% if staff_list %}
+      {% for t in staff_list %}
+      <div class="instructor-report-card">
+        <div class="instructor-card-head">
+          <div class="instructor-identity">
+            <div class="instructor-avatar">
+              {{ (t.name_person or t.username)[0]|upper }}
             </div>
-            <div class="course-students-count">
-              {{ course_wrap.students_count if course_wrap.students_count is defined else (course.enrollments|length if course.enrollments is defined else 0) }} students enrolled &rarr;
+            <div>
+              <h3>{{ t.name_person or t.username }}</h3>
+              <p>{{ t.department or 'Faculty Department' }} • {{ t.email }}</p>
             </div>
           </div>
 
-          <!-- الواجبات والتقييمات -->
-          {% set assignments_list = course_wrap.assignments if course_wrap.assignments is defined else (course.assignments if course.assignments is defined else []) %}
-          {% if assignments_list %}
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>ASSIGNMENT</th>
-                  <th>STUDENT</th>
-                  <th>GRADE</th>
-                  <th style="text-align: right; padding-right: 24px;">STATUS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for assign in assignments_list %}
-                  {% set subs = assign.submissions if assign.submissions is defined else [] %}
-                  {% if subs %}
-                    {% for sub in subs %}
-                    <tr>
-                      <td data-label="ASSIGNMENT">
-                        <strong style="color: var(--slate-900);">{{ assign.title }}</strong>
-                      </td>
-                      <td data-label="STUDENT">
-                        {{ sub.student.name_person if sub.student and sub.student.name_person else (sub.student.username if sub.student else 'Student') }}
-                      </td>
-                      <td data-label="GRADE">
-                        <span style="font-weight: 700; color: var(--slate-800);">{{ sub.grade if sub.grade is not none else 'Not graded' }}</span>
-                      </td>
-                      <td data-label="STATUS" style="text-align: right;">
-                        {% if sub.grade is not none %}
-                          <span class="status-badge-graded">Graded</span>
-                        {% else %}
-                          <span class="status-badge-pending">Pending</span>
-                        {% endif %}
-                      </td>
-                    </tr>
-                    {% endfor %}
-                  {% else %}
-                    <tr>
-                      <td data-label="ASSIGNMENT">
-                        <strong style="color: var(--slate-900);">{{ assign.title if assign.title is defined else assign }}</strong>
-                      </td>
-                      <td colspan="3" style="color: var(--slate-400); font-size: 0.82rem;">
-                        No submissions yet.
-                      </td>
-                    </tr>
-                  {% endif %}
-                {% endfor %}
-              </tbody>
-            </table>
-          {% else %}
-            <div class="empty-state-box">
-              <i class="fa-solid fa-folder-open" style="font-size: 1.5rem; margin-bottom: 6px; display: block;"></i>
-              No assignments in this course.
+          <div class="instructor-summary-pills">
+            <span class="summary-mini-pill">
+              <i class="fa-solid fa-book-open" style="color: var(--primary); margin-right: 4px;"></i>
+              {{ t.courses|length if t.courses else 0 }} Course(s)
+            </span>
+          </div>
+        </div>
+
+        {% if t.courses %}
+          {% for c in t.courses %}
+          <div class="course-report-section">
+            <div class="course-sub-header">
+              <div class="course-title-left">
+                <span class="course-code-badge">{{ c.code }}</span>
+                <strong>{{ c.name }}</strong>
+              </div>
+              <a href="/admin/courses/{{ c.id }}/students" class="enrolled-link-btn">
+                {{ c.enrollments|length if c.enrollments else 0 }} students enrolled <i class="fa-solid fa-arrow-right"></i>
+              </a>
             </div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      {% else %}
-        <div class="empty-state-box">
-          <i class="fa-solid fa-book" style="font-size: 1.5rem; margin-bottom: 6px; display: block;"></i>
-          No courses currently assigned to this instructor.
-        </div>
-      {% endif %}
-    </div>
-    {% endfor %}
-  {% else %}
-    <div class="instructor-report-block">
-      <div class="empty-state-box" style="padding: 60px 20px;">
-        <i class="fa-solid fa-chart-pie" style="font-size: 2.5rem; margin-bottom: 12px; display: block; color: var(--slate-400);"></i>
-        No academic reports available to display.
+
+            {% if c.assignments %}
+              <div class="table-scroll-wrap">
+                <table class="report-data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Assignment / Quiz</th>
+                      <th style="width: 32%;">Student</th>
+                      <th style="width: 18%;">Grade</th>
+                      <th style="width: 18%; text-align: right;">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for a in c.assignments %}
+                      {% if a.submissions %}
+                        {% for sub in a.submissions %}
+                        <tr>
+                          <td><strong>{{ a.title }}</strong></td>
+                          <td>{{ (sub.student.name_person or sub.student.username) if sub.student else 'Student' }}</td>
+                          <td>
+                            {% if sub.grade is not none %}
+                              <span class="grade-pill">{{ sub.grade }}</span>
+                            {% else %}
+                              <span class="grade-muted">Ungraded</span>
+                            {% endif %}
+                          </td>
+                          <td style="text-align: right;">
+                            {% if sub.grade is not none %}
+                              <span class="status-badge-done">● Graded</span>
+                            {% else %}
+                              <span class="status-badge-pending">Submitted</span>
+                            {% endif %}
+                          </td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                        <tr>
+                          <td><strong>{{ a.title }}</strong></td>
+                          <td style="color: var(--slate-400);">No submissions yet.</td>
+                          <td><span class="grade-muted">—</span></td>
+                          <td style="text-align: right;">
+                            <span class="status-badge-pending">Awaiting</span>
+                          </td>
+                        </tr>
+                      {% endif %}
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="empty-course-box">
+                <i class="fa-solid fa-folder-open"></i>
+                <p>No assignments in this course.</p>
+              </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="empty-course-box">
+            <i class="fa-solid fa-book"></i>
+            <p>No courses assigned to this instructor yet.</p>
+          </div>
+        {% endif %}
       </div>
-    </div>
-  {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="instructor-report-card">
+        <div class="empty-course-box" style="padding: 50px 20px;">
+          <i class="fa-solid fa-chart-column"></i>
+          <p>No academic report data available yet.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
 </div>
+
+<script>
+  function filterAcademicReports() {
+    const query = (document.getElementById('reportSearchInput')?.value || '').toLowerCase().trim();
+    const cards = document.querySelectorAll('#reportsCardsContainer .instructor-report-card');
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = (!query || text.includes(query)) ? '' : 'none';
+    });
+  }
+</script>
 {% endblock %}
