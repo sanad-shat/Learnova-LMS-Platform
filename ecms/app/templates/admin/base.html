@@ -42,9 +42,9 @@
       width: 100%;
     }
 
-    /* Light SaaS Sidebar - تثبيت الموضع العلوي لمنع قص الشعار */
+    /* Light SaaS Sidebar - إخفاء شريط التمرير العمودي وتثبيت الأبعاد */
     aside.sidebar#appSidebar {
-      width: var(--sidebar-width) !important;
+      width: 260px !important;
       background: var(--bg-sidebar) !important;
       border-right: 1px solid var(--border-color) !important;
       display: flex !important;
@@ -54,10 +54,18 @@
       bottom: 0 !important;
       left: 0 !important;
       margin: 0 !important;
-      padding: 16px 16px 24px !important;
+      padding: 16px 16px 20px !important;
       z-index: 100 !important;
       overflow-y: auto !important;
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    aside.sidebar#appSidebar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
     }
 
     aside.sidebar#appSidebar .sidebar-brand {
@@ -68,10 +76,10 @@
       align-items: center !important;
       gap: 12px !important;
       text-decoration: none !important;
-      margin: 0 0 18px 0 !important;
-      padding: 6px 8px 18px !important;
+      margin: 0 0 12px 0 !important;
+      padding: 4px 8px 14px !important;
       height: auto !important;
-      min-height: 56px !important;
+      min-height: 52px !important;
       overflow: visible !important;
       transform: none !important;
       border-bottom: 1px solid #f1f5f9 !important;
@@ -140,21 +148,21 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: #94a3b8;
-      padding: 12px 10px 6px;
+      padding: 8px 10px 4px;
     }
 
     .side-nav {
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      margin-bottom: 12px;
+      gap: 3px;
+      margin-bottom: 10px;
     }
 
     .side-nav a {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 14px;
+      padding: 9px 14px;
       border-radius: 12px;
       font-size: 13.5px;
       font-weight: 600;
@@ -203,7 +211,7 @@
 
     .sidebar-footer {
       margin-top: auto;
-      padding-top: 14px;
+      padding-top: 12px;
       border-top: 1px solid #f1f5f9;
     }
 
@@ -211,7 +219,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px 14px;
+      padding: 9px 14px;
       border-radius: 12px;
       font-size: 13px;
       font-weight: 600;
@@ -228,10 +236,11 @@
       border-color: #cbd5e1;
     }
 
-    /* Main Area */
+    /* Main Area - مطابقة الهامش الأيسر مع عرض القائمة 260px لمنع قص المحتوى */
     .app-main {
       flex: 1;
-      margin-left: var(--sidebar-width);
+      margin-left: 260px !important;
+      width: calc(100% - 260px) !important;
       display: flex;
       flex-direction: column;
       min-width: 0;
@@ -445,7 +454,7 @@
     }
 
     /* =========================================================
-       تحسينات الهاتف المخصصة (تعمل فقط عندما يكون العرض <= 768px)
+       تحسينات الهاتف المخصصة (تعمل فقط عندما يكون العرض <= 992px / 768px)
        ========================================================= */
     @media (max-width: 992px) {
       aside.sidebar#appSidebar {
@@ -456,7 +465,8 @@
         transform: translateX(0);
       }
       .app-main {
-        margin-left: 0;
+        margin-left: 0 !important;
+        width: 100% !important;
       }
       .menu-toggle {
         display: block;
