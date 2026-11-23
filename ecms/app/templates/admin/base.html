@@ -59,39 +59,52 @@
     }
 
     .sidebar-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      padding: 0 8px 24px;
-      border-bottom: 1px solid #f1f5f9;
-      margin-bottom: 20px;
+      display: flex !important;
+      align-items: center !important;
+      gap: 12px !important;
+      text-decoration: none !important;
+      padding: 4px 8px 20px !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      margin-bottom: 20px !important;
     }
 
     .sidebar-logo {
       width: 38px !important;
       height: 38px !important;
+      flex-shrink: 0 !important;
       filter: drop-shadow(0 4px 6px rgba(79, 70, 229, 0.2));
     }
 
+    .brand-copy {
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      min-width: 0 !important;
+    }
+
     .brand-copy strong {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--navy);
-      display: block;
-      line-height: 1.1;
+      font-size: 18px !important;
+      font-weight: 800 !important;
+      color: #0f172a !important;
+      display: block !important;
+      line-height: 1.2 !important;
+      letter-spacing: -0.02em !important;
+      opacity: 1 !important;
+      visibility: visible !important;
     }
 
     .brand-copy strong b {
-      color: var(--primary);
+      color: #4f46e5 !important;
+      font-weight: 800 !important;
     }
 
     .brand-copy small {
-      font-size: 9.5px;
-      letter-spacing: 1.4px;
-      color: var(--slate);
-      font-weight: 700;
-      display: block;
+      font-size: 9px !important;
+      letter-spacing: 1.3px !important;
+      color: #64748b !important;
+      font-weight: 700 !important;
+      display: block !important;
+      margin-top: 3px !important;
     }
 
     .nav-section {
