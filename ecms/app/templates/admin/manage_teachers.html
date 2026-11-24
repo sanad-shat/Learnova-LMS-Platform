@@ -24,61 +24,60 @@
     --danger-soft: #fef2f2;
   }
 
-  /* ضبط عرض الحاوية الرئيسية لمنع التمدد خارج الشاشة وإزالة الفراغ العلوي */
-  .content, .app-main, main {
-    padding-top: 12px !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-    overflow-x: hidden !important;
-  }
-
   .teachers-page-shell {
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 0 14px 50px !important;
-    margin-top: -8px;
-    box-sizing: border-box !important;
-    overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0 36px !important;
+    box-sizing: border-box;
   }
 
-  /* Header Bar */
+  /* Header Bar - مطابق لمرجع المسافات الموحد */
   .page-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
 
   .page-title-block h5 {
-    font-size: 0.72rem;
+    font-size: 11px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.8px;
     color: var(--primary);
-    margin: 0 0 4px;
+    margin: 0 0 2px;
   }
 
   .page-title-block h1 {
-    font-size: 1.6rem;
+    font-size: 22px;
     font-weight: 800;
     color: var(--slate-900);
-    margin: 0;
+    margin: 0 0 2px;
     letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .page-title-block p {
+    font-size: 13px;
+    color: var(--slate-500);
+    margin: 0;
   }
 
   .btn-add-primary {
+    height: 38px;
     background: var(--primary);
     color: #ffffff !important;
-    padding: 9px 16px;
+    padding: 0 16px;
     border-radius: 10px;
-    font-size: 0.83rem;
+    font-size: 13px;
     font-weight: 700;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -89,49 +88,51 @@
     transform: translateY(-1px);
   }
 
-  /* KPI Summary Cards */
+  /* KPI Summary Cards - مطابق لمرجع المسافات الموحد */
   .kpi-summary-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
 
   .kpi-box {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 14px;
-    padding: 15px 18px;
+    border-radius: 16px;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
     min-width: 0;
   }
 
   .kpi-box span {
-    font-size: 0.72rem;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.4px;
     color: var(--slate-500);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
   }
 
   .kpi-box strong {
-    font-size: 1.45rem;
+    font-size: 20px;
     font-weight: 800;
     color: var(--slate-900);
+    line-height: 1.15;
   }
 
   .kpi-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 11px;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.05rem;
+    font-size: 16px;
     flex-shrink: 0;
   }
 
@@ -139,15 +140,15 @@
   .directory-panel {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 16px;
-    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+    border-radius: 18px;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
   }
 
   .directory-toolbar {
-    padding: 14px 18px;
+    padding: 13px 18px;
     border-bottom: 1px solid var(--slate-100);
     display: flex;
     justify-content: space-between;
@@ -159,7 +160,7 @@
   .toolbar-title {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 11px;
   }
 
   .toolbar-title-icon {
@@ -171,42 +172,45 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.95rem;
+    font-size: 15px;
+    flex-shrink: 0;
   }
 
   .toolbar-title h3 {
     margin: 0;
-    font-size: 0.98rem;
+    font-size: 15px;
     font-weight: 800;
     color: var(--slate-900);
   }
 
   .toolbar-title small {
-    font-size: 0.76rem;
+    font-size: 12px;
     color: var(--slate-500);
   }
 
   .search-input-wrap {
     position: relative;
-    width: 240px;
+    width: 260px;
     max-width: 100%;
   }
 
   .search-input-wrap i {
     position: absolute;
-    left: 11px;
+    left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--slate-400);
-    font-size: 0.82rem;
+    font-size: 13px;
+    pointer-events: none;
   }
 
   .search-input-wrap input {
     width: 100%;
-    padding: 8px 12px 8px 32px;
+    height: 35px;
+    padding: 0 12px 0 34px;
     border: 1.5px solid var(--slate-200);
     border-radius: 10px;
-    font-size: 0.82rem;
+    font-size: 12.5px;
     background: var(--slate-50);
     outline: none;
     box-sizing: border-box;
@@ -216,42 +220,52 @@
   .search-input-wrap input:focus {
     border-color: var(--primary);
     background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
   }
 
   /* Responsive Table Wrapper */
   .table-scroll-container {
     width: 100%;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .table-scroll-container::-webkit-scrollbar {
+    display: none;
   }
 
   .teachers-table {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 0.81rem;
+    font-size: 12.5px;
   }
 
   .teachers-table th {
     background: var(--slate-50);
-    padding: 11px 10px;
-    font-size: 0.68rem;
+    padding: 10px 10px;
+    font-size: 10.5px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.4px;
     color: var(--slate-500);
     border-bottom: 1px solid var(--slate-200);
     white-space: nowrap;
   }
 
   .teachers-table td {
-    padding: 11px 10px;
+    padding: 10px 10px;
     border-bottom: 1px solid var(--slate-100);
     vertical-align: middle;
     color: var(--slate-700);
   }
 
-  .teachers-table tr:hover {
+  .teachers-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .teachers-table tr:hover td {
     background: #fafbff;
   }
 
@@ -259,10 +273,10 @@
   .emp-badge {
     font-family: monospace;
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: 11.5px;
     background: var(--slate-100);
     color: var(--slate-700);
-    padding: 4px 7px;
+    padding: 3px 7px;
     border-radius: 6px;
     white-space: nowrap;
   }
@@ -271,7 +285,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    min-width: 145px;
   }
 
   .avatar-circle {
@@ -281,7 +294,7 @@
     background: linear-gradient(135deg, #4f46e5, #7c3aed);
     color: #ffffff;
     font-weight: 800;
-    font-size: 0.82rem;
+    font-size: 12.5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -290,14 +303,15 @@
 
   .teacher-name-meta strong {
     display: block;
-    font-size: 0.84rem;
+    font-size: 13px;
     font-weight: 700;
     color: var(--slate-900);
-    line-height: 1.25;
+    line-height: 1.2;
+    white-space: nowrap;
   }
 
   .teacher-name-meta span {
-    font-size: 0.73rem;
+    font-size: 11px;
     color: var(--slate-400);
   }
 
@@ -306,16 +320,19 @@
     background: var(--slate-100);
     color: var(--slate-700);
     font-weight: 600;
-    font-size: 0.74rem;
-    padding: 4px 8px;
+    font-size: 11px;
+    padding: 3px 8px;
     border-radius: 6px;
-    line-height: 1.3;
+    line-height: 1.25;
     max-width: 115px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .rank-stack {
-    font-size: 0.76rem;
-    line-height: 1.35;
+    font-size: 11.5px;
+    line-height: 1.3;
     white-space: nowrap;
   }
 
@@ -327,23 +344,28 @@
 
   .rank-stack span {
     color: var(--slate-400);
-    font-size: 0.71rem;
+    font-size: 11px;
   }
 
   .contact-stack {
-    font-size: 0.76rem;
-    line-height: 1.35;
+    font-size: 11.5px;
+    line-height: 1.3;
+    max-width: 155px;
   }
 
   .contact-stack strong {
     display: block;
     color: var(--slate-800);
     font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .contact-stack span {
     color: var(--slate-400);
-    font-size: 0.71rem;
+    font-size: 11px;
+    white-space: nowrap;
   }
 
   .status-pill {
@@ -352,7 +374,7 @@
     gap: 4px;
     padding: 3px 8px;
     border-radius: 999px;
-    font-size: 0.68rem;
+    font-size: 10px;
     font-weight: 800;
     text-transform: uppercase;
     background: var(--success-soft);
@@ -369,7 +391,7 @@
 
   .pwd-text {
     font-family: monospace;
-    font-size: 0.78rem;
+    font-size: 11.5px;
     color: var(--slate-700);
   }
 
@@ -379,7 +401,7 @@
     border: 1px solid #fde68a;
     border-radius: 5px;
     padding: 2px 6px;
-    font-size: 0.68rem;
+    font-size: 10.5px;
     font-weight: 700;
     cursor: pointer;
   }
@@ -394,7 +416,7 @@
   .course-code-tag {
     background: var(--primary-soft);
     color: var(--primary);
-    font-size: 0.68rem;
+    font-size: 10.5px;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 5px;
@@ -405,7 +427,7 @@
     background: #eef2ff;
     color: var(--primary);
     border: 1px dashed #a5b4fc;
-    font-size: 0.68rem;
+    font-size: 10.5px;
     font-weight: 700;
     padding: 2px 6px;
     border-radius: 5px;
@@ -421,7 +443,7 @@
 
   /* Compact Action Buttons */
   .actions-btn-group {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
     white-space: nowrap;
@@ -434,7 +456,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.76rem;
+    font-size: 11.5px;
     border: 1px solid transparent;
     text-decoration: none;
     cursor: pointer;
@@ -450,9 +472,33 @@
   .btn-del-tc { background: #fef2f2; color: #dc2626; border-color: #fee2e2; }
   .btn-del-tc:hover { background: #dc2626; color: #ffffff; }
 
+  @media (max-width: 1100px) {
+    .teachers-table {
+      min-width: 960px;
+    }
+    .table-scroll-container {
+      scrollbar-width: auto;
+      -ms-overflow-style: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-scroll-container::-webkit-scrollbar {
+      display: block;
+      height: 5px;
+    }
+  }
+
   @media (max-width: 900px) {
-    .kpi-summary-grid { grid-template-columns: 1fr; }
-    .search-input-wrap { width: 100%; }
+    .kpi-summary-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .search-input-wrap {
+      width: 100%;
+    }
+    .btn-add-primary {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
 
@@ -462,6 +508,7 @@
     <div class="page-title-block">
       <h5>Faculty & Staff</h5>
       <h1>Instructor Accounts Management</h1>
+      <p>Manage instructor accounts, departments, office details, and assigned courses.</p>
     </div>
     <a href="/admin/teachers/add" class="btn-add-primary">
       <i class="fa-solid fa-user-plus"></i> Add New Instructor
@@ -560,7 +607,7 @@
                 </div>
               </td>
               <td>
-                <span class="dept-pill">{{ t.department or 'General' }}</span>
+                <span class="dept-pill" title="{{ t.department or 'General' }}">{{ t.department or 'General' }}</span>
               </td>
               <td>
                 <div class="rank-stack">
@@ -570,7 +617,7 @@
               </td>
               <td>
                 <div class="contact-stack">
-                  <strong>{{ t.email }}</strong>
+                  <strong title="{{ t.email }}">{{ t.email }}</strong>
                   <span>{{ t.phone or '—' }}</span>
                 </div>
               </td>
