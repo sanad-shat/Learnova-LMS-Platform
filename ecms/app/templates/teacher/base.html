@@ -6,8 +6,125 @@
   <title>{% block title %}Instructor Portal | Learnova LMS{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=13">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=14">
   <style>
+    /* ضبط التخطيط العام ومنع الفراغ الجانبي غير المقصود */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      overflow-x: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    .app-layout {
+      display: flex !important;
+      width: 100% !important;
+      min-height: 100vh !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    /* إخفاء شريط التمرير الجانبي للسايدبار */
+    aside.sidebar {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+      left: 0 !important;
+      margin: 0 !important;
+    }
+    aside.sidebar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+    }
+
+    /* على الشاشات الأكبر من 768px: إبقاء السايدبار ظاهراً ومحاذاة المحتوى بجانبه مباشرة بدون فراغ زائد */
+    @media (min-width: 769px) {
+      aside.sidebar {
+        width: 250px !important;
+        transform: translateX(0) !important;
+      }
+
+      .app-main {
+        margin-left: 250px !important;
+        margin-right: 0 !important;
+        width: calc(100% - 250px) !important;
+        max-width: calc(100% - 250px) !important;
+        flex: 1 1 auto !important;
+      }
+
+      .menu-toggle,
+      [data-menu-toggle],
+      .mobile-overlay {
+        display: none !important;
+      }
+
+      .top-header {
+        left: auto !important;
+        right: auto !important;
+        width: 100% !important;
+        height: 60px !important;
+        padding: 0 24px !important;
+      }
+
+      main.content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        padding: 10px 24px 36px !important;
+      }
+    }
+
+    /* تصغير حقل البحث العلوي وتوحيده */
+    .header-left {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      flex: 0 1 250px !important;
+      max-width: 250px !important;
+      min-width: 0 !important;
+    }
+
+    .search-box {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      height: 35px !important;
+      width: 100% !important;
+      padding: 0 12px !important;
+      border-radius: 10px !important;
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      box-sizing: border-box !important;
+    }
+
+    .search-box:focus-within {
+      background: #ffffff !important;
+      border-color: #4f46e5 !important;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+    }
+
+    .search-box i {
+      font-size: 13px !important;
+      color: #94a3b8 !important;
+      flex-shrink: 0;
+    }
+
+    .search-box input {
+      border: none !important;
+      background: transparent !important;
+      outline: none !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      font-size: 13px !important;
+      color: #0f172a !important;
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+
     /* تنسيق فائق النقاء لأيقونة الجرس بدون مربعات خلفية وبدون فراغات */
     .clean-bell-container {
       position: relative;
@@ -22,6 +139,7 @@
       text-decoration: none;
       transition: background 0.2s ease, color 0.2s ease;
       margin-right: 6px;
+      flex-shrink: 0;
     }
     .clean-bell-container:hover {
       background: #f1f5f9;
@@ -50,59 +168,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* إخفاء شريط التمرير الجانبي للسايدبار */
-    aside.sidebar {
-      scrollbar-width: none !important;
-      -ms-overflow-style: none !important;
-    }
-    aside.sidebar::-webkit-scrollbar {
-      display: none !important;
-      width: 0 !important;
-    }
-
-    /* تصغير حقل البحث العلوي وتوحيد ارتفاع الهيدر */
-    .top-header {
-      height: 62px !important;
-      padding-left: 26px !important;
-      padding-right: 26px !important;
-    }
-    .header-left {
-      flex: 0 1 280px !important;
-      max-width: 280px !important;
-    }
-    .search-box {
-      height: 36px !important;
-      padding: 0 12px !important;
-      border-radius: 10px !important;
-      background: #f8fafc !important;
-      border: 1px solid #e2e8f0 !important;
-    }
-    .search-box:focus-within {
-      background: #ffffff !important;
-      border-color: #4f46e5 !important;
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
-    }
-    .search-box input {
-      font-size: 13px !important;
-    }
-
-    /* توحيد المسافة العلوية في كل صفحات المدرس ورفع العنوان لأعلى */
-    @media (min-width: 993px) {
-      .app-main {
-        margin-left: 260px !important;
-        width: calc(100% - 260px) !important;
-        max-width: calc(100% - 260px) !important;
-      }
-
-      main.content {
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 10px 26px 36px !important;
-        box-sizing: border-box !important;
-      }
-    }
-
-    /* إلغاء أي حشو أو هامش علوي زائد يبعد العنوان عن الهيدر في أي صفحة */
+    /* رفع بداية المحتوى والعنوان لأعلى في كل الصفحات */
     main.content > *:first-child {
       margin-top: 0 !important;
       padding-top: 0 !important;
@@ -112,18 +178,23 @@
       padding-top: 0 !important;
     }
 
-    /* الحفاظ على تجاوب الهاتف */
+    /* تجاوب الهاتف (<= 768px) */
     @media (max-width: 768px) {
+      .app-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+      }
       .top-header {
         height: 58px !important;
-        padding-left: 14px !important;
-        padding-right: 14px !important;
+        padding: 0 14px !important;
       }
       .header-left {
         max-width: none !important;
+        flex: 1 1 auto !important;
       }
       main.content {
-        padding: 12px 14px 36px !important;
+        padding: 10px 14px 36px !important;
       }
     }
   </style>
