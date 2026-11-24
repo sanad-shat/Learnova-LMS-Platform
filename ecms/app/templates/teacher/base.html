@@ -74,7 +74,8 @@
         width: 100% !important;
         max-width: 100% !important;
         margin-left: 0 !important;
-        padding: 10px 24px 36px !important;
+        padding: 14px 24px 36px !important;
+        box-sizing: border-box !important;
       }
     }
 
@@ -168,7 +169,7 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-    /* رفع بداية المحتوى والعنوان لأعلى في كل الصفحات */
+    /* رفع بداية المحتوى والعنوان لأعلى وتوحيد المسافات في كل الصفحات */
     main.content > *:first-child {
       margin-top: 0 !important;
       padding-top: 0 !important;
@@ -176,6 +177,39 @@
     main.content > *:first-child > *:first-child {
       margin-top: 0 !important;
       padding-top: 0 !important;
+    }
+
+    main.content .page-header-row,
+    main.content .page-top-bar,
+    main.content .forum-header-bar {
+      margin-top: 0 !important;
+      margin-bottom: 14px !important;
+      gap: 12px !important;
+    }
+
+    main.content .metrics-summary-grid,
+    main.content .kpi-row,
+    main.content .kpi-summary-grid {
+      gap: 14px !important;
+      margin-bottom: 16px !important;
+    }
+
+    main.content .filter-bar,
+    main.content .directory-toolbar,
+    main.content .forum-toolbar {
+      margin-bottom: 16px !important;
+      gap: 12px !important;
+    }
+
+    main.content .course-card-pro,
+    main.content .directory-card,
+    main.content .directory-panel,
+    main.content .forum-panel {
+      border-radius: 16px !important;
+    }
+
+    main.content .course-cards-matrix {
+      gap: 16px !important;
     }
 
     /* تجاوب الهاتف (<= 768px) */
@@ -194,7 +228,7 @@
         flex: 1 1 auto !important;
       }
       main.content {
-        padding: 10px 14px 36px !important;
+        padding: 12px 14px 36px !important;
       }
     }
   </style>
