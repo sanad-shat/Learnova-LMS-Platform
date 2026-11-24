@@ -14,21 +14,21 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: transparent;
       color: #334155;
       text-decoration: none;
       transition: background 0.2s ease, color 0.2s ease;
-      margin-right: 8px;
+      margin-right: 6px;
     }
     .clean-bell-container:hover {
       background: #f1f5f9;
       color: #4f46e5;
     }
     .clean-bell-container i {
-      font-size: 18px;
+      font-size: 17px;
     }
     .clean-bell-badge {
       position: absolute;
@@ -49,7 +49,85 @@
       line-height: 1;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
+
+    /* إخفاء شريط التمرير الجانبي للسايدبار */
+    aside.sidebar {
+      scrollbar-width: none !important;
+      -ms-overflow-style: none !important;
+    }
+    aside.sidebar::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+    }
+
+    /* تصغير حقل البحث العلوي وتوحيد ارتفاع الهيدر */
+    .top-header {
+      height: 62px !important;
+      padding-left: 26px !important;
+      padding-right: 26px !important;
+    }
+    .header-left {
+      flex: 0 1 280px !important;
+      max-width: 280px !important;
+    }
+    .search-box {
+      height: 36px !important;
+      padding: 0 12px !important;
+      border-radius: 10px !important;
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+    }
+    .search-box:focus-within {
+      background: #ffffff !important;
+      border-color: #4f46e5 !important;
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+    }
+    .search-box input {
+      font-size: 13px !important;
+    }
+
+    /* توحيد المسافة العلوية في كل صفحات المدرس ورفع العنوان لأعلى */
+    @media (min-width: 993px) {
+      .app-main {
+        margin-left: 260px !important;
+        width: calc(100% - 260px) !important;
+        max-width: calc(100% - 260px) !important;
+      }
+
+      main.content {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 10px 26px 36px !important;
+        box-sizing: border-box !important;
+      }
+    }
+
+    /* إلغاء أي حشو أو هامش علوي زائد يبعد العنوان عن الهيدر في أي صفحة */
+    main.content > *:first-child {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+    main.content > *:first-child > *:first-child {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+    }
+
+    /* الحفاظ على تجاوب الهاتف */
+    @media (max-width: 768px) {
+      .top-header {
+        height: 58px !important;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+      }
+      .header-left {
+        max-width: none !important;
+      }
+      main.content {
+        padding: 12px 14px 36px !important;
+      }
+    }
   </style>
+  {% block head %}{% endblock %}
 </head>
 <body>
 <div class="mobile-overlay"></div>
