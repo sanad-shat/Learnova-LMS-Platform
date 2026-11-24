@@ -255,8 +255,8 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-bottom: 1px solid var(--border-color);
-      height: 70px;
-      padding: 0 32px;
+      height: 64px;
+      padding: 0 28px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -287,7 +287,7 @@
       gap: 10px;
       background: #f1f5f9;
       border: 1px solid transparent;
-      padding: 9px 16px;
+      padding: 8px 14px;
       border-radius: 12px;
       width: 100%;
       transition: all 0.2s;
@@ -449,8 +449,13 @@
 
     /* Content Area */
     .content {
-      padding: 32px;
+      padding: 18px 28px 36px;
       flex: 1;
+    }
+
+    .content > *:first-child {
+      margin-top: 0 !important;
+      padding-top: 0 !important;
     }
 
     /* =========================================================
