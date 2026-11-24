@@ -40,59 +40,64 @@
   .profile-page-shell {
     width: 100% !important;
     max-width: 100% !important;
-    padding: 14px 24px 32px !important;
+    margin: 0 auto !important;
+    padding: 0 0 36px !important;
     box-sizing: border-box;
     font-family: inherit;
     background: radial-gradient(circle at top right, rgba(79, 70, 229, 0.03), transparent 400px);
   }
 
-  /* Header Banner Style */
+  /* Header Banner Style - مطابق لمرجع المسافات الموحد */
   .profile-header-banner {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 15px;
-    padding: 14px 20px;
+    border-radius: 16px;
+    padding: 14px 18px;
+    margin-top: 0;
     margin-bottom: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
   }
 
   .profile-header-info h1 {
-    font-size: 1.35rem;
+    font-size: 22px;
     font-weight: 800;
     color: var(--slate-900);
     letter-spacing: -0.02em;
     margin: 0 0 2px;
+    line-height: 1.2;
   }
 
   .profile-header-info p {
-    font-size: 0.82rem;
+    font-size: 13px;
     color: var(--slate-500);
     margin: 0;
   }
 
   .profile-header-badge {
+    height: 34px;
     background: var(--primary-soft);
     color: var(--primary);
-    font-size: 0.75rem;
+    font-size: 12px;
     font-weight: 700;
-    padding: 5px 12px;
+    padding: 0 13px;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
     border: 1px solid rgba(79, 70, 229, 0.15);
+    white-space: nowrap;
   }
 
   /* Grid Layout */
   .profile-grid-layout {
     display: grid;
-    grid-template-columns: 290px 1fr;
-    gap: 18px;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 16px;
     align-items: start;
     width: 100%;
   }
@@ -101,8 +106,8 @@
   .profile-card {
     background: #ffffff;
     border: 1px solid var(--slate-200);
-    border-radius: 16px;
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+    border-radius: 18px;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
     overflow: hidden;
     box-sizing: border-box;
     width: 100%;
@@ -110,7 +115,7 @@
 
   /* Left Card: Overview */
   .profile-overview-card {
-    padding: 20px 18px;
+    padding: 18px 16px;
     text-align: center;
     position: relative;
   }
@@ -121,16 +126,16 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 68px;
+    height: 64px;
     background: linear-gradient(135deg, rgba(79, 70, 229, 0.07), rgba(99, 102, 241, 0.02));
     z-index: 0;
   }
 
   .profile-avatar-wrapper {
     position: relative;
-    width: 70px;
-    height: 70px;
-    margin: 4px auto 10px;
+    width: 66px;
+    height: 66px;
+    margin: 2px auto 10px;
     z-index: 1;
   }
 
@@ -139,13 +144,13 @@
     height: 100%;
     background: var(--primary-gradient);
     color: #ffffff;
-    font-size: 1.75rem;
+    font-size: 1.65rem;
     font-weight: 800;
-    border-radius: 20px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.25);
   }
 
   .status-badge {
@@ -154,7 +159,7 @@
     right: -3px;
     background: var(--success-bg);
     color: var(--success-text);
-    font-size: 0.65rem;
+    font-size: 10px;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 999px;
@@ -164,7 +169,7 @@
   }
 
   .profile-name {
-    font-size: 1.1rem;
+    font-size: 15px;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0 0 2px;
@@ -173,10 +178,10 @@
   }
 
   .profile-role-tag {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 600;
     color: var(--slate-500);
-    margin: 0 0 14px;
+    margin: 0 0 12px;
     position: relative;
     z-index: 1;
   }
@@ -196,7 +201,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.78rem;
+    font-size: 12px;
     color: var(--slate-700);
     background: var(--slate-50);
     border: 1px solid var(--slate-200);
@@ -223,11 +228,11 @@
 
   /* Right Card: Edit Form */
   .profile-form-card {
-    padding: 18px 22px;
+    padding: 16px 20px;
   }
 
   .form-card-title {
-    font-size: 1.02rem;
+    font-size: 15px;
     font-weight: 800;
     color: var(--slate-900);
     margin: 0 0 2px;
@@ -237,14 +242,14 @@
   }
 
   .form-card-subtitle {
-    font-size: 0.8rem;
+    font-size: 12.5px;
     color: var(--slate-500);
     margin: 0 0 14px;
   }
 
   .form-grid-2 {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px 14px;
     margin-bottom: 10px;
   }
@@ -260,7 +265,7 @@
   }
 
   .form-label {
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
     color: var(--slate-700);
     display: flex;
@@ -271,7 +276,7 @@
   }
 
   .form-label .lock-hint {
-    font-size: 0.66rem;
+    font-size: 10.5px;
     font-weight: 600;
     color: var(--slate-500);
     background: var(--slate-100);
@@ -284,10 +289,11 @@
 
   .form-control {
     width: 100%;
-    padding: 7px 12px;
-    font-size: 0.86rem;
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12.5px;
     border: 1.5px solid var(--slate-200);
-    border-radius: 9px;
+    border-radius: 10px;
     background: #ffffff;
     color: var(--slate-900);
     transition: all 0.2s ease;
@@ -319,36 +325,39 @@
   }
 
   .btn-save-profile {
+    height: 36px;
     background: var(--primary-gradient);
     color: #ffffff;
-    font-size: 0.86rem;
+    font-size: 12.5px;
     font-weight: 700;
-    padding: 9px 22px;
+    padding: 0 18px;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    gap: 7px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.22);
+    white-space: nowrap;
   }
 
   .btn-save-profile:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.32);
   }
 
   /* Responsive Design for Mobile & Tablet */
   @media (max-width: 1024px) {
     .profile-grid-layout {
       grid-template-columns: 1fr;
+      gap: 12px;
     }
   }
 
   @media (max-width: 640px) {
     .profile-page-shell {
-      padding: 16px 14px 40px !important;
+      padding: 0 0 32px !important;
     }
     .form-grid-2 {
       grid-template-columns: 1fr;
@@ -357,13 +366,18 @@
       grid-column: span 1;
     }
     .profile-form-card {
-      padding: 16px;
+      padding: 14px 16px;
     }
     .profile-overview-card {
-      padding: 18px 16px;
+      padding: 16px;
     }
     .profile-header-banner {
-      padding: 14px 16px;
+      padding: 13px 16px;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .profile-header-badge {
+      justify-content: center;
     }
     .btn-save-profile {
       width: 100%;
