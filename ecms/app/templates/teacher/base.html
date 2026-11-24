@@ -6,7 +6,7 @@
   <title>{% block title %}Instructor Portal | Learnova LMS{% endblock %}</title>
   <link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=15">
+  <link rel="stylesheet" href="{{ url_for('static',filename='professional.css') }}?v=16">
   <style>
     /* ضبط التخطيط العام ومنع الفراغ الجانبي غير المقصود */
     html, body {
@@ -79,7 +79,7 @@
       }
     }
 
-    /* تصغير حقل البحث العلوي وتوحيده */
+    /* ضبط حقل البحث العلوي ومنع تداخل أيقونة العدسة مع النص */
     .header-left {
       display: flex !important;
       align-items: center !important;
@@ -90,12 +90,13 @@
     }
 
     .search-box {
+      position: relative !important;
       display: flex !important;
       align-items: center !important;
       gap: 8px !important;
       height: 35px !important;
       width: 100% !important;
-      padding: 0 12px !important;
+      padding: 0 12px 0 34px !important;
       border-radius: 10px !important;
       background: #f8fafc !important;
       border: 1px solid #e2e8f0 !important;
@@ -109,8 +110,13 @@
     }
 
     .search-box i {
+      position: absolute !important;
+      left: 11px !important;
+      top: 50% !important;
+      transform: translateY(-50%) !important;
       font-size: 13px !important;
       color: #94a3b8 !important;
+      pointer-events: none !important;
       flex-shrink: 0;
     }
 
@@ -182,7 +188,6 @@
       padding-top: 0 !important;
     }
 
-    /* توحيد ترويسة الصفحة والمسافة أسفلها */
     main.content .page-header-row,
     main.content .page-top-bar,
     main.content .forum-header-bar,
@@ -192,7 +197,6 @@
       gap: 12px !important;
     }
 
-    /* توحيد حجم العنوان الرئيسي في مختلف صفحات المدرس */
     main.content h1.page-main-title,
     main.content .page-title-group h1,
     main.content .forum-title-wrap h1,
@@ -204,7 +208,6 @@
       margin-bottom: 2px !important;
     }
 
-    /* توحيد شبكة بطاقات الإحصائيات والمسافة بينها وأسفلها */
     main.content .metrics-summary-grid,
     main.content .kpi-row,
     main.content .kpi-summary-grid,
@@ -213,7 +216,6 @@
       margin-bottom: 16px !important;
     }
 
-    /* توحيد شرائط البحث والفلاتر الإضافية */
     main.content .filter-bar,
     main.content .directory-toolbar,
     main.content .forum-toolbar,
@@ -222,7 +224,6 @@
       gap: 12px !important;
     }
 
-    /* توحيد فواصل القوائم والشبكات والبطاقات */
     main.content .course-cards-matrix,
     main.content .cards-grid {
       gap: 16px !important;
