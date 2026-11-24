@@ -346,7 +346,6 @@
 </style>
 
 {% set notif_list = notifications if notifications is defined and notifications else [] %}
-{% set unread_items = notif_list | rejectattr('is_read') | list if notif_list else [] %}
 
 <div class="admin-page-shell">
   <div class="page-top-bar">
@@ -356,7 +355,7 @@
       <p>Monitor system alerts, account registrations, and platform activity logs.</p>
     </div>
     {% if notif_list %}
-    <form method="POST" action="{{ url_for('admin.mark_all_notifications_read') if 'admin.mark_all_notifications_read' else '/admin/notifications/read-all' }}" style="margin: 0;">
+    <form method="POST" action="{{ url_for('admin.clear_notifications') }}" style="margin: 0;">
       <button type="submit" class="btn-mark-all">
         <i class="fa-solid fa-check-double"></i> Mark All Read
       </button>
@@ -375,7 +374,7 @@
     <div class="kpi-card">
       <div>
         <div class="kpi-lbl">Unread Alerts</div>
-        <div class="kpi-num">{{ admin_unread_count|default(unread_items|length) }}</div>
+        <div class="kpi-num">{{ admin_unread_count|default(0) }}</div>
       </div>
       <div class="kpi-icon" style="background: var(--danger-bg); color: var(--danger-text);"><i class="fa-solid fa-envelope-open-text"></i></div>
     </div>
@@ -412,13 +411,13 @@
               <i class="fa-solid fa-bell"></i>
             </div>
             <div class="notif-copy">
-              <strong>{{ n.title or 'System Alert' }}</strong>
-              <p>{{ n.message or n.body or '' }}</p>
+              <strong>{{ n.title if (n.title is defined and n.title) else 'System Alert' }}</strong>
+              <p>{{ n.message if (n.message is defined and n.message) else (n.body if (n.body is defined and n.body) else '') }}</p>
             </div>
           </div>
           <div class="notif-right">
             <span class="notif-time">
-              {{ n.created_at.strftime('%d %b %Y, %H:%M') if n.created_at and n.created_at.strftime is defined else 'Recently' }}
+              {{ n.created_at.strftime('%d %b %Y, %H:%M') if (n.created_at is defined and n.created_at and n.created_at.strftime is defined) else 'Recently' }}
             </span>
             {% if not n.is_read %}
             <span class="unread-dot" title="Unread"></span>
