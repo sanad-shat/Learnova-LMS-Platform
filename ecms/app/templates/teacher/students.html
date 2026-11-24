@@ -15,7 +15,7 @@
     --border-normal: #e2e8f0;
     --border-subtle: #f1f5f9;
     --radius-xl: 18px;
-    --radius-lg: 14px;
+    --radius-lg: 16px;
     --radius-md: 10px;
     --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
     --shadow-hover: 0 10px 24px -4px rgba(37, 99, 235, 0.08);
@@ -34,8 +34,8 @@
   .students-page-wrapper {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 auto;
-    padding: 16px 24px 40px !important;
+    margin: 0 auto !important;
+    padding: 0 0 36px !important;
     box-sizing: border-box;
   }
 
@@ -44,16 +44,18 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: 0;
     margin-bottom: 14px;
     flex-wrap: wrap;
     gap: 12px;
   }
   .header-titles h1 {
-    font-size: 23px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
     margin: 0 0 2px;
-    letter-spacing: -0.4px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
   .header-titles p {
     font-size: 13px;
@@ -87,9 +89,10 @@
     background: var(--card-bg);
     border: 1px solid var(--border-normal);
     border-radius: var(--radius-lg);
-    padding: 13px 16px;
+    padding: 14px 18px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 13px;
     box-shadow: var(--shadow-card);
   }
@@ -104,17 +107,19 @@
     flex-shrink: 0;
   }
   .kpi-text h3 {
-    font-size: 19px;
+    font-size: 20px;
     font-weight: 800;
     color: var(--text-primary);
-    margin: 0 0 2px;
-    line-height: 1.1;
+    margin: 0;
+    line-height: 1.15;
   }
   .kpi-text p {
-    font-size: 11.5px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
     color: var(--text-muted);
-    margin: 0;
+    margin: 0 0 3px;
   }
 
   /* ---------------- Students Table Card & Toolbar ---------------- */
@@ -138,7 +143,7 @@
   }
   .search-input-box {
     position: relative;
-    width: 320px;
+    width: 300px;
     max-width: 100%;
   }
   .search-input-box i {
@@ -155,10 +160,11 @@
     height: 35px;
     border: 1.5px solid var(--border-normal);
     border-radius: var(--radius-md);
-    padding: 0 14px 0 34px;
+    padding: 0 12px 0 34px;
     font-size: 12.5px;
     color: var(--text-primary);
     outline: none;
+    box-sizing: border-box;
     transition: all 0.2s;
   }
   .search-input-box input:focus {
@@ -182,9 +188,9 @@
   }
   .students-data-table th {
     background: #f8fafc;
-    padding: 10px 16px;
+    padding: 11px 16px;
     font-size: 10.5px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
@@ -192,7 +198,7 @@
     white-space: nowrap;
   }
   .students-data-table td {
-    padding: 11px 16px;
+    padding: 12px 16px;
     vertical-align: middle;
     border-bottom: 1px solid var(--border-subtle);
     font-size: 12.5px;
@@ -311,7 +317,7 @@
 
   @media (max-width: 768px) {
     .students-page-wrapper {
-      padding: 16px 14px 40px !important;
+      padding: 0 0 32px !important;
     }
     .students-header-bar {
       flex-direction: column;
@@ -335,7 +341,7 @@
   <!-- Header Section -->
   <div class="students-header-bar">
     <div class="header-titles">
-      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.6px; display: block; margin-bottom: 3px;">Learners</span>
+      <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--primary); letter-spacing: 0.8px; display: block; margin-bottom: 2px;">Learners</span>
       <h1>My Students</h1>
       <p>View students enrolled in your assigned courses.</p>
     </div>
@@ -348,32 +354,32 @@
   <!-- KPI Overview Row -->
   <div class="kpi-metrics-row">
     <div class="kpi-card">
+      <div class="kpi-text">
+        <p>Total Active Learners</p>
+        <h3>{{ students|length }}</h3>
+      </div>
       <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;">
         <i class="fa-solid fa-user-graduate"></i>
       </div>
-      <div class="kpi-text">
-        <h3>{{ students|length }}</h3>
-        <p>Total Active Learners</p>
-      </div>
     </div>
 
     <div class="kpi-card">
+      <div class="kpi-text">
+        <p>Assigned Courses</p>
+        <h3>{{ teacher.courses|length }}</h3>
+      </div>
       <div class="kpi-icon" style="background: #f0fdf4; color: #16a34a;">
         <i class="fa-solid fa-graduation-cap"></i>
       </div>
-      <div class="kpi-text">
-        <h3>{{ teacher.courses|length }}</h3>
-        <p>Assigned Courses</p>
-      </div>
     </div>
 
     <div class="kpi-card">
+      <div class="kpi-text">
+        <p>Verified Student Profiles</p>
+        <h3>Academic</h3>
+      </div>
       <div class="kpi-icon" style="background: #f5f3ff; color: #7c3aed;">
         <i class="fa-solid fa-building-columns"></i>
-      </div>
-      <div class="kpi-text">
-        <h3>Academic</h3>
-        <p>Verified Student Profiles</p>
       </div>
     </div>
   </div>
