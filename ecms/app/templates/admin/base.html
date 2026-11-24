@@ -459,6 +459,151 @@
     }
 
     /* =========================================================
+       نظام التنسيق الموحد لجميع صفحات الأدمن (Admin Unified UI)
+       ========================================================= */
+    .admin-page-shell,
+    .page-shell,
+    .dashboard-shell {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 auto !important;
+      padding: 0 0 24px !important;
+      box-sizing: border-box !important;
+    }
+
+    /* الترويسة الموحدة أعلى كل صفحة */
+    .admin-page-header,
+    .page-top-bar,
+    .page-header-row {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      flex-wrap: wrap !important;
+      gap: 12px !important;
+      margin: 0 0 14px 0 !important;
+      padding: 0 !important;
+    }
+
+    .admin-page-header h1,
+    .page-top-bar h1,
+    .page-header-row h1,
+    .page-title-group h1 {
+      font-size: 22px !important;
+      font-weight: 800 !important;
+      color: var(--navy) !important;
+      margin: 2px 0 3px !important;
+      letter-spacing: -0.02em !important;
+      line-height: 1.2 !important;
+    }
+
+    .admin-page-header p,
+    .page-top-bar p,
+    .page-header-row p,
+    .page-title-group p {
+      font-size: 13px !important;
+      color: var(--slate) !important;
+      margin: 0 !important;
+      line-height: 1.4 !important;
+    }
+
+    /* صف بطاقات الإحصائيات الموحد */
+    .admin-kpi-grid,
+    .kpi-row,
+    .stats-grid {
+      display: grid !important;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+      gap: 14px !important;
+      margin: 0 0 16px 0 !important;
+      padding: 0 !important;
+    }
+
+    .admin-kpi-card,
+    .kpi-card,
+    .stat-card {
+      background: #ffffff !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 16px !important;
+      padding: 14px 18px !important;
+      box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02) !important;
+      box-sizing: border-box !important;
+    }
+
+    .admin-kpi-card h2,
+    .admin-kpi-card h3,
+    .kpi-card h2,
+    .kpi-card h3,
+    .stat-card h2,
+    .stat-card h3 {
+      font-size: 20px !important;
+      font-weight: 800 !important;
+      color: var(--navy) !important;
+      margin: 0 0 2px !important;
+      line-height: 1.15 !important;
+    }
+
+    /* بطاقة الجدول والمحتوى الموحدة */
+    .admin-panel-card,
+    .table-card,
+    .data-card,
+    .directory-card {
+      width: 100% !important;
+      background: #ffffff !important;
+      border: 1px solid var(--border-color) !important;
+      border-radius: 18px !important;
+      box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02) !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
+
+    .admin-panel-card table,
+    .table-card table,
+    .data-card table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+    }
+
+    .admin-panel-card th,
+    .table-card th,
+    .data-card th {
+      padding: 11px 16px !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px !important;
+      text-transform: uppercase !important;
+      color: #94a3b8 !important;
+      background: #f8fafc !important;
+      border-bottom: 1px solid var(--border-color) !important;
+      white-space: nowrap !important;
+    }
+
+    .admin-panel-card td,
+    .table-card td,
+    .data-card td {
+      padding: 12px 16px !important;
+      font-size: 13px !important;
+      vertical-align: middle !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .admin-panel-card tr:last-child td,
+    .table-card tr:last-child td,
+    .data-card tr:last-child td {
+      border-bottom: none !important;
+    }
+
+    @media (min-width: 993px) {
+      .table-responsive-wrapper,
+      .table-scroll-wrapper {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      .table-responsive-wrapper::-webkit-scrollbar,
+      .table-scroll-wrapper::-webkit-scrollbar {
+        display: none !important;
+      }
+    }
+
+    /* =========================================================
        تحسينات الهاتف المخصصة (تعمل فقط عندما يكون العرض <= 992px / 768px)
        ========================================================= */
     @media (max-width: 992px) {
