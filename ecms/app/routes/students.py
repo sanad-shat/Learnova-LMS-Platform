@@ -70,8 +70,8 @@ def demo_login():
 
         if not demo_user:
             user_kwargs = {
-                "name_person": "Dr. Demo student",
-                "username": "dr.demo.student",
+                "name_person": "Demo Student",
+                "username": "demo.student",
                 "email": demo_email,
                 "role": "student",
             }
@@ -85,6 +85,11 @@ def demo_login():
                 demo_user.set_password("DemoStudent@2026")
             db.session.add(demo_user)
             db.session.flush()
+        else:
+            if demo_user.name_person != "Demo Student":
+                demo_user.name_person = "Demo Student"
+            if hasattr(demo_user, "username") and demo_user.username != "demo.student":
+                demo_user.username = "demo.student"
 
         course_title_attr = _get_course_title_attr()
         assign_title_attr = _get_assignment_title_attr()
@@ -220,16 +225,16 @@ def demo_login():
             if hasattr(Notification, "title"):
                 notif_kwargs["title"] = "Welcome to Student Demo Mode"
             if hasattr(Notification, "message"):
-                notif_kwargs["message"] = "You are signed in as Dr. Demo student with isolated sample courses and assignments."
+                notif_kwargs["message"] = "You are signed in as Demo Student with isolated sample courses and assignments."
             elif hasattr(Notification, "body"):
-                notif_kwargs["body"] = "You are signed in as Dr. Demo student with isolated sample courses and assignments."
+                notif_kwargs["body"] = "You are signed in as Demo Student with isolated sample courses and assignments."
             if hasattr(Notification, "is_read"):
                 notif_kwargs["is_read"] = False
             db.session.add(Notification(**notif_kwargs))
 
         db.session.commit()
         login_user(demo_user)
-        flash("Signed in to Demo Student mode as Dr. Demo student.", "info")
+        flash("Signed in to Demo Student mode as Demo Student.", "info")
         return redirect(url_for("students.dashboard"))
 
     except Exception as e:
