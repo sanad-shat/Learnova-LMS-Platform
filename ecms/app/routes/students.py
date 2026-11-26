@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, json
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, json, send_file
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import (
     User,
@@ -21,6 +21,7 @@ from app.models import (
 from app import db
 from datetime import datetime, timezone
 import os
+import io
 import uuid
 from PIL import Image, ImageDraw, ImageFont
 from werkzeug.utils import secure_filename
@@ -764,8 +765,20 @@ def settings():
     return render_template('student/settings.html', student=current_user, active_page='settings',
                            **_student_nav_context(current_user))
 
-from flask import send_file
-import io
+
+@students_bp.route('/help')
+@login_required
+def help_center():
+    if current_user.role.lower() != 'student':
+        flash('Access denied.', 'danger')
+        return redirect(url_for('students.login'))
+    return render_template(
+        'student/help.html',
+        student=current_user,
+        active_page='help',
+        **_student_nav_context(current_user),
+    )
+
 
 @students_bp.route("/unit/<int:unit_id>/download")
 @login_required
