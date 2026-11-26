@@ -47,6 +47,137 @@ def login():
     return render_template("student/login.html")
 
 
+# ------------------------- Instant Demo Student Access -------------------------
+@students_bp.route("/demo-login", methods=["POST"])
+def demo_login():
+    demo_email = "demo.student@learnova.local"
+    demo_user = User.query.filter_by(email=demo_email).first()
+
+    if not demo_user:
+        demo_user = User(
+            name_person="Dr. Demo student",
+            username="dr.demo.student",
+            email=demo_email,
+            role="student",
+            department="Computer Science",
+            academic_level="Year 2",
+            is_active=True
+        )
+        if hasattr(demo_user, "set_password"):
+            demo_user.set_password("DemoStudent@2026")
+        db.session.add(demo_user)
+        db.session.flush()
+
+    demo_courses_spec = [
+        {
+            "code": "DEMO-CS101",
+            "title": "Demo: Foundations of Software Engineering",
+            "description": "Sample course for evaluating the Learnova student portal.",
+            "units": ["Introduction to SDLC", "Requirements & UML Basics", "Testing & Quality"],
+            "assignments": [
+                {
+                    "title": "Demo Assignment 1: Use Case Specification",
+                    "description": "Sample assignment for demo evaluation.",
+                    "score": 25,
+                    "grade": 22.0,
+                    "text": "Sample submitted specification for demo account."
+                },
+                {
+                    "title": "Demo Assignment 2: Test Plan Draft",
+                    "description": "Pending sample assignment for testing submission flow.",
+                    "score": 25,
+                    "grade": None,
+                    "text": None
+                }
+            ]
+        },
+        {
+            "code": "DEMO-AI204",
+            "title": "Demo: Applied Python & Data Structures",
+            "description": "Sample course with completed modules and grades for demo preview.",
+            "units": ["Lists, Stacks & Queues", "Recursion & Trees"],
+            "assignments": [
+                {
+                    "title": "Demo Lab: Stack & Queue Implementation",
+                    "description": "Sample lab task in demo course.",
+                    "score": 30,
+                    "grade": 27.0,
+                    "text": "Sample Python implementation submitted by demo student."
+                }
+            ]
+        }
+    ]
+
+    for spec in demo_courses_spec:
+        course = Course.query.filter_by(code=spec["code"]).first()
+        if not course:
+            course = Course(
+                title=spec["title"],
+                code=spec["code"],
+                description=spec["description"]
+            )
+            if hasattr(course, "teacher_id"):
+                teacher = User.query.filter(User.role.ilike("teacher")).first()
+                if teacher:
+                    course.teacher_id = teacher.id
+            db.session.add(course)
+            db.session.flush()
+
+            for idx, u_title in enumerate(spec["units"], start=1):
+                unit = Unit(
+                    course_id=course.id,
+                    title=u_title,
+                    order_index=idx
+                )
+                db.session.add(unit)
+                db.session.flush()
+                if idx == 1:
+                    db.session.add(UnitCompletion(student_id=demo_user.id, unit_id=unit.id))
+
+            for a_spec in spec["assignments"]:
+                assignment = Assignment(
+                    course_id=course.id,
+                    title=a_spec["title"],
+                    description=a_spec["description"],
+                    assignment_type="assignment",
+                    max_score=a_spec["score"] if hasattr(Assignment, "max_score") else None,
+                    due_date=datetime.now(timezone.utc)
+                )
+                db.session.add(assignment)
+                db.session.flush()
+
+                if a_spec["text"] is not None:
+                    sub = Submission(
+                        student_id=demo_user.id,
+                        assignment_id=assignment.id,
+                        submission_text=a_spec["text"],
+                        grade=a_spec["grade"],
+                        submitted_at=datetime.now(timezone.utc)
+                    )
+                    db.session.add(sub)
+
+        existing_enrollment = Enrollment.query.filter_by(
+            student_id=demo_user.id,
+            course_id=course.id
+        ).first()
+        if not existing_enrollment:
+            db.session.add(Enrollment(student_id=demo_user.id, course_id=course.id))
+
+    existing_notif = Notification.query.filter_by(user_id=demo_user.id).first()
+    if not existing_notif:
+        db.session.add(Notification(
+            user_id=demo_user.id,
+            title="Welcome to Student Demo Mode",
+            message="You are signed in as Dr. Demo student with isolated sample courses and assignments.",
+            is_read=False
+        ))
+
+    db.session.commit()
+    login_user(demo_user)
+    flash("Signed in to Demo Student mode as Dr. Demo student.", "info")
+    return redirect(url_for("students.dashboard"))
+
+
 # ------------------------- Student Logout -------------------------
 @students_bp.route("/logout")
 @login_required
@@ -785,7 +916,6 @@ def help_center():
 def download_unit_file(unit_id):
     unit = Unit.query.get_or_404(unit_id)
 
-    # إذا كان الملف مخزناً داخل قاعدة البيانات
     if unit.file_data:
         filename = unit.file_path or f"{unit.title}.pptx"
         mimetype = unit.file_mimetype or "application/vnd.openxmlformats-officedocument.presentationml.presentation"
@@ -796,7 +926,6 @@ def download_unit_file(unit_id):
             mimetype=mimetype
         )
 
-    # في حال كان مساراً محلياً قديماً موجوداً على السيرفر
     if unit.file_path:
         local_path = os.path.join(current_app.root_path, 'static', unit.file_path.replace('static/', '').lstrip('/'))
         if os.path.exists(local_path):
