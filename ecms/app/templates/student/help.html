@@ -1,0 +1,206 @@
+{% extends "student/base.html" %}
+{% block title %}Help Center | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  .help-layout-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0 36px;
+    box-sizing: border-box;
+  }
+
+  .help-banner-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    color: #ffffff;
+    border-radius: 18px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    gap: 14px;
+    flex-wrap: wrap;
+    box-shadow: 0 4px 16px -2px rgba(79, 70, 229, 0.18);
+  }
+
+  .help-banner-header h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .help-banner-header p {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.92;
+  }
+
+  .help-badge-pill {
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .help-grid-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .help-card-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  }
+
+  .help-card-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #eef2ff;
+    color: #4f46e5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .help-card-box h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .help-card-box p {
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    color: #64748b;
+    line-height: 1.5;
+  }
+
+  .help-card-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .help-card-link:hover {
+    text-decoration: underline;
+  }
+
+  .help-faq-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  }
+
+  .help-faq-box h2 {
+    margin: 0 0 14px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .faq-item-row {
+    padding: 12px 0;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .faq-item-row:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .faq-q {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+  }
+
+  .faq-a {
+    font-size: 12.5px;
+    color: #475569;
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 900px) {
+    .help-grid-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="help-layout-container">
+  <div class="help-banner-header">
+    <div>
+      <h1>Help Center</h1>
+      <p>Find quick answers about courses, assignments, grades, certificates, and support.</p>
+    </div>
+    <div class="help-badge-pill">
+      <i class="fa-solid fa-headset"></i> Student Support
+    </div>
+  </div>
+
+  <div class="help-grid-cards">
+    <div class="help-card-box">
+      <div class="help-card-icon"><i class="fa-solid fa-book-open"></i></div>
+      <h3>Courses & Units</h3>
+      <p>Access enrolled courses, review study units, and track unit completion progress.</p>
+      <a class="help-card-link" href="/student/courses">Go to My Courses <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div class="help-card-box">
+      <div class="help-card-icon"><i class="fa-solid fa-list-check"></i></div>
+      <h3>Assignments & Grades</h3>
+      <p>Submit coursework before deadlines, review quiz and exam results, and check final scores.</p>
+      <a class="help-card-link" href="/student/assignments">Go to Assignments <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div class="help-card-box">
+      <div class="help-card-icon"><i class="fa-solid fa-envelope"></i></div>
+      <h3>Direct Support</h3>
+      <p>Need technical or academic assistance? Reach out to the support team by email.</p>
+      <a class="help-card-link" href="mailto:support@learnova.local">support@learnova.local <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+    </div>
+  </div>
+
+  <div class="help-faq-box">
+    <h2>Frequently Asked Questions</h2>
+
+    <div class="faq-item-row">
+      <p class="faq-q">How do I unlock a course certificate?</p>
+      <p class="faq-a">Earn a final grade of at least 60% in the course, then open the Certificates page to view or print your credential.</p>
+    </div>
+
+    <div class="faq-item-row">
+      <p class="faq-q">Can I edit an assignment after submitting it?</p>
+      <p class="faq-a">You can update your submission before the assignment deadline passes from the course or assignment page.</p>
+    </div>
+
+    <div class="faq-item-row">
+      <p class="faq-q">How do I ask a question about a course or lecture?</p>
+      <p class="faq-a">Open Discussions from the sidebar, choose New Topic, select your course or Question category, and post your inquiry.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
