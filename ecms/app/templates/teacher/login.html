@@ -1,423 +1,593 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Instructor Sign In | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --primary: #4f46e5;
       --primary-hover: #4338ca;
-      --primary-glow: rgba(79, 70, 229, 0.35);
-      --navy: #0f172a;
-      --slate: #64748b;
-      --border-glass: rgba(226, 232, 240, 0.8);
-      --bg-page: #f8fafc;
+      --accent: #06b6d4;
+      --indigo-soft: #6366f1;
+      --primary-glow: rgba(79, 70, 229, 0.32);
+      --bg-page: #f3f6fc;
+      --bg-grid-dot: rgba(79, 70, 229, 0.14);
+      --bg-grid-line: rgba(203, 213, 225, 0.32);
+      --card-bg: rgba(255, 255, 255, 0.86);
+      --card-border: rgba(255, 255, 255, 0.95);
+      --card-ring: rgba(203, 213, 225, 0.75);
+      --input-bg: rgba(255, 255, 255, 0.92);
+      --input-border: #dbe3f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --demo-bg: linear-gradient(135deg, rgba(238, 242, 255, 0.82), rgba(236, 254, 255, 0.72));
+      --demo-border: rgba(99, 102, 241, 0.34);
+      --shadow-shell: 0 30px 70px -18px rgba(15, 23, 42, 0.14), 0 8px 24px -6px rgba(79, 70, 229, 0.08);
     }
 
-    * {
+    html[data-theme="dark"] {
+      --bg-page: #060913;
+      --bg-grid-dot: rgba(129, 140, 248, 0.15);
+      --bg-grid-line: rgba(30, 41, 59, 0.5);
+      --card-bg: rgba(13, 20, 36, 0.84);
+      --card-border: rgba(51, 65, 85, 0.65);
+      --card-ring: rgba(51, 65, 85, 0.65);
+      --input-bg: rgba(23, 33, 56, 0.85);
+      --input-border: #2a3954;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --demo-bg: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(6, 182, 212, 0.08));
+      --demo-border: rgba(129, 140, 248, 0.35);
+      --shadow-shell: 0 32px 72px -14px rgba(0, 0, 0, 0.65);
+    }
+
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    html[dir="rtl"] * {
+      letter-spacing: 0 !important;
     }
 
     body {
       min-height: 100vh;
       background: var(--bg-page);
-      color: var(--navy);
+      color: var(--text-main);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow-x: hidden;
-      padding: 40px 16px;
+      padding: 24px 16px;
+      transition: background 0.25s ease, color 0.25s ease;
     }
 
-    /* Interactive Living Background */
+    .svg-ico {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
     .bg-grid {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      background-image: 
-        radial-gradient(rgba(79, 70, 229, 0.16) 1.5px, transparent 1.5px),
-        linear-gradient(to right, rgba(226, 232, 240, 0.3) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(226, 232, 240, 0.3) 1px, transparent 1px);
-      background-size: 32px 32px, 96px 96px, 96px 96px;
-      mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
-      -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, #000 40%, transparent 95%);
+      background-image:
+        radial-gradient(var(--bg-grid-dot) 1.5px, transparent 1.5px),
+        linear-gradient(to right, var(--bg-grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid-line) 1px, transparent 1px);
+      background-size: 30px 30px, 90px 90px, 90px 90px;
+      mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 96%);
+      -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 96%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* Ambient Dynamic Blobs */
-    .orb-1 {
-      position: absolute;
-      width: 520px;
-      height: 520px;
+    .ambient-glow {
+      position: fixed;
+      width: 660px;
+      height: 460px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, rgba(59, 130, 246, 0.12) 45%, transparent 70%);
-      top: 10%;
+      background: radial-gradient(circle at 30% 40%, rgba(34, 211, 238, 0.16), transparent 60%),
+                  radial-gradient(circle at 70% 60%, rgba(99, 102, 241, 0.2), transparent 65%);
+      top: 50%;
       left: 50%;
-      transform: translate(-50%, -20%);
-      filter: blur(65px);
-      pointer-events: none;
-      z-index: 0;
-      animation: floatOrb 10s ease-in-out infinite alternate;
-    }
-
-    .orb-2 {
-      position: absolute;
-      width: 380px;
-      height: 380px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
-      bottom: 5%;
-      right: 25%;
-      filter: blur(60px);
+      transform: translate(-50%, -50%);
+      filter: blur(75px);
       pointer-events: none;
       z-index: 0;
     }
 
-    @keyframes floatOrb {
-      0% { transform: translate(-50%, -15%) scale(1); }
-      100% { transform: translate(-48%, -25%) scale(1.08); }
-    }
-
-    /* Top Navigation Floating Link */
-    .nav-float {
-      position: relative;
-      z-index: 2;
-      margin-bottom: 24px;
-    }
-
-    .back-btn-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--slate);
-      background: rgba(255, 255, 255, 0.75);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      padding: 9px 18px;
-      border-radius: 999px;
-      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-      transition: all 0.25s ease;
-    }
-
-    .back-btn-pill:hover {
-      color: var(--primary);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(79, 70, 229, 0.12);
-      border-color: #c7d2fe;
-    }
-
-    /* Modern Glass Card */
-    .auth-box-wrapper {
+    .top-bar {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 440px;
+      max-width: 940px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
     }
 
-    .glass-card {
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-ring);
+      padding: 8px 15px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn:hover {
+      color: var(--primary);
+      border-color: var(--demo-border);
+      transform: translateY(-1px);
+    }
+
+    .auth-shell {
       position: relative;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.95);
-      border-radius: 28px;
-      padding: 40px 36px 34px;
-      box-shadow: 
-        0 24px 48px -12px rgba(15, 23, 42, 0.09),
-        0 4px 16px -2px rgba(79, 70, 229, 0.05),
-        inset 0 1px 1px rgba(255, 255, 255, 0.9);
+      z-index: 2;
+      width: 100%;
+      max-width: 940px;
+      display: grid;
+      grid-template-columns: 1.03fr 1fr;
+      border-radius: 30px;
+      overflow: hidden;
+      border: 1px solid var(--card-ring);
+      box-shadow: var(--shadow-shell);
+      background: var(--card-bg);
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+    }
+
+    .showcase-panel {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(155deg, #070d1c 0%, #0f1d3d 48%, #1b1b4b 100%);
+      color: #ffffff;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .showcase-panel::before {
+      content: '';
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.24) 0%, transparent 70%);
+      top: -90px;
+      right: -70px;
+      pointer-events: none;
+    }
+
+    .showcase-panel::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, transparent 70%);
+      bottom: -80px;
+      left: -60px;
+      pointer-events: none;
+    }
+
+    .showcase-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 6px 13px;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.12);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      color: #67e8f9;
+      font-size: 11.5px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .showcase-panel h2 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      line-height: 1.25;
+      margin-bottom: 10px;
+    }
+
+    .showcase-panel p {
+      font-size: 13px;
+      color: rgba(226, 232, 240, 0.85);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .bento-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card {
+      background: rgba(255, 255, 255, 0.055);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 11px 10px;
+      text-align: center;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(103, 232, 249, 0.4);
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 14.5px;
+      font-weight: 800;
+      color: #67e8f9;
+      margin-bottom: 2px;
+    }
+
+    .metric-card span {
+      font-size: 11px;
+      color: rgba(226, 232, 240, 0.82);
+      font-weight: 600;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 11px 13px;
+      transition: background 0.2s ease;
+    }
+
+    .feature-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .feature-ico-box {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(99, 102, 241, 0.22));
+      border: 1px solid rgba(103, 232, 249, 0.25);
+      color: #67e8f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .feature-item strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .feature-item span {
+      font-size: 11.8px;
+      color: rgba(226, 232, 240, 0.8);
+      line-height: 1.45;
+    }
+
+    .showcase-foot {
+      margin-top: 22px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      font-size: 12px;
+      color: rgba(203, 213, 225, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .form-panel {
+      padding: 36px 34px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .card-top-header {
       text-align: center;
-      margin-bottom: 28px;
-    }
-
-    .brand-icon-halo {
-      position: relative;
-      width: 68px;
-      height: 68px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .brand-icon-halo::before {
-      content: '';
-      position: absolute;
-      inset: -4px;
-      border-radius: 22px;
-      background: linear-gradient(135deg, rgba(79, 70, 229, 0.4), rgba(59, 130, 246, 0.2));
-      filter: blur(8px);
-      z-index: 1;
+      margin-bottom: 22px;
     }
 
     .brand-icon-inner {
-      position: relative;
-      z-index: 2;
-      width: 100%;
-      height: 100%;
-      background: #ffffff;
-      border: 1px solid rgba(226, 232, 240, 0.9);
-      border-radius: 20px;
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 14px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.03);
+      box-shadow: 0 10px 22px rgba(79, 70, 229, 0.14);
     }
 
-    .brand-icon-inner i {
-      font-size: 28px;
-      color: var(--primary);
+    .brand-icon-inner img {
+      width: 34px;
+      height: 34px;
     }
 
     .card-top-header h1 {
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 800;
-      letter-spacing: -0.8px;
-      color: var(--navy);
-      margin-bottom: 6px;
+      letter-spacing: -0.6px;
+      margin-bottom: 5px;
     }
 
     .card-top-header p {
-      font-size: 13.5px;
-      color: var(--slate);
-      font-weight: 500;
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    /* Flash Messages */
     .flash {
-      padding: 12px 16px;
-      border-radius: 14px;
-      font-size: 13px;
+      padding: 11px 14px;
+      border-radius: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
     .flash.danger, .flash.error {
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fee2e2;
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
     }
     .flash.success {
-      background: #f0fdf4;
-      color: #16a34a;
-      border: 1px solid #dcfce7;
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .flash.info {
+      background: rgba(99, 102, 241, 0.12);
+      color: var(--indigo-soft);
+      border: 1px solid rgba(99, 102, 241, 0.25);
     }
 
-    /* Input Fields */
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 15px;
     }
 
     .field-label {
       display: block;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 700;
-      color: #334155;
-      margin-bottom: 7px;
+      color: var(--text-main);
+      margin-bottom: 6px;
     }
 
     .input-field-wrap {
       position: relative;
       display: flex;
       align-items: center;
-      background: #ffffff;
-      border: 1.5px solid var(--border-glass);
-      border-radius: 14px;
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: 13px;
+      transition: all 0.2s ease;
     }
 
     .input-field-wrap:focus-within {
       border-color: var(--primary);
       box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
-      background: #ffffff;
     }
 
-    .input-field-wrap i.field-icon {
-      padding-left: 16px;
-      color: #94a3b8;
-      font-size: 15px;
-      transition: color 0.2s;
+    .input-field-wrap .field-icon-wrap {
+      padding-inline-start: 14px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
     }
 
-    .input-field-wrap:focus-within i.field-icon {
+    .input-field-wrap:focus-within .field-icon-wrap {
       color: var(--primary);
     }
 
     .input-field-wrap input {
       width: 100%;
-      padding: 13px 14px;
+      padding: 12px 13px;
       border: none;
       background: transparent;
       outline: none;
-      font-size: 14px;
-      color: var(--navy);
+      font-size: 13.5px;
+      color: var(--text-main);
       font-weight: 500;
-    }
-
-    .input-field-wrap input::placeholder {
-      color: #94a3b8;
-      font-weight: 400;
     }
 
     .btn-password-eye {
       background: none;
       border: none;
-      padding: 0 16px;
+      padding: 0 14px;
       cursor: pointer;
-      color: #94a3b8;
-      font-size: 15px;
-      transition: color 0.2s;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
     }
 
     .btn-password-eye:hover {
       color: var(--primary);
     }
 
-    .forgot-link-box {
+    .form-meta-row {
       display: flex;
-      justify-content: flex-end;
-      margin-top: 6px;
-      margin-bottom: 22px;
-    }
-
-    .forgot-link-box a {
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0 18px;
       font-size: 12px;
-      font-weight: 600;
-      color: var(--primary);
-      text-decoration: none;
-      transition: color 0.2s;
     }
 
-    .forgot-link-box a:hover {
-      color: var(--primary-hover);
+    .remember-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--text-muted);
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      font-weight: 700;
+      color: var(--indigo-soft);
+      text-decoration: none;
+    }
+
+    .forgot-link:hover {
       text-decoration: underline;
     }
 
-    /* Submit Button */
     .btn-submit-action {
       width: 100%;
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
       border: none;
-      padding: 14px;
-      border-radius: 14px;
-      font-size: 15px;
+      padding: 13px 16px;
+      border-radius: 13px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 10px 22px var(--primary-glow);
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     .btn-submit-action:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.45);
-      background: linear-gradient(135deg, #4338ca 0%, #4f46e5 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.42);
     }
 
-    .btn-submit-action:active {
-      transform: translateY(0);
+    .btn-submit-action:disabled,
+    .btn-demo-instructor:disabled {
+      opacity: 0.72;
+      cursor: not-allowed;
+      transform: none;
     }
 
-    /* Demo Access Card */
-    .demo-access-card {
-      margin-top: 20px;
-      padding: 14px;
-      background: rgba(238, 242, 255, 0.6);
-      border: 1px dashed #c7d2fe;
+    .demo-access-box {
+      margin-top: 18px;
+      padding: 13px 14px;
       border-radius: 16px;
+      border: 1.5px dashed var(--demo-border);
+      background: var(--demo-bg);
       text-align: center;
     }
 
-    .demo-header-note {
-      font-size: 11.5px;
+    .demo-access-caption {
+      font-size: 12px;
       font-weight: 700;
-      color: #4338ca;
-      margin-bottom: 8px;
+      color: var(--indigo-soft);
+      margin-bottom: 3px;
+    }
+
+    .demo-access-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 9px;
+    }
+
+    .btn-demo-instructor {
+      width: 100%;
+      background: var(--input-bg);
+      color: var(--indigo-soft);
+      border: 1.5px solid var(--demo-border);
+      padding: 10px 14px;
+      border-radius: 11px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-    }
-
-    .btn-instant-demo {
-      width: 100%;
-      background: #ffffff;
-      border: 1.5px solid #c7d2fe;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--primary);
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.06);
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
       gap: 8px;
+      transition: all 0.2s ease;
     }
 
-    .btn-instant-demo:hover {
-      background: #eef2ff;
-      border-color: #a5b4fc;
+    .btn-demo-instructor:hover {
+      background: rgba(99, 102, 241, 0.14);
       transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.12);
     }
 
     .card-footer-sec {
-      margin-top: 24px;
-      padding-top: 18px;
-      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-ring);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 7px;
       font-size: 11.5px;
-      color: #94a3b8;
+      color: var(--text-muted);
       font-weight: 600;
     }
 
-    .card-footer-sec i {
+    .card-footer-sec svg {
       color: #10b981;
-      font-size: 13px;
     }
 
-    @media (max-width: 480px) {
-      body {
-        padding: 24px 14px;
+    html[dir="rtl"] .flip-rtl {
+      transform: scaleX(-1);
+    }
+
+    @media (max-width: 840px) {
+      .auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 450px;
       }
-      .glass-card {
-        padding: 30px 20px 24px;
-        border-radius: 22px;
+      .showcase-panel {
+        display: none;
       }
-      .card-top-header h1 {
-        font-size: 22px;
+      .form-panel {
+        padding: 30px 24px 26px;
       }
     }
   </style>
@@ -425,108 +595,348 @@
 
 <body>
   <div class="bg-grid"></div>
-  <div class="orb-1"></div>
-  <div class="orb-2"></div>
+  <div class="ambient-glow"></div>
 
-  <!-- Top Floating Nav -->
-  <div class="nav-float">
-    <a href="/" class="back-btn-pill">
-      <i class="fa-solid fa-arrow-left"></i> Return to Main Hub
+  <div class="top-bar">
+    <a href="/" class="pill-btn">
+      <svg class="svg-ico flip-rtl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span data-i18n="backHub">Return to Main Hub</span>
     </a>
+
+    <div class="top-actions">
+      <button type="button" class="pill-btn" id="langToggleBtn" aria-label="Switch Language">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span id="langLabel">العربية</span>
+      </button>
+      <button type="button" class="pill-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+        <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
+    </div>
   </div>
 
-  <div class="auth-box-wrapper">
-    <div class="glass-card">
-      <div class="card-top-header">
-        <div class="brand-icon-halo">
-          <div class="brand-icon-inner">
-            <i class="fa-solid fa-chalkboard-user"></i>
+  <div class="auth-shell">
+    <aside class="showcase-panel">
+      <div>
+        <div class="showcase-tag">
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
+          <span data-i18n="badge">Learnova Instructor Studio</span>
+        </div>
+        <h2 data-i18n="heroTitle">Teach, Assess, and Guide with Precision.</h2>
+        <p data-i18n="heroSub">Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.</p>
+
+        <div class="bento-metrics">
+          <div class="metric-card">
+            <strong data-i18n="m1Val">Courses</strong>
+            <span data-i18n="m1">Unit Builder</span>
+          </div>
+          <div class="metric-card">
+            <strong data-i18n="m2Val">Grading</strong>
+            <span data-i18n="m2">Quizzes & Exams</span>
+          </div>
+          <div class="metric-card">
+            <strong data-i18n="m3Val">Insights</strong>
+            <span data-i18n="m3">Learner Analytics</span>
           </div>
         </div>
-        <h1>Instructor Portal</h1>
-        <p>Sign in to manage courses, assessments & learners</p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            </div>
+            <div>
+              <strong data-i18n="f1Title">Course & Unit Management</strong>
+              <span data-i18n="f1Desc">Organize learning modules, upload materials, and structure syllabi.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <div>
+              <strong data-i18n="f2Title">Submissions, Quizzes & Exams</strong>
+              <span data-i18n="f2Desc">Grade student work, publish feedback, and manage exam windows.</span>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div>
+              <strong data-i18n="f3Title">Instant Demo Instructor Mode</strong>
+              <span data-i18n="f3Desc">Preview the instructor workspace with isolated sample courses.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-foot">
+        <span>Learnova LMS</span>
+        <span data-i18n="edition">Instructor Studio</span>
+      </div>
+    </aside>
+
+    <div class="form-panel">
+      <div class="card-top-header">
+        <div class="brand-icon-inner">
+          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+        </div>
+        <h1 data-i18n="portalTitle">Instructor Portal</h1>
+        <p data-i18n="portalSub">Sign in to manage courses, assessments & learners</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
             <div class="flash {{ category }}">
-              <i class="fa-solid fa-circle-exclamation"></i>
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>{{ message }}</span>
             </div>
           {% endfor %}
         {% endif %}
       {% endwith %}
 
-      <form id="instructorLoginForm" method="POST">
+      <form method="POST" id="instructorLoginForm">
         <div class="form-group">
-          <label class="field-label" for="email">Username or Email</label>
+          <label class="field-label" for="email" data-i18n="emailLabel">Academic Email</label>
           <div class="input-field-wrap">
-            <i class="fa-regular fa-envelope field-icon"></i>
-            <input id="email" type="text" name="email" placeholder="instructor@university.edu" required autofocus>
+            <span class="field-icon-wrap">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+            <input id="email" type="email" name="email" placeholder="instructor@learnova.com" required autofocus>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="field-label" for="password">Password</label>
+          <label class="field-label" for="password" data-i18n="passLabel">Password</label>
           <div class="input-field-wrap">
-            <i class="fa-solid fa-lock field-icon"></i>
-            <input id="password" type="password" name="password" placeholder="Enter your password" required>
+            <span class="field-icon-wrap">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input id="password" type="password" name="password" placeholder="Enter your password" data-i18n-placeholder="passPlaceholder" required>
             <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
-              <i class="fa-regular fa-eye" id="eyeIcon"></i>
+              <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
 
-        <div class="forgot-link-box">
-          <a href="#">Forgot Password?</a>
+        <div class="form-meta-row">
+          <label class="remember-label">
+            <input type="checkbox" name="remember" value="1">
+            <span data-i18n="remember">Keep me signed in</span>
+          </label>
+          <a href="{{ url_for('students.help_center') }}" class="forgot-link" data-i18n="needHelp">Need Help?</a>
         </div>
 
-        <button class="btn-submit-action" type="submit">
-          <span>Sign In to Instructor Studio</span>
-          <i class="fa-solid fa-arrow-right"></i>
+        <button class="btn-submit-action" type="submit" id="signInBtn">
+          <span data-i18n="signInBtn">Sign In to Instructor Studio</span>
+          <svg class="svg-ico flip-rtl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
       </form>
 
-      <!-- One-Click Instant Demo Box -->
-      <div class="demo-access-card">
-        <div class="demo-header-note">
-          <i class="fa-solid fa-sparkles"></i> Evaluating Learnova Platform?
-        </div>
-        <button type="button" id="demoInstructorBtn" class="btn-instant-demo">
-          <i class="fa-solid fa-bolt"></i> Instant Demo Instructor Access
-        </button>
+      <div class="demo-access-box">
+        <div class="demo-access-caption" data-i18n="demoCap">Evaluating Learnova Platform?</div>
+        <div class="demo-access-sub" data-i18n="demoSub">Sign in as Demo Instructor with isolated sample data</div>
+        <form method="POST" action="/teacher/demo-login" id="demoLoginForm">
+          <button type="submit" class="btn-demo-instructor" id="demoAccessBtn">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            <span data-i18n="demoBtn">Instant Demo Instructor Access</span>
+          </button>
+        </form>
       </div>
 
       <div class="card-footer-sec">
-        <i class="fa-solid fa-shield-halved"></i>
-        <span>Authenticated Educator Access</span>
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span data-i18n="secFoot">Authenticated Educator Access</span>
       </div>
     </div>
   </div>
 
   <script>
-    const toggleBtn = document.getElementById('togglePasswordBtn');
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
-    const emailInput = document.getElementById('email');
-    const demoBtn = document.getElementById('demoInstructorBtn');
-    const form = document.getElementById('instructorLoginForm');
+    const htmlRoot = document.documentElement;
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeIconSvg = document.getElementById('themeIconSvg');
+    const themeLabel = document.getElementById('themeLabel');
+    const langToggleBtn = document.getElementById('langToggleBtn');
+    const langLabel = document.getElementById('langLabel');
 
-    if (toggleBtn && passwordInput && eyeIcon) {
-      toggleBtn.addEventListener('click', function () {
-        const isPassword = passwordInput.getAttribute('type') === 'password';
-        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-        eyeIcon.classList.toggle('fa-eye', !isPassword);
-        eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+    const i18n = {
+      en: {
+        backHub: 'Return to Main Hub',
+        badge: 'Learnova Instructor Studio',
+        heroTitle: 'Teach, Assess, and Guide with Precision.',
+        heroSub: 'Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.',
+        m1Val: 'Courses',
+        m1: 'Unit Builder',
+        m2Val: 'Grading',
+        m2: 'Quizzes & Exams',
+        m3Val: 'Insights',
+        m3: 'Learner Analytics',
+        f1Title: 'Course & Unit Management',
+        f1Desc: 'Organize learning modules, upload materials, and structure syllabi.',
+        f2Title: 'Submissions, Quizzes & Exams',
+        f2Desc: 'Grade student work, publish feedback, and manage exam windows.',
+        f3Title: 'Instant Demo Instructor Mode',
+        f3Desc: 'Preview the instructor workspace with isolated sample courses.',
+        edition: 'Instructor Studio',
+        portalTitle: 'Instructor Portal',
+        portalSub: 'Sign in to manage courses, assessments & learners',
+        emailLabel: 'Academic Email',
+        passLabel: 'Password',
+        passPlaceholder: 'Enter your password',
+        remember: 'Keep me signed in',
+        needHelp: 'Need Help?',
+        signInBtn: 'Sign In to Instructor Studio',
+        demoCap: 'Evaluating Learnova Platform?',
+        demoSub: 'Sign in as Demo Instructor with isolated sample data',
+        demoBtn: 'Instant Demo Instructor Access',
+        secFoot: 'Authenticated Educator Access',
+        dark: 'Dark Mode',
+        light: 'Light Mode',
+        switchLang: 'العربية'
+      },
+      ar: {
+        backHub: 'العودة للصفحة الرئيسية',
+        badge: 'استوديو المدرس - Learnova',
+        heroTitle: 'درّس، قيّم، وتابع الطلاب بدقة عالية.',
+        heroSub: 'أدِر وحدات المقررات، انشر الواجبات والاختبارات، راجع التسليمات، وتابع أداء الطلاب من مكان واحد متكامل.',
+        m1Val: 'المقررات',
+        m1: 'بناء الوحدات',
+        m2Val: 'التقييم',
+        m2: 'اختبارات ودرجات',
+        m3Val: 'التحليلات',
+        m3: 'متابعة الطلاب',
+        f1Title: 'إدارة المقررات والوحدات',
+        f1Desc: 'نظّم الوحدات التعليمية، ارفع الملفات، ورتّب الخطة الدراسية.',
+        f2Title: 'التسليمات والكويزات والامتحانات',
+        f2Desc: 'صحّح واجبات الطلاب، أضف الملاحظات، واضبط مواعيد الاختبارات.',
+        f3Title: 'وضع المدرس التجريبي الفوري',
+        f3Desc: 'استعرض لوحة المدرس فوراً ببيانات ومقررات تجريبية معزولة.',
+        edition: 'استوديو المدرس',
+        portalTitle: 'بوابة المدرس',
+        portalSub: 'سجّل الدخول لإدارة المقررات والتقييمات والطلاب',
+        emailLabel: 'البريد الإلكتروني الأكاديمي',
+        passLabel: 'كلمة المرور',
+        passPlaceholder: 'أدخل كلمة المرور',
+        remember: 'تذكر تسجيل دخولي',
+        needHelp: 'تحتاج مساعدة؟',
+        signInBtn: 'تسجيل الدخول إلى استوديو المدرس',
+        demoCap: 'تستكشف منصة Learnova؟',
+        demoSub: 'ادخل بحساب مدرس تجريبي ببيانات معزولة تماماً',
+        demoBtn: 'دخول تجريبي فوري كمدرس',
+        secFoot: 'وصول أكاديمي موثّق للمدرسين',
+        dark: 'الوضع الداكن',
+        light: 'الوضع الفاتح',
+        switchLang: 'English'
+      }
+    };
+
+    const moonPath = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+    const sunPath = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+
+    function applyLang(lang) {
+      const dict = i18n[lang] || i18n.en;
+      htmlRoot.setAttribute('lang', lang);
+      htmlRoot.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      localStorage.setItem('learnova_login_lang', lang);
+      langLabel.textContent = dict.switchLang;
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (dict[key]) el.setAttribute('placeholder', dict[key]);
+      });
+
+      const currentTheme = htmlRoot.getAttribute('data-theme') || 'light';
+      themeLabel.textContent = currentTheme === 'dark' ? dict.light : dict.dark;
+    }
+
+    function applyTheme(theme) {
+      const lang = htmlRoot.getAttribute('lang') || 'en';
+      const dict = i18n[lang] || i18n.en;
+      htmlRoot.setAttribute('data-theme', theme);
+      localStorage.setItem('learnova_login_theme', theme);
+      if (theme === 'dark') {
+        themeIconSvg.innerHTML = sunPath;
+        themeLabel.textContent = dict.light;
+      } else {
+        themeIconSvg.innerHTML = moonPath;
+        themeLabel.textContent = dict.dark;
+      }
+    }
+
+    const loginForm = document.getElementById('instructorLoginForm');
+    const signInBtn = document.getElementById('signInBtn');
+    const demoForm = document.getElementById('demoLoginForm');
+    const demoBtn = document.getElementById('demoAccessBtn');
+    const initialSignInHtml = signInBtn ? signInBtn.innerHTML : '';
+    const initialDemoHtml = demoBtn ? demoBtn.innerHTML : '';
+
+    function resetActionButtons() {
+      if (signInBtn) {
+        signInBtn.disabled = false;
+        signInBtn.innerHTML = initialSignInHtml;
+      }
+      if (demoBtn) {
+        demoBtn.disabled = false;
+        demoBtn.innerHTML = initialDemoHtml;
+      }
+      applyLang(htmlRoot.getAttribute('lang') || 'en');
+    }
+
+    applyLang(localStorage.getItem('learnova_login_lang') || 'en');
+    applyTheme(localStorage.getItem('learnova_login_theme') || 'light');
+
+    window.addEventListener('pageshow', (e) => {
+      if (e.persisted) resetActionButtons();
+    });
+
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener('click', () => {
+        const next = htmlRoot.getAttribute('lang') === 'ar' ? 'en' : 'ar';
+        applyLang(next);
       });
     }
 
-    if (demoBtn && emailInput && passwordInput && form) {
-      demoBtn.addEventListener('click', function () {
-        emailInput.value = 'instructor@learnova.edu';
-        passwordInput.value = 'demo123';
-        form.submit();
+    if (themeToggleBtn) {
+      themeToggleBtn.addEventListener('click', () => {
+        const next = htmlRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+      });
+    }
+
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const passwordInput = document.getElementById('password');
+    const eyeSvg = document.getElementById('eyeSvg');
+
+    const eyeOpenPath = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+    const eyeClosedPath = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
+
+    if (toggleBtn && passwordInput && eyeSvg) {
+      toggleBtn.addEventListener('click', function () {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        eyeSvg.innerHTML = isPassword ? eyeClosedPath : eyeOpenPath;
+      });
+    }
+
+    if (loginForm && signInBtn) {
+      loginForm.addEventListener('submit', () => {
+        const isAr = htmlRoot.getAttribute('lang') === 'ar';
+        signInBtn.disabled = true;
+        signInBtn.innerHTML = `<span>${isAr ? 'جاري تسجيل الدخول...' : 'Signing In...'}</span>`;
+      });
+    }
+
+    if (demoForm && demoBtn) {
+      demoForm.addEventListener('submit', () => {
+        const isAr = htmlRoot.getAttribute('lang') === 'ar';
+        demoBtn.disabled = true;
+        demoBtn.innerHTML = `<span>${isAr ? 'جاري تجهيز الحساب التجريبي...' : 'Preparing Demo Instructor...'}</span>`;
       });
     }
   </script>
