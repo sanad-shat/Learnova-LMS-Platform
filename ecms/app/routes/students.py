@@ -50,132 +50,164 @@ def login():
 # ------------------------- Instant Demo Student Access -------------------------
 @students_bp.route("/demo-login", methods=["POST"])
 def demo_login():
-    demo_email = "demo.student@learnova.local"
-    demo_user = User.query.filter_by(email=demo_email).first()
+    try:
+        demo_email = "demo.student@learnova.local"
+        demo_user = User.query.filter_by(email=demo_email).first()
 
-    if not demo_user:
-        demo_user = User(
-            name_person="Dr. Demo student",
-            username="dr.demo.student",
-            email=demo_email,
-            role="student",
-            department="Computer Science",
-            academic_level="Year 2",
-            is_active=True
-        )
-        if hasattr(demo_user, "set_password"):
-            demo_user.set_password("DemoStudent@2026")
-        db.session.add(demo_user)
-        db.session.flush()
+        if not demo_user:
+            user_kwargs = {
+                "name_person": "Dr. Demo student",
+                "username": "dr.demo.student",
+                "email": demo_email,
+                "role": "student",
+            }
+            if hasattr(User, "department"):
+                user_kwargs["department"] = "Computer Science"
+            if hasattr(User, "academic_level"):
+                user_kwargs["academic_level"] = "Year 2"
+            if hasattr(User, "is_active"):
+                user_kwargs["is_active"] = True
 
-    demo_courses_spec = [
-        {
-            "code": "DEMO-CS101",
-            "title": "Demo: Foundations of Software Engineering",
-            "description": "Sample course for evaluating the Learnova student portal.",
-            "units": ["Introduction to SDLC", "Requirements & UML Basics", "Testing & Quality"],
-            "assignments": [
-                {
-                    "title": "Demo Assignment 1: Use Case Specification",
-                    "description": "Sample assignment for demo evaluation.",
-                    "score": 25,
-                    "grade": 22.0,
-                    "text": "Sample submitted specification for demo account."
-                },
-                {
-                    "title": "Demo Assignment 2: Test Plan Draft",
-                    "description": "Pending sample assignment for testing submission flow.",
-                    "score": 25,
-                    "grade": None,
-                    "text": None
-                }
-            ]
-        },
-        {
-            "code": "DEMO-AI204",
-            "title": "Demo: Applied Python & Data Structures",
-            "description": "Sample course with completed modules and grades for demo preview.",
-            "units": ["Lists, Stacks & Queues", "Recursion & Trees"],
-            "assignments": [
-                {
-                    "title": "Demo Lab: Stack & Queue Implementation",
-                    "description": "Sample lab task in demo course.",
-                    "score": 30,
-                    "grade": 27.0,
-                    "text": "Sample Python implementation submitted by demo student."
-                }
-            ]
-        }
-    ]
-
-    for spec in demo_courses_spec:
-        course = Course.query.filter_by(code=spec["code"]).first()
-        if not course:
-            course = Course(
-                title=spec["title"],
-                code=spec["code"],
-                description=spec["description"]
-            )
-            if hasattr(course, "teacher_id"):
-                teacher = User.query.filter(User.role.ilike("teacher")).first()
-                if teacher:
-                    course.teacher_id = teacher.id
-            db.session.add(course)
+            demo_user = User(**user_kwargs)
+            if hasattr(demo_user, "set_password"):
+                demo_user.set_password("DemoStudent@2026")
+            db.session.add(demo_user)
             db.session.flush()
 
-            for idx, u_title in enumerate(spec["units"], start=1):
-                unit = Unit(
-                    course_id=course.id,
-                    title=u_title,
-                    order_index=idx
-                )
-                db.session.add(unit)
+        demo_courses_spec = [
+            {
+                "code": "DEMO-CS101",
+                "title": "Demo: Foundations of Software Engineering",
+                "description": "Sample course for evaluating the Learnova student portal.",
+                "units": ["Introduction to SDLC", "Requirements & UML Basics", "Testing & Quality"],
+                "assignments": [
+                    {
+                        "title": "Demo Assignment 1: Use Case Specification",
+                        "description": "Sample assignment for demo evaluation.",
+                        "score": 25,
+                        "grade": 22.0,
+                        "text": "Sample submitted specification for demo account."
+                    },
+                    {
+                        "title": "Demo Assignment 2: Test Plan Draft",
+                        "description": "Pending sample assignment for testing submission flow.",
+                        "score": 25,
+                        "grade": None,
+                        "text": None
+                    }
+                ]
+            },
+            {
+                "code": "DEMO-AI204",
+                "title": "Demo: Applied Python & Data Structures",
+                "description": "Sample course with completed modules and grades for demo preview.",
+                "units": ["Lists, Stacks & Queues", "Recursion & Trees"],
+                "assignments": [
+                    {
+                        "title": "Demo Lab: Stack & Queue Implementation",
+                        "description": "Sample lab task in demo course.",
+                        "score": 30,
+                        "grade": 27.0,
+                        "text": "Sample Python implementation submitted by demo student."
+                    }
+                ]
+            }
+        ]
+
+        teacher = User.query.filter(User.role.ilike("teacher")).first()
+
+        for spec in demo_courses_spec:
+            course = Course.query.filter_by(code=spec["code"]).first() if hasattr(Course, "code") else Course.query.filter_by(title=spec["title"]).first()
+            if not course:
+                course_kwargs = {
+                    "title": spec["title"],
+                    "description": spec["description"],
+                }
+                if hasattr(Course, "code"):
+                    course_kwargs["code"] = spec["code"]
+                if hasattr(Course, "teacher_id") and teacher:
+                    course_kwargs["teacher_id"] = teacher.id
+
+                course = Course(**course_kwargs)
+                db.session.add(course)
                 db.session.flush()
-                if idx == 1:
-                    db.session.add(UnitCompletion(student_id=demo_user.id, unit_id=unit.id))
 
-            for a_spec in spec["assignments"]:
-                assignment = Assignment(
-                    course_id=course.id,
-                    title=a_spec["title"],
-                    description=a_spec["description"],
-                    assignment_type="assignment",
-                    max_score=a_spec["score"] if hasattr(Assignment, "max_score") else None,
-                    due_date=datetime.now(timezone.utc)
-                )
-                db.session.add(assignment)
-                db.session.flush()
+                for idx, u_title in enumerate(spec["units"], start=1):
+                    unit_kwargs = {
+                        "course_id": course.id,
+                        "title": u_title,
+                    }
+                    if hasattr(Unit, "order_index"):
+                        unit_kwargs["order_index"] = idx
+                    elif hasattr(Unit, "order"):
+                        unit_kwargs["order"] = idx
 
-                if a_spec["text"] is not None:
-                    sub = Submission(
-                        student_id=demo_user.id,
-                        assignment_id=assignment.id,
-                        submission_text=a_spec["text"],
-                        grade=a_spec["grade"],
-                        submitted_at=datetime.now(timezone.utc)
-                    )
-                    db.session.add(sub)
+                    unit = Unit(**unit_kwargs)
+                    db.session.add(unit)
+                    db.session.flush()
+                    if idx == 1:
+                        db.session.add(UnitCompletion(student_id=demo_user.id, unit_id=unit.id))
 
-        existing_enrollment = Enrollment.query.filter_by(
-            student_id=demo_user.id,
-            course_id=course.id
-        ).first()
-        if not existing_enrollment:
-            db.session.add(Enrollment(student_id=demo_user.id, course_id=course.id))
+                for a_spec in spec["assignments"]:
+                    assign_kwargs = {
+                        "course_id": course.id,
+                        "title": a_spec["title"],
+                        "description": a_spec["description"],
+                    }
+                    if hasattr(Assignment, "assignment_type"):
+                        assign_kwargs["assignment_type"] = "assignment"
+                    if hasattr(Assignment, "max_score"):
+                        assign_kwargs["max_score"] = a_spec["score"]
+                    elif hasattr(Assignment, "score"):
+                        assign_kwargs["score"] = a_spec["score"]
+                    if hasattr(Assignment, "due_date"):
+                        assign_kwargs["due_date"] = datetime.now(timezone.utc)
 
-    existing_notif = Notification.query.filter_by(user_id=demo_user.id).first()
-    if not existing_notif:
-        db.session.add(Notification(
-            user_id=demo_user.id,
-            title="Welcome to Student Demo Mode",
-            message="You are signed in as Dr. Demo student with isolated sample courses and assignments.",
-            is_read=False
-        ))
+                    assignment = Assignment(**assign_kwargs)
+                    db.session.add(assignment)
+                    db.session.flush()
 
-    db.session.commit()
-    login_user(demo_user)
-    flash("Signed in to Demo Student mode as Dr. Demo student.", "info")
-    return redirect(url_for("students.dashboard"))
+                    if a_spec["text"] is not None:
+                        sub_kwargs = {
+                            "student_id": demo_user.id,
+                            "assignment_id": assignment.id,
+                            "submission_text": a_spec["text"],
+                            "grade": a_spec["grade"],
+                        }
+                        if hasattr(Submission, "submitted_at"):
+                            sub_kwargs["submitted_at"] = datetime.now(timezone.utc)
+                        db.session.add(Submission(**sub_kwargs))
+
+            existing_enrollment = Enrollment.query.filter_by(
+                student_id=demo_user.id,
+                course_id=course.id
+            ).first()
+            if not existing_enrollment:
+                db.session.add(Enrollment(student_id=demo_user.id, course_id=course.id))
+
+        existing_notif = Notification.query.filter_by(user_id=demo_user.id).first()
+        if not existing_notif:
+            notif_kwargs = {
+                "user_id": demo_user.id,
+                "title": "Welcome to Student Demo Mode",
+            }
+            if hasattr(Notification, "message"):
+                notif_kwargs["message"] = "You are signed in as Dr. Demo student with isolated sample courses and assignments."
+            elif hasattr(Notification, "body"):
+                notif_kwargs["body"] = "You are signed in as Dr. Demo student with isolated sample courses and assignments."
+            if hasattr(Notification, "is_read"):
+                notif_kwargs["is_read"] = False
+            db.session.add(Notification(**notif_kwargs))
+
+        db.session.commit()
+        login_user(demo_user)
+        flash("Signed in to Demo Student mode as Dr. Demo student.", "info")
+        return redirect(url_for("students.dashboard"))
+
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Demo login error: {str(e)}", "danger")
+        return redirect(url_for("students.login"))
 
 
 # ------------------------- Student Logout -------------------------
