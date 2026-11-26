@@ -1,16 +1,565 @@
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Edit Student</title><link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
-<body><header class="topbar"><a class="brand" href="{{ url_for('admin.dashboard') }}">Learnova LMS</a><nav class="admin-nav"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a><a href="{{ url_for('admin.manage_students') }}">Students</a><a href="{{ url_for('admin.manage_teachers') }}">Instructors</a><a href="{{ url_for('admin.manage_courses') }}">Courses</a><a href="{{ url_for('admin.reports_teachers') }}">Reports</a></nav></header><main class="container"><div class="page-heading"><div><span class="eyebrow">STUDENT MANAGEMENT</span><h1>Edit Student Profile</h1><p>Update academic, contact, and account details.</p></div></div><section class="form-card wide-form"><form method="POST">
-<div class="form-grid">
-  <div class="field full"><label>Full Name <span>*</span></label><input name="name_person" value="{{ student.name_person if student else '' }}" required></div>
-  <div class="field"><label>University ID <span>*</span></label><input name="university_id" value="{{ student.university_id if student else '' }}" placeholder="e.g. 202410245" required></div>
-  <div class="field"><label>Username <span>*</span></label><input name="username" value="{{ student.username if student else '' }}" required></div>
-  <div class="field"><label>Email <span>*</span></label><input type="email" name="email" value="{{ student.email if student else '' }}" required></div>
-  <div class="field"><label>Password {% if student %}<small>(leave blank to keep current)</small>{% else %}<span>*</span>{% endif %}</label><input type="password" name="password" {% if not student %}required{% endif %}></div>
-  <div class="field"><label>Phone Number</label><input name="phone" value="{{ student.phone if student else '' }}" placeholder="+971 ..."></div>
-  <div class="field"><label>Department</label><select name="department"><option value="">Select department</option>{% for item in ['Software Engineering','Computer Science','Artificial Intelligence','Cyber Security','Information Technology','Data Science','Business'] %}<option value="{{ item }}" {% if student and student.department == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
-  <div class="field"><label>Academic Level</label><select name="level"><option value="">Select level</option>{% for item in ['Year 1','Year 2','Year 3','Year 4','Graduate'] %}<option value="{{ item }}" {% if student and student.level == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
-  <div class="field"><label>Gender</label><select name="gender"><option value="">Select gender</option>{% for item in ['Male','Female'] %}<option value="{{ item }}" {% if student and student.gender == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
-  <div class="field"><label>Status</label><select name="status">{% for item in ['Active','Inactive'] %}<option value="{{ item }}" {% if (student and student.status == item) or (not student and item == 'Active') %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
-</div><div class="form-actions"><a class="secondary-btn" href="{{ url_for('admin.manage_students') }}">Cancel</a><button type="submit">Save Changes</button></div></form></section></main></body></html>
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edit Student Profile | Learnova LMS</title>
+  <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --indigo-soft: #6366f1;
+      --accent: #06b6d4;
+      --primary-glow: rgba(79, 70, 229, 0.28);
+      --bg-page: #f3f6fc;
+      --bg-grid-dot: rgba(79, 70, 229, 0.14);
+      --bg-grid-line: rgba(203, 213, 225, 0.32);
+      --card-bg: rgba(255, 255, 255, 0.88);
+      --card-ring: rgba(203, 213, 225, 0.8);
+      --input-bg: rgba(255, 255, 255, 0.95);
+      --input-border: #dbe3f0;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --shadow-card: 0 24px 60px -18px rgba(15, 23, 42, 0.12);
+    }
+
+    html[data-theme="dark"] {
+      --bg-page: #060913;
+      --bg-grid-dot: rgba(129, 140, 248, 0.15);
+      --bg-grid-line: rgba(30, 41, 59, 0.5);
+      --card-bg: rgba(13, 20, 36, 0.88);
+      --card-ring: rgba(51, 65, 85, 0.7);
+      --input-bg: rgba(23, 33, 56, 0.88);
+      --input-border: #2a3954;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --shadow-card: 0 26px 64px -16px rgba(0, 0, 0, 0.65);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    html[dir="rtl"] * {
+      letter-spacing: 0 !important;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-page);
+      color: var(--text-main);
+      position: relative;
+      overflow-x: hidden;
+      padding: 20px 16px 48px;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .svg-ico {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(var(--bg-grid-dot) 1.5px, transparent 1.5px),
+        linear-gradient(to right, var(--bg-grid-line) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid-line) 1px, transparent 1px);
+      background-size: 30px 30px, 90px 90px, 90px 90px;
+      mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 45%, transparent 96%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 45%, transparent 96%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .top-nav {
+      position: relative;
+      z-index: 2;
+      max-width: 980px;
+      margin: 0 auto 24px;
+      padding: 12px 18px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-ring);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .brand-link img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-item {
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 7px 12px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--indigo-soft);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      padding: 7px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pill-btn:hover {
+      color: var(--primary);
+      border-color: var(--indigo-soft);
+    }
+
+    .page-container {
+      position: relative;
+      z-index: 2;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .page-header {
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--indigo-soft);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.22);
+      padding: 5px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 6px;
+    }
+
+    .page-header p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    .flash {
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .flash.success {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .flash.danger, .flash.warning {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .form-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-ring);
+      border-radius: 26px;
+      padding: 30px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px 20px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .field-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 7px;
+      line-height: 1.4;
+    }
+
+    .req-star {
+      color: #ef4444;
+      font-weight: 800;
+      display: inline;
+    }
+
+    .field-hint {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-inline-start: 4px;
+    }
+
+    .input-control,
+    .select-control {
+      width: 100%;
+      padding: 11.5px 14px;
+      border-radius: 13px;
+      border: 1.5px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-control:focus,
+    .select-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+    }
+
+    .form-actions {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-ring);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-cancel {
+      text-decoration: none;
+      padding: 11px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      transition: all 0.2s ease;
+    }
+
+    .btn-cancel:hover {
+      color: var(--text-main);
+    }
+
+    .btn-save {
+      padding: 11.5px 22px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 22px var(--primary-glow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-save:hover {
+      transform: translateY(-1px);
+    }
+
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      .form-card {
+        padding: 22px 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-grid"></div>
+
+  <nav class="top-nav">
+    <a href="/" class="brand-link">
+      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+      <span>Learnova LMS</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="/" class="nav-item" data-i18n="navDash">Dashboard</a>
+      <a href="/student/dashboard" class="nav-item active" data-i18n="navStudents">Students</a>
+      <a href="/teacher/dashboard" class="nav-item" data-i18n="navInstructors">Instructors</a>
+      <a href="/student/courses" class="nav-item" data-i18n="navCourses">Courses</a>
+      <a href="/student/reports" class="nav-item" data-i18n="navReports">Reports</a>
+    </div>
+
+    <div class="nav-controls">
+      <button type="button" class="pill-btn" id="langToggleBtn">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span id="langLabel">العربية</span>
+      </button>
+      <button type="button" class="pill-btn" id="themeToggleBtn">
+        <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page-container">
+    <div class="page-header">
+      <div class="eyebrow" data-i18n="eyebrow">Student Management</div>
+      <h1 data-i18n="title">Edit Student Profile</h1>
+      <p data-i18n="subtitle">Update academic, contact, and account details.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="form-card">
+      <div class="form-grid">
+        <div class="field-group full-width">
+          <label class="field-label" for="full_name">
+            <span data-i18n="fullName">Full Name</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="full_name" name="name_person" type="text" class="input-control"
+                 value="{{ student.name_person if student is defined and student.name_person else 'Ahmed Mohamed Ali' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="university_id">
+            <span data-i18n="uniId">University ID</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="university_id" name="university_id" type="text" class="input-control"
+                 value="{{ student.university_id if student is defined and student.university_id else '202610001' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="username">
+            <span data-i18n="username">Username</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="username" name="username" type="text" class="input-control"
+                 value="{{ student.username if student is defined and student.username else 'ahmed.mohamed' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="email">
+            <span data-i18n="email">Email</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="email" name="email" type="email" class="input-control"
+                 value="{{ student.email if student is defined and student.email else 'ahmed.mohamed@learnova.com' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">
+            <span data-i18n="password">Password</span>
+            <span class="field-hint" data-i18n="passHint">(leave blank to keep current)</span>
+          </label>
+          <input id="password" name="new_password" type="password" class="input-control" placeholder="••••••••">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="phone">
+            <span data-i18n="phone">Phone Number</span>
+          </label>
+          <input id="phone" name="phone" type="text" class="input-control"
+                 value="{{ student.phone if student is defined and student.phone else '+971500000001' }}">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="department">
+            <span data-i18n="department">Department</span>
+          </label>
+          {% set current_dept = student.department if student is defined and student.department else 'Software Engineering' %}
+          <select id="department" name="department" class="select-control">
+            <option value="Software Engineering" {% if current_dept == 'Software Engineering' %}selected{% endif %}>Software Engineering</option>
+            <option value="Computer Science" {% if current_dept == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+            <option value="Information Technology" {% if current_dept == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="academic_level">
+            <span data-i18n="level">Academic Level</span>
+          </label>
+          {% set current_lvl = student.academic_level if student is defined and student.academic_level else '' %}
+          <select id="academic_level" name="academic_level" class="select-control">
+            <option value="" {% if not current_lvl %}selected{% endif %}>Select level</option>
+            <option value="Year 1" {% if current_lvl == 'Year 1' %}selected{% endif %}>Year 1</option>
+            <option value="Year 2" {% if current_lvl == 'Year 2' %}selected{% endif %}>Year 2</option>
+            <option value="Year 3" {% if current_lvl == 'Year 3' %}selected{% endif %}>Year 3</option>
+            <option value="Year 4" {% if current_lvl == 'Year 4' %}selected{% endif %}>Year 4</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="gender">
+            <span data-i18n="gender">Gender</span>
+          </label>
+          {% set current_gender = student.gender if student is defined and student.gender else 'Male' %}
+          <select id="gender" name="gender" class="select-control">
+            <option value="Male" {% if current_gender == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if current_gender == 'Female' %}selected{% endif %}>Female</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/student/dashboard" class="btn-cancel" data-i18n="cancel">Cancel</a>
+        <button type="submit" class="btn-save">
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span data-i18n="saveBtn">Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </main>
+
+  <script>
+    const htmlRoot = document.documentElement;
+    const themeBtn = document.getElementById('themeToggleBtn');
+    const themeIconSvg = document.getElementById('themeIconSvg');
+    const themeLabel = document.getElementById('themeLabel');
+    const langBtn = document.getElementById('langToggleBtn');
+    const langLabel = document.getElementById('langLabel');
+
+    const i18n = {
+      en: {
+        navDash: 'Dashboard', navStudents: 'Students', navInstructors: 'Instructors', navCourses: 'Courses', navReports: 'Reports',
+        eyebrow: 'Student Management', title: 'Edit Student Profile',
+        subtitle: 'Update academic, contact, and account details.',
+        fullName: 'Full Name', uniId: 'University ID', username: 'Username', email: 'Email',
+        password: 'Password', passHint: '(leave blank to keep current)', phone: 'Phone Number',
+        department: 'Department', level: 'Academic Level', gender: 'Gender',
+        cancel: 'Cancel', saveBtn: 'Save Changes', dark: 'Dark Mode', light: 'Light Mode', switchLang: 'العربية'
+      },
+      ar: {
+        navDash: 'الرئيسية', navStudents: 'الطلاب', navInstructors: 'المدرسون', navCourses: 'المقررات', navReports: 'التقارير',
+        eyebrow: 'إدارة الطلاب', title: 'تعديل ملف الطالب',
+        subtitle: 'تحديث البيانات الأكاديمية ومعلومات التواصل والحساب.',
+        fullName: 'الاسم الكامل', uniId: 'الرقم الجامعي', username: 'اسم المستخدم', email: 'البريد الإلكتروني',
+        password: 'كلمة المرور', passHint: '(اتركه فارغاً للإبقاء على الحالية)', phone: 'رقم الهاتف',
+        department: 'القسم الأكاديمي', level: 'المستوى الدراسي', gender: 'الجنس',
+        cancel: 'إلغاء', saveBtn: 'حفظ التغييرات', dark: 'الوضع الداكن', light: 'الوضع الفاتح', switchLang: 'English'
+      }
+    };
+
+    const moonPath = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+    const sunPath = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
+
+    function applyLang(lang) {
+      const dict = i18n[lang] || i18n.en;
+      htmlRoot.setAttribute('lang', lang);
+      htmlRoot.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      localStorage.setItem('learnova_login_lang', lang);
+      langLabel.textContent = dict.switchLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (dict[k]) el.textContent = dict[k];
+      });
+      const th = htmlRoot.getAttribute('data-theme') || 'light';
+      themeLabel.textContent = th === 'dark' ? dict.light : dict.dark;
+    }
+
+    function applyTheme(theme) {
+      const lang = htmlRoot.getAttribute('lang') || 'en';
+      const dict = i18n[lang] || i18n.en;
+      htmlRoot.setAttribute('data-theme', theme);
+      localStorage.setItem('learnova_login_theme', theme);
+      themeIconSvg.innerHTML = theme === 'dark' ? sunPath : moonPath;
+      themeLabel.textContent = theme === 'dark' ? dict.light : dict.dark;
+    }
+
+    applyLang(localStorage.getItem('learnova_login_lang') || 'en');
+    applyTheme(localStorage.getItem('learnova_login_theme') || 'light');
+
+    langBtn.addEventListener('click', () => applyLang(htmlRoot.getAttribute('lang') === 'ar' ? 'en' : 'ar'));
+    themeBtn.addEventListener('click', () => applyTheme(htmlRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+  </script>
+</body>
+</html>
