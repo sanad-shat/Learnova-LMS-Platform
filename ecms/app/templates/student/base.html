@@ -54,6 +54,27 @@
       z-index: 10 !important;
     }
 
+    /* تنسيق رابط Help Center في تذييل السايدبار */
+    .sidebar-footer .help-link {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      padding: 10px 14px !important;
+      border-radius: 10px !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: #e2e8f0 !important;
+      font-size: 13px !important;
+      font-weight: 600 !important;
+      text-decoration: none !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .sidebar-footer .help-link:hover,
+    .sidebar-footer .help-link.active {
+      background: var(--ln-brand, #4f46e5) !important;
+      color: #ffffff !important;
+    }
+
     /* على الشاشات الأكبر من 768px: تثبيت السايدبار ومحاذاة المحتوى بجانبه مباشرة */
     @media (min-width: 769px) {
       aside.sidebar {
@@ -295,7 +316,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a class="help-link" href="mailto:support@learnova.local">
+      <a class="help-link {{ 'active' if active_page=='help' else '' }}" href="{{ url_for('students.help_center') }}">
         <i class="fa-regular fa-circle-question"></i>Help Center
       </a>
     </div>
