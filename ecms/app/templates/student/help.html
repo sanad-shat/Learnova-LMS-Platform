@@ -3,7 +3,7 @@
 
 {% block content %}
 <style>
-  .help-layout-container {
+  .help-modern-wrap {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
@@ -11,196 +11,346 @@
     box-sizing: border-box;
   }
 
-  .help-banner-header {
+  .help-hero-banner {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+    background: linear-gradient(135deg, #4338ca 0%, #6366f1 55%, #4f46e5 100%);
     color: #ffffff;
     border-radius: 18px;
-    padding: 20px 24px;
+    padding: 22px 26px;
     margin-bottom: 16px;
-    gap: 14px;
+    gap: 16px;
     flex-wrap: wrap;
-    box-shadow: 0 4px 16px -2px rgba(79, 70, 229, 0.18);
+    box-shadow: 0 8px 24px -4px rgba(79, 70, 229, 0.25);
   }
 
-  .help-banner-header h1 {
-    margin: 0 0 4px;
-    font-size: 22px;
+  .help-hero-title {
+    margin: 0 0 5px;
+    font-size: 23px;
     font-weight: 800;
+    letter-spacing: -0.02em;
     line-height: 1.2;
   }
 
-  .help-banner-header p {
+  .help-hero-sub {
     margin: 0;
     font-size: 13px;
-    opacity: 0.92;
+    color: rgba(255, 255, 255, 0.9);
   }
 
-  .help-badge-pill {
+  .help-hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background: rgba(255, 255, 255, 0.16);
     border: 1px solid rgba(255, 255, 255, 0.28);
-    padding: 8px 14px;
-    border-radius: 12px;
-    font-size: 12px;
+    backdrop-filter: blur(6px);
+    padding: 9px 15px;
+    border-radius: 999px;
+    font-size: 12.5px;
     font-weight: 700;
     white-space: nowrap;
   }
 
-  .help-grid-cards {
+  .help-toolbar-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  }
+
+  .help-toolbar-card i {
+    color: #64748b;
+    font-size: 14px;
+  }
+
+  .help-toolbar-card input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13.5px;
+    color: #0f172a;
+  }
+
+  .help-cards-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
     margin-bottom: 16px;
   }
 
-  .help-card-box {
+  .help-action-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    padding: 18px 20px;
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 14px;
+    box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.05);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
-  .help-card-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+  .help-action-card:hover {
+    transform: translateY(-2px);
+    border-color: #c7d2fe;
+    box-shadow: 0 10px 24px -6px rgba(79, 70, 229, 0.12);
+  }
+
+  .help-icon-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
     background: #eef2ff;
     color: #4f46e5;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
-    margin-bottom: 10px;
+    font-size: 16px;
+    margin-bottom: 12px;
   }
 
-  .help-card-box h3 {
+  .help-action-card h3 {
     margin: 0 0 6px;
-    font-size: 15px;
+    font-size: 15.5px;
     font-weight: 800;
     color: #0f172a;
   }
 
-  .help-card-box p {
-    margin: 0 0 12px;
-    font-size: 12.5px;
+  .help-action-card p {
+    margin: 0;
+    font-size: 13px;
     color: #64748b;
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
-  .help-card-link {
+  .help-action-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12.5px;
-    font-weight: 700;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 11px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     color: #4f46e5;
+    font-size: 13px;
+    font-weight: 700;
     text-decoration: none;
+    transition: all 0.2s ease;
   }
 
-  .help-card-link:hover {
-    text-decoration: underline;
+  .help-action-btn:hover {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #ffffff;
   }
 
-  .help-faq-box {
+  .help-faq-panel {
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 18px;
     padding: 20px 22px;
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 4px 16px -4px rgba(15, 23, 42, 0.04);
   }
 
-  .help-faq-box h2 {
-    margin: 0 0 14px;
-    font-size: 16px;
+  .help-faq-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .help-faq-header h2 {
+    margin: 0;
+    font-size: 16.5px;
     font-weight: 800;
     color: #0f172a;
   }
 
-  .faq-item-row {
-    padding: 12px 0;
-    border-top: 1px solid #f1f5f9;
+  .faq-accordion-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 13px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: #ffffff;
+    transition: border-color 0.2s ease;
   }
 
-  .faq-item-row:first-of-type {
-    border-top: none;
-    padding-top: 0;
+  .faq-accordion-item:last-child {
+    margin-bottom: 0;
   }
 
-  .faq-q {
-    font-size: 13px;
+  .faq-accordion-item.open {
+    border-color: #c7d2fe;
+    background: #fafbff;
+  }
+
+  .faq-trigger {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 13.5px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 4px;
   }
 
-  .faq-a {
-    font-size: 12.5px;
+  .faq-trigger i {
+    color: #6366f1;
+    font-size: 12px;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .faq-accordion-item.open .faq-trigger i {
+    transform: rotate(180deg);
+  }
+
+  .faq-panel {
+    display: none;
+    padding: 0 16px 14px;
+    font-size: 13px;
     color: #475569;
-    margin: 0;
-    line-height: 1.55;
+    line-height: 1.6;
+  }
+
+  .faq-accordion-item.open .faq-panel {
+    display: block;
   }
 
   @media (max-width: 900px) {
-    .help-grid-cards {
+    .help-cards-grid {
       grid-template-columns: 1fr;
     }
   }
 </style>
 
-<div class="help-layout-container">
-  <div class="help-banner-header">
+<div class="help-modern-wrap">
+  <div class="help-hero-banner">
     <div>
-      <h1>Help Center</h1>
-      <p>Find quick answers about courses, assignments, grades, certificates, and support.</p>
+      <h1 class="help-hero-title">Help Center</h1>
+      <p class="help-hero-sub">Quick guides, answers, and support shortcuts for your courses, assignments, and grades.</p>
     </div>
-    <div class="help-badge-pill">
-      <i class="fa-solid fa-headset"></i> Student Support
-    </div>
-  </div>
-
-  <div class="help-grid-cards">
-    <div class="help-card-box">
-      <div class="help-card-icon"><i class="fa-solid fa-book-open"></i></div>
-      <h3>Courses & Units</h3>
-      <p>Access enrolled courses, review study units, and track unit completion progress.</p>
-      <a class="help-card-link" href="/student/courses">Go to My Courses <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-
-    <div class="help-card-box">
-      <div class="help-card-icon"><i class="fa-solid fa-list-check"></i></div>
-      <h3>Assignments & Grades</h3>
-      <p>Submit coursework before deadlines, review quiz and exam results, and check final scores.</p>
-      <a class="help-card-link" href="/student/assignments">Go to Assignments <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-
-    <div class="help-card-box">
-      <div class="help-card-icon"><i class="fa-solid fa-envelope"></i></div>
-      <h3>Direct Support</h3>
-      <p>Need technical or academic assistance? Reach out to the support team by email.</p>
-      <a class="help-card-link" href="mailto:support@learnova.local">support@learnova.local <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+    <div class="help-hero-pill">
+      <i class="fa-solid fa-headset"></i>
+      <span>Student Support</span>
     </div>
   </div>
 
-  <div class="help-faq-box">
-    <h2>Frequently Asked Questions</h2>
+  <div class="help-toolbar-card">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input id="helpTopicSearch" type="text" placeholder="Search help topics or common questions...">
+  </div>
 
-    <div class="faq-item-row">
-      <p class="faq-q">How do I unlock a course certificate?</p>
-      <p class="faq-a">Earn a final grade of at least 60% in the course, then open the Certificates page to view or print your credential.</p>
+  <div class="help-cards-grid">
+    <div class="help-action-card" data-help-searchable>
+      <div>
+        <div class="help-icon-badge"><i class="fa-solid fa-book-open"></i></div>
+        <h3>Courses & Units</h3>
+        <p>Open enrolled courses, study learning units, download materials, and track unit completion.</p>
+      </div>
+      <a class="help-action-btn" href="/student/courses">
+        <span>Go to My Courses</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
     </div>
 
-    <div class="faq-item-row">
-      <p class="faq-q">Can I edit an assignment after submitting it?</p>
-      <p class="faq-a">You can update your submission before the assignment deadline passes from the course or assignment page.</p>
+    <div class="help-action-card" data-help-searchable>
+      <div>
+        <div class="help-icon-badge"><i class="fa-solid fa-list-check"></i></div>
+        <h3>Assignments & Grades</h3>
+        <p>Submit tasks before deadlines, review quiz and exam scores, and monitor final course grades.</p>
+      </div>
+      <a class="help-action-btn" href="/student/assignments">
+        <span>Go to Assignments</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </a>
     </div>
 
-    <div class="faq-item-row">
-      <p class="faq-q">How do I ask a question about a course or lecture?</p>
-      <p class="faq-a">Open Discussions from the sidebar, choose New Topic, select your course or Question category, and post your inquiry.</p>
+    <div class="help-action-card" data-help-searchable>
+      <div>
+        <div class="help-icon-badge"><i class="fa-solid fa-envelope"></i></div>
+        <h3>Direct Support</h3>
+        <p>Need help with your account, enrollments, or technical issues? Contact the support desk.</p>
+      </div>
+      <a class="help-action-btn" href="mailto:support@learnova.local">
+        <span>support@learnova.local</span>
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+      </a>
+    </div>
+  </div>
+
+  <div class="help-faq-panel">
+    <div class="help-faq-header">
+      <h2>Frequently Asked Questions</h2>
+    </div>
+
+    <div class="faq-accordion-item open" data-help-searchable>
+      <button type="button" class="faq-trigger" onclick="toggleFaqItem(this)">
+        <span>How do I unlock a course certificate?</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <div class="faq-panel">
+        Earn a final grade of at least 60% in the course, then open the Certificates page to view, download, or print your credential.
+      </div>
+    </div>
+
+    <div class="faq-accordion-item" data-help-searchable>
+      <button type="button" class="faq-trigger" onclick="toggleFaqItem(this)">
+        <span>Can I edit an assignment after submitting it?</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <div class="faq-panel">
+        Yes, you can update your submission before the assignment deadline passes from the course or assignment submission page.
+      </div>
+    </div>
+
+    <div class="faq-accordion-item" data-help-searchable>
+      <button type="button" class="faq-trigger" onclick="toggleFaqItem(this)">
+        <span>How do I ask a question about a course or lecture?</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+      <div class="faq-panel">
+        Open Discussions from the sidebar, select your course or discussion topic, and post your question for instructors and peers.
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+  function toggleFaqItem(btn) {
+    const item = btn.closest('.faq-accordion-item');
+    if (item) {
+      item.classList.toggle('open');
+    }
+  }
+
+  const helpSearchInput = document.getElementById('helpTopicSearch');
+  if (helpSearchInput) {
+    helpSearchInput.addEventListener('input', () => {
+      const term = helpSearchInput.value.trim().toLowerCase();
+      document.querySelectorAll('[data-help-searchable]').forEach(el => {
+        const matches = !term || el.textContent.toLowerCase().includes(term);
+        el.style.display = matches ? '' : 'none';
+      });
+    });
+  }
+</script>
 {% endblock %}
