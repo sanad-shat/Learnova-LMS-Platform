@@ -1595,6 +1595,21 @@ def profile(teacher_id):
     return render_template("teacher/profile.html", teacher=teacher, **_teacher_nav_context(teacher))
 
 
+@teachers_bp.route("/<int:teacher_id>/help")
+@login_required
+def help_center(teacher_id):
+    teacher = User.query.get_or_404(teacher_id)
+    if current_user.id != teacher.id or current_user.role.lower() != "teacher":
+        flash("Access denied.", "danger")
+        return redirect(url_for("teachers.login"))
+    return render_template(
+        "teacher/help.html",
+        teacher=teacher,
+        active_page="help",
+        **_teacher_nav_context(teacher),
+    )
+
+
 # ------------------------- Notifications System -------------------------
 @teachers_bp.route("/<int:teacher_id>/notifications")
 @login_required
