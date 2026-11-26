@@ -286,7 +286,11 @@
       <a class="{{ 'active' if active_page=='profile' else '' }}" href="{{ url_for('teachers.profile',teacher_id=teacher.id) }}"><i class="fa-solid fa-user-gear"></i>Profile</a>
       <a href="{{ url_for('teachers.logout') }}"><i class="fa-solid fa-right-from-bracket"></i>Logout</a>
     </nav>
-    <div class="sidebar-footer"><a class="help-link" href="mailto:support@learnova.local"><i class="fa-regular fa-circle-question"></i>Help Center</a></div>
+    <div class="sidebar-footer">
+      <a class="help-link {{ 'active' if active_page=='help' else '' }}" href="{{ url_for('teachers.help_center',teacher_id=teacher.id) }}">
+        <i class="fa-regular fa-circle-question"></i>Help Center
+      </a>
+    </div>
   </aside>
   <section class="app-main">
     <header class="top-header">
