@@ -1,0 +1,323 @@
+{% extends "teacher/base.html" %}
+{% block title %}Help Center | Learnova LMS{% endblock %}
+
+{% block content %}
+<style>
+  .teacher-help-shell {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 0 36px;
+    box-sizing: border-box;
+  }
+
+  .help-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 55%, #2563eb 100%);
+    border-radius: 18px;
+    padding: 24px 28px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    text-align: center;
+    color: #ffffff;
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.14);
+  }
+
+  .help-hero .eyebrow {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #bfdbfe;
+    margin-bottom: 4px;
+  }
+
+  .help-hero h1 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  .help-hero p {
+    font-size: 13px;
+    color: #dbeafe;
+    margin: 0 auto 14px;
+    max-width: 560px;
+  }
+
+  .help-search {
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .help-search i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13.5px;
+    pointer-events: none;
+  }
+
+  .help-search input {
+    width: 100%;
+    height: 38px;
+    padding: 0 14px 0 38px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 13px;
+    outline: none;
+    box-sizing: border-box;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  }
+
+  .help-search input:focus {
+    border-color: #bfdbfe;
+    box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.35);
+  }
+
+  .help-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+  }
+
+  .help-card-link {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 18px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+  }
+
+  .help-card-link:hover {
+    border-color: #bfdbfe;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -6px rgba(37, 99, 235, 0.12);
+  }
+
+  .help-card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14.5px;
+    margin-bottom: 10px;
+  }
+
+  .help-card-link h3 {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 4px;
+    line-height: 1.25;
+  }
+
+  .help-card-link p {
+    font-size: 12.5px;
+    color: #64748b;
+    margin: 0 0 12px;
+    line-height: 1.45;
+  }
+
+  .help-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 700;
+    color: #2563eb;
+    padding-top: 8px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .help-empty-state {
+    display: none;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #64748b;
+    margin-top: 14px;
+  }
+
+  .help-empty-state i {
+    font-size: 26px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .help-empty-state h3 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .help-empty-state p {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  @media (max-width: 992px) {
+    .help-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .help-hero {
+      padding: 20px 16px;
+      border-radius: 16px;
+    }
+    .help-grid {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+  }
+</style>
+
+<div class="teacher-help-shell">
+  <div class="help-hero">
+    <span class="eyebrow">LEARNOVA INSTRUCTOR SUPPORT</span>
+    <h1>How can we help?</h1>
+    <p>Use these teaching guides and quick shortcuts to manage your courses, assignments, and students.</p>
+    <div class="help-search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="text" id="teacherHelpSearch" placeholder="Search help topics..." autocomplete="off">
+    </div>
+  </div>
+
+  <div class="help-grid" id="teacherHelpGrid">
+    <a href="{{ url_for('teachers.courses', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-book-open"></i></div>
+        <h3>My Courses</h3>
+        <p>Access assigned courses, manage curriculum units, organize learning materials, and open course workspaces.</p>
+      </div>
+      <div class="help-card-footer"><span>Open My Courses</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.assignments', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-list-check"></i></div>
+        <h3>Assignments &amp; Quizzes</h3>
+        <p>Review homework tasks, quizzes, and projects, track deadlines, edit details, and monitor submission counts.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Assignments</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.submissions', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-inbox"></i></div>
+        <h3>Student Submissions</h3>
+        <p>Inspect submitted answers and files, filter pending or graded work, assign scores, and write feedback.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Submissions</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.students', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-user-graduate"></i></div>
+        <h3>My Students</h3>
+        <p>Browse enrolled students across your courses, check departments, levels, and contact information.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Students</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.evaluations', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-star-half-stroke"></i></div>
+        <h3>Evaluations &amp; Grades</h3>
+        <p>Track graded assignments, exam scores, pending reviews, and overall student performance averages.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Evaluations</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.certificates', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-award"></i></div>
+        <h3>Course Certificates</h3>
+        <p>Monitor student course completion progress and final grades to issue or view completion certificates.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Certificates</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('forum.index') }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-comments"></i></div>
+        <h3>Discussion Forum</h3>
+        <p>Participate in course discussions, answer student questions, post announcements, and moderate topics.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Discussions</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.reports', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-chart-column"></i></div>
+        <h3>Reports &amp; Analytics</h3>
+        <p>Review course engagement summaries, assessment statistics, and academic performance reports.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Reports</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <a href="{{ url_for('teachers.profile', teacher_id=teacher.id) }}" class="help-card-link" data-help-item>
+      <div>
+        <div class="help-card-icon"><i class="fa-solid fa-user-gear"></i></div>
+        <h3>Instructor Profile</h3>
+        <p>Update your full name, email address, phone number, office location, and academic rank details.</p>
+      </div>
+      <div class="help-card-footer"><span>Open Profile</span><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+
+  <div class="help-empty-state" id="teacherHelpEmptyState">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <h3>No help topics found</h3>
+    <p>Try searching with another word.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const teacherHelpSearch = document.getElementById('teacherHelpSearch');
+const teacherHelpItems = document.querySelectorAll('[data-help-item]');
+const teacherHelpEmptyState = document.getElementById('teacherHelpEmptyState');
+if (teacherHelpSearch) {
+  teacherHelpSearch.addEventListener('input', function () {
+    const value = this.value.toLowerCase().trim();
+    let visibleCount = 0;
+    teacherHelpItems.forEach(function (item) {
+      const isVisible = item.textContent.toLowerCase().includes(value);
+      item.style.display = isVisible ? 'flex' : 'none';
+      if (isVisible) visibleCount++;
+    });
+    teacherHelpEmptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}
