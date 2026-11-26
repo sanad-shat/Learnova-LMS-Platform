@@ -31,6 +31,20 @@ from app.services import course_progress, final_grade, issue_certificate
 students_bp = Blueprint("students", __name__, url_prefix="/student")
 
 
+def _get_course_title_attr():
+    for attr in ("title", "name", "course_name", "subject"):
+        if hasattr(Course, attr):
+            return attr
+    return None
+
+
+def _get_assignment_title_attr():
+    for attr in ("title", "name", "assignment_title"):
+        if hasattr(Assignment, attr):
+            return attr
+    return None
+
+
 # ------------------------- Student Login -------------------------
 @students_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -71,6 +85,9 @@ def demo_login():
                 demo_user.set_password("DemoStudent@2026")
             db.session.add(demo_user)
             db.session.flush()
+
+        course_title_attr = _get_course_title_attr()
+        assign_title_attr = _get_assignment_title_attr()
 
         demo_courses_spec = [
             {
@@ -115,12 +132,18 @@ def demo_login():
         teacher = User.query.filter(User.role.ilike("teacher")).first()
 
         for spec in demo_courses_spec:
-            course = Course.query.filter_by(code=spec["code"]).first() if hasattr(Course, "code") else Course.query.filter_by(title=spec["title"]).first()
+            course = None
+            if hasattr(Course, "code"):
+                course = Course.query.filter_by(code=spec["code"]).first()
+            elif course_title_attr:
+                course = Course.query.filter_by(**{course_title_attr: spec["title"]}).first()
+
             if not course:
-                course_kwargs = {
-                    "title": spec["title"],
-                    "description": spec["description"],
-                }
+                course_kwargs = {}
+                if course_title_attr:
+                    course_kwargs[course_title_attr] = spec["title"]
+                if hasattr(Course, "description"):
+                    course_kwargs["description"] = spec["description"]
                 if hasattr(Course, "code"):
                     course_kwargs["code"] = spec["code"]
                 if hasattr(Course, "teacher_id") and teacher:
@@ -133,8 +156,12 @@ def demo_login():
                 for idx, u_title in enumerate(spec["units"], start=1):
                     unit_kwargs = {
                         "course_id": course.id,
-                        "title": u_title,
                     }
+                    if hasattr(Unit, "title"):
+                        unit_kwargs["title"] = u_title
+                    elif hasattr(Unit, "name"):
+                        unit_kwargs["name"] = u_title
+
                     if hasattr(Unit, "order_index"):
                         unit_kwargs["order_index"] = idx
                     elif hasattr(Unit, "order"):
@@ -149,9 +176,11 @@ def demo_login():
                 for a_spec in spec["assignments"]:
                     assign_kwargs = {
                         "course_id": course.id,
-                        "title": a_spec["title"],
-                        "description": a_spec["description"],
                     }
+                    if assign_title_attr:
+                        assign_kwargs[assign_title_attr] = a_spec["title"]
+                    if hasattr(Assignment, "description"):
+                        assign_kwargs["description"] = a_spec["description"]
                     if hasattr(Assignment, "assignment_type"):
                         assign_kwargs["assignment_type"] = "assignment"
                     if hasattr(Assignment, "max_score"):
@@ -187,8 +216,9 @@ def demo_login():
         if not existing_notif:
             notif_kwargs = {
                 "user_id": demo_user.id,
-                "title": "Welcome to Student Demo Mode",
             }
+            if hasattr(Notification, "title"):
+                notif_kwargs["title"] = "Welcome to Student Demo Mode"
             if hasattr(Notification, "message"):
                 notif_kwargs["message"] = "You are signed in as Dr. Demo student with isolated sample courses and assignments."
             elif hasattr(Notification, "body"):
