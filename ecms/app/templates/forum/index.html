@@ -1,4 +1,9 @@
-{% extends "teacher/base.html" if current_user.is_authenticated and current_user.role == 'teacher' else "base.html" %}
+{% set user_role = (current_user.role or '')|lower if current_user.is_authenticated else '' %}
+{% if user_role == 'teacher' %}
+  {% extends "teacher/base.html" %}
+{% else %}
+  {% extends "student/base.html" %}
+{% endif %}
 {% block title %}Discussions | Learnova LMS{% endblock %}
 
 {% block content %}
@@ -27,7 +32,7 @@
     box-sizing: border-box;
   }
 
-  /* ---------------- ترويسة الصفحة - مطابقة لمرجع المسافات الموحد ---------------- */
+  /* ---------------- ترويسة الصفحة ---------------- */
   .forum-banner-header {
     display: flex;
     justify-content: space-between;
@@ -243,6 +248,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    gap: 10px;
   }
   .badge-category-pill {
     display: inline-flex;
@@ -258,6 +264,30 @@
   .pill-discussion { background: #eef2ff; color: #4f46e5; border: 1px solid #c7d2fe; }
   .pill-question { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
   .pill-announcement { background: #fefce8; color: #ca8a04; border: 1px solid #fef08a; }
+
+  .topic-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-inline-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #eef2ff;
+    color: #4f46e5;
+    border: 1px solid #c7d2fe;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-inline-edit:hover {
+    background: #4f46e5;
+    color: #ffffff;
+  }
 
   /* قائمة التعديل والحذف */
   .menu-actions-box {
@@ -524,7 +554,7 @@
     </button>
   </div>
 
-  <!-- 4 Stats Cards (مطابقة لبطاقات التقارير الأربعة) -->
+  <!-- 4 Stats Cards -->
   <div class="stats-quad-grid">
     <div class="stat-card-item">
       <div class="stat-badge-icon icon-purple">
@@ -626,21 +656,44 @@
           {% endif %}
         </span>
 
-        <!-- Dropdown for Edit & Delete (Permitted for owner, teacher, or admin) -->
-        {% if topic.user_id == current_user.id or current_user.role in ['teacher', 'admin'] %}
-        <div class="menu-actions-box">
-          <button class="btn-menu-dots" onclick="toggleMenu('menu-{{ topic.id }}', event)">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
+        {% if topic.user_id == current_user.id or user_role in ['teacher', 'admin'] %}
+        <div class="topic-actions-group">
+          <button
+            type="button"
+            class="btn-inline-edit"
+            data-topic-id="{{ topic.id }}"
+            data-topic-title="{{ topic.title|e }}"
+            data-topic-content="{{ topic.content|e }}"
+            data-topic-category="{{ topic.category }}"
+            data-topic-course="{{ topic.course_id or '' }}"
+            onclick="openEditModalFromBtn(this)"
+          >
+            <i class="fa-regular fa-pen-to-square"></i> Edit
           </button>
-          <div id="menu-{{ topic.id }}" class="popover-menu-list">
-            <button type="button" class="pop-item-btn" onclick="openEditModal('{{ topic.id }}', '{{ topic.title|escape }}', '{{ topic.content|escape }}', '{{ topic.category }}', '{{ topic.course_id or '' }}')">
-              <i class="fa-regular fa-pen-to-square"></i> Edit
+
+          <div class="menu-actions-box">
+            <button type="button" class="btn-menu-dots" onclick="toggleMenu('menu-{{ topic.id }}', event)">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
-            <form method="POST" action="{{ url_for('forum.delete_topic', topic_id=topic.id) }}" onsubmit="return confirm('Are you sure you want to delete this topic?');">
-              <button type="submit" class="pop-item-btn btn-delete">
-                <i class="fa-regular fa-trash-can"></i> Delete
+            <div id="menu-{{ topic.id }}" class="popover-menu-list">
+              <button
+                type="button"
+                class="pop-item-btn"
+                data-topic-id="{{ topic.id }}"
+                data-topic-title="{{ topic.title|e }}"
+                data-topic-content="{{ topic.content|e }}"
+                data-topic-category="{{ topic.category }}"
+                data-topic-course="{{ topic.course_id or '' }}"
+                onclick="openEditModalFromBtn(this)"
+              >
+                <i class="fa-regular fa-pen-to-square"></i> Edit
               </button>
-            </form>
+              <form method="POST" action="{{ url_for('forum.delete_topic', topic_id=topic.id) }}" onsubmit="return confirm('Are you sure you want to delete this topic?');">
+                <button type="submit" class="pop-item-btn btn-delete">
+                  <i class="fa-regular fa-trash-can"></i> Delete
+                </button>
+              </form>
+            </div>
           </div>
         </div>
         {% endif %}
@@ -795,7 +848,13 @@
     });
   });
 
-  function openEditModal(id, title, content, category, courseId) {
+  function openEditModalFromBtn(btn) {
+    const id = btn.getAttribute('data-topic-id');
+    const title = btn.getAttribute('data-topic-title') || '';
+    const content = btn.getAttribute('data-topic-content') || '';
+    const category = btn.getAttribute('data-topic-category') || 'Discussion';
+    const courseId = btn.getAttribute('data-topic-course') || '';
+
     document.getElementById('editForm').action = '/forum/edit/' + id;
     document.getElementById('edit_title').value = title;
     document.getElementById('edit_content').value = content;
