@@ -65,8 +65,6 @@ def demo_login():
                 user_kwargs["department"] = "Computer Science"
             if hasattr(User, "academic_level"):
                 user_kwargs["academic_level"] = "Year 2"
-            if hasattr(User, "is_active"):
-                user_kwargs["is_active"] = True
 
             demo_user = User(**user_kwargs)
             if hasattr(demo_user, "set_password"):
