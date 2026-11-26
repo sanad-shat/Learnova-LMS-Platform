@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Student Sign In | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,7 +18,7 @@
       --bg-page: #f8fafc;
       --bg-grid-dot: rgba(79, 70, 229, 0.16);
       --bg-grid-line: rgba(226, 232, 240, 0.35);
-      --card-bg: rgba(255, 255, 255, 0.9);
+      --card-bg: rgba(255, 255, 255, 0.92);
       --card-border: rgba(226, 232, 240, 0.9);
       --input-bg: #ffffff;
       --input-border: #e2e8f0;
@@ -34,13 +33,13 @@
       --bg-page: #090d16;
       --bg-grid-dot: rgba(129, 140, 248, 0.16);
       --bg-grid-line: rgba(30, 41, 59, 0.55);
-      --card-bg: rgba(15, 23, 42, 0.88);
+      --card-bg: rgba(15, 23, 42, 0.9);
       --card-border: rgba(51, 65, 85, 0.75);
-      --input-bg: rgba(30, 41, 59, 0.75);
+      --input-bg: rgba(30, 41, 59, 0.8);
       --input-border: #334155;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --demo-bg: rgba(79, 70, 229, 0.12);
+      --demo-bg: rgba(79, 70, 229, 0.14);
       --demo-border: rgba(129, 140, 248, 0.35);
       --shadow-card: 0 24px 50px -12px rgba(0, 0, 0, 0.55);
     }
@@ -64,6 +63,14 @@
       overflow-x: hidden;
       padding: 28px 16px;
       transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    .svg-ico {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: inline-block;
+      vertical-align: middle;
     }
 
     .bg-grid {
@@ -98,7 +105,7 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 880px;
+      max-width: 900px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -133,22 +140,37 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 880px;
+      max-width: 900px;
       display: grid;
-      grid-template-columns: 1fr 1.05fr;
+      grid-template-columns: 1fr 1.04fr;
       gap: 20px;
       align-items: stretch;
     }
 
+    /* Left Showcase Card */
     .showcase-panel {
-      background: linear-gradient(155deg, #4338ca 0%, #4f46e5 52%, #6366f1 100%);
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(150deg, #312e81 0%, #4338ca 42%, #4f46e5 100%);
       color: #ffffff;
       border-radius: 28px;
-      padding: 34px 30px;
+      padding: 32px 28px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       box-shadow: var(--shadow-card);
+    }
+
+    .showcase-panel::after {
+      content: '';
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.16) 0%, transparent 70%);
+      top: -60px;
+      right: -60px;
+      pointer-events: none;
     }
 
     .showcase-tag {
@@ -156,49 +178,84 @@
       align-items: center;
       gap: 8px;
       width: fit-content;
-      padding: 6px 12px;
+      padding: 6px 13px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.16);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.24);
       font-size: 11.5px;
       font-weight: 700;
       margin-bottom: 18px;
     }
 
     .showcase-panel h2 {
-      font-size: 26px;
+      font-size: 25px;
       font-weight: 800;
       letter-spacing: -0.6px;
-      line-height: 1.2;
+      line-height: 1.24;
       margin-bottom: 10px;
     }
 
     .showcase-panel p {
-      font-size: 13.5px;
-      color: rgba(255, 255, 255, 0.88);
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.86);
       line-height: 1.6;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+    }
+
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.11);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      padding: 11px 10px;
+      text-align: center;
+    }
+
+    .stat-pill strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .stat-pill span {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.82);
+      font-weight: 600;
     }
 
     .feature-list {
       display: grid;
-      gap: 12px;
+      gap: 10px;
     }
 
     .feature-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
+      gap: 11px;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: 16px;
-      padding: 12px 14px;
+      border-radius: 15px;
+      padding: 11px 13px;
     }
 
-    .feature-item i {
-      margin-top: 2px;
-      font-size: 15px;
-      color: #e0e7ff;
+    .feature-ico-box {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
     }
 
     .feature-item strong {
@@ -211,20 +268,23 @@
     .feature-item span {
       font-size: 12px;
       color: rgba(255, 255, 255, 0.82);
+      line-height: 1.45;
     }
 
     .showcase-foot {
-      margin-top: 24px;
-      padding-top: 16px;
+      margin-top: 20px;
+      padding-top: 14px;
       border-top: 1px solid rgba(255, 255, 255, 0.18);
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.82);
+      color: rgba(255, 255, 255, 0.85);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      font-weight: 600;
     }
 
+    /* Right Login Card */
     .glass-card {
       background: var(--card-bg);
       backdrop-filter: blur(24px);
@@ -323,10 +383,15 @@
       box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
     }
 
-    .input-field-wrap i.field-icon {
+    .input-field-wrap .field-icon-wrap {
       padding-left: 14px;
       color: var(--text-muted);
-      font-size: 14px;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-field-wrap:focus-within .field-icon-wrap {
+      color: var(--primary);
     }
 
     .input-field-wrap input {
@@ -346,7 +411,8 @@
       padding: 0 14px;
       cursor: pointer;
       color: var(--text-muted);
-      font-size: 14px;
+      display: flex;
+      align-items: center;
     }
 
     .btn-password-eye:hover {
@@ -460,7 +526,7 @@
       font-weight: 600;
     }
 
-    .card-footer-sec i {
+    .card-footer-sec svg {
       color: #10b981;
     }
 
@@ -482,11 +548,11 @@
 
   <div class="top-bar">
     <a href="/" class="pill-btn">
-      <i class="fa-solid fa-arrow-left"></i>
+      <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
       <span>Return to Main Hub</span>
     </a>
     <button type="button" class="pill-btn" id="themeToggleBtn" aria-label="Toggle theme">
-      <i class="fa-regular fa-moon" id="themeIcon"></i>
+      <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
       <span id="themeLabel">Dark Mode</span>
     </button>
   </div>
@@ -495,32 +561,53 @@
     <aside class="showcase-panel">
       <div>
         <div class="showcase-tag">
-          <i class="fa-solid fa-graduation-cap"></i>
-          <span>Learnova Student Workspace</span>
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <span>Learnova Student Portal</span>
         </div>
-        <h2>Learn, track progress, and stay ahead.</h2>
-        <p>Access your enrolled courses, submit assignments on time, review quiz and exam results, and earn verified completion certificates.</p>
+        <h2>Your Academic Hub, Built for Clarity.</h2>
+        <p>Access your courses, download study units, submit assignments, and track your grades and certificates in one organized workspace.</p>
+
+        <div class="stats-strip">
+          <div class="stat-pill">
+            <strong>24/7</strong>
+            <span>Course Access</span>
+          </div>
+          <div class="stat-pill">
+            <strong>Instant</strong>
+            <span>Quiz Feedback</span>
+          </div>
+          <div class="stat-pill">
+            <strong>Verified</strong>
+            <span>Certificates</span>
+          </div>
+        </div>
 
         <div class="feature-list">
           <div class="feature-item">
-            <i class="fa-solid fa-layer-group"></i>
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            </div>
             <div>
-              <strong>Structured Course Units</strong>
-              <span>Follow modules, download resources, and mark completed units.</span>
+              <strong>Courses & Study Units</strong>
+              <span>Track module completion and download lecture slides anytime.</span>
             </div>
           </div>
           <div class="feature-item">
-            <i class="fa-solid fa-chart-line"></i>
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            </div>
             <div>
-              <strong>Real-Time Grades & Reports</strong>
-              <span>Monitor your progress percentages, grades, and transcripts.</span>
+              <strong>Live Grades & Progress Reports</strong>
+              <span>Monitor assignment scores, exams, and overall GPA progress.</span>
             </div>
           </div>
           <div class="feature-item">
-            <i class="fa-solid fa-bolt"></i>
+            <div class="feature-ico-box">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
             <div>
-              <strong>Isolated Demo Environment</strong>
-              <span>Explore the portal instantly with sample courses and tasks.</span>
+              <strong>One-Click Demo Student Mode</strong>
+              <span>Test the complete student experience with isolated sample data.</span>
             </div>
           </div>
         </div>
@@ -528,7 +615,7 @@
 
       <div class="showcase-foot">
         <span>Learnova LMS</span>
-        <span>Student Portal v2</span>
+        <span>Academic Edition</span>
       </div>
     </aside>
 
@@ -538,14 +625,14 @@
           <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
         </div>
         <h1>Student Portal</h1>
-        <p>Enter your credentials to access your courses</p>
+        <p>Sign in with your academic credentials to continue</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
           {% for category, message in messages %}
             <div class="flash {{ category }}">
-              <i class="fa-solid fa-circle-info"></i>
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>{{ message }}</span>
             </div>
           {% endfor %}
@@ -554,20 +641,24 @@
 
       <form method="POST" id="studentLoginForm">
         <div class="form-group">
-          <label class="field-label" for="email">Username or Email</label>
+          <label class="field-label" for="email">Academic Email</label>
           <div class="input-field-wrap">
-            <i class="fa-regular fa-envelope field-icon"></i>
-            <input id="email" type="text" name="email" placeholder="student@university.edu" required autofocus>
+            <span class="field-icon-wrap">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+            <input id="email" type="email" name="email" placeholder="student@learnova.com" required autofocus>
           </div>
         </div>
 
         <div class="form-group">
           <label class="field-label" for="password">Password</label>
           <div class="input-field-wrap">
-            <i class="fa-solid fa-lock field-icon"></i>
+            <span class="field-icon-wrap">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
             <input id="password" type="password" name="password" placeholder="Enter your password" required>
             <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
-              <i class="fa-regular fa-eye" id="eyeIcon"></i>
+              <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
           </div>
         </div>
@@ -582,7 +673,7 @@
 
         <button class="btn-submit-action" type="submit" id="signInBtn">
           <span>Sign In to Student Space</span>
-          <i class="fa-solid fa-arrow-right"></i>
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
       </form>
 
@@ -590,14 +681,14 @@
         <div class="demo-access-caption">Evaluating Learnova Platform?</div>
         <form method="POST" action="{{ url_for('students.demo_login') }}" id="demoLoginForm">
           <button type="submit" class="btn-demo-student" id="demoAccessBtn">
-            <i class="fa-solid fa-bolt"></i>
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             <span>Instant Demo Student Access</span>
           </button>
         </form>
       </div>
 
       <div class="card-footer-sec">
-        <i class="fa-solid fa-shield-halved"></i>
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
         <span>End-to-End Encrypted Session</span>
       </div>
     </div>
@@ -606,23 +697,25 @@
   <script>
     const htmlRoot = document.documentElement;
     const themeToggleBtn = document.getElementById('themeToggleBtn');
-    const themeIcon = document.getElementById('themeIcon');
+    const themeIconSvg = document.getElementById('themeIconSvg');
     const themeLabel = document.getElementById('themeLabel');
+
+    const moonPath = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+    const sunPath = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
 
     function applyTheme(theme) {
       htmlRoot.setAttribute('data-theme', theme);
       localStorage.setItem('learnova_login_theme', theme);
       if (theme === 'dark') {
-        themeIcon.className = 'fa-regular fa-sun';
+        themeIconSvg.innerHTML = sunPath;
         themeLabel.textContent = 'Light Mode';
       } else {
-        themeIcon.className = 'fa-regular fa-moon';
+        themeIconSvg.innerHTML = moonPath;
         themeLabel.textContent = 'Dark Mode';
       }
     }
 
-    const savedTheme = localStorage.getItem('learnova_login_theme') || 'light';
-    applyTheme(savedTheme);
+    applyTheme(localStorage.getItem('learnova_login_theme') || 'light');
 
     if (themeToggleBtn) {
       themeToggleBtn.addEventListener('click', () => {
@@ -633,14 +726,16 @@
 
     const toggleBtn = document.getElementById('togglePasswordBtn');
     const passwordInput = document.getElementById('password');
-    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeSvg = document.getElementById('eyeSvg');
 
-    if (toggleBtn && passwordInput && eyeIcon) {
+    const eyeOpenPath = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
+    const eyeClosedPath = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
+
+    if (toggleBtn && passwordInput && eyeSvg) {
       toggleBtn.addEventListener('click', function () {
         const isPassword = passwordInput.getAttribute('type') === 'password';
         passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-        eyeIcon.classList.toggle('fa-eye', !isPassword);
-        eyeIcon.classList.toggle('fa-eye-slash', isPassword);
+        eyeSvg.innerHTML = isPassword ? eyeClosedPath : eyeOpenPath;
       });
     }
 
@@ -649,7 +744,7 @@
     if (loginForm && signInBtn) {
       loginForm.addEventListener('submit', () => {
         signInBtn.disabled = true;
-        signInBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Signing In...</span>';
+        signInBtn.innerHTML = '<span>Signing In...</span>';
       });
     }
 
@@ -658,7 +753,7 @@
     if (demoForm && demoBtn) {
       demoForm.addEventListener('submit', () => {
         demoBtn.disabled = true;
-        demoBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Preparing Demo Student...</span>';
+        demoBtn.innerHTML = '<span>Preparing Demo Student...</span>';
       });
     }
   </script>
