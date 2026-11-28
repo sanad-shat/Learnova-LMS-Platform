@@ -19,15 +19,15 @@
       --emerald: #10b981;
       --bg-page: #f5f7fb;
       --bg-grid: rgba(15, 23, 42, 0.045);
-      --surface-glass: rgba(255, 255, 255, 0.88);
+      --surface-glass: rgba(255, 255, 255, 0.9);
       --surface-elevated: #ffffff;
       --surface-subtle: #f1f5f9;
       --border-hairline: rgba(15, 23, 42, 0.085);
       --border-accent: rgba(79, 70, 229, 0.3);
       --text-main: #090d16;
       --text-muted: #526071;
-      --shadow-soft: 0 18px 44px -18px rgba(9, 13, 22, 0.1);
-      --shadow-glow: 0 14px 30px -8px rgba(79, 70, 229, 0.3);
+      --shadow-soft: 0 18px 42px -18px rgba(9, 13, 22, 0.09);
+      --shadow-glow: 0 14px 30px -8px rgba(79, 70, 229, 0.28);
     }
 
     html[data-theme="dark"] {
@@ -39,14 +39,14 @@
       --emerald: #34d399;
       --bg-page: #05070d;
       --bg-grid: rgba(148, 163, 184, 0.055);
-      --surface-glass: rgba(12, 17, 29, 0.86);
+      --surface-glass: rgba(12, 17, 29, 0.88);
       --surface-elevated: #0d1322;
       --surface-subtle: rgba(23, 32, 51, 0.78);
       --border-hairline: rgba(148, 163, 184, 0.14);
       --border-accent: rgba(99, 102, 241, 0.38);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --shadow-soft: 0 24px 60px -18px rgba(0, 0, 0, 0.78);
+      --shadow-soft: 0 24px 58px -18px rgba(0, 0, 0, 0.78);
       --shadow-glow: 0 16px 36px -8px rgba(99, 102, 241, 0.36);
     }
 
@@ -102,7 +102,7 @@
       position: sticky;
       top: 14px;
       z-index: 100;
-      max-width: 1140px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 0 20px;
     }
@@ -130,8 +130,8 @@
     }
 
     .brand img {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
       filter: drop-shadow(0 6px 12px rgba(79, 70, 229, 0.22));
       transition: transform 0.2s ease;
@@ -217,17 +217,17 @@
     .container {
       position: relative;
       z-index: 1;
-      max-width: 1140px;
+      max-width: 1120px;
       margin: 0 auto;
       padding: 0 20px;
     }
 
-    /* Compact Asymmetric Split Hero */
+    /* Hero Section */
     .hero {
-      padding: 46px 0 34px;
+      padding: 40px 0 28px;
       display: grid;
       grid-template-columns: 1.08fr 0.92fr;
-      gap: 36px;
+      gap: 32px;
       align-items: center;
     }
 
@@ -242,7 +242,7 @@
       color: var(--indigo-soft);
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid var(--border-accent);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .eyebrow-dot {
@@ -253,11 +253,11 @@
     }
 
     .hero h1 {
-      font-size: 52px;
+      font-size: 50px;
       font-weight: 800;
       line-height: 1.06;
       letter-spacing: -2px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .hero h1 .accent-gradient {
@@ -267,10 +267,10 @@
     }
 
     .hero-desc {
-      font-size: 15.5px;
+      font-size: 15px;
       color: var(--text-muted);
-      max-width: 530px;
-      margin-bottom: 24px;
+      max-width: 520px;
+      margin-bottom: 22px;
       line-height: 1.6;
     }
 
@@ -279,7 +279,7 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
 
     .btn-primary {
@@ -287,7 +287,7 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      padding: 12px 22px;
+      padding: 11.5px 22px;
       border-radius: 12px;
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
@@ -307,7 +307,7 @@
       align-items: center;
       gap: 8px;
       text-decoration: none;
-      padding: 12px 20px;
+      padding: 11.5px 20px;
       border-radius: 12px;
       background: var(--surface-glass);
       border: 1px solid var(--border-hairline);
@@ -326,15 +326,15 @@
     .hero-specs {
       display: flex;
       align-items: center;
-      gap: 22px;
-      padding-top: 16px;
+      gap: 24px;
+      padding-top: 14px;
       border-top: 1px solid var(--border-hairline);
       flex-wrap: wrap;
     }
 
     .spec-item strong {
       display: block;
-      font-size: 16px;
+      font-size: 15.5px;
       font-weight: 800;
       letter-spacing: -0.3px;
     }
@@ -345,7 +345,7 @@
       font-weight: 600;
     }
 
-    /* Live Platform Preview Card */
+    /* Live Platform Preview Box */
     .preview-frame {
       background: var(--surface-glass);
       backdrop-filter: blur(24px);
@@ -465,18 +465,13 @@
       color: var(--emerald);
     }
 
-    /* Tight Section Spacing */
+    /* Aligned Section Blocks */
     .sec-block {
-      padding: 30px 0;
+      padding: 24px 0;
     }
 
     .sec-head {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 18px;
-      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
 
     .sec-kicker {
@@ -489,19 +484,19 @@
     }
 
     .sec-head h2 {
-      font-size: 28px;
+      font-size: 27px;
       font-weight: 800;
       letter-spacing: -0.8px;
       line-height: 1.15;
+      margin-bottom: 5px;
     }
 
     .sec-head p {
       font-size: 13.5px;
       color: var(--text-muted);
-      max-width: 420px;
     }
 
-    /* Crisp Boxed Portals Grid */
+    /* Portals Grid */
     .portals-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -513,7 +508,7 @@
       backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
       border-radius: 18px;
-      padding: 22px;
+      padding: 20px 22px;
       text-decoration: none;
       color: inherit;
       display: flex;
@@ -524,7 +519,7 @@
     }
 
     .portal-card:hover {
-      transform: translateY(-4px);
+      transform: translateY(-3px);
       border-color: var(--border-accent);
     }
 
@@ -536,17 +531,17 @@
     }
 
     .portal-badge-ico {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .portal-badge-ico svg {
-      width: 20px;
-      height: 20px;
+      width: 19px;
+      height: 19px;
     }
 
     .ico-student {
@@ -577,7 +572,7 @@
     }
 
     .portal-card h3 {
-      font-size: 18px;
+      font-size: 17.5px;
       font-weight: 800;
       margin-bottom: 6px;
     }
@@ -585,7 +580,7 @@
     .portal-card p {
       font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       line-height: 1.55;
     }
 
@@ -596,7 +591,7 @@
       font-size: 13px;
       font-weight: 700;
       color: var(--indigo-soft);
-      padding-top: 12px;
+      padding-top: 11px;
       border-top: 1px solid var(--border-hairline);
     }
 
@@ -608,7 +603,7 @@
       transition: transform 0.2s ease;
     }
 
-    /* Compact Bento Box Architecture */
+    /* Balanced Bento Box Grid */
     .bento-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -620,7 +615,7 @@
       backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
       border-radius: 18px;
-      padding: 20px 22px;
+      padding: 18px 20px;
       box-shadow: var(--shadow-soft);
       transition: border-color 0.2s ease, transform 0.2s ease;
     }
@@ -636,13 +631,13 @@
     .bento-top {
       display: flex;
       align-items: center;
-      gap: 11px;
-      margin-bottom: 10px;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
     .bento-ico {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       border-radius: 10px;
       background: var(--surface-subtle);
       border: 1px solid var(--border-hairline);
@@ -654,25 +649,25 @@
     }
 
     .bento-card h3 {
-      font-size: 15.5px;
+      font-size: 15px;
       font-weight: 800;
     }
 
     .bento-card p {
       font-size: 12.8px;
       color: var(--text-muted);
-      line-height: 1.55;
+      line-height: 1.52;
     }
 
-    /* Compact Footer */
+    /* Footer */
     .site-footer {
-      margin-top: 24px;
+      margin-top: 20px;
       border-top: 1px solid var(--border-hairline);
-      padding: 20px;
+      padding: 18px 20px;
     }
 
     .footer-inner {
-      max-width: 1140px;
+      max-width: 1120px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -686,11 +681,11 @@
     @media (max-width: 960px) {
       .hero {
         grid-template-columns: 1fr;
-        padding: 32px 0 24px;
-        gap: 24px;
+        padding: 28px 0 20px;
+        gap: 22px;
       }
       .hero h1 {
-        font-size: 40px;
+        font-size: 38px;
       }
       .portals-grid {
         grid-template-columns: 1fr;
@@ -705,7 +700,7 @@
         display: none;
       }
       .hero h1 {
-        font-size: 33px;
+        font-size: 32px;
         letter-spacing: -1.1px;
       }
       .navbar {
@@ -751,7 +746,7 @@
   </div>
 
   <main class="container">
-    <!-- Compact Split Hero -->
+    <!-- Hero Section -->
     <section class="hero">
       <div>
         <div class="hero-eyebrow">
@@ -840,10 +835,8 @@
     <!-- Dedicated Portals -->
     <section id="portals" class="sec-block">
       <div class="sec-head">
-        <div>
-          <div class="sec-kicker">Role-Based Access</div>
-          <h2>Choose Your Dedicated Portal</h2>
-        </div>
+        <div class="sec-kicker">Role-Based Access</div>
+        <h2>Choose Your Dedicated Portal</h2>
         <p>Select your role to enter a tailored workspace with dedicated tools and permissions.</p>
       </div>
 
@@ -901,13 +894,11 @@
       </div>
     </section>
 
-    <!-- Compact Bento Grid Boxes -->
+    <!-- Bento Box Capabilities -->
     <section id="platform" class="sec-block">
       <div class="sec-head">
-        <div>
-          <div class="sec-kicker">Core Capabilities</div>
-          <h2>Engineered for Academic Clarity</h2>
-        </div>
+        <div class="sec-kicker">Core Capabilities</div>
+        <h2>Engineered for Academic Clarity</h2>
         <p>Structured bento modules to deliver, evaluate, and certify modern digital coursework.</p>
       </div>
 
