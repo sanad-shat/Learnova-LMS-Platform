@@ -68,7 +68,7 @@
         linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
       background-size: 56px 56px;
       color: var(--text-main);
-      overflow-x: hidden;
+      overflow-x: clip;
       line-height: 1.5;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
@@ -97,19 +97,21 @@
       z-index: 0;
     }
 
-    /* Fixed Floating Pill Navbar */
+    /* Locked Fixed Top Navbar */
     .nav-shell {
       position: fixed;
-      top: 14px;
-      left: 0;
-      right: 0;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 100;
+      width: 100%;
       max-width: 1120px;
-      margin: 0 auto;
       padding: 0 20px;
+      will-change: transform;
     }
 
     .navbar {
+      width: 100%;
       background: var(--surface-glass);
       backdrop-filter: blur(22px);
       -webkit-backdrop-filter: blur(22px);
@@ -836,7 +838,7 @@
 <body>
   <div class="ambient-spotlight"></div>
 
-  <!-- Fixed Floating Navbar -->
+  <!-- Locked Fixed Top Navbar -->
   <div class="nav-shell">
     <header class="navbar">
       <a href="/" class="brand" aria-label="Learnova LMS Home">
