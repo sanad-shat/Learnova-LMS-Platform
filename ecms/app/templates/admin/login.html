@@ -176,18 +176,18 @@
       width: 44px;
       height: 44px;
       border-radius: 14px;
-      background: linear-gradient(145deg, rgba(6, 182, 212, 0.16), rgba(16, 185, 129, 0.14));
+      background: var(--input-bg);
       border: 1px solid rgba(6, 182, 212, 0.34);
-      color: var(--adm-cyan);
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 10px 22px -8px var(--adm-glow);
     }
 
-    .mark-box svg {
-      width: 21px;
-      height: 21px;
+    .mark-box img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
     }
 
     .brand-title {
@@ -457,7 +457,7 @@
       <div class="brand-row">
         <div class="brand-mark">
           <div class="mark-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
           </div>
           <div>
             <div class="brand-title">Learnova Admin</div>
