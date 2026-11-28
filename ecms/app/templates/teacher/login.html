@@ -7,7 +7,7 @@
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -51,11 +51,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, sans-serif;
-    }
-
-    html[dir="rtl"] * {
-      letter-spacing: 0 !important;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     }
 
     body {
@@ -119,12 +115,6 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 18px;
-    }
-
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .pill-btn {
@@ -326,7 +316,7 @@
     }
 
     .form-panel {
-      padding: 36px 34px 30px;
+      padding: 34px 34px 28px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -334,13 +324,13 @@
 
     .card-top-header {
       text-align: center;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .brand-icon-inner {
       width: 58px;
       height: 58px;
-      margin: 0 auto 14px;
+      margin: 0 auto 12px;
       background: var(--input-bg);
       border: 1px solid var(--input-border);
       border-radius: 18px;
@@ -372,7 +362,7 @@
       border-radius: 13px;
       font-size: 12.5px;
       font-weight: 600;
-      margin-bottom: 16px;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -394,7 +384,7 @@
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 14px;
     }
 
     .field-label {
@@ -421,7 +411,7 @@
     }
 
     .input-field-wrap .field-icon-wrap {
-      padding-inline-start: 14px;
+      padding-left: 14px;
       color: var(--text-muted);
       display: flex;
       align-items: center;
@@ -433,7 +423,7 @@
 
     .input-field-wrap input {
       width: 100%;
-      padding: 12px 13px;
+      padding: 11.5px 13px;
       border: none;
       background: transparent;
       outline: none;
@@ -460,7 +450,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin: 4px 0 18px;
+      margin: 4px 0 16px;
       font-size: 12px;
     }
 
@@ -488,7 +478,7 @@
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
       border: none;
-      padding: 13px 16px;
+      padding: 12.5px 16px;
       border-radius: 13px;
       font-size: 14px;
       font-weight: 700;
@@ -514,8 +504,8 @@
     }
 
     .demo-access-box {
-      margin-top: 18px;
-      padding: 13px 14px;
+      margin-top: 16px;
+      padding: 12px 14px;
       border-radius: 16px;
       border: 1.5px dashed var(--demo-border);
       background: var(--demo-bg);
@@ -558,8 +548,8 @@
     }
 
     .card-footer-sec {
-      margin-top: 18px;
-      padding-top: 14px;
+      margin-top: 16px;
+      padding-top: 13px;
       border-top: 1px solid var(--card-ring);
       display: flex;
       align-items: center;
@@ -574,10 +564,6 @@
       color: #10b981;
     }
 
-    html[dir="rtl"] .flip-rtl {
-      transform: scaleX(-1);
-    }
-
     @media (max-width: 840px) {
       .auth-shell {
         grid-template-columns: 1fr;
@@ -587,7 +573,7 @@
         display: none;
       }
       .form-panel {
-        padding: 30px 24px 26px;
+        padding: 28px 22px 24px;
       }
     }
   </style>
@@ -599,20 +585,14 @@
 
   <div class="top-bar">
     <a href="/" class="pill-btn">
-      <svg class="svg-ico flip-rtl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-      <span data-i18n="backHub">Return to Main Hub</span>
+      <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+      <span>Return to Main Hub</span>
     </a>
 
-    <div class="top-actions">
-      <button type="button" class="pill-btn" id="langToggleBtn" aria-label="Switch Language">
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        <span id="langLabel">العربية</span>
-      </button>
-      <button type="button" class="pill-btn" id="themeToggleBtn" aria-label="Toggle Theme">
-        <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-        <span id="themeLabel">Dark Mode</span>
-      </button>
-    </div>
+    <button type="button" class="pill-btn" id="themeToggleBtn" aria-label="Toggle Theme">
+      <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      <span id="themeLabel">Dark Mode</span>
+    </button>
   </div>
 
   <div class="auth-shell">
@@ -620,23 +600,23 @@
       <div>
         <div class="showcase-tag">
           <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
-          <span data-i18n="badge">Learnova Instructor Studio</span>
+          <span>Learnova Instructor Studio</span>
         </div>
-        <h2 data-i18n="heroTitle">Teach, Assess, and Guide with Precision.</h2>
-        <p data-i18n="heroSub">Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.</p>
+        <h2>Teach, Assess, and Guide with Precision.</h2>
+        <p>Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.</p>
 
         <div class="bento-metrics">
           <div class="metric-card">
-            <strong data-i18n="m1Val">Courses</strong>
-            <span data-i18n="m1">Unit Builder</span>
+            <strong>Courses</strong>
+            <span>Unit Builder</span>
           </div>
           <div class="metric-card">
-            <strong data-i18n="m2Val">Grading</strong>
-            <span data-i18n="m2">Quizzes & Exams</span>
+            <strong>Grading</strong>
+            <span>Quizzes & Exams</span>
           </div>
           <div class="metric-card">
-            <strong data-i18n="m3Val">Insights</strong>
-            <span data-i18n="m3">Learner Analytics</span>
+            <strong>Insights</strong>
+            <span>Learner Analytics</span>
           </div>
         </div>
 
@@ -646,8 +626,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
             </div>
             <div>
-              <strong data-i18n="f1Title">Course & Unit Management</strong>
-              <span data-i18n="f1Desc">Organize learning modules, upload materials, and structure syllabi.</span>
+              <strong>Course & Unit Management</strong>
+              <span>Organize learning modules, upload materials, and structure syllabi.</span>
             </div>
           </div>
           <div class="feature-item">
@@ -655,8 +635,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
             <div>
-              <strong data-i18n="f2Title">Submissions, Quizzes & Exams</strong>
-              <span data-i18n="f2Desc">Grade student work, publish feedback, and manage exam windows.</span>
+              <strong>Submissions, Quizzes & Exams</strong>
+              <span>Grade student work, publish feedback, and manage exam windows.</span>
             </div>
           </div>
           <div class="feature-item">
@@ -664,8 +644,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
             <div>
-              <strong data-i18n="f3Title">Instant Demo Instructor Mode</strong>
-              <span data-i18n="f3Desc">Preview the instructor workspace with isolated sample courses.</span>
+              <strong>Instant Demo Instructor Mode</strong>
+              <span>Preview the instructor workspace with isolated sample courses.</span>
             </div>
           </div>
         </div>
@@ -673,7 +653,7 @@
 
       <div class="showcase-foot">
         <span>Learnova LMS</span>
-        <span data-i18n="edition">Instructor Studio</span>
+        <span>Instructor Studio</span>
       </div>
     </aside>
 
@@ -682,8 +662,8 @@
         <div class="brand-icon-inner">
           <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
         </div>
-        <h1 data-i18n="portalTitle">Instructor Portal</h1>
-        <p data-i18n="portalSub">Sign in to manage courses, assessments & learners</p>
+        <h1>Instructor Portal</h1>
+        <p>Sign in to manage courses, assessments & learners</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -699,7 +679,7 @@
 
       <form method="POST" id="instructorLoginForm">
         <div class="form-group">
-          <label class="field-label" for="email" data-i18n="emailLabel">Academic Email</label>
+          <label class="field-label" for="email">Academic Email</label>
           <div class="input-field-wrap">
             <span class="field-icon-wrap">
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -709,12 +689,12 @@
         </div>
 
         <div class="form-group">
-          <label class="field-label" for="password" data-i18n="passLabel">Password</label>
+          <label class="field-label" for="password">Password</label>
           <div class="input-field-wrap">
             <span class="field-icon-wrap">
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             </span>
-            <input id="password" type="password" name="password" placeholder="Enter your password" data-i18n-placeholder="passPlaceholder" required>
+            <input id="password" type="password" name="password" placeholder="Enter your password" required>
             <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
               <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
             </button>
@@ -724,31 +704,31 @@
         <div class="form-meta-row">
           <label class="remember-label">
             <input type="checkbox" name="remember" value="1">
-            <span data-i18n="remember">Keep me signed in</span>
+            <span>Keep me signed in</span>
           </label>
-          <a href="{{ url_for('students.help_center') }}" class="forgot-link" data-i18n="needHelp">Need Help?</a>
+          <a href="{{ url_for('students.help_center') }}" class="forgot-link">Need Help?</a>
         </div>
 
         <button class="btn-submit-action" type="submit" id="signInBtn">
-          <span data-i18n="signInBtn">Sign In to Instructor Studio</span>
-          <svg class="svg-ico flip-rtl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          <span>Sign In to Instructor Studio</span>
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
       </form>
 
       <div class="demo-access-box">
-        <div class="demo-access-caption" data-i18n="demoCap">Evaluating Learnova Platform?</div>
-        <div class="demo-access-sub" data-i18n="demoSub">Sign in as Demo Instructor with isolated sample data</div>
+        <div class="demo-access-caption">Evaluating Learnova Platform?</div>
+        <div class="demo-access-sub">Sign in as Demo Instructor with isolated sample data</div>
         <form method="POST" action="/teacher/demo-login" id="demoLoginForm">
           <button type="submit" class="btn-demo-instructor" id="demoAccessBtn">
             <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span data-i18n="demoBtn">Instant Demo Instructor Access</span>
+            <span>Instant Demo Instructor Access</span>
           </button>
         </form>
       </div>
 
       <div class="card-footer-sec">
         <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span data-i18n="secFoot">Authenticated Educator Access</span>
+        <span>Authenticated Educator Access</span>
       </div>
     </div>
   </div>
@@ -758,114 +738,19 @@
     const themeToggleBtn = document.getElementById('themeToggleBtn');
     const themeIconSvg = document.getElementById('themeIconSvg');
     const themeLabel = document.getElementById('themeLabel');
-    const langToggleBtn = document.getElementById('langToggleBtn');
-    const langLabel = document.getElementById('langLabel');
-
-    const i18n = {
-      en: {
-        backHub: 'Return to Main Hub',
-        badge: 'Learnova Instructor Studio',
-        heroTitle: 'Teach, Assess, and Guide with Precision.',
-        heroSub: 'Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.',
-        m1Val: 'Courses',
-        m1: 'Unit Builder',
-        m2Val: 'Grading',
-        m2: 'Quizzes & Exams',
-        m3Val: 'Insights',
-        m3: 'Learner Analytics',
-        f1Title: 'Course & Unit Management',
-        f1Desc: 'Organize learning modules, upload materials, and structure syllabi.',
-        f2Title: 'Submissions, Quizzes & Exams',
-        f2Desc: 'Grade student work, publish feedback, and manage exam windows.',
-        f3Title: 'Instant Demo Instructor Mode',
-        f3Desc: 'Preview the instructor workspace with isolated sample courses.',
-        edition: 'Instructor Studio',
-        portalTitle: 'Instructor Portal',
-        portalSub: 'Sign in to manage courses, assessments & learners',
-        emailLabel: 'Academic Email',
-        passLabel: 'Password',
-        passPlaceholder: 'Enter your password',
-        remember: 'Keep me signed in',
-        needHelp: 'Need Help?',
-        signInBtn: 'Sign In to Instructor Studio',
-        demoCap: 'Evaluating Learnova Platform?',
-        demoSub: 'Sign in as Demo Instructor with isolated sample data',
-        demoBtn: 'Instant Demo Instructor Access',
-        secFoot: 'Authenticated Educator Access',
-        dark: 'Dark Mode',
-        light: 'Light Mode',
-        switchLang: 'العربية'
-      },
-      ar: {
-        backHub: 'العودة للصفحة الرئيسية',
-        badge: 'استوديو المدرس - Learnova',
-        heroTitle: 'درّس، قيّم، وتابع الطلاب بدقة عالية.',
-        heroSub: 'أدِر وحدات المقررات، انشر الواجبات والاختبارات، راجع التسليمات، وتابع أداء الطلاب من مكان واحد متكامل.',
-        m1Val: 'المقررات',
-        m1: 'بناء الوحدات',
-        m2Val: 'التقييم',
-        m2: 'اختبارات ودرجات',
-        m3Val: 'التحليلات',
-        m3: 'متابعة الطلاب',
-        f1Title: 'إدارة المقررات والوحدات',
-        f1Desc: 'نظّم الوحدات التعليمية، ارفع الملفات، ورتّب الخطة الدراسية.',
-        f2Title: 'التسليمات والكويزات والامتحانات',
-        f2Desc: 'صحّح واجبات الطلاب، أضف الملاحظات، واضبط مواعيد الاختبارات.',
-        f3Title: 'وضع المدرس التجريبي الفوري',
-        f3Desc: 'استعرض لوحة المدرس فوراً ببيانات ومقررات تجريبية معزولة.',
-        edition: 'استوديو المدرس',
-        portalTitle: 'بوابة المدرس',
-        portalSub: 'سجّل الدخول لإدارة المقررات والتقييمات والطلاب',
-        emailLabel: 'البريد الإلكتروني الأكاديمي',
-        passLabel: 'كلمة المرور',
-        passPlaceholder: 'أدخل كلمة المرور',
-        remember: 'تذكر تسجيل دخولي',
-        needHelp: 'تحتاج مساعدة؟',
-        signInBtn: 'تسجيل الدخول إلى استوديو المدرس',
-        demoCap: 'تستكشف منصة Learnova؟',
-        demoSub: 'ادخل بحساب مدرس تجريبي ببيانات معزولة تماماً',
-        demoBtn: 'دخول تجريبي فوري كمدرس',
-        secFoot: 'وصول أكاديمي موثّق للمدرسين',
-        dark: 'الوضع الداكن',
-        light: 'الوضع الفاتح',
-        switchLang: 'English'
-      }
-    };
 
     const moonPath = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
     const sunPath = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
 
-    function applyLang(lang) {
-      const dict = i18n[lang] || i18n.en;
-      htmlRoot.setAttribute('lang', lang);
-      htmlRoot.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-      localStorage.setItem('learnova_login_lang', lang);
-      langLabel.textContent = dict.switchLang;
-
-      document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (dict[key]) el.textContent = dict[key];
-      });
-      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        const key = el.getAttribute('data-i18n-placeholder');
-        if (dict[key]) el.setAttribute('placeholder', dict[key]);
-      });
-
-      const currentTheme = htmlRoot.getAttribute('data-theme') || 'light';
-      themeLabel.textContent = currentTheme === 'dark' ? dict.light : dict.dark;
-    }
-
     function applyTheme(theme) {
-      const lang = htmlRoot.getAttribute('lang') || 'en';
-      const dict = i18n[lang] || i18n.en;
       htmlRoot.setAttribute('data-theme', theme);
       localStorage.setItem('learnova_login_theme', theme);
       if (theme === 'dark') {
         themeIconSvg.innerHTML = sunPath;
-        themeLabel.textContent = dict.light;
+        themeLabel.textContent = 'Light Mode';
       } else {
         themeIconSvg.innerHTML = moonPath;
-        themeLabel.textContent = dict.dark;
+        themeLabel.textContent = 'Dark Mode';
       }
     }
 
@@ -885,22 +770,13 @@
         demoBtn.disabled = false;
         demoBtn.innerHTML = initialDemoHtml;
       }
-      applyLang(htmlRoot.getAttribute('lang') || 'en');
     }
 
-    applyLang(localStorage.getItem('learnova_login_lang') || 'en');
     applyTheme(localStorage.getItem('learnova_login_theme') || 'light');
 
     window.addEventListener('pageshow', (e) => {
       if (e.persisted) resetActionButtons();
     });
-
-    if (langToggleBtn) {
-      langToggleBtn.addEventListener('click', () => {
-        const next = htmlRoot.getAttribute('lang') === 'ar' ? 'en' : 'ar';
-        applyLang(next);
-      });
-    }
 
     if (themeToggleBtn) {
       themeToggleBtn.addEventListener('click', () => {
@@ -926,17 +802,15 @@
 
     if (loginForm && signInBtn) {
       loginForm.addEventListener('submit', () => {
-        const isAr = htmlRoot.getAttribute('lang') === 'ar';
         signInBtn.disabled = true;
-        signInBtn.innerHTML = `<span>${isAr ? 'جاري تسجيل الدخول...' : 'Signing In...'}</span>`;
+        signInBtn.innerHTML = '<span>Signing In...</span>';
       });
     }
 
     if (demoForm && demoBtn) {
       demoForm.addEventListener('submit', () => {
-        const isAr = htmlRoot.getAttribute('lang') === 'ar';
         demoBtn.disabled = true;
-        demoBtn.innerHTML = `<span>${isAr ? 'جاري تجهيز الحساب التجريبي...' : 'Preparing Demo Instructor...'}</span>`;
+        demoBtn.innerHTML = '<span>Preparing Demo Instructor...</span>';
       });
     }
   </script>
