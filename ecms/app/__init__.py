@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from sqlalchemy import text as sql_text
+from jinja2 import TemplateNotFound
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -102,15 +103,48 @@ def create_app():
 
     @app.after_request
     def inject_learnova_footer(response):
-        if (
-            response.content_type
-            and "text/html" in response.content_type
-            and not response.direct_passthrough
-        ):
-            html = response.get_data(as_text=True)
-            if "learnova-site-footer" not in html and "</body>" in html:
-                footer_html = render_template("_footer.html")
-                response.set_data(html.replace("</body>", f"{footer_html}\n</body>", 1))
+        try:
+            if (
+                200 <= response.status_code < 300
+                and response.content_type
+                and "text/html" in response.content_type.lower()
+                and not response.direct_passthrough
+                and not response.is_streamed
+            ):
+                html = response.get_data(as_text=True)
+                if "learnova-site-footer" not in html and "</body>" in html:
+                    try:
+                        footer_html = render_template("_footer.html")
+                    except TemplateNotFound:
+                        footer_html = """
+                        <footer class="learnova-site-footer">
+                          <p>&copy; 2026 Learnova LMS. All rights reserved. | Developed by Eng. Sanad Shat</p>
+                        </footer>
+                        <style>
+                          .learnova-site-footer {
+                            position: relative;
+                            z-index: 1;
+                            margin-top: 20px;
+                            border-top: 1px solid var(--border-hairline, rgba(15, 23, 42, 0.085));
+                            background: var(--surface-glass, rgba(255, 255, 255, 0.92));
+                            backdrop-filter: blur(16px);
+                            -webkit-backdrop-filter: blur(16px);
+                            padding: 18px 20px;
+                            text-align: center;
+                          }
+                          .learnova-site-footer p {
+                            margin: 0 auto;
+                            max-width: 1120px;
+                            font-size: 12.5px;
+                            font-weight: 600;
+                            color: var(--text-muted, #526071);
+                            text-align: center;
+                          }
+                        </style>
+                        """
+                    response.set_data(html.replace("</body>", f"{footer_html}\n</body>", 1))
+        except Exception:
+            pass
         return response
 
     @app.route('/')
