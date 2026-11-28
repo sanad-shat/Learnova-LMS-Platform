@@ -1,21 +1,17 @@
 <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="prismTopGrad" x1="6" y1="8" x2="34" y2="24" gradientUnits="userSpaceOnUse">
+    <linearGradient id="prismTopGrad" x1="4" y1="6" x2="36" y2="24" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#4f46e5" />
       <stop offset="55%" stop-color="#6366f1" />
       <stop offset="100%" stop-color="#06b6d4" />
     </linearGradient>
-    <linearGradient id="prismBaseGrad" x1="8" y1="22" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+    <linearGradient id="prismBaseGrad" x1="5" y1="21" x2="35" y2="34" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#0284c7" />
       <stop offset="100%" stop-color="#10b981" />
     </linearGradient>
   </defs>
-  
-  <path d="M20 11L8.5 16.8L20 22.6L31.5 16.8L20 11Z" fill="url(#prismTopGrad)" />
-  
-  <path d="M8.5 21.6L20 27.4L31.5 21.6" stroke="url(#prismBaseGrad)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
-  
-  <path d="M8.5 26.4L20 32.2L31.5 26.4" stroke="#6366f1" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
-  
-  <path d="M31.5 6.5L32.3 8.7L34.5 9.5L32.3 10.3L31.5 12.5L30.7 10.3L28.5 9.5L30.7 8.7L31.5 6.5Z" fill="#10b981" />
+  <path d="M20 7.5L5.5 14.8L20 22.1L34.5 14.8L20 7.5Z" fill="url(#prismTopGrad)" />
+  <path d="M5.5 20.8L20 28.1L34.5 20.8" stroke="url(#prismBaseGrad)" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M5.5 26.8L20 34.1L34.5 26.8" stroke="#6366f1" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M34 4L35 6.8L37.8 7.8L35 8.8L34 11.6L33 8.8L30.2 7.8L33 6.8L34 4Z" fill="#10b981" />
 </svg>
