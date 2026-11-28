@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Console | Learnova LMS</title>
+  <title>Admin Vault | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,45 +11,41 @@
 
   <style>
     :root {
-      --adm-cyan: #0891b2;
-      --adm-cyan-bright: #06b6d4;
-      --adm-teal: #0d9488;
-      --adm-emerald: #10b981;
-      --adm-glow: rgba(6, 182, 212, 0.25);
-      --adm-emerald-glow: rgba(16, 185, 129, 0.16);
-      --bg-page: #e9eff6;
-      --bg-dot: rgba(15, 23, 42, 0.14);
-      --surface-shell: rgba(255, 255, 255, 0.82);
-      --surface-elevated: rgba(255, 255, 255, 0.96);
-      --surface-bento: rgba(241, 246, 252, 0.85);
-      --border-hairline: rgba(15, 23, 42, 0.09);
-      --border-strong: rgba(8, 145, 178, 0.32);
+      --vault-cyan: #0891b2;
+      --vault-cyan-bright: #06b6d4;
+      --vault-emerald: #10b981;
+      --vault-glow: rgba(6, 182, 212, 0.24);
+      --vault-emerald-glow: rgba(16, 185, 129, 0.16);
+      --bg-page: #edf2f7;
+      --bg-dot: rgba(15, 23, 42, 0.13);
+      --card-bg: rgba(255, 255, 255, 0.86);
+      --card-border: rgba(255, 255, 255, 0.96);
+      --card-ring: rgba(15, 23, 42, 0.09);
+      --surface-chip: rgba(241, 245, 249, 0.88);
       --input-bg: #ffffff;
       --input-border: #cbd5e1;
       --text-main: #0f172a;
       --text-muted: #475569;
-      --shadow-shell: 0 36px 85px -24px rgba(15, 23, 42, 0.2), 0 10px 28px -8px rgba(8, 145, 178, 0.12);
+      --shadow-card: 0 34px 80px -22px rgba(15, 23, 42, 0.18), 0 10px 26px -8px rgba(8, 145, 178, 0.12);
     }
 
     html[data-theme="dark"] {
-      --adm-cyan: #22d3ee;
-      --adm-cyan-bright: #67e8f9;
-      --adm-teal: #2dd4bf;
-      --adm-emerald: #34d399;
-      --adm-glow: rgba(34, 211, 238, 0.24);
-      --adm-emerald-glow: rgba(52, 211, 153, 0.15);
-      --bg-page: #03060c;
+      --vault-cyan: #22d3ee;
+      --vault-cyan-bright: #67e8f9;
+      --vault-emerald: #34d399;
+      --vault-glow: rgba(34, 211, 238, 0.24);
+      --vault-emerald-glow: rgba(52, 211, 153, 0.15);
+      --bg-page: #04070e;
       --bg-dot: rgba(34, 211, 238, 0.13);
-      --surface-shell: rgba(9, 15, 28, 0.86);
-      --surface-elevated: rgba(15, 23, 42, 0.94);
-      --surface-bento: rgba(15, 23, 42, 0.74);
-      --border-hairline: rgba(148, 163, 184, 0.14);
-      --border-strong: rgba(34, 211, 238, 0.36);
-      --input-bg: rgba(15, 23, 42, 0.92);
+      --card-bg: rgba(10, 16, 29, 0.88);
+      --card-border: rgba(51, 65, 85, 0.65);
+      --card-ring: rgba(148, 163, 184, 0.14);
+      --surface-chip: rgba(15, 23, 42, 0.78);
+      --input-bg: rgba(15, 23, 42, 0.94);
       --input-border: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --shadow-shell: 0 40px 90px -20px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(34, 211, 238, 0.1);
+      --shadow-card: 0 38px 86px -18px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(34, 211, 238, 0.1);
     }
 
     *, *::before, *::after {
@@ -86,24 +82,24 @@
       inset: 0;
       background-image: radial-gradient(var(--bg-dot) 1.25px, transparent 1.25px);
       background-size: 24px 24px;
-      mask-image: radial-gradient(ellipse 82% 76% at 50% 50%, #000 45%, transparent 95%);
-      -webkit-mask-image: radial-gradient(ellipse 82% 76% at 50% 50%, #000 45%, transparent 95%);
+      mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 95%);
+      -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 95%);
       pointer-events: none;
       z-index: 0;
     }
 
     .ambient-orb {
       position: fixed;
-      width: 720px;
-      height: 460px;
+      width: 620px;
+      height: 420px;
       border-radius: 50%;
       background:
-        radial-gradient(circle at 26% 35%, var(--adm-glow), transparent 62%),
-        radial-gradient(circle at 74% 65%, var(--adm-emerald-glow), transparent 65%);
+        radial-gradient(circle at 28% 35%, var(--vault-glow), transparent 62%),
+        radial-gradient(circle at 72% 65%, var(--vault-emerald-glow), transparent 65%);
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      filter: blur(84px);
+      filter: blur(80px);
       pointer-events: none;
       z-index: 0;
     }
@@ -112,7 +108,7 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 880px;
+      max-width: 470px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -128,10 +124,10 @@
       font-size: 12.5px;
       font-weight: 700;
       color: var(--text-muted);
-      background: var(--surface-shell);
+      background: var(--card-bg);
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--border-hairline);
+      border: 1px solid var(--card-ring);
       padding: 8px 15px;
       border-radius: 999px;
       cursor: pointer;
@@ -139,175 +135,113 @@
     }
 
     .pill-btn:hover {
-      color: var(--adm-cyan);
-      border-color: var(--border-strong);
+      color: var(--vault-cyan);
+      border-color: var(--vault-cyan-bright);
       transform: translateY(-1px);
     }
 
-    .console-wrapper {
+    /* Floating Security Vault Card */
+    .vault-card {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 880px;
-      background: var(--surface-shell);
+      max-width: 470px;
+      overflow: hidden;
+      background: var(--card-bg);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid var(--border-hairline);
-      border-radius: 32px;
-      padding: 32px;
-      box-shadow: var(--shadow-shell);
+      border: 1px solid var(--card-ring);
+      box-shadow: inset 0 1px 0 var(--card-border), var(--shadow-card);
+      border-radius: 30px;
+      padding: 32px 28px 26px;
     }
 
-    .console-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding-bottom: 22px;
-      margin-bottom: 24px;
-      border-bottom: 1px solid var(--border-hairline);
-      flex-wrap: wrap;
-    }
-
-    .console-brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .shield-emblem {
-      width: 56px;
-      height: 56px;
-      border-radius: 18px;
-      background: linear-gradient(145deg, rgba(6, 182, 212, 0.18), rgba(16, 185, 129, 0.14));
-      border: 1px solid var(--border-strong);
-      color: var(--adm-cyan);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 12px 26px -8px var(--adm-glow);
-    }
-
-    .shield-emblem svg {
-      width: 26px;
-      height: 26px;
-    }
-
-    .console-title-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .console-brand h1 {
-      font-size: 23px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      line-height: 1.2;
-    }
-
-    .sec-tag {
-      font-size: 10.5px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      color: var(--adm-cyan);
-      background: rgba(6, 182, 212, 0.12);
-      border: 1px solid var(--border-strong);
-    }
-
-    .console-brand p {
-      font-size: 12.5px;
-      color: var(--text-muted);
-      margin-top: 3px;
-    }
-
-    .header-meta-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .env-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 12px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text-muted);
-      background: var(--surface-bento);
-      border: 1px solid var(--border-hairline);
-    }
-
-    .status-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-size: 11.5px;
-      font-weight: 700;
-      color: var(--adm-emerald);
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.28);
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--adm-emerald);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
-    }
-
-    .bento-body {
-      display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 20px;
-      align-items: stretch;
-    }
-
-    .auth-box {
-      position: relative;
-      overflow: hidden;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border-hairline);
-      border-radius: 24px;
-      padding: 26px 24px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      box-shadow: 0 14px 32px -18px rgba(15, 23, 42, 0.1);
-    }
-
-    .auth-box::before {
+    .vault-card::before {
       content: '';
       position: absolute;
       inset: 0 0 auto 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--adm-cyan-bright), var(--adm-emerald), transparent);
-      opacity: 0.7;
+      height: 2.5px;
+      background: linear-gradient(90deg, transparent, var(--vault-cyan-bright), var(--vault-emerald), transparent);
+      opacity: 0.85;
     }
 
-    .auth-box-head {
-      margin-bottom: 18px;
+    .vault-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 22px;
     }
 
-    .auth-box-head h2 {
-      font-size: 16.5px;
+    .vault-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
       font-weight: 800;
-      letter-spacing: -0.3px;
-      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--vault-cyan);
+      background: rgba(6, 182, 212, 0.11);
+      border: 1px solid rgba(6, 182, 212, 0.28);
+      padding: 5px 11px;
+      border-radius: 999px;
     }
 
-    .auth-box-head span {
-      font-size: 12px;
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--vault-emerald);
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      padding: 5px 11px;
+      border-radius: 999px;
+    }
+
+    .live-dot {
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 50%;
+      background: var(--vault-emerald);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
+    }
+
+    .vault-hero {
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .vault-icon-box {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 14px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(6, 182, 212, 0.16), rgba(16, 185, 129, 0.14));
+      border: 1px solid rgba(6, 182, 212, 0.34);
+      color: var(--vault-cyan);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 26px -8px var(--vault-glow);
+    }
+
+    .vault-icon-box svg {
+      width: 27px;
+      height: 27px;
+    }
+
+    .vault-hero h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 5px;
+    }
+
+    .vault-hero p {
+      font-size: 13px;
       color: var(--text-muted);
     }
 
@@ -333,7 +267,7 @@
     }
     .flash.info {
       background: rgba(6, 182, 212, 0.12);
-      color: var(--adm-cyan);
+      color: var(--vault-cyan);
       border: 1px solid rgba(6, 182, 212, 0.25);
     }
 
@@ -375,17 +309,17 @@
       align-items: center;
       background: var(--input-bg);
       border: 1.5px solid var(--input-border);
-      border-radius: 13px;
+      border-radius: 14px;
       transition: all 0.2s ease;
     }
 
     .input-wrap:focus-within {
-      border-color: var(--adm-cyan);
-      box-shadow: 0 0 0 3.5px var(--adm-glow);
+      border-color: var(--vault-cyan);
+      box-shadow: 0 0 0 3.5px var(--vault-glow);
     }
 
     .input-icon {
-      padding-left: 13px;
+      padding-left: 14px;
       color: var(--text-muted);
       display: flex;
       align-items: center;
@@ -393,12 +327,12 @@
     }
 
     .input-wrap:focus-within .input-icon {
-      color: var(--adm-cyan);
+      color: var(--vault-cyan);
     }
 
     .input-wrap input {
       width: 100%;
-      padding: 11.5px 12px;
+      padding: 12px 13px;
       border: none;
       background: transparent;
       outline: none;
@@ -410,7 +344,7 @@
     .eye-btn {
       background: none;
       border: none;
-      padding: 0 13px;
+      padding: 0 14px;
       cursor: pointer;
       color: var(--text-muted);
       display: flex;
@@ -419,21 +353,21 @@
     }
 
     .eye-btn:hover {
-      color: var(--adm-cyan);
+      color: var(--vault-cyan);
     }
 
     .btn-authorize {
       width: 100%;
       margin-top: 6px;
-      padding: 12.5px 16px;
-      border-radius: 13px;
+      padding: 13px 16px;
+      border-radius: 14px;
       border: none;
       background: linear-gradient(135deg, #0284c7 0%, #0891b2 55%, #0d9488 100%);
       color: #ffffff;
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 12px 24px -6px var(--adm-glow);
+      box-shadow: 0 12px 24px -6px var(--vault-glow);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -443,7 +377,7 @@
 
     .btn-authorize:hover {
       transform: translateY(-1px);
-      box-shadow: 0 16px 30px -6px var(--adm-glow);
+      box-shadow: 0 16px 30px -6px var(--vault-glow);
     }
 
     .btn-authorize:disabled {
@@ -452,104 +386,58 @@
       transform: none;
     }
 
-    .side-bento {
+    /* Compact Micro-Stats Strip */
+    .micro-stats {
+      margin-top: 18px;
       display: grid;
-      gap: 12px;
-    }
-
-    .info-tile {
-      background: var(--surface-bento);
-      border: 1px solid var(--border-hairline);
-      border-radius: 20px;
-      padding: 15px 16px;
-      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-    }
-
-    .info-tile:hover {
-      transform: translateY(-2px);
-      border-color: var(--border-strong);
-      background: var(--surface-elevated);
-    }
-
-    .info-tile-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      grid-template-columns: repeat(3, 1fr);
       gap: 8px;
-      margin-bottom: 6px;
     }
 
-    .info-tile-title {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      font-size: 12.5px;
+    .micro-stat {
+      background: var(--surface-chip);
+      border: 1px solid var(--card-ring);
+      border-radius: 12px;
+      padding: 9px 8px;
+      text-align: center;
+    }
+
+    .micro-stat strong {
+      display: block;
+      font-size: 11.5px;
       font-weight: 800;
-      color: var(--text-main);
+      color: var(--vault-cyan);
     }
 
-    .tile-ico-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 9px;
-      background: rgba(6, 182, 212, 0.12);
-      border: 1px solid var(--border-strong);
-      color: var(--adm-cyan);
-      display: inline-flex;
+    .micro-stat span {
+      display: block;
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .vault-foot {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--card-ring);
+      display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .tile-pill {
-      font-size: 10.5px;
-      font-weight: 700;
-      color: var(--adm-emerald);
-      background: rgba(16, 185, 129, 0.1);
-      padding: 2px 8px;
-      border-radius: 999px;
-    }
-
-    .info-tile p {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    .console-foot {
-      margin-top: 22px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-hairline);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
+      gap: 7px;
       font-size: 11.5px;
       color: var(--text-muted);
       font-weight: 600;
-      flex-wrap: wrap;
     }
 
-    .foot-sec {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+    .vault-foot svg {
+      color: var(--vault-emerald);
     }
 
-    .foot-sec svg {
-      color: var(--adm-emerald);
-    }
-
-    @media (max-width: 760px) {
-      .bento-body {
-        grid-template-columns: 1fr;
-      }
-      .console-wrapper {
-        padding: 20px 16px;
+    @media (max-width: 500px) {
+      .vault-card {
+        padding: 26px 20px 22px;
         border-radius: 24px;
-      }
-      .auth-box {
-        padding: 18px;
       }
     }
   </style>
@@ -571,132 +459,91 @@
     </button>
   </div>
 
-  <main class="console-wrapper">
-    <header class="console-header">
-      <div class="console-brand">
-        <div class="shield-emblem">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-        </div>
-        <div>
-          <div class="console-title-row">
-            <h1>Admin Console</h1>
-            <span class="sec-tag">Command Center</span>
-          </div>
-          <p>Restricted access for system administrators</p>
-        </div>
-      </div>
+  <main class="vault-card">
+    <div class="vault-top-row">
+      <span class="vault-badge">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Admin Vault</span>
+      </span>
 
-      <div class="header-meta-group">
-        <span class="env-chip">TLS 1.3 Guard</span>
-        <div class="status-chip">
-          <span class="status-dot"></span>
-          <span>System Operational</span>
-        </div>
-      </div>
-    </header>
-
-    <div class="bento-body">
-      <section class="auth-box">
-        <div class="auth-box-head">
-          <h2>Administrator Authentication</h2>
-          <span>Verify your staff credentials to open control panels</span>
-        </div>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="flash {{ category }}">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>{{ message }}</span>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <form method="POST" id="adminLoginForm">
-          <div class="form-group">
-            <div class="label-row">
-              <label class="field-label" for="username">Administrator Username</label>
-            </div>
-            <div class="input-wrap">
-              <span class="input-icon">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              </span>
-              <input id="username" type="text" name="username" placeholder="admin" required autofocus>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <div class="label-row">
-              <label class="field-label" for="password">Security Password</label>
-              <span class="caps-badge" id="capsBadge">Caps Lock On</span>
-            </div>
-            <div class="input-wrap">
-              <span class="input-icon">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-              </span>
-              <input id="password" type="password" name="password" placeholder="Enter root password" required>
-              <button type="button" class="eye-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">
-                <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-authorize" id="authorizeBtn">
-            <span>Authorize &amp; Enter Console</span>
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-          </button>
-        </form>
-      </section>
-
-      <aside class="side-bento">
-        <div class="info-tile">
-          <div class="info-tile-top">
-            <div class="info-tile-title">
-              <span class="tile-ico-badge">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-              </span>
-              <span>Privileged Access Control</span>
-            </div>
-            <span class="tile-pill">RBAC</span>
-          </div>
-          <p>Administrative sign-in is strictly verified against authorized staff accounts and system roles.</p>
-        </div>
-
-        <div class="info-tile">
-          <div class="info-tile-top">
-            <div class="info-tile-title">
-              <span class="tile-ico-badge">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-              </span>
-              <span>Directory &amp; Catalog Governance</span>
-            </div>
-            <span class="tile-pill">Active</span>
-          </div>
-          <p>Manage student and instructor records, course assignments, and platform-wide settings.</p>
-        </div>
-
-        <div class="info-tile">
-          <div class="info-tile-top">
-            <div class="info-tile-title">
-              <span class="tile-ico-badge">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              </span>
-              <span>Session &amp; Activity Logging</span>
-            </div>
-            <span class="tile-pill">Audited</span>
-          </div>
-          <p>All administrative sessions are encrypted and monitored for operational integrity.</p>
-        </div>
-      </aside>
+      <span class="live-indicator">
+        <span class="live-dot"></span>
+        <span>System Operational</span>
+      </span>
     </div>
 
-    <footer class="console-foot">
-      <div class="foot-sec">
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span>Encrypted Admin Session &bull; IP Audited</span>
+    <div class="vault-hero">
+      <div class="vault-icon-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
       </div>
-      <span>Learnova LMS Core</span>
+      <h1>Admin Console</h1>
+      <p>Restricted access for system administrators</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" id="adminLoginForm">
+      <div class="form-group">
+        <div class="label-row">
+          <label class="field-label" for="username">Administrator Username</label>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </span>
+          <input id="username" type="text" name="username" placeholder="admin" required autofocus>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="label-row">
+          <label class="field-label" for="password">Security Password</label>
+          <span class="caps-badge" id="capsBadge">Caps Lock On</span>
+        </div>
+        <div class="input-wrap">
+          <span class="input-icon">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+          </span>
+          <input id="password" type="password" name="password" placeholder="Enter root password" required>
+          <button type="button" class="eye-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">
+            <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-authorize" id="authorizeBtn">
+        <span>Authorize &amp; Enter Console</span>
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </form>
+
+    <div class="micro-stats">
+      <div class="micro-stat">
+        <strong>RBAC</strong>
+        <span>Role Verified</span>
+      </div>
+      <div class="micro-stat">
+        <strong>TLS 1.3</strong>
+        <span>Transport Guard</span>
+      </div>
+      <div class="micro-stat">
+        <strong>Audit Log</strong>
+        <span>IP Tracked</span>
+      </div>
+    </div>
+
+    <footer class="vault-foot">
+      <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Encrypted Admin Session &bull; IP Audited</span>
     </footer>
   </main>
 
