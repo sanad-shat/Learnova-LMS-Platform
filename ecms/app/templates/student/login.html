@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instructor Sign In | Learnova LMS</title>
+  <title>Student Sign In | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -497,7 +497,7 @@
     }
 
     .btn-submit-action:disabled,
-    .btn-demo-instructor:disabled {
+    .btn-demo-student:disabled {
       opacity: 0.72;
       cursor: not-allowed;
       transform: none;
@@ -525,7 +525,7 @@
       margin-bottom: 9px;
     }
 
-    .btn-demo-instructor {
+    .btn-demo-student {
       width: 100%;
       background: var(--input-bg);
       color: var(--indigo-soft);
@@ -542,7 +542,7 @@
       transition: all 0.2s ease;
     }
 
-    .btn-demo-instructor:hover {
+    .btn-demo-student:hover {
       background: rgba(99, 102, 241, 0.14);
       transform: translateY(-1px);
     }
@@ -599,24 +599,24 @@
     <aside class="showcase-panel">
       <div>
         <div class="showcase-tag">
-          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
-          <span>Learnova Instructor Studio</span>
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          <span>Learnova Student Space</span>
         </div>
-        <h2>Teach, Assess, and Guide with Precision.</h2>
-        <p>Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.</p>
+        <h2>Learn Smarter, Track Progress, Earn Credentials.</h2>
+        <p>Access enrolled courses, study units, assignments, quizzes, grades, and verified certificates from one workspace.</p>
 
         <div class="bento-metrics">
           <div class="metric-card">
             <strong>Courses</strong>
-            <span>Unit Builder</span>
+            <span>Study Units</span>
           </div>
           <div class="metric-card">
-            <strong>Grading</strong>
-            <span>Quizzes & Exams</span>
+            <strong>Assessments</strong>
+            <span>Quizzes &amp; Exams</span>
           </div>
           <div class="metric-card">
-            <strong>Insights</strong>
-            <span>Learner Analytics</span>
+            <strong>Credentials</strong>
+            <span>Certificates</span>
           </div>
         </div>
 
@@ -626,8 +626,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
             </div>
             <div>
-              <strong>Course & Unit Management</strong>
-              <span>Organize learning modules, upload materials, and structure syllabi.</span>
+              <strong>Enrolled Courses &amp; Units</strong>
+              <span>Follow course modules, download materials, and track completion.</span>
             </div>
           </div>
           <div class="feature-item">
@@ -635,8 +635,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
             <div>
-              <strong>Submissions, Quizzes & Exams</strong>
-              <span>Grade student work, publish feedback, and manage exam windows.</span>
+              <strong>Assignments, Quizzes &amp; Grades</strong>
+              <span>Submit coursework, take quizzes, and view live grade breakdowns.</span>
             </div>
           </div>
           <div class="feature-item">
@@ -644,8 +644,8 @@
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             </div>
             <div>
-              <strong>Instant Demo Instructor Mode</strong>
-              <span>Preview the instructor workspace with isolated sample courses.</span>
+              <strong>Instant Demo Student Mode</strong>
+              <span>Explore sample courses and assignments immediately with one click.</span>
             </div>
           </div>
         </div>
@@ -653,7 +653,7 @@
 
       <div class="showcase-foot">
         <span>Learnova LMS</span>
-        <span>Instructor Studio</span>
+        <span>Student Space</span>
       </div>
     </aside>
 
@@ -662,8 +662,8 @@
         <div class="brand-icon-inner">
           <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
         </div>
-        <h1>Instructor Portal</h1>
-        <p>Sign in to manage courses, assessments & learners</p>
+        <h1>Student Portal</h1>
+        <p>Sign in to access your courses, assignments &amp; grades</p>
       </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %}
@@ -677,14 +677,14 @@
         {% endif %}
       {% endwith %}
 
-      <form method="POST" id="instructorLoginForm">
+      <form method="POST" id="studentLoginForm">
         <div class="form-group">
-          <label class="field-label" for="email">Academic Email</label>
+          <label class="field-label" for="email">Student Email</label>
           <div class="input-field-wrap">
             <span class="field-icon-wrap">
               <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
             </span>
-            <input id="email" type="email" name="email" placeholder="instructor@learnova.com" required autofocus>
+            <input id="email" type="email" name="email" placeholder="student@learnova.com" required autofocus>
           </div>
         </div>
 
@@ -706,29 +706,29 @@
             <input type="checkbox" name="remember" value="1">
             <span>Keep me signed in</span>
           </label>
-          <a href="{{ url_for('students.help_center') }}" class="forgot-link">Need Help?</a>
+          <a href="{{ url_for('teachers.login') }}" class="forgot-link">Instructor Portal</a>
         </div>
 
         <button class="btn-submit-action" type="submit" id="signInBtn">
-          <span>Sign In to Instructor Studio</span>
+          <span>Sign In to Student Space</span>
           <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </button>
       </form>
 
       <div class="demo-access-box">
         <div class="demo-access-caption">Evaluating Learnova Platform?</div>
-        <div class="demo-access-sub">Sign in as Demo Instructor with isolated sample data</div>
-        <form method="POST" action="/teacher/demo-login" id="demoLoginForm">
-          <button type="submit" class="btn-demo-instructor" id="demoAccessBtn">
+        <div class="demo-access-sub">Sign in as Demo Student with isolated sample data</div>
+        <form method="POST" action="{{ url_for('students.demo_login') }}" id="demoLoginForm">
+          <button type="submit" class="btn-demo-student" id="demoAccessBtn">
             <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span>Instant Demo Instructor Access</span>
+            <span>Instant Demo Student Access</span>
           </button>
         </form>
       </div>
 
       <div class="card-footer-sec">
         <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Authenticated Educator Access</span>
+        <span>Authenticated Learner Access</span>
       </div>
     </div>
   </div>
@@ -754,7 +754,7 @@
       }
     }
 
-    const loginForm = document.getElementById('instructorLoginForm');
+    const loginForm = document.getElementById('studentLoginForm');
     const signInBtn = document.getElementById('signInBtn');
     const demoForm = document.getElementById('demoLoginForm');
     const demoBtn = document.getElementById('demoAccessBtn');
@@ -810,7 +810,7 @@
     if (demoForm && demoBtn) {
       demoForm.addEventListener('submit', () => {
         demoBtn.disabled = true;
-        demoBtn.innerHTML = '<span>Preparing Demo Instructor...</span>';
+        demoBtn.innerHTML = '<span>Preparing Demo Student...</span>';
       });
     }
   </script>
