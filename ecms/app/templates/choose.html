@@ -19,15 +19,15 @@
       --emerald: #10b981;
       --bg-page: #f5f7fb;
       --bg-grid: rgba(15, 23, 42, 0.045);
-      --surface-glass: rgba(255, 255, 255, 0.86);
+      --surface-glass: rgba(255, 255, 255, 0.88);
       --surface-elevated: #ffffff;
       --surface-subtle: #f1f5f9;
-      --border-hairline: rgba(15, 23, 42, 0.08);
-      --border-accent: rgba(79, 70, 229, 0.28);
+      --border-hairline: rgba(15, 23, 42, 0.085);
+      --border-accent: rgba(79, 70, 229, 0.3);
       --text-main: #090d16;
       --text-muted: #526071;
-      --shadow-soft: 0 24px 60px -20px rgba(9, 13, 22, 0.1);
-      --shadow-glow: 0 16px 36px -10px rgba(79, 70, 229, 0.28);
+      --shadow-soft: 0 18px 44px -18px rgba(9, 13, 22, 0.1);
+      --shadow-glow: 0 14px 30px -8px rgba(79, 70, 229, 0.3);
     }
 
     html[data-theme="dark"] {
@@ -39,15 +39,15 @@
       --emerald: #34d399;
       --bg-page: #05070d;
       --bg-grid: rgba(148, 163, 184, 0.055);
-      --surface-glass: rgba(12, 17, 29, 0.84);
+      --surface-glass: rgba(12, 17, 29, 0.86);
       --surface-elevated: #0d1322;
-      --surface-subtle: rgba(23, 32, 51, 0.75);
-      --border-hairline: rgba(148, 163, 184, 0.13);
-      --border-accent: rgba(99, 102, 241, 0.36);
+      --surface-subtle: rgba(23, 32, 51, 0.78);
+      --border-hairline: rgba(148, 163, 184, 0.14);
+      --border-accent: rgba(99, 102, 241, 0.38);
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --shadow-soft: 0 32px 76px -20px rgba(0, 0, 0, 0.8);
-      --shadow-glow: 0 18px 40px -10px rgba(99, 102, 241, 0.35);
+      --shadow-soft: 0 24px 60px -18px rgba(0, 0, 0, 0.78);
+      --shadow-glow: 0 16px 36px -8px rgba(99, 102, 241, 0.36);
     }
 
     *, *::before, *::after {
@@ -69,7 +69,7 @@
       background-size: 56px 56px;
       color: var(--text-main);
       overflow-x: hidden;
-      line-height: 1.55;
+      line-height: 1.5;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
@@ -81,7 +81,6 @@
       vertical-align: middle;
     }
 
-    /* Ambient Spotlight */
     .ambient-spotlight {
       position: fixed;
       top: -180px;
@@ -101,9 +100,9 @@
     /* Floating Pill Navbar */
     .nav-shell {
       position: sticky;
-      top: 16px;
+      top: 14px;
       z-index: 100;
-      max-width: 1160px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 20px;
     }
@@ -114,7 +113,7 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
       border-radius: 999px;
-      padding: 10px 14px 10px 22px;
+      padding: 8px 12px 8px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -131,14 +130,21 @@
     }
 
     .brand img {
-      width: 32px;
-      height: 32px;
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      filter: drop-shadow(0 6px 12px rgba(79, 70, 229, 0.22));
+      transition: transform 0.2s ease;
+    }
+
+    .brand:hover img {
+      transform: scale(1.04);
     }
 
     .brand-name {
-      font-size: 16px;
+      font-size: 16.5px;
       font-weight: 800;
-      letter-spacing: -0.3px;
+      letter-spacing: -0.35px;
     }
 
     .brand-name span {
@@ -148,7 +154,7 @@
     .nav-center {
       display: flex;
       align-items: center;
-      gap: 28px;
+      gap: 26px;
     }
 
     .nav-center a {
@@ -208,21 +214,20 @@
       opacity: 0.92;
     }
 
-    /* Container */
     .container {
       position: relative;
       z-index: 1;
-      max-width: 1160px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 20px;
     }
 
-    /* Asymmetric Split Hero */
+    /* Compact Asymmetric Split Hero */
     .hero {
-      padding: 72px 0 64px;
+      padding: 46px 0 34px;
       display: grid;
       grid-template-columns: 1.08fr 0.92fr;
-      gap: 44px;
+      gap: 36px;
       align-items: center;
     }
 
@@ -230,14 +235,14 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
+      padding: 5px 13px;
       border-radius: 999px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       color: var(--indigo-soft);
       background: rgba(99, 102, 241, 0.1);
       border: 1px solid var(--border-accent);
-      margin-bottom: 22px;
+      margin-bottom: 16px;
     }
 
     .eyebrow-dot {
@@ -248,11 +253,11 @@
     }
 
     .hero h1 {
-      font-size: 54px;
+      font-size: 52px;
       font-weight: 800;
       line-height: 1.06;
       letter-spacing: -2px;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     .hero h1 .accent-gradient {
@@ -262,11 +267,11 @@
     }
 
     .hero-desc {
-      font-size: 16.5px;
+      font-size: 15.5px;
       color: var(--text-muted);
-      max-width: 540px;
-      margin-bottom: 30px;
-      line-height: 1.65;
+      max-width: 530px;
+      margin-bottom: 24px;
+      line-height: 1.6;
     }
 
     .hero-btns {
@@ -274,19 +279,19 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      margin-bottom: 34px;
+      margin-bottom: 24px;
     }
 
     .btn-primary {
       display: inline-flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       text-decoration: none;
-      padding: 13px 24px;
-      border-radius: 13px;
+      padding: 12px 22px;
+      border-radius: 12px;
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       box-shadow: var(--shadow-glow);
       transition: transform 0.2s ease, filter 0.2s ease;
@@ -300,14 +305,14 @@
     .btn-outline {
       display: inline-flex;
       align-items: center;
-      gap: 9px;
+      gap: 8px;
       text-decoration: none;
-      padding: 13px 22px;
-      border-radius: 13px;
+      padding: 12px 20px;
+      border-radius: 12px;
       background: var(--surface-glass);
       border: 1px solid var(--border-hairline);
       color: var(--text-main);
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       transition: all 0.2s ease;
     }
@@ -321,43 +326,42 @@
     .hero-specs {
       display: flex;
       align-items: center;
-      gap: 24px;
-      padding-top: 20px;
+      gap: 22px;
+      padding-top: 16px;
       border-top: 1px solid var(--border-hairline);
       flex-wrap: wrap;
     }
 
     .spec-item strong {
       display: block;
-      font-size: 17px;
+      font-size: 16px;
       font-weight: 800;
       letter-spacing: -0.3px;
     }
 
     .spec-item span {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--text-muted);
       font-weight: 600;
     }
 
-    /* Interactive Workspace Preview Card (Right Column) */
+    /* Live Platform Preview Card */
     .preview-frame {
       background: var(--surface-glass);
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border: 1px solid var(--border-hairline);
-      border-radius: 26px;
-      padding: 20px;
+      border-radius: 20px;
+      padding: 16px;
       box-shadow: var(--shadow-soft);
-      position: relative;
     }
 
     .preview-topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 14px;
-      margin-bottom: 16px;
+      padding-bottom: 11px;
+      margin-bottom: 12px;
       border-bottom: 1px solid var(--border-hairline);
     }
 
@@ -391,14 +395,14 @@
     .preview-bento {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+      gap: 10px;
     }
 
     .p-card {
       background: var(--surface-elevated);
       border: 1px solid var(--border-hairline);
-      border-radius: 16px;
-      padding: 15px;
+      border-radius: 14px;
+      padding: 13px 14px;
     }
 
     .p-card.span-2 {
@@ -406,29 +410,29 @@
     }
 
     .p-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.4px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .p-val {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.4px;
     }
 
     .p-bar {
-      height: 7px;
+      height: 6px;
       border-radius: 999px;
       background: var(--surface-subtle);
       overflow: hidden;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .p-bar-fill {
@@ -440,82 +444,87 @@
 
     .p-list {
       display: grid;
-      gap: 8px;
-      margin-top: 6px;
+      gap: 7px;
+      margin-top: 4px;
     }
 
     .p-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
-      padding: 8px 10px;
+      padding: 7px 10px;
       border-radius: 10px;
       background: var(--surface-subtle);
     }
 
     .p-tag-ok {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--emerald);
     }
 
-    /* Section Headers */
+    /* Tight Section Spacing */
     .sec-block {
-      padding: 56px 0;
+      padding: 30px 0;
     }
 
     .sec-head {
-      max-width: 620px;
-      margin-bottom: 34px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
     }
 
     .sec-kicker {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       color: var(--indigo-soft);
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .sec-head h2 {
-      font-size: 34px;
+      font-size: 28px;
       font-weight: 800;
-      letter-spacing: -1px;
-      margin-bottom: 10px;
+      letter-spacing: -0.8px;
+      line-height: 1.15;
     }
 
     .sec-head p {
-      font-size: 15px;
+      font-size: 13.5px;
       color: var(--text-muted);
+      max-width: 420px;
     }
 
-    /* Dedicated Portals Grid */
+    /* Crisp Boxed Portals Grid */
     .portals-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
+      gap: 16px;
     }
 
     .portal-card {
       background: var(--surface-glass);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
-      border-radius: 24px;
-      padding: 28px;
+      border-radius: 18px;
+      padding: 22px;
       text-decoration: none;
       color: inherit;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease;
       box-shadow: var(--shadow-soft);
     }
 
     .portal-card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-4px);
       border-color: var(--border-accent);
     }
 
@@ -523,21 +532,21 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 20px;
+      margin-bottom: 14px;
     }
 
     .portal-badge-ico {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .portal-badge-ico svg {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
     }
 
     .ico-student {
@@ -559,57 +568,59 @@
     }
 
     .role-chip {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-muted);
       background: var(--surface-subtle);
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 999px;
     }
 
     .portal-card h3 {
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .portal-card p {
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 24px;
-      line-height: 1.6;
+      margin-bottom: 16px;
+      line-height: 1.55;
     }
 
     .portal-link {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      font-size: 13.5px;
+      gap: 6px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--indigo-soft);
+      padding-top: 12px;
+      border-top: 1px solid var(--border-hairline);
     }
 
     .portal-card:hover .portal-link svg {
-      transform: translateX(4px);
+      transform: translateX(3px);
     }
 
     .portal-link svg {
       transition: transform 0.2s ease;
     }
 
-    /* Asymmetric Bento Features */
+    /* Compact Bento Box Architecture */
     .bento-grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
-      gap: 20px;
+      gap: 14px;
     }
 
     .bento-card {
       background: var(--surface-glass);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border-hairline);
-      border-radius: 24px;
-      padding: 26px;
+      border-radius: 18px;
+      padding: 20px 22px;
       box-shadow: var(--shadow-soft);
       transition: border-color 0.2s ease, transform 0.2s ease;
     }
@@ -619,50 +630,55 @@
       transform: translateY(-2px);
     }
 
-    .col-7 { grid-column: span 7; }
-    .col-5 { grid-column: span 5; }
+    .col-6 { grid-column: span 6; }
     .col-4 { grid-column: span 4; }
 
+    .bento-top {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 10px;
+    }
+
     .bento-ico {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
       background: var(--surface-subtle);
       border: 1px solid var(--border-hairline);
-      color: var(--indigo-soft);
+      color: var(--cyan);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      flex-shrink: 0;
     }
 
     .bento-card h3 {
-      font-size: 18px;
+      font-size: 15.5px;
       font-weight: 800;
-      margin-bottom: 8px;
     }
 
     .bento-card p {
-      font-size: 13.5px;
+      font-size: 12.8px;
       color: var(--text-muted);
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
-    /* Footer */
+    /* Compact Footer */
     .site-footer {
-      margin-top: 48px;
+      margin-top: 24px;
       border-top: 1px solid var(--border-hairline);
-      padding: 28px 20px;
+      padding: 20px;
     }
 
     .footer-inner {
-      max-width: 1160px;
+      max-width: 1140px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      font-size: 13px;
+      gap: 12px;
+      font-size: 12.5px;
       color: var(--text-muted);
       flex-wrap: wrap;
     }
@@ -670,15 +686,16 @@
     @media (max-width: 960px) {
       .hero {
         grid-template-columns: 1fr;
-        padding: 48px 0 40px;
+        padding: 32px 0 24px;
+        gap: 24px;
       }
       .hero h1 {
-        font-size: 42px;
+        font-size: 40px;
       }
       .portals-grid {
         grid-template-columns: 1fr;
       }
-      .col-7, .col-5, .col-4 {
+      .col-6, .col-4 {
         grid-column: 1 / -1;
       }
     }
@@ -688,11 +705,15 @@
         display: none;
       }
       .hero h1 {
-        font-size: 34px;
-        letter-spacing: -1.2px;
+        font-size: 33px;
+        letter-spacing: -1.1px;
       }
       .navbar {
-        padding: 10px 12px 10px 16px;
+        padding: 8px 12px 8px 16px;
+      }
+      .brand img {
+        width: 36px;
+        height: 36px;
       }
     }
   </style>
@@ -704,7 +725,7 @@
   <!-- Floating Navbar -->
   <div class="nav-shell">
     <header class="navbar">
-      <a href="/" class="brand">
+      <a href="/" class="brand" aria-label="Learnova LMS Home">
         <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
         <span class="brand-name">Learnova <span>LMS</span></span>
       </a>
@@ -730,7 +751,7 @@
   </div>
 
   <main class="container">
-    <!-- Asymmetric Split Hero -->
+    <!-- Compact Split Hero -->
     <section class="hero">
       <div>
         <div class="hero-eyebrow">
@@ -773,7 +794,7 @@
         </div>
       </div>
 
-      <!-- Live Platform Preview Card -->
+      <!-- Live Platform Preview Box -->
       <div class="preview-frame" aria-hidden="true">
         <div class="preview-topbar">
           <div class="window-dots">
@@ -792,7 +813,7 @@
           <div class="p-card">
             <div class="p-label"><span>Active Portals</span></div>
             <div class="p-val">Student &bull; Staff</div>
-            <div style="font-size: 11.5px; color: var(--emerald); font-weight: 700; margin-top: 8px;">All Services Operational</div>
+            <div style="font-size: 11px; color: var(--emerald); font-weight: 700; margin-top: 6px;">All Services Operational</div>
           </div>
 
           <div class="p-card span-2">
@@ -819,8 +840,10 @@
     <!-- Dedicated Portals -->
     <section id="portals" class="sec-block">
       <div class="sec-head">
-        <div class="sec-kicker">Role-Based Access</div>
-        <h2>Choose Your Dedicated Portal</h2>
+        <div>
+          <div class="sec-kicker">Role-Based Access</div>
+          <h2>Choose Your Dedicated Portal</h2>
+        </div>
         <p>Select your role to enter a tailored workspace with dedicated tools and permissions.</p>
       </div>
 
@@ -878,52 +901,64 @@
       </div>
     </section>
 
-    <!-- Bento Platform Capabilities -->
+    <!-- Compact Bento Grid Boxes -->
     <section id="platform" class="sec-block">
       <div class="sec-head">
-        <div class="sec-kicker">Core Capabilities</div>
-        <h2>Engineered for Academic Clarity</h2>
-        <p>Everything needed to deliver, evaluate, and certify modern digital coursework.</p>
+        <div>
+          <div class="sec-kicker">Core Capabilities</div>
+          <h2>Engineered for Academic Clarity</h2>
+        </div>
+        <p>Structured bento modules to deliver, evaluate, and certify modern digital coursework.</p>
       </div>
 
       <div class="bento-grid" id="architecture">
-        <article class="bento-card col-7">
-          <div class="bento-ico">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <article class="bento-card col-6">
+          <div class="bento-top">
+            <div class="bento-ico">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+            </div>
+            <h3>Modular Curriculum &amp; Study Units</h3>
           </div>
-          <h3>Modular Curriculum &amp; Study Units</h3>
-          <p>Structure courses into clear weekly or topical modules with downloadable lecture files, reference sheets, and progress tracking for every enrolled learner.</p>
+          <p>Structure courses into clear topical units with lecture materials, reference sheets, and per-student progress tracking.</p>
         </article>
 
-        <article class="bento-card col-5">
-          <div class="bento-ico">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <article class="bento-card col-6">
+          <div class="bento-top">
+            <div class="bento-ico">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            </div>
+            <h3>Automated Quizzes &amp; Exams</h3>
           </div>
-          <h3>Automated Quizzes &amp; Exams</h3>
-          <p>Run timed assessments with instant scoring, rubric-backed assignment grading, and transparent gradebook analytics.</p>
+          <p>Run timed assessments with instant scoring, assignment submissions, and transparent gradebook views.</p>
         </article>
 
         <article class="bento-card col-4">
-          <div class="bento-ico">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div class="bento-top">
+            <div class="bento-ico">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>Course Discussions</h3>
           </div>
-          <h3>Course Discussions</h3>
           <p>Dedicated academic forums per course for Q&amp;A, announcements, and peer collaboration.</p>
         </article>
 
         <article class="bento-card col-4">
-          <div class="bento-ico">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          <div class="bento-top">
+            <div class="bento-ico">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+            </div>
+            <h3>Verified Certificates</h3>
           </div>
-          <h3>Verified Certificates</h3>
           <p>Automatically issue verifiable completion credentials upon fulfilling course requirements.</p>
         </article>
 
         <article class="bento-card col-4">
-          <div class="bento-ico">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <div class="bento-top">
+            <div class="bento-ico">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <h3>Isolated Demo Sandboxes</h3>
           </div>
-          <h3>Isolated Demo Sandboxes</h3>
           <p>Evaluate student and instructor workflows immediately with pre-populated sample courses.</p>
         </article>
       </div>
