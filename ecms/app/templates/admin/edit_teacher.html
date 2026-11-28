@@ -1,70 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Edit Instructor</title><link rel="stylesheet" href="{{ url_for('static', filename='professional.css') }}"><link rel="icon" href="{{ url_for('static',filename='brand/learnova-icon.svg') }}"></head>
+<body><header class="topbar"><a class="brand" href="{{ url_for('admin.dashboard') }}">Learnova LMS</a><nav class="admin-nav"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a><a href="{{ url_for('admin.manage_students') }}">Students</a><a href="{{ url_for('admin.manage_teachers') }}">Instructors</a><a href="{{ url_for('admin.manage_courses') }}">Courses</a><a href="{{ url_for('admin.reports_teachers') }}">Reports</a></nav></header><main class="container"><div class="page-heading"><div><span class="eyebrow">INSTRUCTOR MANAGEMENT</span><h1>Edit Instructor Profile</h1><p>Update professional, academic, and account details.</p></div></div><section class="form-card wide-form"><form method="POST">
+<div class="form-grid">
+  <div class="field full"><label>Full Name <span>*</span></label><input name="name_person" value="{{ teacher.name_person if teacher else '' }}" required></div>
+  <div class="field"><label>Employee ID <span>*</span></label><input name="employee_id" value="{{ teacher.employee_id if teacher else '' }}" placeholder="e.g. EMP-1042" required></div>
+  <div class="field"><label>Username <span>*</span></label><input name="username" value="{{ teacher.username if teacher else '' }}" required></div>
+  <div class="field"><label>Email <span>*</span></label><input type="email" name="email" value="{{ teacher.email if teacher else '' }}" required></div>
+  <div class="field"><label>Password {% if teacher %}<small>(leave blank to keep current)</small>{% else %}<span>*</span>{% endif %}</label><input type="password" name="password" {% if not teacher %}required{% endif %}></div>
+  <div class="field"><label>Phone Number</label><input name="phone" value="{{ teacher.phone if teacher else '' }}"></div>
+  <div class="field"><label>Department</label><select name="department"><option value="">Select department</option>{% for item in ['Software Engineering','Computer Science','Artificial Intelligence','Cyber Security','Information Technology','Data Science','Business'] %}<option value="{{ item }}" {% if teacher and teacher.department == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Academic Rank</label><select name="academic_rank"><option value="">Select rank</option>{% for item in ['Teaching Assistant','Lecturer','Assistant Professor','Associate Professor','Professor'] %}<option value="{{ item }}" {% if teacher and teacher.academic_rank == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Office Number</label><input name="office_number" value="{{ teacher.office_number if teacher else '' }}"></div>
+  <div class="field"><label>Gender</label><select name="gender"><option value="">Select gender</option>{% for item in ['Male','Female'] %}<option value="{{ item }}" {% if teacher and teacher.gender == item %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Status</label><select name="status">{% for item in ['Active','Inactive'] %}<option value="{{ item }}" {% if (teacher and teacher.status == item) or (not teacher and item == 'Active') %}selected{% endif %}>{{ item }}</option>{% endfor %}</select></div>
+</div><div class="form-actions"><a class="secondary-btn" href="{{ url_for('admin.manage_teachers') }}">Cancel</a><button type="submit">Save Changes</button></div></form></section></main></body></html>
 <!doctype html>
 <html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Instructor Sign In | Learnova LMS</title>
+  <title>Edit Instructor Profile | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
       --primary: #4f46e5;
-      --primary-hover: #4338ca;
-      --accent: #06b6d4;
       --indigo-soft: #6366f1;
-      --primary-glow: rgba(79, 70, 229, 0.32);
+      --accent: #06b6d4;
+      --primary-glow: rgba(79, 70, 229, 0.28);
       --bg-page: #f3f6fc;
       --bg-grid-dot: rgba(79, 70, 229, 0.14);
       --bg-grid-line: rgba(203, 213, 225, 0.32);
-      --card-bg: rgba(255, 255, 255, 0.86);
-      --card-border: rgba(255, 255, 255, 0.95);
-      --card-ring: rgba(203, 213, 225, 0.75);
-      --input-bg: rgba(255, 255, 255, 0.92);
+      --card-bg: rgba(255, 255, 255, 0.88);
+      --card-ring: rgba(203, 213, 225, 0.8);
+      --input-bg: rgba(255, 255, 255, 0.95);
       --input-border: #dbe3f0;
       --text-main: #0f172a;
       --text-muted: #64748b;
-      --demo-bg: linear-gradient(135deg, rgba(238, 242, 255, 0.82), rgba(236, 254, 255, 0.72));
-      --demo-border: rgba(99, 102, 241, 0.34);
-      --shadow-shell: 0 30px 70px -18px rgba(15, 23, 42, 0.14), 0 8px 24px -6px rgba(79, 70, 229, 0.08);
+      --shadow-card: 0 24px 60px -18px rgba(15, 23, 42, 0.12);
     }
 
     html[data-theme="dark"] {
       --bg-page: #060913;
       --bg-grid-dot: rgba(129, 140, 248, 0.15);
       --bg-grid-line: rgba(30, 41, 59, 0.5);
-      --card-bg: rgba(13, 20, 36, 0.84);
-      --card-border: rgba(51, 65, 85, 0.65);
-      --card-ring: rgba(51, 65, 85, 0.65);
-      --input-bg: rgba(23, 33, 56, 0.85);
+      --card-bg: rgba(13, 20, 36, 0.88);
+      --card-ring: rgba(51, 65, 85, 0.7);
+      --input-bg: rgba(23, 33, 56, 0.88);
       --input-border: #2a3954;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --demo-bg: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(6, 182, 212, 0.08));
-      --demo-border: rgba(129, 140, 248, 0.35);
-      --shadow-shell: 0 32px 72px -14px rgba(0, 0, 0, 0.65);
+      --shadow-card: 0 26px 64px -16px rgba(0, 0, 0, 0.65);
     }
 
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      font-family: 'Plus Jakarta Sans', 'Cairo', system-ui, -apple-system, sans-serif;
+    }
+
+    html[dir="rtl"] * {
+      letter-spacing: 0 !important;
     }
 
     body {
       min-height: 100vh;
       background: var(--bg-page);
       color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
       position: relative;
       overflow-x: hidden;
-      padding: 24px 16px;
+      padding: 20px 16px 48px;
       transition: background 0.25s ease, color 0.25s ease;
     }
 
@@ -84,52 +94,84 @@
         linear-gradient(to right, var(--bg-grid-line) 1px, transparent 1px),
         linear-gradient(to bottom, var(--bg-grid-line) 1px, transparent 1px);
       background-size: 30px 30px, 90px 90px, 90px 90px;
-      mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 96%);
-      -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 96%);
+      mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 45%, transparent 96%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 45%, transparent 96%);
       pointer-events: none;
       z-index: 0;
     }
 
-    .ambient-glow {
-      position: fixed;
-      width: 660px;
-      height: 460px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 40%, rgba(34, 211, 238, 0.16), transparent 60%),
-                  radial-gradient(circle at 70% 60%, rgba(99, 102, 241, 0.2), transparent 65%);
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      filter: blur(75px);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .top-bar {
+    .top-nav {
       position: relative;
       z-index: 2;
-      width: 100%;
-      max-width: 940px;
+      max-width: 980px;
+      margin: 0 auto 24px;
+      padding: 12px 18px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--card-ring);
+      box-shadow: var(--shadow-card);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .brand-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .brand-link img {
+      width: 28px;
+      height: 28px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .nav-item {
+      text-decoration: none;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding: 7px 12px;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      color: var(--indigo-soft);
+      background: rgba(99, 102, 241, 0.1);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .pill-btn {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      text-decoration: none;
-      font-size: 12.5px;
+      gap: 6px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-ring);
-      padding: 8px 15px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      padding: 7px 12px;
       border-radius: 999px;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -137,443 +179,190 @@
 
     .pill-btn:hover {
       color: var(--primary);
-      border-color: var(--demo-border);
-      transform: translateY(-1px);
+      border-color: var(--indigo-soft);
     }
 
-    .auth-shell {
+    .page-container {
       position: relative;
       z-index: 2;
-      width: 100%;
-      max-width: 940px;
-      display: grid;
-      grid-template-columns: 1.03fr 1fr;
-      border-radius: 30px;
-      overflow: hidden;
-      border: 1px solid var(--card-ring);
-      box-shadow: var(--shadow-shell);
-      background: var(--card-bg);
-      backdrop-filter: blur(26px);
-      -webkit-backdrop-filter: blur(26px);
+      max-width: 860px;
+      margin: 0 auto;
     }
 
-    .showcase-panel {
-      position: relative;
-      overflow: hidden;
-      background: linear-gradient(155deg, #070d1c 0%, #0f1d3d 48%, #1b1b4b 100%);
-      color: #ffffff;
-      padding: 36px 32px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+    .page-header {
+      margin-bottom: 22px;
     }
 
-    .showcase-panel::before {
-      content: '';
-      position: absolute;
-      width: 280px;
-      height: 280px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(34, 211, 238, 0.24) 0%, transparent 70%);
-      top: -90px;
-      right: -70px;
-      pointer-events: none;
-    }
-
-    .showcase-panel::after {
-      content: '';
-      position: absolute;
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.28) 0%, transparent 70%);
-      bottom: -80px;
-      left: -60px;
-      pointer-events: none;
-    }
-
-    .showcase-tag {
+    .eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      width: fit-content;
-      padding: 6px 13px;
-      border-radius: 999px;
-      background: rgba(34, 211, 238, 0.12);
-      border: 1px solid rgba(34, 211, 238, 0.3);
-      color: #67e8f9;
+      gap: 7px;
       font-size: 11.5px;
-      font-weight: 700;
-      margin-bottom: 18px;
-    }
-
-    .showcase-panel h2 {
-      font-size: 26px;
       font-weight: 800;
-      letter-spacing: -0.6px;
-      line-height: 1.25;
+      text-transform: uppercase;
+      color: var(--indigo-soft);
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.22);
+      padding: 5px 12px;
+      border-radius: 999px;
       margin-bottom: 10px;
     }
 
-    .showcase-panel p {
-      font-size: 13px;
-      color: rgba(226, 232, 240, 0.85);
-      line-height: 1.65;
-      margin-bottom: 20px;
-    }
-
-    .bento-metrics {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .metric-card {
-      background: rgba(255, 255, 255, 0.055);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 14px;
-      padding: 11px 10px;
-      text-align: center;
-      transition: transform 0.2s ease, border-color 0.2s ease;
-    }
-
-    .metric-card:hover {
-      transform: translateY(-2px);
-      border-color: rgba(103, 232, 249, 0.4);
-    }
-
-    .metric-card strong {
-      display: block;
-      font-size: 14.5px;
-      font-weight: 800;
-      color: #67e8f9;
-      margin-bottom: 2px;
-    }
-
-    .metric-card span {
-      font-size: 11px;
-      color: rgba(226, 232, 240, 0.82);
-      font-weight: 600;
-    }
-
-    .feature-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      background: rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 11px 13px;
-      transition: background 0.2s ease;
-    }
-
-    .feature-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-
-    .feature-ico-box {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(34, 211, 238, 0.2), rgba(99, 102, 241, 0.22));
-      border: 1px solid rgba(103, 232, 249, 0.25);
-      color: #67e8f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .feature-item strong {
-      display: block;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .feature-item span {
-      font-size: 11.8px;
-      color: rgba(226, 232, 240, 0.8);
-      line-height: 1.45;
-    }
-
-    .showcase-foot {
-      margin-top: 22px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.14);
-      font-size: 12px;
-      color: rgba(203, 213, 225, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 600;
-    }
-
-    .form-panel {
-      padding: 34px 34px 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .card-top-header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .brand-icon-inner {
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 12px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 10px 22px rgba(79, 70, 229, 0.14);
-    }
-
-    .brand-icon-inner img {
-      width: 34px;
-      height: 34px;
-    }
-
-    .card-top-header h1 {
-      font-size: 24px;
+    .page-header h1 {
+      font-size: 28px;
       font-weight: 800;
       letter-spacing: -0.6px;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
     }
 
-    .card-top-header p {
-      font-size: 13px;
+    .page-header p {
+      font-size: 13.5px;
       color: var(--text-muted);
     }
 
     .flash {
-      padding: 11px 14px;
-      border-radius: 13px;
-      font-size: 12.5px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 15px;
+      margin-bottom: 18px;
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-    .flash.danger, .flash.error {
-      background: rgba(239, 68, 68, 0.12);
-      color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.25);
     }
     .flash.success {
       background: rgba(16, 185, 129, 0.12);
       color: #10b981;
       border: 1px solid rgba(16, 185, 129, 0.25);
     }
-    .flash.info {
-      background: rgba(99, 102, 241, 0.12);
-      color: var(--indigo-soft);
-      border: 1px solid rgba(99, 102, 241, 0.25);
+    .flash.danger, .flash.warning {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.25);
     }
 
-    .form-group {
-      margin-bottom: 14px;
+    .form-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-ring);
+      border-radius: 26px;
+      padding: 30px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px 20px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-group.full-width {
+      grid-column: 1 / -1;
     }
 
     .field-label {
-      display: block;
-      font-size: 12.5px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--text-main);
-      margin-bottom: 6px;
+      margin-bottom: 7px;
+      line-height: 1.4;
     }
 
-    .input-field-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      background: var(--input-bg);
-      border: 1.5px solid var(--input-border);
+    .req-star {
+      color: #ef4444;
+      font-weight: 800;
+      display: inline;
+    }
+
+    .field-hint {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-inline-start: 4px;
+    }
+
+    .input-control,
+    .select-control {
+      width: 100%;
+      padding: 11.5px 14px;
       border-radius: 13px;
+      border: 1.5px solid var(--input-border);
+      background: var(--input-bg);
+      color: var(--text-main);
+      font-size: 13.5px;
+      font-weight: 500;
+      outline: none;
       transition: all 0.2s ease;
     }
 
-    .input-field-wrap:focus-within {
+    .input-control:focus,
+    .select-control:focus {
       border-color: var(--primary);
       box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
     }
 
-    .input-field-wrap .field-icon-wrap {
-      padding-left: 14px;
-      color: var(--text-muted);
+    .form-actions {
+      margin-top: 26px;
+      padding-top: 20px;
+      border-top: 1px solid var(--card-ring);
       display: flex;
       align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
     }
 
-    .input-field-wrap:focus-within .field-icon-wrap {
-      color: var(--primary);
-    }
-
-    .input-field-wrap input {
-      width: 100%;
-      padding: 11.5px 13px;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 13.5px;
-      color: var(--text-main);
-      font-weight: 500;
-    }
-
-    .btn-password-eye {
-      background: none;
-      border: none;
-      padding: 0 14px;
-      cursor: pointer;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-    }
-
-    .btn-password-eye:hover {
-      color: var(--primary);
-    }
-
-    .form-meta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 4px 0 16px;
-      font-size: 12px;
-    }
-
-    .remember-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      color: var(--text-muted);
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .forgot-link {
-      font-weight: 700;
-      color: var(--indigo-soft);
+    .btn-cancel {
       text-decoration: none;
+      padding: 11px 18px;
+      border-radius: 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      transition: all 0.2s ease;
     }
 
-    .forgot-link:hover {
-      text-decoration: underline;
+    .btn-cancel:hover {
+      color: var(--text-main);
     }
 
-    .btn-submit-action {
-      width: 100%;
+    .btn-save {
+      padding: 11.5px 22px;
+      border-radius: 12px;
+      border: none;
       background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
       color: #ffffff;
-      border: none;
-      padding: 12.5px 16px;
-      border-radius: 13px;
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
       box-shadow: 0 10px 22px var(--primary-glow);
-      transition: all 0.2s ease;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 9px;
-    }
-
-    .btn-submit-action:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.42);
-    }
-
-    .btn-submit-action:disabled,
-    .btn-demo-instructor:disabled {
-      opacity: 0.72;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .demo-access-box {
-      margin-top: 16px;
-      padding: 12px 14px;
-      border-radius: 16px;
-      border: 1.5px dashed var(--demo-border);
-      background: var(--demo-bg);
-      text-align: center;
-    }
-
-    .demo-access-caption {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--indigo-soft);
-      margin-bottom: 3px;
-    }
-
-    .demo-access-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 9px;
-    }
-
-    .btn-demo-instructor {
-      width: 100%;
-      background: var(--input-bg);
-      color: var(--indigo-soft);
-      border: 1.5px solid var(--demo-border);
-      padding: 10px 14px;
-      border-radius: 11px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       gap: 8px;
       transition: all 0.2s ease;
     }
 
-    .btn-demo-instructor:hover {
-      background: rgba(99, 102, 241, 0.14);
+    .btn-save:hover {
       transform: translateY(-1px);
     }
 
-    .card-footer-sec {
-      margin-top: 16px;
-      padding-top: 13px;
-      border-top: 1px solid var(--card-ring);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .card-footer-sec svg {
-      color: #10b981;
-    }
-
-    @media (max-width: 840px) {
-      .auth-shell {
+    @media (max-width: 720px) {
+      .form-grid {
         grid-template-columns: 1fr;
-        max-width: 450px;
       }
-      .showcase-panel {
-        display: none;
-      }
-      .form-panel {
-        padding: 28px 22px 24px;
+      .form-card {
+        padding: 22px 18px;
       }
     }
   </style>
@@ -581,238 +370,220 @@
 
 <body>
   <div class="bg-grid"></div>
-  <div class="ambient-glow"></div>
 
-  <div class="top-bar">
-    <a href="/" class="pill-btn">
-      <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-      <span>Return to Main Hub</span>
+  <nav class="top-nav">
+    <a href="/" class="brand-link">
+      <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
+      <span>Learnova LMS</span>
     </a>
 
-    <button type="button" class="pill-btn" id="themeToggleBtn" aria-label="Toggle Theme">
-      <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-      <span id="themeLabel">Dark Mode</span>
-    </button>
-  </div>
-
-  <div class="auth-shell">
-    <aside class="showcase-panel">
-      <div>
-        <div class="showcase-tag">
-          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="12" x="3" y="4" rx="2"/><line x1="2" x2="22" y1="20" y2="20"/></svg>
-          <span>Learnova Instructor Studio</span>
-        </div>
-        <h2>Teach, Assess, and Guide with Precision.</h2>
-        <p>Manage course units, publish assignments and assessments, review submissions, and monitor learner progress from one studio.</p>
-
-        <div class="bento-metrics">
-          <div class="metric-card">
-            <strong>Courses</strong>
-            <span>Unit Builder</span>
-          </div>
-          <div class="metric-card">
-            <strong>Grading</strong>
-            <span>Quizzes & Exams</span>
-          </div>
-          <div class="metric-card">
-            <strong>Insights</strong>
-            <span>Learner Analytics</span>
-          </div>
-        </div>
-
-        <div class="feature-list">
-          <div class="feature-item">
-            <div class="feature-ico-box">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-            </div>
-            <div>
-              <strong>Course & Unit Management</strong>
-              <span>Organize learning modules, upload materials, and structure syllabi.</span>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-ico-box">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </div>
-            <div>
-              <strong>Submissions, Quizzes & Exams</strong>
-              <span>Grade student work, publish feedback, and manage exam windows.</span>
-            </div>
-          </div>
-          <div class="feature-item">
-            <div class="feature-ico-box">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            </div>
-            <div>
-              <strong>Instant Demo Instructor Mode</strong>
-              <span>Preview the instructor workspace with isolated sample courses.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="showcase-foot">
-        <span>Learnova LMS</span>
-        <span>Instructor Studio</span>
-      </div>
-    </aside>
-
-    <div class="form-panel">
-      <div class="card-top-header">
-        <div class="brand-icon-inner">
-          <img src="{{ url_for('static', filename='brand/learnova-icon.svg') }}" alt="Learnova">
-        </div>
-        <h1>Instructor Portal</h1>
-        <p>Sign in to manage courses, assessments & learners</p>
-      </div>
-
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-            <div class="flash {{ category }}">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              <span>{{ message }}</span>
-            </div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-
-      <form method="POST" id="instructorLoginForm">
-        <div class="form-group">
-          <label class="field-label" for="email">Academic Email</label>
-          <div class="input-field-wrap">
-            <span class="field-icon-wrap">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            </span>
-            <input id="email" type="email" name="email" placeholder="instructor@learnova.com" required autofocus>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="field-label" for="password">Password</label>
-          <div class="input-field-wrap">
-            <span class="field-icon-wrap">
-              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            </span>
-            <input id="password" type="password" name="password" placeholder="Enter your password" required>
-            <button type="button" class="btn-password-eye" id="togglePasswordBtn" aria-label="Toggle password visibility">
-              <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="form-meta-row">
-          <label class="remember-label">
-            <input type="checkbox" name="remember" value="1">
-            <span>Keep me signed in</span>
-          </label>
-          <a href="{{ url_for('students.help_center') }}" class="forgot-link">Need Help?</a>
-        </div>
-
-        <button class="btn-submit-action" type="submit" id="signInBtn">
-          <span>Sign In to Instructor Studio</span>
-          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </button>
-      </form>
-
-      <div class="demo-access-box">
-        <div class="demo-access-caption">Evaluating Learnova Platform?</div>
-        <div class="demo-access-sub">Sign in as Demo Instructor with isolated sample data</div>
-        <form method="POST" action="/teacher/demo-login" id="demoLoginForm">
-          <button type="submit" class="btn-demo-instructor" id="demoAccessBtn">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-            <span>Instant Demo Instructor Access</span>
-          </button>
-        </form>
-      </div>
-
-      <div class="card-footer-sec">
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Authenticated Educator Access</span>
-      </div>
+    <div class="nav-links">
+      <a href="/" class="nav-item" data-i18n="navDash">Dashboard</a>
+      <a href="/student/dashboard" class="nav-item" data-i18n="navStudents">Students</a>
+      <a href="/teacher/dashboard" class="nav-item active" data-i18n="navInstructors">Instructors</a>
+      <a href="/student/courses" class="nav-item" data-i18n="navCourses">Courses</a>
+      <a href="/student/reports" class="nav-item" data-i18n="navReports">Reports</a>
     </div>
-  </div>
+
+    <div class="nav-controls">
+      <button type="button" class="pill-btn" id="langToggleBtn">
+        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        <span id="langLabel">العربية</span>
+      </button>
+      <button type="button" class="pill-btn" id="themeToggleBtn">
+        <svg class="svg-ico" id="themeIconSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
+    </div>
+  </nav>
+
+  <main class="page-container">
+    <div class="page-header">
+      <div class="eyebrow" data-i18n="eyebrow">Instructor Management</div>
+      <h1 data-i18n="title">Edit Instructor Profile</h1>
+      <p data-i18n="subtitle">Update professional, academic, and account details.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="form-card">
+      <div class="form-grid">
+        <div class="field-group full-width">
+          <label class="field-label" for="full_name">
+            <span data-i18n="fullName">Full Name</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="full_name" name="name_person" type="text" class="input-control"
+                 value="{{ instructor.name_person if instructor is defined and instructor.name_person else 'Dr. Ahmed Mohamed Ali' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="employee_id">
+            <span data-i18n="empId">Employee ID</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="employee_id" name="employee_id" type="text" class="input-control"
+                 value="{{ instructor.employee_id if instructor is defined and instructor.employee_id else 'ahmed.ali' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="username">
+            <span data-i18n="username">Username</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="username" name="username" type="text" class="input-control"
+                 value="{{ instructor.username if instructor is defined and instructor.username else 'ahmed.ali' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="email">
+            <span data-i18n="email">Email</span>
+            <span class="req-star">*</span>
+          </label>
+          <input id="email" name="email" type="email" class="input-control"
+                 value="{{ instructor.email if instructor is defined and instructor.email else 'ahmed.ali@example.com' }}" required>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">
+            <span data-i18n="password">Password</span>
+            <span class="field-hint" data-i18n="passHint">(leave blank to keep current)</span>
+          </label>
+          <input id="password" name="new_password" type="password" class="input-control" placeholder="••••••••">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="phone">
+            <span data-i18n="phone">Phone Number</span>
+          </label>
+          <input id="phone" name="phone" type="text" class="input-control"
+                 value="{{ instructor.phone if instructor is defined and instructor.phone else '+971501000001' }}">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="department">
+            <span data-i18n="department">Department</span>
+          </label>
+          {% set current_dept = instructor.department if instructor is defined and instructor.department else 'Software Engineering' %}
+          <select id="department" name="department" class="select-control">
+            <option value="Software Engineering" {% if current_dept == 'Software Engineering' %}selected{% endif %}>Software Engineering</option>
+            <option value="Computer Science" {% if current_dept == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+            <option value="Information Technology" {% if current_dept == 'Information Technology' %}selected{% endif %}>Information Technology</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="academic_rank">
+            <span data-i18n="rank">Academic Rank</span>
+          </label>
+          {% set current_rank = instructor.academic_rank if instructor is defined and instructor.academic_rank else 'Professor' %}
+          <select id="academic_rank" name="academic_rank" class="select-control">
+            <option value="Lecturer" {% if current_rank == 'Lecturer' %}selected{% endif %}>Lecturer</option>
+            <option value="Assistant Professor" {% if current_rank == 'Assistant Professor' %}selected{% endif %}>Assistant Professor</option>
+            <option value="Associate Professor" {% if current_rank == 'Associate Professor' %}selected{% endif %}>Associate Professor</option>
+            <option value="Professor" {% if current_rank == 'Professor' %}selected{% endif %}>Professor</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="office_number">
+            <span data-i18n="office">Office Number</span>
+          </label>
+          <input id="office_number" name="office_number" type="text" class="input-control"
+                 value="{{ instructor.office_number if instructor is defined and instructor.office_number else 'A-201' }}">
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="gender">
+            <span data-i18n="gender">Gender</span>
+          </label>
+          {% set current_gender = instructor.gender if instructor is defined and instructor.gender else 'Male' %}
+          <select id="gender" name="gender" class="select-control">
+            <option value="Male" {% if current_gender == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if current_gender == 'Female' %}selected{% endif %}>Female</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <a href="/teacher/dashboard" class="btn-cancel" data-i18n="cancel">Cancel</a>
+        <button type="submit" class="btn-save">
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span data-i18n="saveBtn">Save Changes</span>
+        </button>
+      </div>
+    </form>
+  </main>
 
   <script>
     const htmlRoot = document.documentElement;
-    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeBtn = document.getElementById('themeToggleBtn');
     const themeIconSvg = document.getElementById('themeIconSvg');
     const themeLabel = document.getElementById('themeLabel');
+    const langBtn = document.getElementById('langToggleBtn');
+    const langLabel = document.getElementById('langLabel');
+
+    const i18n = {
+      en: {
+        navDash: 'Dashboard', navStudents: 'Students', navInstructors: 'Instructors', navCourses: 'Courses', navReports: 'Reports',
+        eyebrow: 'Instructor Management', title: 'Edit Instructor Profile',
+        subtitle: 'Update professional, academic, and account details.',
+        fullName: 'Full Name', empId: 'Employee ID', username: 'Username', email: 'Email',
+        password: 'Password', passHint: '(leave blank to keep current)', phone: 'Phone Number',
+        department: 'Department', rank: 'Academic Rank', office: 'Office Number', gender: 'Gender',
+        cancel: 'Cancel', saveBtn: 'Save Changes', dark: 'Dark Mode', light: 'Light Mode', switchLang: 'العربية'
+      },
+      ar: {
+        navDash: 'الرئيسية', navStudents: 'الطلاب', navInstructors: 'المدرسون', navCourses: 'المقررات', navReports: 'التقارير',
+        eyebrow: 'إدارة المدرسين', title: 'تعديل ملف المدرس',
+        subtitle: 'تحديث البيانات الأكاديمية والوظيفية ومعلومات الحساب.',
+        fullName: 'الاسم الكامل', empId: 'الرقم الوظيفي', username: 'اسم المستخدم', email: 'البريد الإلكتروني',
+        password: 'كلمة المرور', passHint: '(اتركه فارغاً للإبقاء على الحالية)', phone: 'رقم الهاتف',
+        department: 'القسم الأكاديمي', rank: 'الرتبة الأكاديمية', office: 'رقم المكتب', gender: 'الجنس',
+        cancel: 'إلغاء', saveBtn: 'حفظ التغييرات', dark: 'الوضع الداكن', light: 'الوضع الفاتح', switchLang: 'English'
+      }
+    };
 
     const moonPath = '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
     const sunPath = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>';
 
+    function applyLang(lang) {
+      const dict = i18n[lang] || i18n.en;
+      htmlRoot.setAttribute('lang', lang);
+      htmlRoot.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+      localStorage.setItem('learnova_login_lang', lang);
+      langLabel.textContent = dict.switchLang;
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n');
+        if (dict[k]) el.textContent = dict[k];
+      });
+      const th = htmlRoot.getAttribute('data-theme') || 'light';
+      themeLabel.textContent = th === 'dark' ? dict.light : dict.dark;
+    }
+
     function applyTheme(theme) {
+      const lang = htmlRoot.getAttribute('lang') || 'en';
+      const dict = i18n[lang] || i18n.en;
       htmlRoot.setAttribute('data-theme', theme);
       localStorage.setItem('learnova_login_theme', theme);
-      if (theme === 'dark') {
-        themeIconSvg.innerHTML = sunPath;
-        themeLabel.textContent = 'Light Mode';
-      } else {
-        themeIconSvg.innerHTML = moonPath;
-        themeLabel.textContent = 'Dark Mode';
-      }
+      themeIconSvg.innerHTML = theme === 'dark' ? sunPath : moonPath;
+      themeLabel.textContent = theme === 'dark' ? dict.light : dict.dark;
     }
 
-    const loginForm = document.getElementById('instructorLoginForm');
-    const signInBtn = document.getElementById('signInBtn');
-    const demoForm = document.getElementById('demoLoginForm');
-    const demoBtn = document.getElementById('demoAccessBtn');
-    const initialSignInHtml = signInBtn ? signInBtn.innerHTML : '';
-    const initialDemoHtml = demoBtn ? demoBtn.innerHTML : '';
-
-    function resetActionButtons() {
-      if (signInBtn) {
-        signInBtn.disabled = false;
-        signInBtn.innerHTML = initialSignInHtml;
-      }
-      if (demoBtn) {
-        demoBtn.disabled = false;
-        demoBtn.innerHTML = initialDemoHtml;
-      }
-    }
-
+    applyLang(localStorage.getItem('learnova_login_lang') || 'en');
     applyTheme(localStorage.getItem('learnova_login_theme') || 'light');
 
-    window.addEventListener('pageshow', (e) => {
-      if (e.persisted) resetActionButtons();
-    });
-
-    if (themeToggleBtn) {
-      themeToggleBtn.addEventListener('click', () => {
-        const next = htmlRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-      });
-    }
-
-    const toggleBtn = document.getElementById('togglePasswordBtn');
-    const passwordInput = document.getElementById('password');
-    const eyeSvg = document.getElementById('eyeSvg');
-
-    const eyeOpenPath = '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>';
-    const eyeClosedPath = '<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/>';
-
-    if (toggleBtn && passwordInput && eyeSvg) {
-      toggleBtn.addEventListener('click', function () {
-        const isPassword = passwordInput.getAttribute('type') === 'password';
-        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-        eyeSvg.innerHTML = isPassword ? eyeClosedPath : eyeOpenPath;
-      });
-    }
-
-    if (loginForm && signInBtn) {
-      loginForm.addEventListener('submit', () => {
-        signInBtn.disabled = true;
-        signInBtn.innerHTML = '<span>Signing In...</span>';
-      });
-    }
-
-    if (demoForm && demoBtn) {
-      demoForm.addEventListener('submit', () => {
-        demoBtn.disabled = true;
-        demoBtn.innerHTML = '<span>Preparing Demo Instructor...</span>';
-      });
-    }
+    langBtn.addEventListener('click', () => applyLang(htmlRoot.getAttribute('lang') === 'ar' ? 'en' : 'ar'));
+    themeBtn.addEventListener('click', () => applyTheme(htmlRoot.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
   </script>
 </body>
 </html>
