@@ -111,7 +111,6 @@ def _question_payload(form, number):
         raise ValueError(f"Question {number} has an unsupported type.")
 
     if question_type == "mcq":
-        # قراءة مباشرة للخيارات إن أُرسلت بالحقول opt_a, opt_b
         opt_a = (form.get(f"opt_a_{number}") or "").strip()
         opt_b = (form.get(f"opt_b_{number}") or "").strip()
         opt_c = (form.get(f"opt_c_{number}") or "").strip()
@@ -252,6 +251,52 @@ def login():
 
         flash("Invalid credentials or not authorized as an instructor.", "danger")
     return render_template("teacher/login.html")
+
+
+@teachers_bp.route("/demo-login", methods=["POST"])
+def demo_login():
+    try:
+        db.session.rollback()
+        demo_teacher = (
+            User.query.filter(
+                User.role.ilike("teacher"),
+                User.email.in_([
+                    "instructor@learnova.edu",
+                    "teacher@learnova.edu",
+                    "demo@learnova.edu",
+                ]),
+            ).first()
+            or User.query.filter(User.role.ilike("teacher")).first()
+        )
+
+        if not demo_teacher:
+            flash("No demo instructor account is available right now.", "danger")
+            return redirect(url_for("teachers.login"))
+
+        session["is_demo"] = True
+        login_user(demo_teacher)
+
+        try:
+            db.session.add(
+                Notification(
+                    user_id=demo_teacher.id,
+                    title="Demo Studio Login",
+                    message=f"Signed in via Demo Instructor Access on {datetime.now().strftime('%d %b %Y, %I:%M %p')}.",
+                    link=f"/teacher/{demo_teacher.id}/dashboard",
+                    is_read=False,
+                    created_at=datetime.now(timezone.utc),
+                )
+            )
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+        flash("Signed in successfully with Demo Instructor Account.", "success")
+        return redirect(url_for("teachers.dashboard", teacher_id=demo_teacher.id))
+    except Exception:
+        db.session.rollback()
+        flash("Could not sign in with the demo instructor account.", "danger")
+        return redirect(url_for("teachers.login"))
 
 
 @teachers_bp.route("/logout")
@@ -1092,7 +1137,7 @@ def preview_exam(teacher_id, course_id, exam_id):
     return render_template("teacher/preview_exam.html", teacher=teacher, course=course, exam=exam)
 
 
-# ------------------------- Edit Exam (مع حفظ وتحديث كافة الأسئلة) -------------------------
+# ------------------------- Edit Exam -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/exams/<int:exam_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_exam_page(teacher_id, course_id, exam_id):
@@ -1132,7 +1177,6 @@ def edit_exam_page(teacher_id, course_id, exam_id):
             exam.end_date = end_date
             exam.total_score = calculated_total if requested_total != calculated_total else requested_total
 
-            # مسح الأسئلة السابقة وإعادة حفظ الأسئلة المحدثة
             ExamQuestion.query.filter_by(exam_id=exam.id).delete(synchronize_session=False)
 
             for payload in questions_payload:
@@ -1152,7 +1196,7 @@ def edit_exam_page(teacher_id, course_id, exam_id):
     return render_template("teacher/edit_exam.html", teacher=teacher, course=course, exam=exam, **_teacher_nav_context(teacher))
 
 
-# ------------------------- Edit Quiz (مع حفظ وتحديث كافة الأسئلة) -------------------------
+# ------------------------- Edit Quiz -------------------------
 @teachers_bp.route("/<int:teacher_id>/courses/<int:course_id>/quizzes/<int:quiz_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_quiz(teacher_id, course_id, quiz_id):
@@ -1192,14 +1236,12 @@ def edit_quiz(teacher_id, course_id, quiz_id):
             quiz.end_date = end_date
             quiz.total_score = calculated_total if requested_total != calculated_total else requested_total
 
-            # تحديث الواجب المرتبط بالكويز إن وُجد
             if quiz.assignment:
                 quiz.assignment.title = title
                 quiz.assignment.description = description
                 quiz.assignment.start_date = start_date
                 quiz.assignment.due_date = end_date
 
-            # مسح الأسئلة القديمة وإضافة الأسئلة المحدثة
             QuizQuestion.query.filter_by(quiz_id=quiz.id).delete(synchronize_session=False)
 
             for payload in questions_payload:
