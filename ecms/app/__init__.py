@@ -65,7 +65,6 @@ def create_app():
 
     database_url = os.environ.get('DATABASE_URL')
     if database_url:
-        # توجيه الاتصال لاستخدام psycopg2 أو psycopg بشكل صريح ومتوافق
         if database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql+psycopg2://", 1)
         elif database_url.startswith("postgresql://") and not database_url.startswith("postgresql+"):
@@ -101,13 +100,25 @@ def create_app():
     app.register_blueprint(students_bp)
     app.register_blueprint(forum_bp)
 
+    @app.after_request
+    def inject_learnova_footer(response):
+        if (
+            response.content_type
+            and "text/html" in response.content_type
+            and not response.direct_passthrough
+        ):
+            html = response.get_data(as_text=True)
+            if "learnova-site-footer" not in html and "</body>" in html:
+                footer_html = render_template("_footer.html")
+                response.set_data(html.replace("</body>", f"{footer_html}\n</body>", 1))
+        return response
+
     @app.route('/')
     def home():
         return render_template('choose.html')
 
     with app.app_context():
         db.create_all()
-        # تشغيل الترقية التلقائية فقط في حال استخدام SQLite
         if not database_url:
             try:
                 _ensure_user_profile_columns()
