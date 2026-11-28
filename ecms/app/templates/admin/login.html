@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Admin Vault | Learnova LMS</title>
+  <title>Admin Console | Learnova LMS</title>
   <link rel="icon" href="{{ url_for('static', filename='brand/learnova-icon.svg') }}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,45 +11,39 @@
 
   <style>
     :root {
-      --vault-cyan: #0891b2;
-      --vault-cyan-bright: #06b6d4;
-      --vault-teal: #0d9488;
-      --vault-emerald: #10b981;
-      --vault-glow: rgba(6, 182, 212, 0.25);
-      --vault-emerald-glow: rgba(16, 185, 129, 0.16);
-      --bg-page: #e8eef5;
-      --bg-dot: rgba(15, 23, 42, 0.13);
-      --card-bg: rgba(255, 255, 255, 0.88);
-      --card-highlight: rgba(255, 255, 255, 0.98);
-      --card-ring: rgba(15, 23, 42, 0.09);
-      --surface-chip: rgba(241, 245, 249, 0.9);
-      --surface-chip-hover: rgba(224, 242, 254, 0.65);
+      --adm-accent: #0891b2;
+      --adm-accent-bright: #06b6d4;
+      --adm-emerald: #10b981;
+      --adm-glow: rgba(6, 182, 212, 0.22);
+      --bg-page: #f4f6f9;
+      --bg-grid: rgba(15, 23, 42, 0.045);
+      --card-bg: rgba(255, 255, 255, 0.92);
+      --card-border: rgba(15, 23, 42, 0.09);
+      --card-sheen: rgba(255, 255, 255, 0.95);
+      --surface-strip: #f8fafc;
       --input-bg: #ffffff;
       --input-border: #cbd5e1;
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --shadow-card: 0 36px 84px -22px rgba(15, 23, 42, 0.2), 0 12px 28px -8px rgba(8, 145, 178, 0.14);
+      --text-main: #090d16;
+      --text-muted: #526071;
+      --shadow-vault: 0 24px 64px -20px rgba(9, 13, 22, 0.14), 0 0 0 1px rgba(15, 23, 42, 0.04);
     }
 
     html[data-theme="dark"] {
-      --vault-cyan: #22d3ee;
-      --vault-cyan-bright: #67e8f9;
-      --vault-teal: #2dd4bf;
-      --vault-emerald: #34d399;
-      --vault-glow: rgba(34, 211, 238, 0.24);
-      --vault-emerald-glow: rgba(52, 211, 153, 0.16);
-      --bg-page: #03060c;
-      --bg-dot: rgba(34, 211, 238, 0.13);
-      --card-bg: rgba(9, 15, 28, 0.9);
-      --card-highlight: rgba(34, 211, 238, 0.14);
-      --card-ring: rgba(148, 163, 184, 0.15);
-      --surface-chip: rgba(15, 23, 42, 0.82);
-      --surface-chip-hover: rgba(14, 116, 144, 0.22);
-      --input-bg: rgba(15, 23, 42, 0.95);
+      --adm-accent: #22d3ee;
+      --adm-accent-bright: #67e8f9;
+      --adm-emerald: #34d399;
+      --adm-glow: rgba(34, 211, 238, 0.2);
+      --bg-page: #05070c;
+      --bg-grid: rgba(148, 163, 184, 0.05);
+      --card-bg: rgba(12, 16, 26, 0.9);
+      --card-border: rgba(148, 163, 184, 0.14);
+      --card-sheen: rgba(255, 255, 255, 0.05);
+      --surface-strip: rgba(18, 24, 38, 0.85);
+      --input-bg: #090d16;
       --input-border: #1e293b;
       --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --shadow-card: 0 40px 92px -20px rgba(0, 0, 0, 0.86), 0 0 0 1px rgba(34, 211, 238, 0.12);
+      --text-muted: #8b9bb0;
+      --shadow-vault: 0 32px 80px -18px rgba(0, 0, 0, 0.88), 0 0 0 1px rgba(255, 255, 255, 0.04);
     }
 
     *, *::before, *::after {
@@ -61,7 +55,11 @@
 
     body {
       min-height: 100vh;
-      background: var(--bg-page);
+      background-color: var(--bg-page);
+      background-image:
+        linear-gradient(to right, var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--bg-grid) 1px, transparent 1px);
+      background-size: 48px 48px;
       color: var(--text-main);
       display: flex;
       flex-direction: column;
@@ -70,7 +68,7 @@
       position: relative;
       overflow-x: hidden;
       padding: 24px 16px;
-      transition: background 0.25s ease, color 0.25s ease;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     .svg-ico {
@@ -81,29 +79,16 @@
       vertical-align: middle;
     }
 
-    .bg-matrix {
+    .top-halo {
       position: fixed;
-      inset: 0;
-      background-image: radial-gradient(var(--bg-dot) 1.25px, transparent 1.25px);
-      background-size: 24px 24px;
-      mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 95%);
-      -webkit-mask-image: radial-gradient(ellipse 78% 72% at 50% 50%, #000 45%, transparent 95%);
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ambient-orb {
-      position: fixed;
-      width: 640px;
-      height: 440px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 26% 35%, var(--vault-glow), transparent 62%),
-        radial-gradient(circle at 74% 65%, var(--vault-emerald-glow), transparent 65%);
-      top: 50%;
+      top: -140px;
       left: 50%;
-      transform: translate(-50%, -50%);
-      filter: blur(82px);
+      transform: translateX(-50%);
+      width: 680px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, var(--adm-glow) 0%, transparent 72%);
+      filter: blur(60px);
       pointer-events: none;
       z-index: 0;
     }
@@ -112,12 +97,12 @@
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 16px;
     }
 
     .pill-btn {
@@ -125,140 +110,128 @@
       align-items: center;
       gap: 7px;
       text-decoration: none;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--text-muted);
       background: var(--card-bg);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border: 1px solid var(--card-ring);
-      padding: 8px 15px;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      padding: 7px 14px;
       border-radius: 999px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
     }
 
     .pill-btn:hover {
-      color: var(--vault-cyan);
-      border-color: var(--vault-cyan-bright);
-      transform: translateY(-1px);
+      color: var(--text-main);
+      border-color: var(--adm-accent);
     }
 
-    /* Next-Gen Floating Security Vault Card */
-    .vault-card {
+    .admin-card {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 480px;
-      overflow: hidden;
+      max-width: 440px;
       background: var(--card-bg);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid var(--card-ring);
-      box-shadow: inset 0 1px 0 var(--card-highlight), var(--shadow-card);
-      border-radius: 30px;
-      padding: 32px 28px 26px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 var(--card-sheen), var(--shadow-vault);
+      overflow: hidden;
     }
 
-    .vault-card::before {
-      content: '';
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent 5%, var(--vault-cyan-bright) 35%, var(--vault-emerald) 65%, transparent 95%);
-      opacity: 0.9;
+    .card-body {
+      padding: 28px 26px 24px;
     }
 
-    .vault-top-row {
+    .brand-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 22px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .vault-badge {
-      display: inline-flex;
+    .brand-mark {
+      display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      color: var(--vault-cyan);
-      background: rgba(6, 182, 212, 0.11);
-      border: 1px solid rgba(6, 182, 212, 0.3);
-      padding: 5px 11px;
-      border-radius: 999px;
+      gap: 11px;
     }
 
-    .live-indicator {
+    .mark-box {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: var(--surface-strip);
+      border: 1px solid var(--card-border);
+      color: var(--adm-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mark-box svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .brand-title {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .health-pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-size: 11px;
       font-weight: 700;
-      color: var(--vault-emerald);
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.26);
-      padding: 5px 11px;
+      color: var(--adm-emerald);
+      background: rgba(16, 185, 129, 0.09);
+      border: 1px solid rgba(16, 185, 129, 0.24);
+      padding: 4px 10px;
       border-radius: 999px;
     }
 
-    @keyframes pulseDot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.65; }
-    }
-
-    .live-dot {
-      width: 6.5px;
-      height: 6.5px;
+    .health-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--vault-emerald);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22);
-      animation: pulseDot 2.2s ease-in-out infinite;
+      background: var(--adm-emerald);
     }
 
-    .vault-hero {
-      text-align: center;
-      margin-bottom: 22px;
+    .heading-block {
+      margin-bottom: 20px;
     }
 
-    .vault-icon-box {
-      width: 62px;
-      height: 62px;
-      margin: 0 auto 14px;
-      border-radius: 20px;
-      background: linear-gradient(145deg, rgba(6, 182, 212, 0.16), rgba(16, 185, 129, 0.14));
-      border: 1px solid rgba(6, 182, 212, 0.35);
-      color: var(--vault-cyan);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 14px 28px -8px var(--vault-glow);
-    }
-
-    .vault-icon-box svg {
-      width: 28px;
-      height: 28px;
-    }
-
-    .vault-hero h1 {
-      font-size: 24px;
+    .heading-block h1 {
+      font-size: 21px;
       font-weight: 800;
-      letter-spacing: -0.6px;
-      margin-bottom: 5px;
+      letter-spacing: -0.45px;
+      margin-bottom: 4px;
     }
 
-    .vault-hero p {
-      font-size: 13px;
+    .heading-block p {
+      font-size: 12.5px;
       color: var(--text-muted);
+      line-height: 1.5;
     }
 
     .flash {
-      padding: 11px 13px;
-      border-radius: 12px;
-      font-size: 12.5px;
+      padding: 10px 12px;
+      border-radius: 11px;
+      font-size: 12px;
       font-weight: 600;
       margin-bottom: 16px;
       display: flex;
@@ -266,23 +239,23 @@
       gap: 8px;
     }
     .flash.danger, .flash.error {
-      background: rgba(239, 68, 68, 0.12);
+      background: rgba(239, 68, 68, 0.1);
       color: #ef4444;
-      border: 1px solid rgba(239, 68, 68, 0.25);
+      border: 1px solid rgba(239, 68, 68, 0.24);
     }
     .flash.success {
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.1);
       color: #10b981;
-      border: 1px solid rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.24);
     }
     .flash.info {
-      background: rgba(6, 182, 212, 0.12);
-      color: var(--vault-cyan);
-      border: 1px solid rgba(6, 182, 212, 0.25);
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--adm-accent);
+      border: 1px solid rgba(6, 182, 212, 0.24);
     }
 
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .label-row {
@@ -293,7 +266,6 @@
     }
 
     .field-label {
-      display: block;
       font-size: 12px;
       font-weight: 700;
       color: var(--text-main);
@@ -306,7 +278,7 @@
       color: #f59e0b;
       background: rgba(245, 158, 11, 0.12);
       border: 1px solid rgba(245, 158, 11, 0.28);
-      padding: 2px 8px;
+      padding: 1.5px 8px;
       border-radius: 999px;
     }
 
@@ -318,40 +290,34 @@
       display: flex;
       align-items: center;
       background: var(--input-bg);
-      border: 1.5px solid var(--input-border);
-      border-radius: 14px;
-      transition: all 0.2s ease;
+      border: 1px solid var(--input-border);
+      border-radius: 11px;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
     }
 
     .input-wrap:focus-within {
-      border-color: var(--vault-cyan);
-      box-shadow: 0 0 0 3.5px var(--vault-glow);
+      border-color: var(--adm-accent);
+      box-shadow: 0 0 0 3px var(--adm-glow);
     }
 
     .input-icon {
-      margin-left: 8px;
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
+      padding-left: 12px;
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
     }
 
     .input-wrap:focus-within .input-icon {
-      color: var(--vault-cyan);
-      background: rgba(6, 182, 212, 0.1);
+      color: var(--adm-accent);
     }
 
     .input-wrap input {
       width: 100%;
-      padding: 12px 12px;
+      padding: 11px 12px;
       border: none;
       background: transparent;
       outline: none;
-      font-size: 13.5px;
+      font-size: 13px;
       color: var(--text-main);
       font-weight: 500;
     }
@@ -359,135 +325,85 @@
     .eye-btn {
       background: none;
       border: none;
-      padding: 0 14px;
+      padding: 0 12px;
       cursor: pointer;
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      transition: color 0.2s ease;
     }
 
     .eye-btn:hover {
-      color: var(--vault-cyan);
+      color: var(--adm-accent);
     }
 
-    .btn-authorize {
+    .btn-submit {
       width: 100%;
       margin-top: 6px;
-      padding: 13px 16px;
-      border-radius: 14px;
-      border: none;
-      background: linear-gradient(135deg, #0284c7 0%, #0891b2 55%, #0d9488 100%);
-      color: #ffffff;
-      font-size: 14px;
+      padding: 11.5px 16px;
+      border-radius: 11px;
+      border: 1px solid rgba(6, 182, 212, 0.45);
+      background: var(--text-main);
+      color: var(--bg-page);
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 12px 24px -6px var(--vault-glow);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: all 0.2s ease;
+      transition: all 0.18s ease;
     }
 
-    .btn-authorize svg {
-      transition: transform 0.2s ease;
+    .btn-submit:hover {
+      border-color: var(--adm-accent);
+      box-shadow: 0 8px 22px -6px var(--adm-glow);
     }
 
-    .btn-authorize:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 30px -6px var(--vault-glow);
-    }
-
-    .btn-authorize:hover svg {
-      transform: translateX(3px);
-    }
-
-    .btn-authorize:disabled {
-      opacity: 0.72;
+    .btn-submit:disabled {
+      opacity: 0.7;
       cursor: not-allowed;
-      transform: none;
     }
 
-    .micro-stats {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-
-    .micro-stat {
-      background: var(--surface-chip);
-      border: 1px solid var(--card-ring);
-      border-radius: 13px;
-      padding: 9px 8px;
-      text-align: center;
-      transition: all 0.2s ease;
-    }
-
-    .micro-stat:hover {
-      background: var(--surface-chip-hover);
-      border-color: rgba(6, 182, 212, 0.35);
-      transform: translateY(-1px);
-    }
-
-    .micro-stat strong {
-      display: block;
-      font-size: 11.5px;
-      font-weight: 800;
-      color: var(--vault-cyan);
-    }
-
-    .micro-stat span {
-      display: block;
-      font-size: 10.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-top: 1px;
-    }
-
-    .vault-foot {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--card-ring);
+    .card-footer-strip {
+      background: var(--surface-strip);
+      border-top: 1px solid var(--card-border);
+      padding: 11px 26px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      font-size: 11.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-      flex-wrap: wrap;
-    }
-
-    .vault-foot-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .vault-foot-left svg {
-      color: var(--vault-emerald);
-    }
-
-    .scope-tag {
       font-size: 11px;
       color: var(--text-muted);
-      opacity: 0.85;
+      font-weight: 600;
     }
 
-    @media (max-width: 500px) {
-      .vault-card {
-        padding: 26px 20px 22px;
-        border-radius: 24px;
+    .foot-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .foot-item svg {
+      color: var(--adm-emerald);
+      width: 14px;
+      height: 14px;
+    }
+
+    @media (max-width: 480px) {
+      .card-body {
+        padding: 22px 18px 20px;
+      }
+      .card-footer-strip {
+        padding: 10px 18px;
+        flex-direction: column;
+        align-items: flex-start;
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="bg-matrix"></div>
-  <div class="ambient-orb"></div>
+  <div class="top-halo"></div>
 
   <div class="top-bar">
     <a href="/" class="pill-btn">
@@ -501,95 +417,84 @@
     </button>
   </div>
 
-  <main class="vault-card">
-    <div class="vault-top-row">
-      <span class="vault-badge">
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span>Admin Vault</span>
-      </span>
-
-      <span class="live-indicator">
-        <span class="live-dot"></span>
-        <span>System Operational</span>
-      </span>
-    </div>
-
-    <div class="vault-hero">
-      <div class="vault-icon-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-      </div>
-      <h1>Admin Console</h1>
-      <p>Restricted access for system administrators</p>
-    </div>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <span>{{ message }}</span>
+  <main class="admin-card">
+    <div class="card-body">
+      <div class="brand-row">
+        <div class="brand-mark">
+          <div class="mark-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
+          <div>
+            <div class="brand-title">Learnova Admin</div>
+            <div class="brand-sub">Control Plane</div>
+          </div>
+        </div>
 
-    <form method="POST" id="adminLoginForm">
-      <div class="form-group">
-        <div class="label-row">
-          <label class="field-label" for="username">Administrator Username</label>
-        </div>
-        <div class="input-wrap">
-          <span class="input-icon">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </span>
-          <input id="username" type="text" name="username" placeholder="admin" required autofocus>
-        </div>
+        <span class="health-pill">
+          <span class="health-dot"></span>
+          <span>Operational</span>
+        </span>
       </div>
 
-      <div class="form-group">
-        <div class="label-row">
-          <label class="field-label" for="password">Security Password</label>
-          <span class="caps-badge" id="capsBadge">Caps Lock On</span>
-        </div>
-        <div class="input-wrap">
-          <span class="input-icon">
-            <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
-          </span>
-          <input id="password" type="password" name="password" placeholder="Enter root password" required>
-          <button type="button" class="eye-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">
-            <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
+      <div class="heading-block">
+        <h1>Sign in to Admin Console</h1>
+        <p>Restricted to authorized administrators. All sessions are audited.</p>
       </div>
 
-      <button type="submit" class="btn-authorize" id="authorizeBtn">
-        <span>Authorize &amp; Enter Console</span>
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-      </button>
-    </form>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="flash {{ category }}">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span>{{ message }}</span>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
 
-    <div class="micro-stats">
-      <div class="micro-stat">
-        <strong>RBAC</strong>
-        <span>Role Verified</span>
-      </div>
-      <div class="micro-stat">
-        <strong>TLS 1.3</strong>
-        <span>Transport Guard</span>
-      </div>
-      <div class="micro-stat">
-        <strong>Audit Log</strong>
-        <span>IP Tracked</span>
-      </div>
+      <form method="POST" id="adminLoginForm">
+        <div class="form-group">
+          <div class="label-row">
+            <label class="field-label" for="username">Username</label>
+          </div>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </span>
+            <input id="username" type="text" name="username" placeholder="admin" required autofocus>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="label-row">
+            <label class="field-label" for="password">Password</label>
+            <span class="caps-badge" id="capsBadge">Caps Lock On</span>
+          </div>
+          <div class="input-wrap">
+            <span class="input-icon">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <input id="password" type="password" name="password" placeholder="Enter root password" required>
+            <button type="button" class="eye-btn" id="togglePasswordBtn" aria-label="Toggle password visibility">
+              <svg class="svg-ico" id="eyeSvg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" id="authorizeBtn">
+          <span>Continue to Console</span>
+          <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </form>
     </div>
 
-    <footer class="vault-foot">
-      <div class="vault-foot-left">
-        <svg class="svg-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        <span>Encrypted Admin Session &bull; IP Audited</span>
-      </div>
-      <span class="scope-tag">Root / Staff</span>
-    </footer>
+    <div class="card-footer-strip">
+      <span class="foot-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>RBAC &bull; IP Audited</span>
+      </span>
+      <span>TLS 1.3</span>
+    </div>
   </main>
 
   <script>
@@ -662,7 +567,7 @@
     if (adminForm && authorizeBtn) {
       adminForm.addEventListener('submit', () => {
         authorizeBtn.disabled = true;
-        authorizeBtn.innerHTML = '<span>Authorizing...</span>';
+        authorizeBtn.innerHTML = '<span>Signing in...</span>';
       });
     }
   </script>
